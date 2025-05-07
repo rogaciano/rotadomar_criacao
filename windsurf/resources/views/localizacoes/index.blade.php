@@ -21,10 +21,15 @@
                 <div class="p-6 text-gray-900">
                     <!-- Filtros -->
                     <div class="mb-6 bg-gray-100 p-4 rounded-lg">
-                        <form action="{{ route('localizacoes.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <form action="{{ route('localizacoes.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <div class="md:col-span-2">
                                 <label for="nome_localizacao" class="block text-sm font-medium text-gray-700 mb-1">Buscar por nome</label>
                                 <input type="text" name="nome_localizacao" id="nome_localizacao" value="{{ request('nome_localizacao') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite o nome da localização">
+                            </div>
+
+                            <div>
+                                <label for="prazo" class="block text-sm font-medium text-gray-700 mb-1">Prazo (em dias)</label>
+                                <input type="number" name="prazo" id="prazo" value="{{ request('prazo') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Filtrar por prazo">
                             </div>
 
                             <div>
@@ -65,6 +70,7 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prazo (dias)</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado em</th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -78,6 +84,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {{ $localizacao->nome_localizacao }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $localizacao->prazo !== null ? $localizacao->prazo : 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <span class="px-2 py-1 rounded-full text-xs {{ $localizacao->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">

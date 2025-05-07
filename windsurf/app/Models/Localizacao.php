@@ -14,7 +14,8 @@ class Localizacao extends Model
 
     protected $fillable = [
         'nome_localizacao',
-        'ativo'
+        'ativo',
+        'prazo'
     ];
 
     protected $casts = [

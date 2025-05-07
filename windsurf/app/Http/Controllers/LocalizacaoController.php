@@ -18,6 +18,10 @@ class LocalizacaoController extends Controller
             $query->where('nome_localizacao', 'like', '%' . $request->nome_localizacao . '%');
         }
 
+        if ($request->filled('prazo')) {
+            $query->where('prazo', $request->prazo);
+        }
+
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
         }
@@ -37,7 +41,7 @@ class LocalizacaoController extends Controller
      */
     public function create()
     {
-        //
+        return view('localizacoes.create');
     }
 
     /**
@@ -45,7 +49,21 @@ class LocalizacaoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nome_localizacao' => 'required|string|max:255',
+            'prazo' => 'nullable|integer|min:0',
+            'ativo' => 'sometimes|boolean',
+        ]);
+        
+        // Definir ativo como false se não estiver presente no request
+        if (!isset($validated['ativo'])) {
+            $validated['ativo'] = false;
+        }
+        
+        $localizacao = \App\Models\Localizacao::create($validated);
+        
+        return redirect()->route('localizacoes.index')
+            ->with('success', 'Localização criada com sucesso!');
     }
 
     /**
@@ -53,7 +71,8 @@ class LocalizacaoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $localizacao = \App\Models\Localizacao::withTrashed()->findOrFail($id);
+        return view('localizacoes.show', compact('localizacao'));
     }
 
     /**
@@ -61,7 +80,8 @@ class LocalizacaoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $localizacao = \App\Models\Localizacao::findOrFail($id);
+        return view('localizacoes.edit', compact('localizacao'));
     }
 
     /**
@@ -69,7 +89,23 @@ class LocalizacaoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $localizacao = \App\Models\Localizacao::findOrFail($id);
+        
+        $validated = $request->validate([
+            'nome_localizacao' => 'required|string|max:255',
+            'prazo' => 'nullable|integer|min:0',
+            'ativo' => 'sometimes|boolean',
+        ]);
+        
+        // Definir ativo como false se não estiver presente no request
+        if (!isset($validated['ativo'])) {
+            $validated['ativo'] = false;
+        }
+        
+        $localizacao->update($validated);
+        
+        return redirect()->route('localizacoes.index')
+            ->with('success', 'Localização atualizada com sucesso!');
     }
 
     /**
