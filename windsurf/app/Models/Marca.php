@@ -13,13 +13,12 @@ class Marca extends Model
 
     protected $fillable = [
         'nome_marca',
+        'logo_path',
         'ativo',
-        'data_cadastro',
         'suporte_marca'
     ];
 
     protected $casts = [
-        'data_cadastro' => 'date',
         'ativo' => 'boolean'
     ];
 

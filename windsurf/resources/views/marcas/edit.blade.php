@@ -17,7 +17,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form action="{{ route('marcas.update', $marca) }}" method="POST">
+                    <form action="{{ route('marcas.update', $marca) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         
@@ -29,13 +29,21 @@
                                 <x-input-error :messages="$errors->get('nome_marca')" class="mt-2" />
                             </div>
                             
-                            <!-- Data de Cadastro -->
-                            <div>
-                                <x-input-label for="data_cadastro" :value="__('Data de Cadastro')" />
-                                <x-text-input id="data_cadastro" class="block mt-1 w-full" type="date" name="data_cadastro" :value="old('data_cadastro', $marca->data_cadastro ? $marca->data_cadastro->format('Y-m-d') : date('Y-m-d'))" required />
-                                <x-input-error :messages="$errors->get('data_cadastro')" class="mt-2" />
-                            </div>
+                            <!-- Campo de Data de Cadastro removido -->
                             
+                            <!-- Logo da Marca -->
+                            <div>
+                                <x-input-label for="logo" :value="__('Logo da Marca')" />
+                                @if($marca->logo_path)
+                                    <div class="mb-2">
+                                        <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="Logo da {{ $marca->nome_marca }}" class="h-24 w-auto object-contain border rounded p-1">
+                                    </div>
+                                @endif
+                                <input id="logo" type="file" name="logo" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" accept="image/*" />
+                                <p class="text-sm text-gray-500 mt-1">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</p>
+                                <x-input-error :messages="$errors->get('logo')" class="mt-2" />
+                            </div>
+
                             <!-- Status -->
                             <div>
                                 <x-input-label for="ativo" :value="__('Status')" />

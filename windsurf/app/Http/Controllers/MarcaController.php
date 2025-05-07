@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Marca;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class MarcaController extends Controller
 {
@@ -20,9 +21,7 @@ class MarcaController extends Controller
             $query->where('nome_marca', 'like', '%' . $request->marca . '%');
         }
 
-        if ($request->filled('data_cadastro')) {
-            $query->whereDate('data_cadastro', $request->data_cadastro);
-        }
+        // Filtro de data_cadastro removido
 
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
@@ -49,7 +48,7 @@ class MarcaController extends Controller
         $validator = Validator::make($request->all(), [
             'nome_marca' => 'required|string|max:255|unique:marcas,nome_marca',
             'ativo' => 'boolean',
-            'data_cadastro' => 'required|date',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -58,7 +57,17 @@ class MarcaController extends Controller
                 ->withInput();
         }
 
-        Marca::create($request->all());
+        $data = $request->all();
+        
+        // Upload da imagem de logo, se fornecida
+        if ($request->hasFile('logo')) {
+            $logo = $request->file('logo');
+            $logoName = time() . '_' . $logo->getClientOriginalName();
+            $logoPath = $logo->storeAs('logos', $logoName, 'public');
+            $data['logo_path'] = $logoPath;
+        }
+        
+        Marca::create($data);
 
         return redirect()->route('marcas.index')
             ->with('success', 'Marca criada com sucesso!');
@@ -88,7 +97,7 @@ class MarcaController extends Controller
         $validator = Validator::make($request->all(), [
             'nome_marca' => 'required|string|max:255|unique:marcas,nome_marca,' . $marca->id,
             'ativo' => 'boolean',
-            'data_cadastro' => 'required|date',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -97,7 +106,22 @@ class MarcaController extends Controller
                 ->withInput();
         }
 
-        $marca->update($request->all());
+        $data = $request->all();
+        
+        // Upload da nova imagem de logo, se fornecida
+        if ($request->hasFile('logo')) {
+            // Remover logo anterior, se existir
+            if ($marca->logo_path) {
+                Storage::disk('public')->delete($marca->logo_path);
+            }
+            
+            $logo = $request->file('logo');
+            $logoName = time() . '_' . $logo->getClientOriginalName();
+            $logoPath = $logo->storeAs('logos', $logoName, 'public');
+            $data['logo_path'] = $logoPath;
+        }
+        
+        $marca->update($data);
 
         return redirect()->route('marcas.index')
             ->with('success', 'Marca atualizada com sucesso!');

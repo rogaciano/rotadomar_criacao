@@ -26,10 +26,7 @@
                                 <label for="marca" class="block text-sm font-medium text-gray-700 mb-1">Buscar por nome</label>
                                 <input type="text" name="marca" id="marca" value="{{ request('marca') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite o nome da marca">
                             </div>
-                            <div>
-                                <label for="data_cadastro" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
-                                <input type="date" name="data_cadastro" id="data_cadastro" value="{{ request('data_cadastro') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
+                            <!-- Filtro de Data de Cadastro removido -->
                             <div>
                                 <label for="ativo" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                 <select name="ativo" id="ativo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -65,11 +62,12 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Nome da Marca
+                                        Logo
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Data de Cadastro
+                                        Nome da Marca
                                     </th>
+                                    <!-- Coluna de Data de Cadastro removida -->
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
                                     </th>
@@ -85,11 +83,16 @@
                                 @forelse($marcas as $marca)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            @if($marca->logo_path)
+                                                <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="Logo da {{ $marca->nome_marca }}" class="h-10 w-auto object-contain">
+                                            @else
+                                                <span class="text-gray-400 italic">Sem logo</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {{ $marca->nome_marca }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ date('d/m/Y', strtotime($marca->data_cadastro)) }}
-                                        </td>
+                                        <!-- Célula de Data de Cadastro removida -->
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $marca->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                 {{ $marca->ativo ? 'Ativo' : 'Inativo' }}
