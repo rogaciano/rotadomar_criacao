@@ -1,0 +1,61 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TecidoController;
+use App\Http\Controllers\EstilistaController;
+use App\Http\Controllers\MarcaController;
+use App\Http\Controllers\GrupoProdutoController;
+use App\Http\Controllers\LocalizacaoController;
+use App\Http\Controllers\TipoController;
+use App\Http\Controllers\SituacaoController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\MovimentacaoController;
+use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Routes para Tecidos
+    Route::resource('tecidos', TecidoController::class);
+    
+    // Routes para Estilistas
+    Route::resource('estilistas', EstilistaController::class);
+    
+    // Routes para Marcas
+    Route::resource('marcas', MarcaController::class);
+    
+    // Routes para Grupo de Produtos
+    Route::resource('grupo_produtos', GrupoProdutoController::class);
+    
+    // Routes para Localização
+    Route::resource('localizacoes', LocalizacaoController::class);
+    
+    // Routes para Tipos
+    Route::resource('tipos', TipoController::class);
+    
+    // Routes para Situações
+    Route::resource('situacoes', SituacaoController::class);
+    
+    // Routes para Status
+    Route::resource('status', StatusController::class);
+    
+    // Routes para Produtos
+    Route::resource('produtos', ProdutoController::class);
+    
+    // Routes para Movimentações
+    Route::resource('movimentacoes', MovimentacaoController::class);
+
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
