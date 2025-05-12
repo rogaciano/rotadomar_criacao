@@ -46,6 +46,19 @@
                 </div>
             @endif
         </div>
+        
+        <div>
+            <x-input-label for="localizacao_id" :value="__('Localização')" />
+            <select id="localizacao_id" name="localizacao_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                <option value="">Selecione uma localização</option>
+                @foreach($localizacoes as $localizacao)
+                    <option value="{{ $localizacao->id }}" {{ old('localizacao_id', $user->localizacao_id) == $localizacao->id ? 'selected' : '' }}>
+                        {{ $localizacao->nome_localizacao }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error class="mt-2" :messages="$errors->get('localizacao_id')" />
+        </div>
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>

@@ -84,7 +84,7 @@
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             @if($marca->logo_path)
-                                                <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="Logo da {{ $marca->nome_marca }}" class="h-10 w-auto object-contain">
+                                                <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="Logo da {{ $marca->nome_marca }}" class="h-10 w-auto object-contain" onerror="this.onerror=null; this.src='{{ asset('images/no-image.png') }}'; this.alt='Logo não disponível';">
                                             @else
                                                 <span class="text-gray-400 italic">Sem logo</span>
                                             @endif

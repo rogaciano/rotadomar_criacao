@@ -32,12 +32,12 @@
                     <form action="{{ route('status.update', $status) }}" method="POST">
                         @csrf
                         @method('PUT')
-                        
+
                         <div class="mb-4">
                             <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                            <input type="text" name="descricao" id="descricao" value="{{ old('descricao', $status->descricao) }}" class="shadow-sm focus:ring-purple-500 focus:border-purple-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                            <input type="text" name="descricao" id="descricao" value="{{ old('descricao', $status->descricao) }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                         </div>
-                        
+
                         <div class="mb-4">
                             <div class="flex items-start">
                                 <div class="flex items-center h-5">
@@ -49,12 +49,15 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="flex justify-end">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                Atualizar Status
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Atualizar
                             </button>
-                        </div>
+
+
                     </form>
                 </div>
             </div>

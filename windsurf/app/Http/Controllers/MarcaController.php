@@ -63,6 +63,8 @@ class MarcaController extends Controller
         if ($request->hasFile('logo')) {
             $logo = $request->file('logo');
             $logoName = time() . '_' . $logo->getClientOriginalName();
+            // Remover caracteres especiais e espaços do nome do arquivo
+            $logoName = preg_replace('/[^A-Za-z0-9\-\.]/', '_', $logoName);
             $logoPath = $logo->storeAs('logos', $logoName, 'public');
             $data['logo_path'] = $logoPath;
         }
@@ -117,6 +119,8 @@ class MarcaController extends Controller
             
             $logo = $request->file('logo');
             $logoName = time() . '_' . $logo->getClientOriginalName();
+            // Remover caracteres especiais e espaços do nome do arquivo
+            $logoName = preg_replace('/[^A-Za-z0-9\-\.]/', '_', $logoName);
             $logoPath = $logo->storeAs('logos', $logoName, 'public');
             $data['logo_path'] = $logoPath;
         }

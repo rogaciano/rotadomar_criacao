@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\User;
 
 class Localizacao extends Model
 {
@@ -26,5 +27,11 @@ class Localizacao extends Model
     public function movimentacoes()
     {
         return $this->hasMany(Movimentacao::class);
+    }
+    
+    // Relacionamento com usuários
+    public function usuarios()
+    {
+        return $this->hasMany(User::class, 'localizacao_id');
     }
 }

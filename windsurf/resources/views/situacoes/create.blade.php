@@ -19,8 +19,8 @@
                     @csrf
                     
                     <div class="mb-4">
-                        <x-label for="descricao" value="{{ __('Descrição') }}" />
-                        <x-input id="descricao" class="block mt-1 w-full" type="text" name="descricao" :value="old('descricao')" required autofocus />
+                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Descrição') }}</label>
+                        <input id="descricao" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" type="text" name="descricao" value="{{ old('descricao') }}" required autofocus />
                         @error('descricao')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -34,9 +34,9 @@
                     </div>
                     
                     <div class="flex items-center justify-end mt-4">
-                        <x-button class="ml-4">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             {{ __('Salvar') }}
-                        </x-button>
+                        </button>
                     </div>
                 </form>
                 

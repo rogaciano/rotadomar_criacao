@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Status;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class StatusController extends Controller
 {
@@ -37,7 +39,7 @@ class StatusController extends Controller
      */
     public function create()
     {
-        //
+        return view('status.create');
     }
 
     /**
@@ -45,7 +47,27 @@ class StatusController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'descricao' => 'required|string|max:255|unique:status,descricao',
+            'ativo' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('status.create')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Garantir que ativo seja false se não estiver presente
+        $data = $request->all();
+        if (!isset($data['ativo'])) {
+            $data['ativo'] = false;
+        }
+
+        Status::create($data);
+
+        return redirect()->route('status.index')
+            ->with('success', 'Status criado com sucesso!');
     }
 
     /**
@@ -53,7 +75,8 @@ class StatusController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $status = Status::withTrashed()->findOrFail($id);
+        return view('status.show', compact('status'));
     }
 
     /**
@@ -61,7 +84,8 @@ class StatusController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $status = Status::findOrFail($id);
+        return view('status.edit', compact('status'));
     }
 
     /**
@@ -69,7 +93,29 @@ class StatusController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $status = Status::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'descricao' => 'required|string|max:255|unique:status,descricao,' . $id,
+            'ativo' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('status.edit', $status)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Garantir que ativo seja false se não estiver presente
+        $data = $request->all();
+        if (!isset($data['ativo'])) {
+            $data['ativo'] = false;
+        }
+
+        $status->update($data);
+
+        return redirect()->route('status.index')
+            ->with('success', 'Status atualizado com sucesso!');
     }
 
     /**
@@ -77,6 +123,19 @@ class StatusController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $status = Status::withTrashed()->findOrFail($id);
+
+        if ($status->trashed()) {
+            // Restaurar
+            $status->restore();
+            $message = 'Status restaurado com sucesso!';
+        } else {
+            // Excluir
+            $status->delete();
+            $message = 'Status excluído com sucesso!';
+        }
+
+        return redirect()->route('status.index')
+            ->with('success', $message);
     }
 }

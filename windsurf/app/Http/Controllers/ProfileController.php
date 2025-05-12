@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Localizacao;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,11 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        
         return view('profile.edit', [
             'user' => $request->user(),
+            'localizacoes' => $localizacoes,
         ]);
     }
 

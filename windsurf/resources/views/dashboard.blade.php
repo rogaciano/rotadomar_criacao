@@ -6,6 +6,36 @@
     </x-slot>
 
     <div class="py-6 bg-gray-900">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
+            <!-- Logos das marcas -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="p-3">
+                    <div class="flex justify-between items-center">
+                        @php
+                            $marcas = \App\Models\Marca::where('ativo', true)->get();
+                            $totalMarcas = $marcas->count();
+                        @endphp
+
+                        @foreach($marcas as $index => $marca)
+                            <div class="text-center flex-shrink-0" style="min-width: 70px;">
+                                @if($marca->logo_path)
+                                    <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="{{ $marca->nome_marca }}" class="h-12 w-auto object-contain mx-auto">
+                                @else
+                                    <div class="h-12 w-20 flex items-center justify-center bg-gray-100 rounded-lg">
+                                        <span class="text-xs font-semibold text-gray-700">{{ $marca->nome_marca }}</span>
+                                    </div>
+                                @endif
+                                <p class="mt-1 text-xs font-medium text-gray-600 truncate">{{ $marca->nome_marca }}</p>
+                            </div>
+
+                            @if($index < $totalMarcas - 1)
+                                <div class="h-8 border-r border-gray-200"></div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Cards estatísticos -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
@@ -53,30 +83,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
                             <span>Novo Estilista</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Card Marcas -->
-                <div class="bg-green-500 rounded-lg shadow-md overflow-hidden">
-                    <div class="p-5">
-                        <div class="flex justify-center mb-2">
-                            <div class="rounded-full bg-green-400/50 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-center text-white font-medium">Total de Marcas</h3>
-                        <p class="text-center text-4xl font-bold text-white my-2">{{ \App\Models\Marca::count() }}</p>
-                        <p class="text-center text-white text-sm">Cadastradas no sistema</p>
-                    </div>
-                    <div class="bg-green-600 p-3">
-                        <a href="{{ route('marcas.create') }}" class="flex justify-center items-center text-white hover:text-green-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>Nova Marca</span>
                         </a>
                     </div>
                 </div>

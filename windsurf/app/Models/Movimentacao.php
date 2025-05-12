@@ -13,8 +13,8 @@ class Movimentacao extends Model
     protected $table = 'movimentacoes';
 
     protected $fillable = [
-        'referencia',
         'comprometido',
+        'produto_id',
         'localizacao_id',
         'data_entrada',
         'data_saida',
@@ -32,7 +32,7 @@ class Movimentacao extends Model
     // Relacionamentos
     public function produto()
     {
-        return $this->belongsTo(Produto::class, 'referencia', 'referencia');
+        return $this->belongsTo(Produto::class, 'produto_id');
     }
 
     public function localizacao()

@@ -1,0 +1,160 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Detalhes do Produto') }}
+            </h2>
+            <div>
+                @if(!$produto->trashed())
+                    <a href="{{ route('produtos.edit', $produto->id) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600 active:bg-yellow-600 focus:outline-none focus:border-yellow-600 focus:ring focus:ring-yellow-300 disabled:opacity-25 transition mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                        Editar
+                    </a>
+                @endif
+                <a href="{{ route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Voltar
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="p-6">
+                    <!-- Informações do Produto -->
+                    <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Referência</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->referencia }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Descrição</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->descricao }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Data de Cadastro</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_cadastro ? $produto->data_cadastro->format('d/m/Y') : 'N/A' }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Marca</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Tecido</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->tecido->descricao ?? 'N/A' }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Estilista</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome ?? 'N/A' }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Grupo</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Quantidade</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Status</span>
+                                <span class="block mt-1">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $produto->status->descricao ?? 'N/A' }}
+                                    </span>
+                                </span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
+                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Preço Varejo</span>
+                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Criado em</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Última atualização</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
+                            </div>
+                            
+                            @if($produto->deleted_at)
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Excluído em</span>
+                                    <span class="block mt-1 text-sm text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <!-- Documentos -->
+                    <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Documentos</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500 mb-2">Ficha de Produção</span>
+                                @if($produto->ficha_producao)
+                                    <a href="{{ asset('storage/' . $produto->ficha_producao) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        Visualizar Ficha
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 italic">Nenhuma ficha de produção disponível</span>
+                                @endif
+                            </div>
+                            
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500 mb-2">Catálogo de Vendas</span>
+                                @if($produto->catalogo_vendas)
+                                    <a href="{{ asset('storage/' . $produto->catalogo_vendas) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                        Visualizar Catálogo
+                                    </a>
+                                @else
+                                    <span class="text-gray-400 italic">Nenhum catálogo de vendas disponível</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Movimentações -->
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Movimentações</h3>
+                        
+                        <div class="text-gray-500 italic">
+                            Funcionalidade em desenvolvimento. Em breve você poderá visualizar todas as movimentações deste produto.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

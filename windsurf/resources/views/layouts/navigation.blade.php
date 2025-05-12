@@ -15,11 +15,19 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    
+
+                    <x-nav-link :href="route('produtos.index')" :active="request()->routeIs('produtos.*')">
+                        {{ __('Produtos') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
+                        {{ __('Movimentações') }}
+                    </x-nav-link>
+
                     <!-- Cadastros Dropdown -->
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
                         <div class="relative">
-                            <button @click="open = !open" @click.away="open = false" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150" :class="{'text-indigo-600': {{ request()->routeIs('tecidos.*') || request()->routeIs('estilistas.*') || request()->routeIs('marcas.*') || request()->routeIs('grupo_produtos.*') ? 'true' : 'false' }} }">
+                            <button @click="open = !open" @click.away="open = false" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150" :class="{'text-indigo-600': {{ request()->routeIs('produtos.*') || request()->routeIs('tecidos.*') || request()->routeIs('estilistas.*') || request()->routeIs('marcas.*') || request()->routeIs('grupo_produtos.*') ? 'true' : 'false' }} }">
                                 <div>{{ __('Cadastros') }}</div>
 
                                 <div class="ms-1">
@@ -43,7 +51,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Outros links serão adicionados conforme implementados -->
                 </div>
             </div>
@@ -100,7 +108,11 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            
+
+            <x-responsive-nav-link :href="route('produtos.index')" :active="request()->routeIs('produtos.*')">
+                {{ __('Produtos') }}
+            </x-responsive-nav-link>
+
             <!-- Responsive Cadastros -->
             <div class="pt-2 pb-3 space-y-1">
                 <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Cadastros') }}</div>

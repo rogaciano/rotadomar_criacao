@@ -39,6 +39,20 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        <!-- Localização -->
+        <div class="mt-4">
+            <x-input-label for="localizacao_id" :value="__('Localização')" />
+            <select id="localizacao_id" name="localizacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                <option value="">Selecione uma localização</option>
+                @foreach($localizacoes as $localizacao)
+                    <option value="{{ $localizacao->id }}" {{ old('localizacao_id') == $localizacao->id ? 'selected' : '' }}>
+                        {{ $localizacao->nome_localizacao }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('localizacao_id')" class="mt-2" />
+        </div>
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}

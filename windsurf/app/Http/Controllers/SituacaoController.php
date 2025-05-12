@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Situacao;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class SituacaoController extends Controller
 {
@@ -37,7 +39,7 @@ class SituacaoController extends Controller
      */
     public function create()
     {
-        //
+        return view('situacoes.create');
     }
 
     /**
@@ -45,7 +47,27 @@ class SituacaoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'descricao' => 'required|string|max:255|unique:situacoes,descricao',
+            'ativo' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('situacoes.create')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Garantir que ativo seja false se não estiver presente
+        $data = $request->all();
+        if (!isset($data['ativo'])) {
+            $data['ativo'] = false;
+        }
+
+        Situacao::create($data);
+
+        return redirect()->route('situacoes.index')
+            ->with('success', 'Situação criada com sucesso!');
     }
 
     /**
@@ -53,7 +75,8 @@ class SituacaoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $situacao = Situacao::withTrashed()->findOrFail($id);
+        return view('situacoes.show', compact('situacao'));
     }
 
     /**
@@ -61,7 +84,8 @@ class SituacaoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $situacao = Situacao::findOrFail($id);
+        return view('situacoes.edit', compact('situacao'));
     }
 
     /**
@@ -69,7 +93,29 @@ class SituacaoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $situacao = Situacao::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'descricao' => 'required|string|max:255|unique:situacoes,descricao,' . $id,
+            'ativo' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('situacoes.edit', $situacao)
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Garantir que ativo seja false se não estiver presente
+        $data = $request->all();
+        if (!isset($data['ativo'])) {
+            $data['ativo'] = false;
+        }
+
+        $situacao->update($data);
+
+        return redirect()->route('situacoes.index')
+            ->with('success', 'Situação atualizada com sucesso!');
     }
 
     /**
@@ -77,6 +123,19 @@ class SituacaoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $situacao = Situacao::withTrashed()->findOrFail($id);
+
+        if ($situacao->trashed()) {
+            // Restaurar
+            $situacao->restore();
+            $message = 'Situação restaurada com sucesso!';
+        } else {
+            // Excluir
+            $situacao->delete();
+            $message = 'Situação excluída com sucesso!';
+        }
+
+        return redirect()->route('situacoes.index')
+            ->with('success', $message);
     }
 }

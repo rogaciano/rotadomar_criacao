@@ -50,7 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('produtos', ProdutoController::class);
     
     // Routes para Movimentações
-    Route::resource('movimentacoes', MovimentacaoController::class);
+    Route::resource('movimentacoes', MovimentacaoController::class)->parameters([
+        'movimentacoes' => 'movimentacao'
+    ]);
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
