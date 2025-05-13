@@ -22,8 +22,8 @@ class Produto extends Model
         'preco_atacado',
         'preco_varejo',
         'status_id',
-        'ficha_producao',
-        'catalogo_vendas'
+        'anexo_ficha_producao',
+        'anexo_catalogo_vendas'
     ];
 
     protected $casts = [

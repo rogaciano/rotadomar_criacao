@@ -55,10 +55,10 @@
                             <!-- Marca -->
                             <div>
                                 <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-                                <select name="marca_id" id="marca_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select name="marca_id" id="marca_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione uma marca</option>
                                     @foreach($marcas as $marca)
-                                        <option value="{{ $marca->id }}" {{ old('marca_id', $produto->marca_id) == $marca->id ? 'selected' : '' }}>
+                                        <option value="{{ $marca->id }}" {{ old('marca_id', $produto->marca_id) == $marca->id ? 'selected' : '' }} class="text-gray-700">
                                             {{ $marca->nome_marca }}
                                         </option>
                                     @endforeach
@@ -74,10 +74,10 @@
                             <!-- Tecido -->
                             <div>
                                 <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido</label>
-                                <select name="tecido_id" id="tecido_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select name="tecido_id" id="tecido_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um tecido</option>
                                     @foreach($tecidos as $tecido)
-                                        <option value="{{ $tecido->id }}" {{ old('tecido_id', $produto->tecido_id) == $tecido->id ? 'selected' : '' }}>
+                                        <option value="{{ $tecido->id }}" {{ old('tecido_id', $produto->tecido_id) == $tecido->id ? 'selected' : '' }} class="text-gray-700">
                                             {{ $tecido->descricao }}
                                         </option>
                                     @endforeach
@@ -87,11 +87,11 @@
                             <!-- Estilista -->
                             <div>
                                 <label for="estilista_id" class="block text-sm font-medium text-gray-700 mb-1">Estilista</label>
-                                <select name="estilista_id" id="estilista_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select name="estilista_id" id="estilista_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um estilista</option>
                                     @foreach($estilistas as $estilista)
-                                        <option value="{{ $estilista->id }}" {{ old('estilista_id', $produto->estilista_id) == $estilista->id ? 'selected' : '' }}>
-                                            {{ $estilista->nome }}
+                                        <option value="{{ $estilista->id }}" {{ old('estilista_id', $produto->estilista_id) == $estilista->id ? 'selected' : '' }} class="text-gray-700">
+                                            {{ $estilista->nome_estilista }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -100,10 +100,10 @@
                             <!-- Grupo -->
                             <div>
                                 <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-                                <select name="grupo_id" id="grupo_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select name="grupo_id" id="grupo_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um grupo</option>
                                     @foreach($grupos as $grupo)
-                                        <option value="{{ $grupo->id }}" {{ old('grupo_id', $produto->grupo_id) == $grupo->id ? 'selected' : '' }}>
+                                        <option value="{{ $grupo->id }}" {{ old('grupo_id', $produto->grupo_id) == $grupo->id ? 'selected' : '' }} class="text-gray-700">
                                             {{ $grupo->descricao }}
                                         </option>
                                     @endforeach
@@ -125,10 +125,10 @@
                             <!-- Status -->
                             <div>
                                 <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <select name="status_id" id="status_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select name="status_id" id="status_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700 bg-white" required>
                                     <option value="">Selecione um status</option>
                                     @foreach($statuses as $status)
-                                        <option value="{{ $status->id }}" {{ old('status_id', $produto->status_id) == $status->id ? 'selected' : '' }}>
+                                        <option value="{{ $status->id }}" {{ old('status_id', $produto->status_id) == $status->id ? 'selected' : '' }} class="text-gray-700">
                                             {{ $status->descricao }}
                                         </option>
                                     @endforeach
@@ -138,9 +138,9 @@
                             <!-- Ficha de Produção -->
                             <div>
                                 <label for="ficha_producao" class="block text-sm font-medium text-gray-700 mb-1">Ficha de Produção</label>
-                                @if($produto->ficha_producao)
+                                @if($produto->anexo_ficha_producao)
                                     <div class="mb-2 flex items-center">
-                                        <a href="{{ asset('storage/' . $produto->ficha_producao) }}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
+                                        <a href="{{ asset('storage/' . $produto->anexo_ficha_producao) }}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                             </svg>
@@ -155,9 +155,9 @@
                             <!-- Catálogo de Vendas -->
                             <div>
                                 <label for="catalogo_vendas" class="block text-sm font-medium text-gray-700 mb-1">Catálogo de Vendas</label>
-                                @if($produto->catalogo_vendas)
+                                @if($produto->anexo_catalogo_vendas)
                                     <div class="mb-2 flex items-center">
-                                        <a href="{{ asset('storage/' . $produto->catalogo_vendas) }}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
+                                        <a href="{{ asset('storage/' . $produto->anexo_catalogo_vendas) }}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                             </svg>

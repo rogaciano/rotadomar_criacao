@@ -111,16 +111,30 @@ class ProdutoController extends Controller
         if ($request->hasFile('ficha_producao')) {
             $ficha = $request->file('ficha_producao');
             $fichaName = time() . '_ficha_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $ficha->getClientOriginalName());
+            
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/fichas');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
             $fichaPath = $ficha->storeAs('fichas', $fichaName, 'public');
-            $data['ficha_producao'] = $fichaPath;
+            $data['anexo_ficha_producao'] = $fichaPath;
         }
 
         // Upload do catálogo de vendas, se fornecido
         if ($request->hasFile('catalogo_vendas')) {
             $catalogo = $request->file('catalogo_vendas');
             $catalogoName = time() . '_catalogo_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $catalogo->getClientOriginalName());
+            
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/catalogos');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
             $catalogoPath = $catalogo->storeAs('catalogos', $catalogoName, 'public');
-            $data['catalogo_vendas'] = $catalogoPath;
+            $data['anexo_catalogo_vendas'] = $catalogoPath;
         }
 
         Produto::create($data);
@@ -185,27 +199,41 @@ class ProdutoController extends Controller
         // Upload da ficha de produção, se fornecida
         if ($request->hasFile('ficha_producao')) {
             // Remover ficha anterior, se existir
-            if ($produto->ficha_producao) {
-                Storage::disk('public')->delete($produto->ficha_producao);
+            if ($produto->anexo_ficha_producao) {
+                Storage::disk('public')->delete($produto->anexo_ficha_producao);
             }
 
             $ficha = $request->file('ficha_producao');
             $fichaName = time() . '_ficha_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $ficha->getClientOriginalName());
+            
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/fichas');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
             $fichaPath = $ficha->storeAs('fichas', $fichaName, 'public');
-            $data['ficha_producao'] = $fichaPath;
+            $data['anexo_ficha_producao'] = $fichaPath;
         }
 
         // Upload do catálogo de vendas, se fornecido
         if ($request->hasFile('catalogo_vendas')) {
             // Remover catálogo anterior, se existir
-            if ($produto->catalogo_vendas) {
-                Storage::disk('public')->delete($produto->catalogo_vendas);
+            if ($produto->anexo_catalogo_vendas) {
+                Storage::disk('public')->delete($produto->anexo_catalogo_vendas);
             }
 
             $catalogo = $request->file('catalogo_vendas');
             $catalogoName = time() . '_catalogo_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $catalogo->getClientOriginalName());
+            
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/catalogos');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
             $catalogoPath = $catalogo->storeAs('catalogos', $catalogoName, 'public');
-            $data['catalogo_vendas'] = $catalogoPath;
+            $data['anexo_catalogo_vendas'] = $catalogoPath;
         }
 
         $produto->update($data);

@@ -59,7 +59,7 @@
                             
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Estilista</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome ?? 'N/A' }}</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
                             </div>
                             
                             <div>
@@ -117,8 +117,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <span class="block text-sm font-medium text-gray-500 mb-2">Ficha de Produção</span>
-                                @if($produto->ficha_producao)
-                                    <a href="{{ asset('storage/' . $produto->ficha_producao) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                @if($produto->anexo_ficha_producao)
+                                    <a href="{{ asset('storage/' . $produto->anexo_ficha_producao) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>
@@ -131,8 +131,8 @@
                             
                             <div>
                                 <span class="block text-sm font-medium text-gray-500 mb-2">Catálogo de Vendas</span>
-                                @if($produto->catalogo_vendas)
-                                    <a href="{{ asset('storage/' . $produto->catalogo_vendas) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                @if($produto->anexo_catalogo_vendas)
+                                    <a href="{{ asset('storage/' . $produto->anexo_catalogo_vendas) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                         </svg>

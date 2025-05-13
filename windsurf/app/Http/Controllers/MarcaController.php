@@ -62,14 +62,46 @@ class MarcaController extends Controller
         // Upload da imagem de logo, se fornecida
         if ($request->hasFile('logo')) {
             $logo = $request->file('logo');
-            $logoName = time() . '_' . $logo->getClientOriginalName();
-            // Remover caracteres especiais e espaços do nome do arquivo
-            $logoName = preg_replace('/[^A-Za-z0-9\-\.]/', '_', $logoName);
-            $logoPath = $logo->storeAs('logos', $logoName, 'public');
+            $logoName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $logo->getClientOriginalName());
+            
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/logos');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
+            // Método alternativo: mover o arquivo diretamente
+            $logo->move($directory, $logoName);
+            
+            // Garantir que o caminho seja salvo corretamente no banco de dados
+            $logoPath = 'logos/' . $logoName;
             $data['logo_path'] = $logoPath;
+            
+            // Debug - registrar no log para verificar
+            \Illuminate\Support\Facades\Log::info('Upload de logo: ' . $logoName);
+            \Illuminate\Support\Facades\Log::info('Caminho salvo: ' . $logoPath);
         }
         
-        Marca::create($data);
+        // Debug - mostrar todos os dados que serão salvos
+        \Illuminate\Support\Facades\Log::info('Dados a serem salvos (create): ' . json_encode($data));
+        
+        // Criar a marca diretamente
+        $marca = new Marca();
+        $marca->nome_marca = $data['nome_marca'];
+        $marca->ativo = isset($data['ativo']) ? $data['ativo'] : false;
+        
+        // Atribuir o caminho da logo explicitamente
+        if (isset($data['logo_path'])) {
+            $marca->logo_path = $data['logo_path'];
+            \Illuminate\Support\Facades\Log::info('Atribuindo logo_path explicitamente (create): ' . $data['logo_path']);
+        }
+        
+        // Salvar a nova marca
+        $marca->save();
+        
+        // Debug - verificar se o caminho foi salvo corretamente
+        \Illuminate\Support\Facades\Log::info('Marca criada com ID: ' . $marca->id);
+        \Illuminate\Support\Facades\Log::info('Caminho salvo no banco (create): ' . $marca->logo_path);
 
         return redirect()->route('marcas.index')
             ->with('success', 'Marca criada com sucesso!');
@@ -114,18 +146,63 @@ class MarcaController extends Controller
         if ($request->hasFile('logo')) {
             // Remover logo anterior, se existir
             if ($marca->logo_path) {
-                Storage::disk('public')->delete($marca->logo_path);
+                $oldLogoPath = storage_path('app/public/' . $marca->logo_path);
+                if (file_exists($oldLogoPath)) {
+                    unlink($oldLogoPath);
+                }
             }
             
             $logo = $request->file('logo');
-            $logoName = time() . '_' . $logo->getClientOriginalName();
-            // Remover caracteres especiais e espaços do nome do arquivo
-            $logoName = preg_replace('/[^A-Za-z0-9\-\.]/', '_', $logoName);
-            $logoPath = $logo->storeAs('logos', $logoName, 'public');
+            $logoName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $logo->getClientOriginalName());
+            
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/logos');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            
+            // Método alternativo: mover o arquivo diretamente
+            $logo->move($directory, $logoName);
+            
+            // Garantir que o caminho seja salvo corretamente no banco de dados
+            $logoPath = 'logos/' . $logoName;
+            
+            // Debug - registrar no log para verificar
+            \Illuminate\Support\Facades\Log::info('Upload de logo (update): ' . $logoName);
+            \Illuminate\Support\Facades\Log::info('Caminho salvo (update): ' . $logoPath);
+            
+            // Adicionar o caminho ao array de dados separadamente
             $data['logo_path'] = $logoPath;
         }
         
-        $marca->update($data);
+        // Debug - mostrar todos os dados que serão salvos
+        \Illuminate\Support\Facades\Log::info('Dados a serem salvos (update): ' . json_encode($data));
+        
+        // Atualizar os dados da marca diretamente
+        $marca->nome_marca = $data['nome_marca'];
+        $marca->ativo = isset($data['ativo']) ? $data['ativo'] : false;
+        
+        // Atribuir o caminho da logo explicitamente
+        if (isset($data['logo_path'])) {
+            $marca->logo_path = $data['logo_path'];
+            \Illuminate\Support\Facades\Log::info('Atribuindo logo_path explicitamente: ' . $data['logo_path']);
+        }
+        
+        // Salvar as alterações
+        $marca->save();
+        
+        // Debug - mostrar o ID da marca atualizada
+        \Illuminate\Support\Facades\Log::info('Marca atualizada com ID: ' . $marca->id);
+        
+        // Verificar se o caminho foi salvo corretamente no banco
+        $marcaAtualizada = Marca::find($marca->id);
+        \Illuminate\Support\Facades\Log::info('Caminho salvo no banco: ' . $marcaAtualizada->logo_path);
+        
+        // Verificar se o arquivo existe no sistema de arquivos
+        $caminhoCompleto = storage_path('app/public/' . $marcaAtualizada->logo_path);
+        $arquivoExiste = file_exists($caminhoCompleto);
+        \Illuminate\Support\Facades\Log::info('Arquivo existe no sistema: ' . ($arquivoExiste ? 'SIM' : 'NÃO'));
+        \Illuminate\Support\Facades\Log::info('Caminho completo: ' . $caminhoCompleto);
 
         return redirect()->route('marcas.index')
             ->with('success', 'Marca atualizada com sucesso!');
