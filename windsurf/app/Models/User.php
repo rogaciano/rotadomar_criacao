@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'localizacao_id',
+        'is_admin',
     ];
 
     /**
@@ -54,5 +55,15 @@ class User extends Authenticatable
     public function localizacao()
     {
         return $this->belongsTo(Localizacao::class);
+    }
+    
+    /**
+     * Verifica se o usuário é um administrador.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return (bool) $this->is_admin;
     }
 }

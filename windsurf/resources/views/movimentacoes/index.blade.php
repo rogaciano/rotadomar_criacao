@@ -27,7 +27,7 @@
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
                                 <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
                             </div>
-                            
+
                             <div class="md:col-span-2">
                                 <label for="produto_id" class="block text-sm font-medium text-gray-700 mb-1">Produto</label>
                                 <select name="produto_id" id="produto_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -57,7 +57,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
                                 <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -67,7 +67,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label for="comprometido" class="block text-sm font-medium text-gray-700 mb-1">Comprometido</label>
                                 <select name="comprometido" id="comprometido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -76,12 +76,12 @@
                                     <option value="0" {{ request('comprometido') == '0' ? 'selected' : '' }}>Não</option>
                                 </select>
                             </div>
-                            
+
                             <div>
                                 <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Entrada (Início)</label>
                                 <input type="date" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
-                            
+
                             <div>
                                 <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Entrada (Fim)</label>
                                 <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -155,7 +155,7 @@
                                 @forelse($movimentacoes as $movimentacao)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            @if($movimentacao->produto)
+                                            @if($movimentacao->produto_id)
                                                 {{ $movimentacao->produto->referencia }} - {{ $movimentacao->produto->descricao }}
                                             @else
                                                 <span class="text-red-500">Produto não encontrado</span>
@@ -246,10 +246,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const toggleButton = document.getElementById('toggle-filters');
             const filterContainer = document.getElementById('filter-container');
-            
+
             // Inicialmente mostrar os filtros
             // filterContainer.style.display = 'block';
-            
+
             toggleButton.addEventListener('click', function() {
                 if (filterContainer.style.display === 'none') {
                     filterContainer.style.display = 'block';

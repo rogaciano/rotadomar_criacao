@@ -61,6 +61,6 @@ class Produto extends Model
 
     public function movimentacoes()
     {
-        return $this->hasMany(Movimentacao::class, 'referencia', 'referencia');
+        return $this->hasMany(Movimentacao::class, 'produto_id');
     }
 }

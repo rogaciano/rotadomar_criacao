@@ -27,8 +27,8 @@
                                 <input type="text" name="descricao" id="descricao" value="{{ request('descricao') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do grupo">
                             </div>
                             <div>
-                                <label for="data_cadastro" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
-                                <input type="date" name="data_cadastro" id="data_cadastro" value="{{ request('data_cadastro') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <label for="created_at" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
+                                <input type="date" name="created_at" id="created_at" value="{{ request('created_at') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
                             <div>
                                 <label for="ativo" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -88,7 +88,7 @@
                                             {{ $grupo->descricao }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ date('d/m/Y', strtotime($grupo->data_cadastro)) }}
+                                            {{ $grupo->created_at ? $grupo->created_at->format('d/m/Y') : 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $grupo->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">

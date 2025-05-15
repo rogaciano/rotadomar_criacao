@@ -23,6 +23,10 @@ class GrupoProdutoController extends Controller
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
         }
+        
+        if ($request->filled('created_at')) {
+            $query->whereDate('created_at', $request->created_at);
+        }
 
         $grupo_produtos = $query->orderBy('descricao')->paginate(10);
         

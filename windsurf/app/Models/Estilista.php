@@ -31,6 +31,8 @@ class Estilista extends Model
      */
     protected $casts = [
         'ativo' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     /**

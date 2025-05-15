@@ -29,6 +29,9 @@ class Movimentacao extends Model
         'comprometido' => 'integer'
     ];
 
+    // Definindo relacionamentos para serem carregados automaticamente
+    protected $with = ['produto', 'localizacao', 'tipo', 'situacao'];
+
     // Relacionamentos
     public function produto()
     {

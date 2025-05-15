@@ -19,7 +19,9 @@ class Marca extends Model
     ];
 
     protected $casts = [
-        'ativo' => 'boolean'
+        'ativo' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     // Relacionamento com produtos

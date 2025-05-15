@@ -149,7 +149,14 @@ class ProdutoController extends Controller
     public function show(string $id)
     {
         $produto = Produto::withTrashed()->with(['marca', 'tecido', 'estilista', 'grupoProduto', 'status'])->findOrFail($id);
-        return view('produtos.show', compact('produto'));
+        
+        // Carregar as movimentações relacionadas a este produto
+        $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
+            ->with(['localizacao', 'tipo', 'situacao'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return view('produtos.show', compact('produto', 'movimentacoes'));
     }
 
     /**

@@ -20,14 +20,13 @@ class MovimentacaoController extends Controller
 
         // Aplicar filtros
         if ($request->filled('referencia')) {
-            $query->where('referencia', 'like', '%' . $request->referencia . '%');
+            $query->whereHas('produto', function($q) use ($request) {
+                $q->where('referencia', 'like', '%' . $request->referencia . '%');
+            });
         }
 
         if ($request->filled('produto_id')) {
-            $produto = Produto::find($request->produto_id);
-            if ($produto) {
-                $query->where('referencia', $produto->referencia);
-            }
+            $query->where('produto_id', $request->produto_id);
         }
 
         if ($request->filled('tipo_id')) {
@@ -86,6 +85,7 @@ class MovimentacaoController extends Controller
      */
     public function store(Request $request)
     {
+        // Validar os dados do formulário
         $validated = $request->validate([
             'produto_id' => 'required|exists:produtos,id',
             'localizacao_id' => 'required|exists:localizacoes,id',
@@ -96,15 +96,35 @@ class MovimentacaoController extends Controller
             'observacao' => 'nullable|string',
         ]);
 
-        // Obter a referência do produto selecionado
-        $produto = Produto::findOrFail($request->produto_id);
-        
-        // Garantir que o produto_id está incluído nos dados
-        $dados = $validated;
-        $dados['produto_id'] = $request->produto_id;
-
-        // Criar a movimentação
-        $movimentacao = Movimentacao::create($dados);
+        try {
+            // Criar a movimentação diretamente usando o modelo
+            $movimentacao = new Movimentacao();
+            $movimentacao->produto_id = $validated['produto_id'];
+            $movimentacao->localizacao_id = $validated['localizacao_id'];
+            $movimentacao->tipo_id = $validated['tipo_id'];
+            $movimentacao->situacao_id = $validated['situacao_id'];
+            $movimentacao->data_entrada = $validated['data_entrada'];
+            $movimentacao->data_saida = $validated['data_saida'] ?? null;
+            $movimentacao->observacao = $validated['observacao'] ?? null;
+            $movimentacao->comprometido = 0; // Valor padrão
+            $movimentacao->save();
+            
+            // Registrar sucesso no log para depuração
+            \Illuminate\Support\Facades\Log::info('Movimentação criada com sucesso', [
+                'id' => $movimentacao->id,
+                'produto_id' => $movimentacao->produto_id
+            ]);
+        } catch (\Exception $e) {
+            // Registrar erro no log para depuração
+            \Illuminate\Support\Facades\Log::error('Erro ao criar movimentação', [
+                'erro' => $e->getMessage(),
+                'dados' => $validated
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['erro' => 'Erro ao criar movimentação: ' . $e->getMessage()]);
+        }
 
         return redirect()->route('movimentacoes.index')
             ->with('success', 'Movimentação registrada com sucesso.');

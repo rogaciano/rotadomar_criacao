@@ -27,8 +27,8 @@ class EstilistaController extends Controller
             });
         }
 
-        if ($request->filled('data_cadastro')) {
-            $query->whereDate('data_cadastro', $request->data_cadastro);
+        if ($request->filled('created_at')) {
+            $query->whereDate('created_at', $request->created_at);
         }
 
         if ($request->filled('ativo')) {
