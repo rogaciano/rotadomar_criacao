@@ -32,6 +32,10 @@
                     <form action="{{ route('movimentacoes.store') }}" method="POST">
                         @csrf
                         
+                        @if(isset($produto_id))
+                            <input type="hidden" name="redirect_to_produto" value="{{ $produto_id }}">
+                        @endif
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Produto -->
                             <div>
@@ -39,11 +43,14 @@
                                 <select id="produto_id" name="produto_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione um produto</option>
                                     @foreach($produtos as $produto)
-                                        <option value="{{ $produto->id }}" {{ old('produto_id') == $produto->id ? 'selected' : '' }}>
+                                        <option value="{{ $produto->id }}" {{ (old('produto_id') == $produto->id || (isset($produto_id) && $produto_id == $produto->id)) ? 'selected' : '' }}>
                                             {{ $produto->referencia }} - {{ $produto->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(isset($produto_selecionado))
+                                    <p class="mt-1 text-sm text-green-600">Produto pré-selecionado da página de detalhes.</p>
+                                @endif
                             </div>
                             
                             <!-- Localização -->

@@ -70,14 +70,22 @@ class MovimentacaoController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $produtos = Produto::all();
         $localizacoes = Localizacao::all();
         $tipos = Tipo::all();
         $situacoes = Situacao::all();
+        
+        // Verificar se foi passado um produto_id na URL
+        $produto_id = $request->input('produto_id');
+        $produto_selecionado = null;
+        
+        if ($produto_id) {
+            $produto_selecionado = Produto::find($produto_id);
+        }
 
-        return view('movimentacoes.create', compact('produtos', 'localizacoes', 'tipos', 'situacoes'));
+        return view('movimentacoes.create', compact('produtos', 'localizacoes', 'tipos', 'situacoes', 'produto_selecionado', 'produto_id'));
     }
 
     /**
@@ -126,6 +134,14 @@ class MovimentacaoController extends Controller
                 ->withErrors(['erro' => 'Erro ao criar movimentação: ' . $e->getMessage()]);
         }
 
+        // Verificar se a movimentação foi criada a partir da página de detalhes do produto
+        if ($request->has('redirect_to_produto')) {
+            $produto_id = $request->input('redirect_to_produto');
+            return redirect()->route('produtos.show', $produto_id)
+                ->with('success', 'Movimentação registrada com sucesso.');
+        }
+        
+        // Redirecionamento padrão para a lista de movimentações
         return redirect()->route('movimentacoes.index')
             ->with('success', 'Movimentação registrada com sucesso.');
     }

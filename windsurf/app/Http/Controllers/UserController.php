@@ -47,7 +47,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'localizacao_id' => $request->localizacao_id,
-            'is_admin' => $request->has('is_admin'),
+            'is_admin' => (bool)$request->input('is_admin'),
         ]);
 
         event(new Registered($user));
@@ -96,7 +96,7 @@ class UserController extends Controller
         $user->name = $request->name;
         $user->email = $request->email;
         $user->localizacao_id = $request->localizacao_id;
-        $user->is_admin = $request->has('is_admin');
+        $user->is_admin = (bool)$request->input('is_admin');
 
         // Atualizar senha apenas se foi fornecida
         if ($request->filled('password')) {

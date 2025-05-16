@@ -75,8 +75,8 @@
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Status</span>
                                 <span class="block mt-1">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                        {{ $produto->status->descricao ?? 'N/A' }}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $produto->status ? $produto->status->descricao : 'N/A' }}
                                     </span>
                                 </span>
                             </div>
@@ -147,7 +147,15 @@
                     
                     <!-- Movimentações -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Movimentações</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Movimentações</h3>
+                            <a href="{{ route('movimentacoes.create', ['produto_id' => $produto->id]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
+                                Nova Movimentação
+                            </a>
+                        </div>
                         
                         @if($movimentacoes->count() > 0)
                             <div class="overflow-x-auto">

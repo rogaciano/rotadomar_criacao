@@ -52,7 +52,7 @@
                         </div>
                     </div>
 
-                    <!-- Outros links serão adicionados conforme implementados -->
+                   <!-- Outros links serão adicionados conforme implementados -->
                 </div>
             </div>
 
@@ -72,6 +72,11 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        @if(auth()->user()->isAdmin())
+                        <x-dropdown-link :href="route('users.index')">
+                            {{ __('Usuários') }}
+                        </x-dropdown-link>
+                        @endif
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -128,7 +133,18 @@
                 <x-responsive-nav-link :href="route('grupo_produtos.index')" :active="request()->routeIs('grupo_produtos.*')" class="pl-6">
                     {{ __('Grupos de Produtos') }}
                 </x-responsive-nav-link>
+
             </div>
+
+            <!-- Responsive Admin Menu (visível apenas para administradores) -->
+            @if(auth()->user()->isAdmin())
+            <div class="pt-2 pb-3 space-y-1">
+                <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Admin') }}</div>
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="pl-6">
+                    {{ __('Usuários') }}
+                </x-responsive-nav-link>
+            </div>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

@@ -21,6 +21,11 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Rotas para gerenciamento de usuários (apenas para administradores)
+    Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
+        Route::resource('users', \App\Http\Controllers\UserController::class);
+    });
 
     // Routes para Tecidos
     Route::resource('tecidos', TecidoController::class);

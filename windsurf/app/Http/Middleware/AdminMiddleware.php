@@ -15,6 +15,10 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Você não tem permissão para acessar esta área.');
+        }
+
         return $next($request);
     }
 }
