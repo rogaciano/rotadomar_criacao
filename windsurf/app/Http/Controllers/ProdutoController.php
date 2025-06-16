@@ -19,7 +19,7 @@ class ProdutoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Produto::with(['marca', 'tecido', 'estilista', 'grupoProduto', 'status']);
+        $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status']);
 
         // Filtros
         if ($request->filled('referencia')) {
@@ -35,7 +35,9 @@ class ProdutoController extends Controller
         }
 
         if ($request->filled('tecido_id')) {
-            $query->where('tecido_id', $request->tecido_id);
+            $query->whereHas('tecidos', function($q) use ($request) {
+                $q->where('tecidos.id', $request->tecido_id);
+            });
         }
 
         if ($request->filled('estilista_id')) {
@@ -91,7 +93,9 @@ class ProdutoController extends Controller
             'referencia' => 'required|string|max:50|unique:produtos,referencia',
             'descricao' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
-            'tecido_id' => 'required|exists:tecidos,id',
+            'tecidos' => 'required|array|min:1',
+            'tecidos.*.tecido_id' => 'required|exists:tecidos,id',
+            'tecidos.*.consumo' => 'nullable|numeric|min:0',
             'estilista_id' => 'required|exists:estilistas,id',
             'grupo_id' => 'required|exists:grupos,id',
             'status_id' => 'required|exists:status,id',
@@ -105,7 +109,7 @@ class ProdutoController extends Controller
                 ->withInput();
         }
 
-        $data = $request->all();
+        $data = $request->except('tecidos');
 
         // Upload da ficha de produção, se fornecida
         if ($request->hasFile('ficha_producao')) {
@@ -137,7 +141,19 @@ class ProdutoController extends Controller
             $data['anexo_catalogo_vendas'] = $catalogoPath;
         }
 
-        Produto::create($data);
+        // Criar o produto
+        $produto = Produto::create($data);
+        
+        // Associar os tecidos ao produto
+        if ($request->has('tecidos')) {
+            $tecidosData = [];
+            foreach ($request->tecidos as $tecido) {
+                if (!empty($tecido['tecido_id'])) {
+                    $tecidosData[$tecido['tecido_id']] = ['consumo' => $tecido['consumo'] ?? null];
+                }
+            }
+            $produto->tecidos()->sync($tecidosData);
+        }
 
         return redirect()->route('produtos.index')
             ->with('success', 'Produto criado com sucesso!');
@@ -148,7 +164,7 @@ class ProdutoController extends Controller
      */
     public function show(string $id)
     {
-        $produto = Produto::withTrashed()->with(['marca', 'tecido', 'estilista', 'grupoProduto', 'status'])->findOrFail($id);
+        $produto = Produto::withTrashed()->with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status'])->findOrFail($id);
         
         // Carregar as movimentações relacionadas a este produto
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
@@ -187,7 +203,9 @@ class ProdutoController extends Controller
             'referencia' => 'required|string|max:50|unique:produtos,referencia,' . $id,
             'descricao' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
-            'tecido_id' => 'required|exists:tecidos,id',
+            'tecidos' => 'required|array|min:1',
+            'tecidos.*.tecido_id' => 'required|exists:tecidos,id',
+            'tecidos.*.consumo' => 'nullable|numeric|min:0',
             'estilista_id' => 'required|exists:estilistas,id',
             'grupo_id' => 'required|exists:grupos,id',
             'status_id' => 'required|exists:status,id',
@@ -201,7 +219,7 @@ class ProdutoController extends Controller
                 ->withInput();
         }
 
-        $data = $request->all();
+        $data = $request->except('tecidos');
 
         // Upload da ficha de produção, se fornecida
         if ($request->hasFile('ficha_producao')) {
@@ -243,7 +261,19 @@ class ProdutoController extends Controller
             $data['anexo_catalogo_vendas'] = $catalogoPath;
         }
 
+        // Atualizar o produto
         $produto->update($data);
+        
+        // Atualizar os tecidos associados ao produto
+        if ($request->has('tecidos')) {
+            $tecidosData = [];
+            foreach ($request->tecidos as $tecido) {
+                if (!empty($tecido['tecido_id'])) {
+                    $tecidosData[$tecido['tecido_id']] = ['consumo' => $tecido['consumo'] ?? null];
+                }
+            }
+            $produto->tecidos()->sync($tecidosData);
+        }
 
         return redirect()->route('produtos.index')
             ->with('success', 'Produto atualizado com sucesso!');

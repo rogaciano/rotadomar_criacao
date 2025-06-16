@@ -12,7 +12,8 @@
                 <div class="p-3">
                     <div class="flex justify-between items-center">
                         @php
-                            $marcas = \App\Models\Marca::where('ativo', true)->get();
+                            // Busca marcas ativas e que tenham logo
+                            $marcas = \App\Models\Marca::where('ativo', true)->where('logo_path', '!=', null)->get();
                             $totalMarcas = $marcas->count();
                         @endphp
 

@@ -18,6 +18,7 @@ class Movimentacao extends Model
         'localizacao_id',
         'data_entrada',
         'data_saida',
+        'data_devolucao',
         'tipo_id',
         'situacao_id',
         'observacao'
@@ -26,6 +27,7 @@ class Movimentacao extends Model
     protected $casts = [
         'data_entrada' => 'date',
         'data_saida' => 'date',
+        'data_devolucao' => 'date',
         'comprometido' => 'integer'
     ];
 

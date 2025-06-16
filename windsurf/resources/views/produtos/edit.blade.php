@@ -1,4 +1,6 @@
 <x-app-layout>
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -71,17 +73,67 @@
                                 <input type="number" name="quantidade" id="quantidade" value="{{ old('quantidade', $produto->quantidade) }}" min="0" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" >
                             </div>
 
-                            <!-- Tecido -->
-                            <div>
-                                <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido</label>
-                                <select name="tecido_id" id="tecido_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
-                                    <option value="">Selecione um tecido</option>
-                                    @foreach($tecidos as $tecido)
-                                        <option value="{{ $tecido->id }}" {{ old('tecido_id', $produto->tecido_id) == $tecido->id ? 'selected' : '' }} class="text-gray-700">
-                                            {{ $tecido->descricao }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                            <!-- Tecidos -->
+                            <div class="col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tecidos</label>
+                                <div class="border border-gray-300 rounded-md p-4">
+                                    <div id="tecidos-container">
+                                        @forelse($produto->tecidos as $index => $produtoTecido)
+                                            <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="flex-grow">
+                                                        <select name="tecidos[{{ $index }}][tecido_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                                            <option value="">Selecione um tecido</option>
+                                                            @foreach($tecidos as $tecido)
+                                                                <option value="{{ $tecido->id }}" {{ $produtoTecido->id == $tecido->id ? 'selected' : '' }} class="text-gray-700">
+                                                                    {{ $tecido->descricao }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="w-1/4">
+                                                        <input type="number" name="tecidos[{{ $index }}][consumo]" placeholder="Consumo" step="0.001" min="0" value="{{ $produtoTecido->pivot->consumo }}" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                                    </div>
+                                                    <button type="button" class="remove-tecido text-red-500 hover:text-red-700">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="flex-grow">
+                                                        <select name="tecidos[0][tecido_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                                            <option value="">Selecione um tecido</option>
+                                                            @foreach($tecidos as $tecido)
+                                                                <option value="{{ $tecido->id }}" class="text-gray-700">
+                                                                    {{ $tecido->descricao }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="w-1/4">
+                                                        <input type="number" name="tecidos[0][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                                    </div>
+                                                    <button type="button" class="remove-tecido text-red-500 hover:text-red-700" style="display: none;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforelse
+                                    </div>
+                                    <button type="button" id="add-tecido" class="mt-3 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        Adicionar Tecido
+                                    </button>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Adicione um ou mais tecidos utilizados neste produto</p>
                             </div>
 
                             <!-- Estilista -->
@@ -183,4 +235,184 @@
             </div>
         </div>
     </div>
+
+    <!-- Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('tecidos-container');
+            const addButton = document.getElementById('add-tecido');
+            let tecidoCount = {{ count($produto->tecidos) > 0 ? count($produto->tecidos) : 0 }};
+
+            // Show/hide remove buttons based on number of tecido items
+            function updateRemoveButtons() {
+                const items = container.querySelectorAll('.tecido-item');
+                items.forEach(item => {
+                    const removeButton = item.querySelector('.remove-tecido');
+                    if (items.length > 1) {
+                        removeButton.style.display = 'block';
+                    } else {
+                        removeButton.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Get all currently selected tecido IDs
+            function getSelectedTecidoIds() {
+                const selects = container.querySelectorAll('select[name^="tecidos"]');
+                return Array.from(selects).map(select => select.value).filter(value => value !== '');
+            }
+            
+            // Update all selects to properly show available options
+            function updateSelectOptions() {
+                const selectedIds = getSelectedTecidoIds();
+                const selects = container.querySelectorAll('select[name^="tecidos"]');
+                
+                // Get all available options from the first select (which has all options)
+                const firstSelect = container.querySelector('select');
+                const allOptions = Array.from(firstSelect.options);
+                
+                selects.forEach(select => {
+                    const currentValue = select.value;
+                    
+                    // Clear all options except the first one (placeholder)
+                    while (select.options.length > 1) {
+                        select.remove(1);
+                    }
+                    
+                    // Add back all options, ensuring the current selection remains available
+                    allOptions.forEach(option => {
+                        // Include option if:
+                        // 1. It's the empty placeholder, or
+                        // 2. It's the currently selected value for this dropdown, or
+                        // 3. It's not selected in any other dropdown
+                        if (option.value === '' || 
+                            option.value === currentValue || 
+                            !selectedIds.includes(option.value) || 
+                            (selectedIds.filter(id => id === option.value).length < 2 && option.value === currentValue)) {
+                            
+                            const newOption = document.createElement('option');
+                            newOption.value = option.value;
+                            newOption.text = option.text;
+                            newOption.className = 'text-gray-700';
+                            if (option.value === currentValue) {
+                                newOption.selected = true;
+                            }
+                            select.add(newOption);
+                        }
+                    });
+                });
+            }
+
+            // Add new tecido item
+            addButton.addEventListener('click', function() {
+                tecidoCount++;
+                const newItem = document.createElement('div');
+                newItem.className = 'tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200';
+                
+                // Get all available options excluding already selected ones
+                const selectedIds = getSelectedTecidoIds();
+                const firstSelect = container.querySelector('select');
+                const filteredOptions = Array.from(firstSelect.options)
+                    .filter(opt => opt.value === '' || !selectedIds.includes(opt.value))
+                    .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
+                    .join('');
+                
+                newItem.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="flex-grow">
+                            <select name="tecidos[${tecidoCount}][tecido_id]" class="tecido-select block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                ${filteredOptions}
+                            </select>
+                        </div>
+                        <div class="w-1/4">
+                            <input type="number" name="tecidos[${tecidoCount}][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                        </div>
+                        <button type="button" class="remove-tecido text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(newItem);
+                updateRemoveButtons();
+                
+                // Add change event listener to the new select
+                const newSelect = newItem.querySelector('select');
+                newSelect.addEventListener('change', updateSelectOptions);
+                
+                // Add event listener to the new remove button
+                newItem.querySelector('.remove-tecido').addEventListener('click', function() {
+                    newItem.remove();
+                    updateRemoveButtons();
+                    updateSelectOptions();
+                });
+            });
+            
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-tecido').forEach(button => {
+                button.addEventListener('click', function() {
+                    button.closest('.tecido-item').remove();
+                    updateRemoveButtons();
+                    updateSelectOptions();
+                });
+            });
+            
+            // Add change event listeners to existing selects
+            document.querySelectorAll('select[name^="tecidos"]').forEach(select => {
+                select.addEventListener('change', function() {
+                    updateSelectOptions();
+                    // Trigger Select2 to update
+                    $(select).trigger('change.select2');
+                });
+            });
+            
+            // Initialize Select2 on all tecido selects
+            $(document).ready(function() {
+                initializeSelect2();
+            });
+            
+            function initializeSelect2() {
+                $('select[name^="tecidos"]').select2({
+                    placeholder: 'Selecione um tecido',
+                    allowClear: true,
+                    width: '100%',
+                    language: {
+                        noResults: function() {
+                            return "Nenhum resultado encontrado";
+                        },
+                        searching: function() {
+                            return "Buscando...";
+                        }
+                    }
+                });
+                
+                // Re-initialize Select2 after adding a new tecido
+                $('#add-tecido').on('click', function() {
+                    setTimeout(function() {
+                        $('select[name^="tecidos"]').last().select2({
+                            placeholder: 'Selecione um tecido',
+                            allowClear: true,
+                            width: '100%',
+                            language: {
+                                noResults: function() {
+                                    return "Nenhum resultado encontrado";
+                                },
+                                searching: function() {
+                                    return "Buscando...";
+                                }
+                            }
+                        });
+                    }, 100);
+                });
+            }
+            
+            // Initialize
+            updateRemoveButtons();
+            updateSelectOptions();
+        });
+    </script>
 </x-app-layout>

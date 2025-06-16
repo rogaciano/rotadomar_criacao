@@ -16,7 +16,6 @@ class Produto extends Model
         'data_cadastro',
         'marca_id',
         'quantidade',
-        'tecido_id',
         'estilista_id',
         'grupo_id',
         'preco_atacado',
@@ -39,9 +38,21 @@ class Produto extends Model
         return $this->belongsTo(Marca::class);
     }
 
+    // Relacionamento singular para o primeiro tecido (compatibilidade)
     public function tecido()
     {
-        return $this->belongsTo(Tecido::class);
+        return $this->belongsToMany(Tecido::class, 'produto_tecido')
+                    ->withPivot('consumo')
+                    ->withTimestamps()
+                    ->limit(1);
+    }
+
+    // Relacionamento plural para todos os tecidos
+    public function tecidos()
+    {
+        return $this->belongsToMany(Tecido::class, 'produto_tecido')
+                    ->withPivot('consumo')
+                    ->withTimestamps();
     }
 
     public function estilista()

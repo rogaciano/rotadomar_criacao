@@ -76,11 +76,11 @@ class MovimentacaoController extends Controller
         $localizacoes = Localizacao::all();
         $tipos = Tipo::all();
         $situacoes = Situacao::all();
-        
+
         // Verificar se foi passado um produto_id na URL
         $produto_id = $request->input('produto_id');
         $produto_selecionado = null;
-        
+
         if ($produto_id) {
             $produto_selecionado = Produto::find($produto_id);
         }
@@ -101,6 +101,7 @@ class MovimentacaoController extends Controller
             'situacao_id' => 'required|exists:situacoes,id',
             'data_entrada' => 'required|date',
             'data_saida' => 'nullable|date|after_or_equal:data_entrada',
+            'data_devolucao' => 'nullable|date|after_or_equal:data_entrada',
             'observacao' => 'nullable|string',
         ]);
 
@@ -113,10 +114,11 @@ class MovimentacaoController extends Controller
             $movimentacao->situacao_id = $validated['situacao_id'];
             $movimentacao->data_entrada = $validated['data_entrada'];
             $movimentacao->data_saida = $validated['data_saida'] ?? null;
+            $movimentacao->data_devolucao = $validated['data_devolucao'] ?? null;
             $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
             $movimentacao->save();
-            
+
             // Registrar sucesso no log para depuração
             \Illuminate\Support\Facades\Log::info('Movimentação criada com sucesso', [
                 'id' => $movimentacao->id,
@@ -128,7 +130,7 @@ class MovimentacaoController extends Controller
                 'erro' => $e->getMessage(),
                 'dados' => $validated
             ]);
-            
+
             return redirect()->back()
                 ->withInput()
                 ->withErrors(['erro' => 'Erro ao criar movimentação: ' . $e->getMessage()]);
@@ -140,7 +142,7 @@ class MovimentacaoController extends Controller
             return redirect()->route('produtos.show', $produto_id)
                 ->with('success', 'Movimentação registrada com sucesso.');
         }
-        
+
         // Redirecionamento padrão para a lista de movimentações
         return redirect()->route('movimentacoes.index')
             ->with('success', 'Movimentação registrada com sucesso.');
@@ -180,6 +182,7 @@ class MovimentacaoController extends Controller
             'situacao_id' => 'required|exists:situacoes,id',
             'data_entrada' => 'required|date',
             'data_saida' => 'nullable|date|after_or_equal:data_entrada',
+            'data_devolucao' => 'nullable|date|after_or_equal:data_entrada',
             'observacao' => 'nullable|string',
         ]);
 

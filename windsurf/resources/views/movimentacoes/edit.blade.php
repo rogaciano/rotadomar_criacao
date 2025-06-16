@@ -83,6 +83,19 @@
                                 <x-input id="data_saida" class="block mt-1 w-full" type="datetime-local" name="data_saida" :value="old('data_saida', $movimentacao->data_saida ? $movimentacao->data_saida->format('Y-m-d\TH:i') : null)" />
                                 <x-input-error for="data_saida" class="mt-2" />
                             </div>
+                            <!-- Data Devolução -->
+                            <div>
+                                <x-label for="data_devolucao" value="{{ __('Data de Devolução (opcional)') }}" />
+                                <x-input id="data_devolucao" class="block mt-1 w-full" type="datetime-local" name="data_devolucao" :value="old('data_devolucao', $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('Y-m-d\TH:i') : null)" />
+                                <x-input-error for="data_devolucao" class="mt-2" />
+                            </div>
+
+                            <!-- Observação -->
+                            <div>
+                                <x-label for="observacao" value="{{ __('Observação (opcional)') }}" />
+                                <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
+                                <x-input-error for="observacao" class="mt-2" />
+                            </div>
 
                             <!-- Observação -->
                             <div class="md:col-span-2">

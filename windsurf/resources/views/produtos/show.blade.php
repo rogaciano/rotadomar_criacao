@@ -52,9 +52,32 @@
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
                             </div>
                             
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Tecido</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->tecido->descricao ?? 'N/A' }}</span>
+                            <div class="col-span-1 md:col-span-3">
+                                <span class="block text-sm font-medium text-gray-500 mb-2">Tecidos</span>
+                                @if($produto->tecidos->count() > 0)
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referência</th>
+                                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @foreach($produto->tecidos as $tecido)
+                                                    <tr>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $tecido->descricao }}</td>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $tecido->referencia }}</td>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $tecido->pivot->consumo ?? 'N/A' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <span class="text-gray-400 italic">Nenhum tecido associado a este produto</span>
+                                @endif
                             </div>
                             
                             <div>

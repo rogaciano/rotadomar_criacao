@@ -25,6 +25,8 @@ class Tecido extends Model
     // Relacionamento com produtos
     public function produtos()
     {
-        return $this->hasMany(Produto::class);
+        return $this->belongsToMany(Produto::class, 'produto_tecido')
+                    ->withPivot('consumo')
+                    ->withTimestamps();
     }
 }

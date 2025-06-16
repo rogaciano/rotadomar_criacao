@@ -31,11 +31,11 @@
 
                     <form action="{{ route('movimentacoes.store') }}" method="POST">
                         @csrf
-                        
+
                         @if(isset($produto_id))
                             <input type="hidden" name="redirect_to_produto" value="{{ $produto_id }}">
                         @endif
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Produto -->
                             <div>
@@ -52,7 +52,7 @@
                                     <p class="mt-1 text-sm text-green-600">Produto pré-selecionado da página de detalhes.</p>
                                 @endif
                             </div>
-                            
+
                             <!-- Localização -->
                             <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
@@ -65,7 +65,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <!-- Tipo -->
                             <div>
                                 <label for="tipo_id" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Movimentação</label>
@@ -78,7 +78,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <!-- Situação -->
                             <div>
                                 <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação</label>
@@ -91,19 +91,23 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
+
                             <!-- Data Entrada -->
                             <div>
                                 <label for="data_entrada" class="block text-sm font-medium text-gray-700 mb-1">Data de Entrada</label>
                                 <input type="datetime-local" name="data_entrada" id="data_entrada" value="{{ old('data_entrada', now()->format('Y-m-d\TH:i')) }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
-                            
+
                             <!-- Data Saída -->
                             <div>
                                 <label for="data_saida" class="block text-sm font-medium text-gray-700 mb-1">Data de Saída (opcional)</label>
                                 <input type="datetime-local" name="data_saida" id="data_saida" value="{{ old('data_saida') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             </div>
-                            
+                            <div>
+                                <label for="data_devolucao" class="block text-sm font-medium text-gray-700 mb-1">Data de Devolução (opcional)</label>
+                                <input type="datetime-local" name="data_devolucao" id="data_devolucao" value="{{ old('data_devolucao') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            </div>
+
                             <!-- Observação -->
                             <div class="md:col-span-2">
                                 <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação (opcional)</label>
