@@ -16,7 +16,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        // Busca marcas ativas e que tenham logo
+        $todasMarcas = \App\Models\Marca::where('ativo', true)->whereNotNull('logo_path')->get();
+        
+        // Seleciona apenas uma marca aleatória
+        if ($todasMarcas->count() > 0) {
+            $marca = $todasMarcas->random(1)->first();
+        } else {
+            $marca = null;
+        }
+        
+        return view('auth.login', [
+            'marca' => $marca
+        ]);
     }
 
     /**

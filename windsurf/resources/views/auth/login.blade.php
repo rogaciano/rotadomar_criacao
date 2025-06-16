@@ -5,6 +5,32 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
+        <!-- Logos das marcas -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="p-3">
+                {{-- Uma marca aleatória é fornecida pelo controller --}}
+                
+                <div class="flex justify-center items-center">
+                    @if($marca)
+                        <div class="text-center">
+                            @if($marca->logo_path)
+                                <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="{{ $marca->nome_marca }}" class="h-16 w-auto object-contain mx-auto">
+                            @else
+                                <div class="h-16 w-24 flex items-center justify-center bg-gray-100 rounded-lg">
+                                    <span class="text-sm font-semibold text-gray-700">{{ $marca->nome_marca }}</span>
+                                </div>
+                            @endif
+                            <p class="mt-2 text-sm font-medium text-gray-600">{{ $marca->nome_marca }}</p>
+                        </div>
+                    @else
+                        <div class="text-center py-4">
+                            <p class="text-sm text-gray-500">Nenhuma marca disponível</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
