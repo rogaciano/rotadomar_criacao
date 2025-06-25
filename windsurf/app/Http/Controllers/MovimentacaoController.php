@@ -54,7 +54,46 @@ class MovimentacaoController extends Controller
         }
 
         // Ordenação
-        $query->latest();
+        if ($request->filled('sort') && $request->filled('direction')) {
+            $sortField = $request->sort;
+            $direction = $request->direction;
+
+            // Mapear os campos de ordenação para as colunas corretas no banco de dados
+            switch ($sortField) {
+                case 'produto':
+                    $query->join('produtos', 'movimentacoes.produto_id', '=', 'produtos.id')
+                          ->orderBy('produtos.referencia', $direction)
+                          ->select('movimentacoes.*'); // Importante para evitar conflitos de colunas
+                    break;
+                case 'localizacao':
+                    $query->join('localizacoes', 'movimentacoes.localizacao_id', '=', 'localizacoes.id')
+                          ->orderBy('localizacoes.nome_localizacao', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                case 'tipo':
+                    $query->join('tipos', 'movimentacoes.tipo_id', '=', 'tipos.id')
+                          ->orderBy('tipos.descricao', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                case 'situacao':
+                    $query->join('situacoes', 'movimentacoes.situacao_id', '=', 'situacoes.id')
+                          ->orderBy('situacoes.descricao', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                default:
+                    // Para campos diretos da tabela movimentacoes
+                    if (in_array($sortField, ['data_entrada', 'data_saida', 'data_devolucao', 'comprometido', 'observacao', 'created_at'])) {
+                        $query->orderBy($sortField, $direction);
+                    } else {
+                        // Ordenação padrão se o campo não for reconhecido
+                        $query->latest();
+                    }
+                    break;
+            }
+        } else {
+            // Ordenação padrão se não houver parâmetros de ordenação
+            $query->latest();
+        }
 
         $movimentacoes = $query->paginate(10)->withQueryString();
 

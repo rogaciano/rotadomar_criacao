@@ -225,7 +225,8 @@ def clean_tables():
             f"DELETE FROM {TARGET_SCHEMA}.marcas;",
             f"DELETE FROM {TARGET_SCHEMA}.`status`;",
             f"DELETE FROM {TARGET_SCHEMA}.estilistas;",
-            f"DELETE FROM {TARGET_SCHEMA}.produto_tecido;"
+            f"DELETE FROM {TARGET_SCHEMA}.produto_tecido;",
+            f"DELETE FROM {TARGET_SCHEMA}.movimentacoes;"
         ]
         
         for stmt in delete_statements:
@@ -840,20 +841,20 @@ def main():
         # Limpar tabelas antes da migração
         print("\n--- LIMPANDO TABELAS ---")
         
-        # clean_tables()
+        clean_tables()
         
         # Reconectar ao banco de dados específico após limpeza
         cx = mysql.connector.connect(**DB_CONFIG, database=TARGET_SCHEMA)
         
         # Executar migrações
-        # print("\n--- INICIANDO MIGRAÇÃO DE TECIDOS ---")
-        # migrate_tecidos(cx)
+        print("\n--- INICIANDO MIGRAÇÃO DE TECIDOS ---")
+        migrate_tecidos(cx)
         
-        # print("\n--- INICIANDO MIGRAÇÃO DE PRODUTOS ---")
-        # migrate_produtos(cx)
+        print("\n--- INICIANDO MIGRAÇÃO DE PRODUTOS ---")
+        migrate_produtos(cx)
         
-        # print("\n--- INICIANDO MIGRAÇÃO DE PRODUTO_TECIDO ---")
-        # migrate_produto_tecido(cx)
+        print("\n--- INICIANDO MIGRAÇÃO DE PRODUTO_TECIDO ---")
+        migrate_produto_tecido(cx)
         
         print("\n--- INICIANDO MIGRAÇÃO DE MOVIMENTAÇÕES ---")
         migrate_movimentacoes(cx)  # Nova função de migração

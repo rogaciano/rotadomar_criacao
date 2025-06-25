@@ -89,13 +89,18 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
+        // Trim spaces from referencia field if it exists
+        if ($request->has('referencia')) {
+            $request->merge(['referencia' => trim($request->referencia)]);
+        }
+
         $validator = Validator::make($request->all(), [
             'referencia' => 'required|string|max:50|unique:produtos,referencia',
             'descricao' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
             'tecidos' => 'required|array|min:1',
             'tecidos.*.tecido_id' => 'required|exists:tecidos,id',
-            'tecidos.*.consumo' => 'nullable|numeric|min:0',
+            'tecidos.*.consumo' => 'nullable|numeric|min:0.001',
             'estilista_id' => 'required|exists:estilistas,id',
             'grupo_id' => 'required|exists:grupos,id',
             'status_id' => 'required|exists:status,id',
@@ -115,13 +120,13 @@ class ProdutoController extends Controller
         if ($request->hasFile('ficha_producao')) {
             $ficha = $request->file('ficha_producao');
             $fichaName = time() . '_ficha_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $ficha->getClientOriginalName());
-            
+
             // Criar diretório se não existir
             $directory = storage_path('app/public/fichas');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
-            
+
             $fichaPath = $ficha->storeAs('fichas', $fichaName, 'public');
             $data['anexo_ficha_producao'] = $fichaPath;
         }
@@ -130,20 +135,20 @@ class ProdutoController extends Controller
         if ($request->hasFile('catalogo_vendas')) {
             $catalogo = $request->file('catalogo_vendas');
             $catalogoName = time() . '_catalogo_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $catalogo->getClientOriginalName());
-            
+
             // Criar diretório se não existir
             $directory = storage_path('app/public/catalogos');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
-            
+
             $catalogoPath = $catalogo->storeAs('catalogos', $catalogoName, 'public');
             $data['anexo_catalogo_vendas'] = $catalogoPath;
         }
 
         // Criar o produto
         $produto = Produto::create($data);
-        
+
         // Associar os tecidos ao produto
         if ($request->has('tecidos')) {
             $tecidosData = [];
@@ -165,13 +170,13 @@ class ProdutoController extends Controller
     public function show(string $id)
     {
         $produto = Produto::withTrashed()->with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status'])->findOrFail($id);
-        
+
         // Carregar as movimentações relacionadas a este produto
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
             ->with(['localizacao', 'tipo', 'situacao'])
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         return view('produtos.show', compact('produto', 'movimentacoes'));
     }
 
@@ -197,10 +202,20 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Trim spaces from referencia field if it exists
+        if ($request->has('referencia')) {
+            $request->merge(['referencia' => trim($request->referencia)]);
+        }
+
+        // Trim spaces from descricao field if it exists
+        if ($request->has('descricao')) {
+            $request->merge(['descricao' => trim($request->descricao)]);
+        }
+
         $produto = Produto::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'referencia' => 'required|string|max:50|unique:produtos,referencia,' . $id,
+        // Custom validation rules
+        $rules = [
             'descricao' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
             'tecidos' => 'required|array|min:1',
@@ -211,7 +226,32 @@ class ProdutoController extends Controller
             'status_id' => 'required|exists:status,id',
             'ficha_producao' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'catalogo_vendas' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-        ]);
+        ];
+
+        // Handle referencia validation separately
+        $rules['referencia'] = [
+            'required',
+            'string',
+            'max:50',
+            function ($attribute, $value, $fail) use ($id) {
+                // Debug values
+                $debugInfo = [
+                    'id' => $id,
+                    'referencia' => $value,
+                    'attribute' => $attribute
+                ];
+
+                // Check if another product with the same referencia exists (excluding current product)
+                $query = Produto::where('referencia', $value)->where('id', '!=', $id);
+                $exists = $query->exists();
+
+                if ($exists) {
+                    $fail('Atenção: Referência já cadastrada!');
+                }
+            },
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return redirect()->route('produtos.edit', $produto->id)
@@ -230,13 +270,13 @@ class ProdutoController extends Controller
 
             $ficha = $request->file('ficha_producao');
             $fichaName = time() . '_ficha_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $ficha->getClientOriginalName());
-            
+
             // Criar diretório se não existir
             $directory = storage_path('app/public/fichas');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
-            
+
             $fichaPath = $ficha->storeAs('fichas', $fichaName, 'public');
             $data['anexo_ficha_producao'] = $fichaPath;
         }
@@ -250,26 +290,31 @@ class ProdutoController extends Controller
 
             $catalogo = $request->file('catalogo_vendas');
             $catalogoName = time() . '_catalogo_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $catalogo->getClientOriginalName());
-            
+
             // Criar diretório se não existir
             $directory = storage_path('app/public/catalogos');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
             }
-            
+
             $catalogoPath = $catalogo->storeAs('catalogos', $catalogoName, 'public');
             $data['anexo_catalogo_vendas'] = $catalogoPath;
         }
 
         // Atualizar o produto
         $produto->update($data);
-        
+
         // Atualizar os tecidos associados ao produto
         if ($request->has('tecidos')) {
             $tecidosData = [];
             foreach ($request->tecidos as $tecido) {
                 if (!empty($tecido['tecido_id'])) {
-                    $tecidosData[$tecido['tecido_id']] = ['consumo' => $tecido['consumo'] ?? null];
+                    // Se o consumo estiver vazio, definir como 0
+                    $consumo = $tecido['consumo'];
+                    if (empty($consumo) || $consumo === null) {
+                        $consumo = 0;
+                    }
+                    $tecidosData[$tecido['tecido_id']] = ['consumo' => $consumo];
                 }
             }
             $produto->tecidos()->sync($tecidosData);
