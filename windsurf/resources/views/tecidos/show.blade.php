@@ -11,6 +11,14 @@
                     </svg>
                     Editar
                 </a>
+                @if($tecido->referencia)
+                <a href="{{ route('tecidos.atualizar-estoque', $tecido->id) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Atualizar Estoque
+                </a>
+                @endif
                 <a href="{{ route('tecidos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -35,8 +43,21 @@
                                 </div>
                                 <div class="mb-4">
                                     <p class="text-sm font-medium text-gray-500">Data de Cadastro</p>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $tecido->data_cadastro->format('d/m/Y') }}</p>
+                                    <p class="mt-1 text-sm text-gray-900">{{ $tecido->data_cadastro ? $tecido->data_cadastro->format('d/m/Y') : 'Não informada' }}</p>
                                 </div>
+                                <div class="mb-4">
+                                    <p class="text-sm font-medium text-gray-500">Referência</p>
+                                    <p class="mt-1 text-sm text-gray-900">{{ $tecido->referencia ?: 'Não informada' }}</p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <p class="text-sm font-medium text-gray-500">Estoque</p>
+                                    <p class="mt-1 text-sm text-gray-900">{{ isset($tecido->quantidade_estoque) ? number_format($tecido->quantidade_estoque, 2, ',', '.') : 'Não disponível' }}</p>
+
+                                    <p class="mt-1 text-xs text-gray-500">Última atualização: {{ $tecido->ultima_consulta_estoque ? $tecido->ultima_consulta_estoque->format('d/m/Y H:i') : 'Não disponível' }}</p>
+
+                                </div>
+
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Status</p>
                                     <p class="mt-1">
@@ -47,7 +68,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div>
                             <h3 class="text-lg font-medium text-gray-900 mb-2">Produtos Relacionados</h3>
                             <div class="bg-gray-50 p-4 rounded-lg">
@@ -67,7 +88,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mt-6 flex justify-end">
                         <form action="{{ route('tecidos.destroy', $tecido->id) }}" method="POST" class="inline">
                             @csrf

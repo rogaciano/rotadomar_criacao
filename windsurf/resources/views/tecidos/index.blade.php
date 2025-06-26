@@ -15,6 +15,12 @@
                     </svg>
                     Adicionar Tecido
                 </a>
+                <a href="{{ route('tecidos.atualizar-todos-estoques') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Atualizar Todos os Estoques
+                </a>
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -22,9 +28,13 @@
                     <!-- Filtros -->
                     <div class="mb-6 bg-gray-100 p-4 rounded-lg">
                         <form action="{{ route('tecidos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-1">
                                 <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Buscar por descrição</label>
                                 <input type="text" name="descricao" id="descricao" value="{{ request('descricao') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do tecido">
+                            </div>
+                            <div class="md:col-span-1">
+                                <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Buscar por referência</label>
+                                <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do tecido">
                             </div>
                             <div>
                                 <label for="data_cadastro" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
@@ -68,7 +78,10 @@
                                         Descrição
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Data de Cadastro
+                                        Referência
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Estoque
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
@@ -88,7 +101,23 @@
                                             {{ $tecido->descricao }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ date('d/m/Y', strtotime($tecido->data_cadastro)) }}
+                                            {{ $tecido->referencia ?: 'Não informada' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($tecido->quantidade_estoque)
+                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                    {{ number_format($tecido->quantidade_estoque, 0, ',', '.') }}
+                                                </span>
+                                                <span class="text-xs text-gray-400 ml-1" title="Última atualização">
+                                                    {{ $tecido->ultima_consulta_estoque ? $tecido->ultima_consulta_estoque->format('d/m/Y H:i') : '' }}
+                                                </span>
+                                            @else
+                                                @if($tecido->referencia)
+                                                    <span class="text-xs text-gray-400">Não consultado</span>
+                                                @else
+                                                    <span class="text-xs text-gray-400">Sem referência</span>
+                                                @endif
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $tecido->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">

@@ -105,6 +105,19 @@
                             </div>
                             
                             <div>
+                                <span class="block text-sm font-medium text-gray-500">Localização Atual</span>
+                                <span class="block mt-1">
+                                    @if($produto->localizacao_atual)
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            {{ $produto->localizacao_atual->nome_localizacao }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-sm italic">Não localizado</span>
+                                    @endif
+                                </span>
+                            </div>
+                            
+                            <div>
                                 <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
                                 <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
                             </div>

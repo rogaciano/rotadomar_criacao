@@ -86,13 +86,13 @@ class MovimentacaoController extends Controller
                         $query->orderBy($sortField, $direction);
                     } else {
                         // Ordenação padrão se o campo não for reconhecido
-                        $query->latest();
+                        $query->orderBy('id', 'desc');
                     }
                     break;
             }
         } else {
             // Ordenação padrão se não houver parâmetros de ordenação
-            $query->latest();
+            $query->orderBy('id', 'desc');
         }
 
         $movimentacoes = $query->paginate(10)->withQueryString();

@@ -40,7 +40,7 @@
                             <!-- Produto -->
                             <div>
                                 <label for="produto_id" class="block text-sm font-medium text-gray-700 mb-1">Produto</label>
-                                <select id="produto_id" name="produto_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="produto_id" name="produto_id" class="select2 block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione um produto</option>
                                     @foreach($produtos as $produto)
                                         <option value="{{ $produto->id }}" {{ (old('produto_id') == $produto->id || (isset($produto_id) && $produto_id == $produto->id)) ? 'selected' : '' }}>
@@ -56,7 +56,7 @@
                             <!-- Localização -->
                             <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                                <select id="localizacao_id" name="localizacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="localizacao_id" name="localizacao_id" class="select2 block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma localização</option>
                                     @foreach($localizacoes as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ old('localizacao_id') == $localizacao->id ? 'selected' : '' }}>
@@ -128,4 +128,23 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: "Selecione um produto",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Ajustar estilo do Select2 para combinar com o Tailwind
+            $('.select2-container--default .select2-selection--single').css({
+                'height': '42px',
+                'padding': '6px 4px',
+                'border-color': '#d1d5db'
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

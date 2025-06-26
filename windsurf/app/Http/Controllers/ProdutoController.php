@@ -19,7 +19,7 @@ class ProdutoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status']);
+        $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao']);
 
         // Filtros
         if ($request->filled('referencia')) {
@@ -52,6 +52,22 @@ class ProdutoController extends Controller
             $query->where('status_id', $request->status_id);
         }
 
+        // Filtro por localização
+        if ($request->filled('localizacao_id')) {
+            $localizacaoId = $request->localizacao_id;
+            
+            // Obter IDs dos produtos cuja última movimentação está na localização selecionada
+            $subquery = \App\Models\Movimentacao::select('produto_id')
+                ->where('localizacao_id', $localizacaoId)
+                ->whereIn('id', function($q) {
+                    $q->select(\DB::raw('MAX(id)'))
+                      ->from('movimentacoes')
+                      ->groupBy('produto_id');
+                });
+                
+            $query->whereIn('id', $subquery);
+        }
+
         // Incluir excluídos se solicitado
         if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
@@ -65,8 +81,9 @@ class ProdutoController extends Controller
         $estilistas = Estilista::orderBy('nome_estilista')->get();
         $grupos = GrupoProduto::orderBy('descricao')->get();
         $statuses = Status::orderBy('descricao')->get();
+        $localizacoes = \App\Models\Localizacao::orderBy('nome_localizacao')->get();
 
-        return view('produtos.index', compact('produtos', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses'));
+        return view('produtos.index', compact('produtos', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes'));
     }
 
     /**

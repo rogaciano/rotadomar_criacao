@@ -14,11 +14,15 @@ class Tecido extends Model
         'descricao',
         'referencia',
         'data_cadastro',
-        'ativo'
+        'ativo',
+        'ultima_consulta_estoque',
+        'quantidade_estoque'
     ];
 
     protected $casts = [
         'data_cadastro' => 'date',
+        'ultima_consulta_estoque' => 'datetime',
+        'quantidade_estoque' => 'decimal:2',
         'ativo' => 'boolean'
     ];
 

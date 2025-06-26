@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Routes para Tecidos
     Route::resource('tecidos', TecidoController::class);
+    Route::get('tecidos/{tecido}/atualizar-estoque', [TecidoController::class, 'atualizarEstoque'])->name('tecidos.atualizar-estoque');
+    Route::get('tecidos-atualizar-todos-estoques', [TecidoController::class, 'atualizarTodosEstoques'])->name('tecidos.atualizar-todos-estoques');
+    Route::get('debug-estoque/{referencia}', [TecidoController::class, 'debugEstoque'])->name('tecidos.debug-estoque');
     
     // Routes para Estilistas
     Route::resource('estilistas', EstilistaController::class);

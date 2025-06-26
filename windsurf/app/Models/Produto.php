@@ -74,4 +74,18 @@ class Produto extends Model
     {
         return $this->hasMany(Movimentacao::class, 'produto_id');
     }
+    
+    /**
+     * Retorna a localização atual do produto baseada na última movimentação
+     */
+    public function getLocalizacaoAtualAttribute()
+    {
+        // Busca a última movimentação do produto ordenada pelo ID mais recente
+        $ultimaMovimentacao = $this->movimentacoes()
+            ->orderBy('id', 'desc')
+            ->with('localizacao')
+            ->first();
+            
+        return $ultimaMovimentacao ? $ultimaMovimentacao->localizacao : null;
+    }
 }
