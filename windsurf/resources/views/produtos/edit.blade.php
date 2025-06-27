@@ -82,11 +82,11 @@
                                             <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
                                                 <div class="flex items-center gap-4">
                                                     <div class="flex-grow">
-                                                        <select name="tecidos[{{ $index }}][tecido_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                                        <select name="tecidos[{{ $index }}][tecido_id]" class="tecido-select select2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
                                                             <option value="">Selecione um tecido</option>
                                                             @foreach($tecidos as $tecido)
                                                                 <option value="{{ $tecido->id }}" {{ $produtoTecido->id == $tecido->id ? 'selected' : '' }} class="text-gray-700">
-                                                                    {{ $tecido->descricao }}
+                                                                    {{ $tecido->descricao }} @if($tecido->referencia) ({{ $tecido->referencia }}) @endif
                                                                 </option>
                                                             @endforeach
                                                         </select>
@@ -105,11 +105,11 @@
                                             <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
                                                 <div class="flex items-center gap-4">
                                                     <div class="flex-grow">
-                                                        <select name="tecidos[0][tecido_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                                        <select name="tecidos[0][tecido_id]" class="tecido-select select2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
                                                             <option value="">Selecione um tecido</option>
                                                             @foreach($tecidos as $tecido)
                                                                 <option value="{{ $tecido->id }}" class="text-gray-700">
-                                                                    {{ $tecido->descricao }}
+                                                                    {{ $tecido->descricao }} @if($tecido->referencia) ({{ $tecido->referencia }}) @endif
                                                                 </option>
                                                             @endforeach
                                                         </select>

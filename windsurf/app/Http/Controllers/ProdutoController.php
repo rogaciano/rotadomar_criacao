@@ -177,7 +177,7 @@ class ProdutoController extends Controller
             $produto->tecidos()->sync($tecidosData);
         }
 
-        return redirect()->route('produtos.index')
+        return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto criado com sucesso!');
     }
 
@@ -337,7 +337,7 @@ class ProdutoController extends Controller
             $produto->tecidos()->sync($tecidosData);
         }
 
-        return redirect()->route('produtos.index')
+        return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto atualizado com sucesso!');
     }
 

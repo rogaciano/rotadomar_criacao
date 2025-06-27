@@ -67,7 +67,11 @@
                                             <tbody class="bg-white divide-y divide-gray-200">
                                                 @foreach($produto->tecidos as $tecido)
                                                     <tr>
-                                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ $tecido->descricao }}</td>
+                                                        <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                            <a href="{{ route('tecidos.show', $tecido->id) }}" class="text-blue-600 hover:text-blue-900 hover:underline">
+                                                                {{ $tecido->descricao }}
+                                                            </a>
+                                                        </td>
                                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $tecido->referencia }}</td>
                                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $tecido->pivot->consumo ?? 'N/A' }}</td>
                                                     </tr>

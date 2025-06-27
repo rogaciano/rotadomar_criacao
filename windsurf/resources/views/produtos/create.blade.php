@@ -78,11 +78,11 @@
                                         <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
                                             <div class="flex items-center gap-4">
                                                 <div class="flex-grow">
-                                                    <select name="tecidos[0][tecido_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                                    <select name="tecidos[0][tecido_id]" class="tecido-select select2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
                                                         <option value="">Selecione um tecido</option>
                                                         @foreach($tecidos as $tecido)
                                                             <option value="{{ $tecido->id }}" class="text-gray-700">
-                                                                {{ $tecido->descricao }}
+                                                                {{ $tecido->descricao }} @if($tecido->referencia) ({{ $tecido->referencia }}) @endif
                                                             </option>
                                                         @endforeach
                                                     </select>
@@ -194,6 +194,20 @@
             const addButton = document.getElementById('add-tecido');
             let tecidoCount = 0;
 
+            // Inicializar Select2 para os selects existentes
+            $('.tecido-select').select2({
+                placeholder: "Selecione um tecido",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Ajustar estilo do Select2 para combinar com o Tailwind
+            $('.select2-container--default .select2-selection--single').css({
+                'height': '42px',
+                'padding': '6px 4px',
+                'border-color': '#d1d5db'
+            });
+
             // Show/hide remove buttons based on number of tecido items
             function updateRemoveButtons() {
                 const items = container.querySelectorAll('.tecido-item');
@@ -225,6 +239,9 @@
                 selects.forEach(select => {
                     const currentValue = select.value;
                     
+                    // Destruir a instância Select2 antes de modificar as opções
+                    $(select).select2('destroy');
+                    
                     // Clear all options except the first one (placeholder)
                     while (select.options.length > 1) {
                         select.remove(1);
@@ -242,6 +259,20 @@
                             select.add(newOption);
                         }
                     });
+                    
+                    // Reinicializar Select2 após modificar as opções
+                    $(select).select2({
+                        placeholder: "Selecione um tecido",
+                        allowClear: true,
+                        width: '100%'
+                    });
+                });
+                
+                // Ajustar estilo do Select2 para combinar com o Tailwind
+                $('.select2-container--default .select2-selection--single').css({
+                    'height': '42px',
+                    'padding': '6px 4px',
+                    'border-color': '#d1d5db'
                 });
             }
 
@@ -283,6 +314,20 @@
                 // Add change event listener to the new select
                 const newSelect = newItem.querySelector('select');
                 newSelect.addEventListener('change', updateSelectOptions);
+                
+                // Inicializar Select2 para o novo select
+                $(newSelect).select2({
+                    placeholder: "Selecione um tecido",
+                    allowClear: true,
+                    width: '100%'
+                });
+                
+                // Ajustar estilo do Select2 para combinar com o Tailwind
+                $('.select2-container--default .select2-selection--single').css({
+                    'height': '42px',
+                    'padding': '6px 4px',
+                    'border-color': '#d1d5db'
+                });
                 
                 // Add event listener to the new remove button
                 newItem.querySelector('.remove-tecido').addEventListener('click', function() {

@@ -49,6 +49,11 @@
                                     <p class="text-sm font-medium text-gray-500">Referência</p>
                                     <p class="mt-1 text-sm text-gray-900">{{ $tecido->referencia ?: 'Não informada' }}</p>
                                 </div>
+                                <div class="mb-4">
+                                    <p class="text-sm font-medium text-gray-500">Necessidade Total</p>
+                                    <p class="mt-1 text-sm text-gray-900 font-semibold">{{ number_format($tecido->necessidade_total, 2, ',', '.') }} metros</p>
+                                    <p class="text-xs text-gray-500 mt-1">Baseado no consumo planejado de todos os produtos</p>
+                                </div>
 
                                 <div class="mb-4">
                                     <p class="text-sm font-medium text-gray-500">Estoque</p>

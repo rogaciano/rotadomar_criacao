@@ -18,6 +18,14 @@ class EstoqueService
         $this->empresa = config('estoque.empresa');
         $this->token = config('estoque.token');
         $this->armazenador = config('estoque.armazenador');
+        
+        // Log das configurações para diagnóstico
+        Log::info('EstoqueService inicializado com as seguintes configurações:', [
+            'apiUrl' => $this->apiUrl,
+            'empresa' => $this->empresa,
+            'token' => $this->token ? 'Presente (não exibido por segurança)' : 'Ausente',
+            'armazenador' => $this->armazenador
+        ]);
     }
 
     /**

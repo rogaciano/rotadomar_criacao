@@ -21,6 +21,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/dados-por-ano', [DashboardController::class, 'getDadosPorAno'])->name('dashboard.dados-por-ano');
     
     // Rotas para gerenciamento de usuários (apenas para administradores)
     Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
@@ -61,6 +62,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([
         'movimentacoes' => 'movimentacao'
     ]);
+    
+    // Routes para Consultas
+    Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

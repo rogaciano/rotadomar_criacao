@@ -33,4 +33,20 @@ class Tecido extends Model
                     ->withPivot('consumo')
                     ->withTimestamps();
     }
+    
+    /**
+     * Calcula a necessidade total do tecido com base no consumo planejado de todos os produtos
+     * 
+     * @return float
+     */
+    public function getNecessidadeTotalAttribute()
+    {
+        $total = 0;
+        
+        foreach ($this->produtos as $produto) {
+            $total += $produto->quantidade * $produto->pivot->consumo;
+        }
+        
+        return $total;
+    }
 }

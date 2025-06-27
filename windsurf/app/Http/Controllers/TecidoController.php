@@ -45,7 +45,10 @@ class TecidoController extends Controller
         $orderDirection = $request->input('order_direction', 'asc');
         $query->orderBy($orderBy, $orderDirection);
 
-        $tecidos = $query->paginate(10);
+        // Carrega os produtos relacionados para calcular a necessidade total
+        $tecidos = $query->with(['produtos' => function($query) {
+            $query->select('produtos.id', 'produtos.quantidade');
+        }])->paginate(10);
 
         return view('tecidos.index', compact('tecidos'));
     }
