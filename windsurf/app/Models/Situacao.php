@@ -14,11 +14,13 @@ class Situacao extends Model
 
     protected $fillable = [
         'descricao',
-        'ativo'
+        'ativo',
+        'observacoes'
     ];
 
     protected $casts = [
-        'ativo' => 'boolean'
+        'ativo' => 'boolean',
+        'observacoes' => 'string'
     ];
 
     // Relacionamento com movimentacoes

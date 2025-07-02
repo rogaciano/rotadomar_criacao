@@ -39,6 +39,11 @@
                         </div>
 
                         <div class="mb-4">
+                            <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                            <textarea name="observacoes" id="observacoes" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacoes', $status->observacoes) }}</textarea>
+                        </div>
+
+                        <div class="mb-4">
                             <div class="flex items-start">
                                 <div class="flex items-center h-5">
                                     <input id="ativo" name="ativo" type="checkbox" value="1" {{ old('ativo', $status->ativo) ? 'checked' : '' }} class="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 rounded">

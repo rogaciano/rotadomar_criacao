@@ -27,6 +27,14 @@
                     </div>
                     
                     <div class="mb-4">
+                        <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Observações') }}</label>
+                        <textarea id="observacoes" name="observacoes" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('observacoes') }}</textarea>
+                        @error('observacoes')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <div class="mb-4">
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="ativo" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" checked>
                             <span class="ml-2 text-gray-700">Ativo</span>

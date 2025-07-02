@@ -48,9 +48,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Routes para Tipos
     Route::resource('tipos', TipoController::class);
+    Route::post('tipos/{tipo}/restore', [TipoController::class, 'restore'])->name('tipos.restore');
+    Route::delete('tipos/{tipo}/force-delete', [TipoController::class, 'forceDelete'])->name('tipos.force-delete');
     
     // Routes para Situações
     Route::resource('situacoes', SituacaoController::class);
+    Route::post('situacoes/{situacao}/restore', [SituacaoController::class, 'restore'])->name('situacoes.restore');
+    Route::delete('situacoes/{situacao}/force-delete', [SituacaoController::class, 'forceDelete'])->name('situacoes.force-delete');
     
     // Routes para Status
     Route::resource('status', StatusController::class);

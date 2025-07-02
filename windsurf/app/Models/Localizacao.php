@@ -10,17 +10,19 @@ use App\Models\User;
 class Localizacao extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $table = 'localizacoes';
 
     protected $fillable = [
         'nome_localizacao',
         'ativo',
-        'prazo'
+        'prazo',
+        'observacoes'
     ];
 
     protected $casts = [
-        'ativo' => 'boolean'
+        'ativo' => 'boolean',
+        'observacoes' => 'string'
     ];
 
     // Relacionamento com movimentacoes
@@ -28,7 +30,7 @@ class Localizacao extends Model
     {
         return $this->hasMany(Movimentacao::class);
     }
-    
+
     // Relacionamento com usuários
     public function usuarios()
     {

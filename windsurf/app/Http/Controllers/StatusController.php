@@ -23,14 +23,14 @@ class StatusController extends Controller
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
         }
-        
+
         // Incluir excluídos se solicitado
         if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
         }
 
         $statuses = $query->orderBy('descricao')->paginate(10);
-        
+
         return view('status.index', compact('statuses'));
     }
 
@@ -49,6 +49,7 @@ class StatusController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255|unique:status,descricao',
+            'observacoes' => 'nullable|string',
             'ativo' => 'boolean',
         ]);
 
@@ -66,7 +67,7 @@ class StatusController extends Controller
 
         Status::create($data);
 
-        return redirect()->route('status.index')
+        return redirect()->route('status.show', $data['id'])
             ->with('success', 'Status criado com sucesso!');
     }
 
@@ -97,6 +98,7 @@ class StatusController extends Controller
 
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255|unique:status,descricao,' . $id,
+            'observacoes' => 'nullable|string',
             'ativo' => 'boolean',
         ]);
 
@@ -114,7 +116,7 @@ class StatusController extends Controller
 
         $status->update($data);
 
-        return redirect()->route('status.index')
+        return redirect()->route('status.show', $status)
             ->with('success', 'Status atualizado com sucesso!');
     }
 

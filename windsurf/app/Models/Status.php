@@ -14,11 +14,12 @@ class Status extends Model
 
     protected $fillable = [
         'descricao',
-        'ativo'
+        'ativo',
+        'observacoes'
     ];
 
     protected $casts = [
-        'ativo' => 'boolean'
+        'ativo' => 'boolean',
     ];
 
     // Relacionamento com produtos

@@ -28,18 +28,23 @@
                     <!-- Informações do Status -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">ID</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $status->id }}</span>
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Descrição</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $status->descricao }}</span>
                             </div>
-                            
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Observações</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $status->observacoes }}</span>
+                            </div>
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Status</span>
                                 <span class="block mt-1">
@@ -54,27 +59,20 @@
                                     @endif
                                 </span>
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Criado em</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $status->created_at->format('d/m/Y H:i') }}</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $status->created_at ? $status->created_at->format('d/m/Y H:i') : 'N/A' }}</span>
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Última atualização</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $status->updated_at->format('d/m/Y H:i') }}</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $status->updated_at ? $status->updated_at->format('d/m/Y H:i') : 'N/A' }}</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Produtos que usam este status (quando houver) -->
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Produtos que usam este status</h3>
-                        
-                        <div class="text-gray-500 italic">
-                            Funcionalidade em desenvolvimento. Em breve você poderá visualizar todos os produtos que utilizam este status.
-                        </div>
-                    </div>
+
+
                 </div>
             </div>
         </div>

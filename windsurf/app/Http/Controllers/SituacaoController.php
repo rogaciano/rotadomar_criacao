@@ -49,6 +49,7 @@ class SituacaoController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255|unique:situacoes,descricao',
+            'observacoes' => 'nullable|string',
             'ativo' => 'boolean',
         ]);
 
@@ -58,10 +59,11 @@ class SituacaoController extends Controller
                 ->withInput();
         }
 
-        // Garantir que ativo seja false se não estiver presente
-        $data = $request->all();
-        if (!isset($data['ativo'])) {
-            $data['ativo'] = false;
+        // Garantir que ativo seja false se não estiver presente e limpar observações se vazio
+        $data = $request->only(['descricao', 'observacoes', 'ativo']);
+        $data['ativo'] = $request->has('ativo');
+        if (empty(trim($data['observacoes'] ?? ''))) {
+            $data['observacoes'] = null;
         }
 
         Situacao::create($data);
@@ -97,6 +99,7 @@ class SituacaoController extends Controller
 
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255|unique:situacoes,descricao,' . $id,
+            'observacoes' => 'nullable|string',
             'ativo' => 'boolean',
         ]);
 
@@ -106,10 +109,11 @@ class SituacaoController extends Controller
                 ->withInput();
         }
 
-        // Garantir que ativo seja false se não estiver presente
-        $data = $request->all();
-        if (!isset($data['ativo'])) {
-            $data['ativo'] = false;
+        // Garantir que ativo seja false se não estiver presente e limpar observações se vazio
+        $data = $request->only(['descricao', 'observacoes', 'ativo']);
+        $data['ativo'] = $request->has('ativo');
+        if (empty(trim($data['observacoes'] ?? ''))) {
+            $data['observacoes'] = null;
         }
 
         $situacao->update($data);

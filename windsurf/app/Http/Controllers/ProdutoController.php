@@ -30,8 +30,14 @@ class ProdutoController extends Controller
             $query->where('descricao', 'like', '%' . $request->descricao . '%');
         }
 
+        // Filtro por marca (aceita ID ou nome)
         if ($request->filled('marca_id')) {
             $query->where('marca_id', $request->marca_id);
+        } elseif ($request->filled('marca')) {
+            $marcaId = Marca::where('nome_marca', $request->marca)->value('id');
+            if ($marcaId) {
+                $query->where('marca_id', $marcaId);
+            }
         }
 
         if ($request->filled('tecido_id')) {
@@ -40,22 +46,46 @@ class ProdutoController extends Controller
             });
         }
 
+        // Filtro por estilista (aceita ID ou nome)
         if ($request->filled('estilista_id')) {
             $query->where('estilista_id', $request->estilista_id);
+        } elseif ($request->filled('estilista')) {
+            $estilistaId = Estilista::where('nome_estilista', $request->estilista)->value('id');
+            if ($estilistaId) {
+                $query->where('estilista_id', $estilistaId);
+            }
         }
 
+        // Filtro por grupo (aceita ID ou nome)
         if ($request->filled('grupo_id')) {
             $query->where('grupo_id', $request->grupo_id);
+        } elseif ($request->filled('grupo')) {
+            $grupoId = GrupoProduto::where('descricao', $request->grupo)->value('id');
+            if ($grupoId) {
+                $query->where('grupo_id', $grupoId);
+            }
         }
 
+        // Filtro por status (aceita ID ou nome)
         if ($request->filled('status_id')) {
             $query->where('status_id', $request->status_id);
+        } elseif ($request->filled('status')) {
+            $statusId = Status::where('descricao', $request->status)->value('id');
+            if ($statusId) {
+                $query->where('status_id', $statusId);
+            }
         }
 
-        // Filtro por localização
+        // Filtro por localização (aceita ID ou nome)
+        $localizacaoId = null;
+        
         if ($request->filled('localizacao_id')) {
             $localizacaoId = $request->localizacao_id;
-            
+        } elseif ($request->filled('localizacao')) {
+            $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $request->localizacao)->value('id');
+        }
+        
+        if ($localizacaoId) {
             // Obter IDs dos produtos cuja última movimentação está na localização selecionada
             $subquery = \App\Models\Movimentacao::select('produto_id')
                 ->where('localizacao_id', $localizacaoId)

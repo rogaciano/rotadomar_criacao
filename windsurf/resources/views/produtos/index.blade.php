@@ -38,11 +38,14 @@
                                 <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($marcas as $marca)
-                                        <option value="{{ $marca->id }}" {{ request('marca_id') == $marca->id ? 'selected' : '' }}>
+                                        <option value="{{ $marca->id }}" {{ (request('marca_id') == $marca->id || (request('marca') == $marca->nome_marca)) ? 'selected' : '' }}>
                                             {{ $marca->nome_marca }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(request('marca'))
+                                    <input type="hidden" name="marca" value="{{ request('marca') }}">
+                                @endif
                             </div>
 
                             <div>
@@ -62,11 +65,14 @@
                                 <select name="estilista_id" id="estilista_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($estilistas as $estilista)
-                                        <option value="{{ $estilista->id }}" {{ request('estilista_id') == $estilista->id ? 'selected' : '' }}>
+                                        <option value="{{ $estilista->id }}" {{ (request('estilista_id') == $estilista->id || (request('estilista') == $estilista->nome_estilista)) ? 'selected' : '' }}>
                                             {{ $estilista->nome_estilista }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(request('estilista'))
+                                    <input type="hidden" name="estilista" value="{{ request('estilista') }}">
+                                @endif
                             </div>
 
                             <div>
@@ -74,11 +80,14 @@
                                 <select name="grupo_id" id="grupo_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($grupos as $grupo)
-                                        <option value="{{ $grupo->id }}" {{ request('grupo_id') == $grupo->id ? 'selected' : '' }}>
+                                        <option value="{{ $grupo->id }}" {{ (request('grupo_id') == $grupo->id || (request('grupo') == $grupo->descricao)) ? 'selected' : '' }}>
                                             {{ $grupo->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(request('grupo'))
+                                    <input type="hidden" name="grupo" value="{{ request('grupo') }}">
+                                @endif
                             </div>
 
                             <div>
@@ -86,11 +95,14 @@
                                 <select name="status_id" id="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($statuses as $status)
-                                        <option value="{{ $status->id }}" {{ request('status_id') == $status->id ? 'selected' : '' }}>
+                                        <option value="{{ $status->id }}" {{ (request('status_id') == $status->id || (request('status') == $status->descricao)) ? 'selected' : '' }}>
                                             {{ $status->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(request('status'))
+                                    <input type="hidden" name="status" value="{{ request('status') }}">
+                                @endif
                             </div>
 
                             <div>
@@ -98,11 +110,14 @@
                                 <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($localizacoes as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ request('localizacao_id') == $localizacao->id ? 'selected' : '' }}>
+                                        <option value="{{ $localizacao->id }}" {{ (request('localizacao_id') == $localizacao->id || (request('localizacao') == $localizacao->nome_localizacao)) ? 'selected' : '' }}>
                                             {{ $localizacao->nome_localizacao }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if(request('localizacao'))
+                                    <input type="hidden" name="localizacao" value="{{ request('localizacao') }}">
+                                @endif
                             </div>
 
                             <div class="flex items-center mt-6">

@@ -112,7 +112,22 @@ class MarcaController extends Controller
      */
     public function show(Marca $marca)
     {
-        return view('marcas.show', compact('marca'));
+        // Load the brand with its products and related data
+        $marca->load(['produtos.estilista', 'produtos.grupoProduto', 'produtos.status']);
+        
+        // Get statistical data
+        $estatisticas = [
+            'totalProdutos' => $marca->total_produtos,
+            'produtosPorEstilista' => $marca->getProdutosPorEstilista(),
+            'produtosPorLocalizacao' => $marca->getProdutosPorLocalizacao(),
+            'produtosPorGrupo' => $marca->getProdutosPorGrupo(),
+            'produtosPorStatus' => $marca->getProdutosPorStatus()
+        ];
+        
+        return view('marcas.show', [
+            'marca' => $marca,
+            'estatisticas' => $estatisticas
+        ]);
     }
 
     /**

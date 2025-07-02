@@ -37,7 +37,7 @@ class TipoController extends Controller
      */
     public function create()
     {
-        //
+        return view('tipos.create');
     }
 
     /**
@@ -45,7 +45,16 @@ class TipoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'descricao' => 'required|string|max:255',
+            'observacoes' => 'nullable|string',
+            'ativo' => 'boolean'
+        ]);
+
+        \App\Models\Tipo::create($validated);
+
+        return redirect()->route('tipos.index')
+            ->with('success', 'Tipo criado com sucesso!');
     }
 
     /**
@@ -53,7 +62,8 @@ class TipoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $tipo = \App\Models\Tipo::withTrashed()->findOrFail($id);
+        return view('tipos.show', compact('tipo'));
     }
 
     /**
@@ -61,7 +71,8 @@ class TipoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $tipo = \App\Models\Tipo::findOrFail($id);
+        return view('tipos.edit', compact('tipo'));
     }
 
     /**
@@ -69,7 +80,17 @@ class TipoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'descricao' => 'required|string|max:255',
+            'observacoes' => 'nullable|string',
+            'ativo' => 'boolean'
+        ]);
+
+        $tipo = \App\Models\Tipo::findOrFail($id);
+        $tipo->update($validated);
+
+        return redirect()->route('tipos.index')
+            ->with('success', 'Tipo atualizado com sucesso!');
     }
 
     /**
@@ -77,6 +98,34 @@ class TipoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $tipo = \App\Models\Tipo::findOrFail($id);
+        $tipo->delete();
+
+        return redirect()->route('tipos.index')
+            ->with('success', 'Tipo excluído com sucesso!');
+    }
+    
+    /**
+     * Restore the specified resource from trash.
+     */
+    public function restore($id)
+    {
+        $tipo = \App\Models\Tipo::withTrashed()->findOrFail($id);
+        $tipo->restore();
+
+        return redirect()->route('tipos.index')
+            ->with('success', 'Tipo restaurado com sucesso!');
+    }
+    
+    /**
+     * Permanently delete the specified resource.
+     */
+    public function forceDelete($id)
+    {
+        $tipo = \App\Models\Tipo::withTrashed()->findOrFail($id);
+        $tipo->forceDelete();
+
+        return redirect()->route('tipos.index')
+            ->with('success', 'Tipo removido permanentemente com sucesso!');
     }
 }

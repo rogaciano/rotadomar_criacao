@@ -30,7 +30,7 @@
                     @endif
 
                     <!-- Formulário de Criação -->
-                    <form action="{{ route('estilistas.store') }}" method="POST">
+                    <form action="{{ route('estilistas.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4">
                             <label for="nome_estilista" class="block text-sm font-medium text-gray-700">Nome do Estilista</label>
@@ -60,6 +60,21 @@
                                 <label for="ativo" class="ml-2 block text-sm text-gray-900">Ativo</label>
                             </div>
                         </div>
+                        
+                        <!-- Campo de Upload de Foto -->
+                        <div class="mb-4">
+                            <label for="foto" class="block text-sm font-medium text-gray-700 mb-1">Foto do Estilista</label>
+                            <div class="mt-1 flex items-center">
+                                <input type="file" name="foto" id="foto" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</p>
+                            
+                            <!-- Preview da Imagem -->
+                            <div id="image-preview" class="mt-2 hidden">
+                                <p class="text-sm font-medium text-gray-700 mb-1">Prévia da Imagem:</p>
+                                <img id="preview" class="h-40 w-40 object-cover rounded-md border border-gray-200">
+                            </div>
+                        </div>
                         <div class="flex justify-end">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,6 +84,31 @@
                             </button>
                         </div>
                     </form>
+
+<!-- Script para visualização da imagem selecionada -->
+@push('scripts')
+<script>
+    document.getElementById('foto').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('image-preview');
+        
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+            }
+            
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = '';
+            previewContainer.classList.add('hidden');
+        }
+    });
+</script>
+@endpush
                 </div>
             </div>
         </div>

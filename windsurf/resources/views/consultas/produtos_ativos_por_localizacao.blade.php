@@ -4,6 +4,20 @@
             {{ __('Produtos Ativos por Localização') }}
         </h2>
     </x-slot>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <div class="flex items-center justify-center mb-4">
+                <svg class="animate-spin h-8 w-8 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-lg font-medium">Processando dados...</span>
+            </div>
+            <p class="text-gray-600 text-center">Esta consulta pode levar alguns instantes. Por favor, aguarde.</p>
+        </div>
+    </div>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -46,7 +60,11 @@
                                 @foreach($produtosPorLocalizacao as $item)
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">{{ $item['nome_localizacao'] }}</div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <a href="{{ route('produtos.index', ['localizacao' => $item['nome_localizacao']]) }}" class="text-indigo-600 hover:text-indigo-900 hover:underline">
+                                                {{ $item['nome_localizacao'] }}
+                                            </a>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm text-gray-900">{{ $item['total'] }}</div>
@@ -72,4 +90,18 @@
             </div>
         </div>
     </div>
+    <script>
+        // Hide loading overlay when page is fully loaded
+        window.addEventListener('load', function() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        });
+        
+        // Show loading overlay when navigating away
+        document.addEventListener('click', function(e) {
+            // Check if the clicked element is a link
+            if (e.target.tagName === 'A' || e.target.closest('a')) {
+                document.getElementById('loading-overlay').style.display = 'flex';
+            }
+        });
+    </script>
 </x-app-layout>
