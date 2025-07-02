@@ -218,6 +218,9 @@
                                                 Data Saída
                                             </th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Dias
+                                            </th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Comprometido
                                             </th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -250,6 +253,53 @@
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : 'N/A' }}
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                    @php
+                                                        $diasEntre = null;
+                                                        $prazoExcedido = false;
+                                                        $indexAtual = $loop->index;
+                                                        $movimentacaoAnterior = $indexAtual > 0 ? $movimentacoes[$indexAtual - 1] : null;
+                                                        
+                                                        if ($indexAtual === 0) {
+                                                            // Primeira linha, exibir zero
+                                                            $diasEntre = 0;
+                                                            $prazoExcedido = false;
+                                                        } elseif ($movimentacaoAnterior && $movimentacao->data_entrada && $movimentacaoAnterior->data_entrada) {
+                                                            // Calcular dias entre a movimentação atual e a anterior
+                                                            // Usando abs() para garantir que o valor seja sempre positivo
+                                                            $diasEntre = abs($movimentacao->data_entrada->diffInDays($movimentacaoAnterior->data_entrada));
+                                                            
+                                                            // Verificar se excede o prazo do setor anterior
+                                                            if ($movimentacaoAnterior->localizacao && $movimentacaoAnterior->localizacao->prazo) {
+                                                                $prazoExcedido = $diasEntre > $movimentacaoAnterior->localizacao->prazo;
+                                                                $prazoSetor = $movimentacaoAnterior->localizacao->prazo;
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    
+                                                    @if($diasEntre !== null)
+                                                        @if($indexAtual === 0)
+                                                            <div class="text-center">
+                                                                <span class="px-2 py-1 inline-block text-xs bg-gray-100 text-gray-600 rounded-full">0 dias</span>
+                                                            </div>
+                                                        @else
+                                                            <div class="text-center">
+                                                                <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
+                                                                    {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                                                </span>
+                                                                @if($prazoExcedido && isset($prazoSetor))
+                                                                    <div class="text-xs mt-1 text-red-600 font-medium">
+                                                                        (Prazo: {{ $prazoSetor }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+                                                    @else
+                                                        <div class="text-center">
+                                                            <span class="text-gray-400">-</span>
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">

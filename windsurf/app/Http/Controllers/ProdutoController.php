@@ -221,7 +221,7 @@ class ProdutoController extends Controller
         // Carregar as movimentações relacionadas a este produto
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
             ->with(['localizacao', 'tipo', 'situacao'])
-            ->orderBy('created_at', 'desc')
+            ->orderBy('data_entrada', 'asc')
             ->get();
 
         return view('produtos.show', compact('produto', 'movimentacoes'));
