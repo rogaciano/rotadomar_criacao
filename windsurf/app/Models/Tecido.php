@@ -49,4 +49,22 @@ class Tecido extends Model
         
         return $total;
     }
+
+    /**
+     * Relacionamento com estoques por cor
+     */
+    public function estoquesCores()
+    {
+        return $this->hasMany(TecidoCorEstoque::class);
+    }
+
+    /**
+     * Retorna a soma de todas as quantidades de estoque por cor
+     * 
+     * @return float
+     */
+    public function getTotalEstoquePorCoresAttribute()
+    {
+        return $this->estoquesCores()->sum('quantidade');
+    }
 }

@@ -56,12 +56,47 @@
                                 </div>
 
                                 <div class="mb-4">
-                                    <p class="text-sm font-medium text-gray-500">Estoque</p>
+                                    <p class="text-sm font-medium text-gray-500">Estoque Total</p>
                                     <p class="mt-1 text-sm text-gray-900">{{ isset($tecido->quantidade_estoque) ? number_format($tecido->quantidade_estoque, 2, ',', '.') : 'Não disponível' }}</p>
 
                                     <p class="mt-1 text-xs text-gray-500">Última atualização: {{ $tecido->ultima_consulta_estoque ? $tecido->ultima_consulta_estoque->format('d/m/Y H:i') : 'Não disponível' }}</p>
 
                                 </div>
+                                
+                                @if($tecido->estoquesCores && $tecido->estoquesCores->count() > 0)
+                                <div class="mb-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <p class="text-sm font-medium text-gray-500">Estoque por Cor</p>
+                                        <a href="{{ route('tecidos.estoque-por-cor', $tecido->id) }}" class="text-xs text-indigo-600 hover:text-indigo-900">Ver detalhes</a>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-100">
+                                                <tr>
+                                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
+                                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                                    <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                @foreach($tecido->estoquesCores as $estoqueCor)
+                                                <tr>
+                                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ $estoqueCor->cor }}</td>
+                                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{{ $estoqueCor->codigo_cor ?: '-' }}</td>
+                                                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-right">{{ number_format($estoqueCor->quantidade, 2, ',', '.') }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                            <tfoot class="bg-gray-50">
+                                                <tr>
+                                                    <td colspan="2" class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">Total</td>
+                                                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 text-right">{{ number_format($tecido->total_estoque_por_cores, 2, ',', '.') }}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                                @endif
 
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Status</p>

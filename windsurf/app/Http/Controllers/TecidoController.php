@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Tecido;
+use App\Models\TecidoCorEstoque;
 use App\Services\EstoqueService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -157,11 +158,7 @@ class TecidoController extends Controller
                 ->with('error', 'Este tecido não possui referência para consulta de estoque.');
         }
 
-
-        
         $resultado = $this->estoqueService->consultarEstoqueTecido($tecido->referencia);
-        
-
 
         if ($resultado && !empty($resultado)) {
             // O resultado é um array indexado pela referência do tecido
@@ -182,6 +179,30 @@ class TecidoController extends Controller
                 'quantidade_estoque' => $dadosEstoque['quantidade'],
                 'ultima_consulta_estoque' => $dadosEstoque['data_consulta']
             ]);
+
+            // Remover registros antigos de estoque por cor para este tecido
+            TecidoCorEstoque::where('tecido_id', $tecido->id)->delete();
+            
+            // Inserir novos registros de estoque por cor
+            if (isset($dadosEstoque['detalhes']) && is_array($dadosEstoque['detalhes'])) {
+                foreach ($dadosEstoque['detalhes'] as $cor => $tamanhos) {
+                    // Calcular quantidade total para esta cor
+                    $quantidadeCor = 0;
+                    foreach ($tamanhos as $tamanho => $quantidade) {
+                        $quantidadeCor += $quantidade;
+                    }
+                    
+                    // Criar registro de estoque por cor
+                    TecidoCorEstoque::create([
+                        'tecido_id' => $tecido->id,
+                        'cor' => $cor,
+                        'codigo_cor' => null, // Não temos esta informação no retorno da API
+                        'quantidade' => $quantidadeCor,
+                        'data_atualizacao' => $dadosEstoque['data_consulta'],
+                        'observacoes' => 'Tamanhos disponíveis: ' . implode(', ', array_keys($tamanhos))
+                    ]);
+                }
+            }
 
             return redirect()->route('tecidos.show', $id)
                 ->with('success', 'Estoque atualizado com sucesso. Quantidade total: ' . $dadosEstoque['quantidade']);
@@ -233,17 +254,49 @@ class TecidoController extends Controller
             if (!empty($estoqueDoTecido)) {
                 // Calcular a quantidade total
                 $quantidadeTotal = 0;
+                $estoquePorCor = [];
+                
+                // Agrupar estoque por cor
                 foreach ($estoqueDoTecido as $item) {
                     if (isset($item['Estoque'])) {
-                        $quantidadeTotal += (float)$item['Estoque'];
+                        $quantidade = (float)$item['Estoque'];
+                        $quantidadeTotal += $quantidade;
+                        
+                        // Obter a cor do item (ou usar valor padrão se não existir)
+                        $cor = isset($item['Cor']) ? $item['Cor'] : 'Não especificada';
+                        $codigoCor = isset($item['CodigoCor']) ? $item['CodigoCor'] : null;
+                        
+                        // Agrupar por cor
+                        if (!isset($estoquePorCor[$cor])) {
+                            $estoquePorCor[$cor] = [
+                                'quantidade' => 0,
+                                'codigo_cor' => $codigoCor
+                            ];
+                        }
+                        
+                        $estoquePorCor[$cor]['quantidade'] += $quantidade;
                     }
                 }
-
-                // Atualizar o tecido
+                
+                // Atualizar o tecido principal
                 $tecido->update([
                     'quantidade_estoque' => $quantidadeTotal,
                     'ultima_consulta_estoque' => $dataConsulta
                 ]);
+                
+                // Remover registros antigos de estoque por cor para este tecido
+                TecidoCorEstoque::where('tecido_id', $tecido->id)->delete();
+                
+                // Inserir novos registros de estoque por cor
+                foreach ($estoquePorCor as $cor => $dados) {
+                    TecidoCorEstoque::create([
+                        'tecido_id' => $tecido->id,
+                        'cor' => $cor,
+                        'codigo_cor' => $dados['codigo_cor'],
+                        'quantidade' => $dados['quantidade'],
+                        'data_atualizacao' => $dataConsulta
+                    ]);
+                }
 
                 $atualizados++;
             }
@@ -301,5 +354,121 @@ class TecidoController extends Controller
             'referencia_buscada' => $referencia,
             'config_armazenador' => config('estoque.armazenador')
         ]);        
+    }
+
+    /**
+     * Exibe o estoque de tecido por cor
+     */
+    public function estoquePorCor($id)
+    {
+        $tecido = Tecido::with('estoquesCores')->findOrFail($id);
+        
+        if ($tecido->estoquesCores->isEmpty()) {
+            return redirect()->route('tecidos.show', $id)
+                ->with('info', 'Não há informações de estoque por cor para este tecido.');
+        }
+        
+        return view('tecidos.estoque-por-cor', compact('tecido'));
+    }
+    
+    /**
+     * Exibe o formulário para importação de estoque por cores
+     */
+    public function importarEstoqueForm()
+    {
+        return view('tecidos.importar-estoque');
+    }
+    
+    /**
+     * Processa a importação de estoque por cores a partir de um arquivo CSV
+     */
+    public function importarEstoque(Request $request)
+    {
+        $request->validate([
+            'arquivo_csv' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+        
+        $arquivo = $request->file('arquivo_csv');
+        $caminho = $arquivo->getRealPath();
+        
+        $handle = fopen($caminho, 'r');
+        $cabecalho = fgetcsv($handle, 1000, ',');
+        
+        // Verificar se o cabeçalho tem os campos necessários
+        $camposNecessarios = ['referencia', 'cor', 'quantidade'];
+        $camposFaltando = array_diff($camposNecessarios, $cabecalho);
+        
+        if (!empty($camposFaltando)) {
+            return redirect()->route('tecidos.importar-estoque-form')
+                ->with('error', 'O arquivo CSV não contém todos os campos necessários: ' . implode(', ', $camposFaltando));
+        }
+        
+        $atualizados = 0;
+        $erros = [];
+        $dataAtualizacao = now();
+        
+        // Processar cada linha do CSV
+        while (($dados = fgetcsv($handle, 1000, ',')) !== false) {
+            $linha = array_combine($cabecalho, $dados);
+            
+            // Buscar o tecido pela referência
+            $tecido = Tecido::where('referencia', $linha['referencia'])->first();
+            
+            if (!$tecido) {
+                $erros[] = "Tecido com referência '{$linha['referencia']}' não encontrado.";
+                continue;
+            }
+            
+            // Verificar se a quantidade é válida
+            if (!is_numeric($linha['quantidade']) || $linha['quantidade'] < 0) {
+                $erros[] = "Quantidade inválida para o tecido '{$linha['referencia']}', cor '{$linha['cor']}'.";
+                continue;
+            }
+            
+            // Atualizar ou criar o registro de estoque por cor
+            $estoqueCor = TecidoCorEstoque::updateOrCreate(
+                [
+                    'tecido_id' => $tecido->id,
+                    'cor' => $linha['cor']
+                ],
+                [
+                    'quantidade' => $linha['quantidade'],
+                    'codigo_cor' => $linha['codigo_cor'] ?? null,
+                    'data_atualizacao' => $dataAtualizacao,
+                    'observacoes' => $linha['observacoes'] ?? null
+                ]
+            );
+            
+            $atualizados++;
+        }
+        
+        fclose($handle);
+        
+        // Atualizar a quantidade total de estoque para cada tecido afetado
+        $tecidosAfetados = TecidoCorEstoque::where('data_atualizacao', $dataAtualizacao)
+            ->select('tecido_id')
+            ->distinct()
+            ->get()
+            ->pluck('tecido_id');
+            
+        foreach ($tecidosAfetados as $tecidoId) {
+            $tecido = Tecido::find($tecidoId);
+            if ($tecido) {
+                $tecido->update([
+                    'quantidade_estoque' => $tecido->total_estoque_por_cores,
+                    'ultima_consulta_estoque' => $dataAtualizacao
+                ]);
+            }
+        }
+        
+        $mensagem = "Foram atualizados {$atualizados} registros de estoque por cor.";
+        if (!empty($erros)) {
+            $mensagem .= "\n\nErros encontrados:\n" . implode("\n", $erros);
+            return redirect()->route('tecidos.importar-estoque-form')
+                ->with('warning', $mensagem);
+        }
+        
+        return redirect()->route('tecidos.index')
+            ->with('success', $mensagem);
     }
 }
