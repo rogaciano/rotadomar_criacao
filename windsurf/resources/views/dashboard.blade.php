@@ -455,8 +455,8 @@
             const produtosAtivosPorEstilistaCtx = document.getElementById('produtosAtivosPorEstilistaChart').getContext('2d');
 
             // Preparar dados para o gráfico
-            const estilistaLabels = {!! json_encode($produtosAtivosPorEstilista->pluck('nome_estilista')->toArray()) !!};
-            const estilistaData = {!! json_encode($produtosAtivosPorEstilista->pluck('total')->toArray()) !!};
+            const estilistaLabels = {!! json_encode(is_object($produtosAtivosPorEstilista) && method_exists($produtosAtivosPorEstilista, 'pluck') ? $produtosAtivosPorEstilista->pluck('nome_estilista')->toArray() : collect($produtosAtivosPorEstilista)->pluck('nome_estilista')->toArray()) !!};
+            const estilistaData = {!! json_encode(is_object($produtosAtivosPorEstilista) && method_exists($produtosAtivosPorEstilista, 'pluck') ? $produtosAtivosPorEstilista->pluck('total')->toArray() : collect($produtosAtivosPorEstilista)->pluck('total')->toArray()) !!};
 
             // Preparar cores para cada barra (destaque para "Outros")
             const backgroundColors = estilistaLabels.map(label =>
