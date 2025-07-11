@@ -8,6 +8,7 @@ use App\Models\Localizacao;
 use App\Models\Tipo;
 use App\Models\Situacao;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MovimentacaoController extends Controller
 {
@@ -226,8 +227,11 @@ class MovimentacaoController extends Controller
         ]);
 
         $movimentacao->update($validated);
-
-        return redirect()->route('movimentacoes.index')
+        
+        // Redirecionar para a mesma página que estava antes
+        $page = $request->input('current_page') ? ['page' => $request->input('current_page')] : [];
+        
+        return redirect()->route('movimentacoes.index', $page)
             ->with('success', 'Movimentação atualizada com sucesso.');
     }
 
@@ -240,5 +244,131 @@ class MovimentacaoController extends Controller
 
         return redirect()->route('movimentacoes.index')
             ->with('success', 'Movimentação excluída com sucesso.');
+    }
+    
+    /**
+     * Gera um PDF da movimentação
+     */
+    public function generatePdf(Movimentacao $movimentacao)
+    {
+        $movimentacao->load(['produto', 'produto.marca', 'localizacao', 'tipo', 'situacao']);
+        
+        $pdf = PDF::loadView('movimentacoes.pdf', compact('movimentacao'))
+               ->setPaper('a4', 'landscape');
+        
+        return $pdf->stream('movimentacao-' . $movimentacao->id . '.pdf');
+    }
+    
+    /**
+     * Gera um PDF da lista de movimentações com os filtros aplicados
+     */
+    public function generateListPdf(Request $request)
+    {
+        // Replicar a lógica de filtros do método index
+        $query = Movimentacao::with(['produto', 'localizacao', 'tipo', 'situacao']);
+
+        // Aplicar filtros
+        if ($request->filled('referencia')) {
+            $query->whereHas('produto', function($q) use ($request) {
+                $q->where('referencia', 'like', '%' . $request->referencia . '%');
+            });
+        }
+
+        if ($request->filled('produto_id')) {
+            $query->where('produto_id', $request->produto_id);
+        }
+
+        if ($request->filled('tipo_id')) {
+            $query->where('tipo_id', $request->tipo_id);
+        }
+
+        if ($request->filled('situacao_id')) {
+            $query->where('situacao_id', $request->situacao_id);
+        }
+
+        if ($request->filled('localizacao_id')) {
+            $query->where('localizacao_id', $request->localizacao_id);
+        }
+
+        if ($request->filled('data_inicio') && $request->filled('data_fim')) {
+            $query->whereBetween('data_entrada', [$request->data_inicio, $request->data_fim]);
+        } elseif ($request->filled('data_inicio')) {
+            $query->where('data_entrada', '>=', $request->data_inicio);
+        } elseif ($request->filled('data_fim')) {
+            $query->where('data_entrada', '<=', $request->data_fim);
+        }
+
+        if ($request->filled('comprometido')) {
+            $query->where('comprometido', $request->comprometido);
+        }
+
+        // Ordenação
+        if ($request->filled('sort') && $request->filled('direction')) {
+            $sortField = $request->sort;
+            $direction = $request->direction;
+
+            // Mapear os campos de ordenação para as colunas corretas no banco de dados
+            switch ($sortField) {
+                case 'produto':
+                    $query->join('produtos', 'movimentacoes.produto_id', '=', 'produtos.id')
+                          ->orderBy('produtos.referencia', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                case 'localizacao':
+                    $query->join('localizacoes', 'movimentacoes.localizacao_id', '=', 'localizacoes.id')
+                          ->orderBy('localizacoes.nome_localizacao', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                case 'tipo':
+                    $query->join('tipos', 'movimentacoes.tipo_id', '=', 'tipos.id')
+                          ->orderBy('tipos.descricao', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                case 'situacao':
+                    $query->join('situacoes', 'movimentacoes.situacao_id', '=', 'situacoes.id')
+                          ->orderBy('situacoes.descricao', $direction)
+                          ->select('movimentacoes.*');
+                    break;
+                default:
+                    // Para campos diretos da tabela movimentacoes
+                    if (in_array($sortField, ['data_entrada', 'data_saida', 'data_devolucao', 'comprometido', 'observacao', 'created_at'])) {
+                        $query->orderBy($sortField, $direction);
+                    } else {
+                        // Ordenação padrão se o campo não for reconhecido
+                        $query->orderBy('id', 'desc');
+                    }
+                    break;
+            }
+        } else {
+            // Ordenação padrão se não houver parâmetros de ordenação
+            $query->orderBy('id', 'desc');
+        }
+        
+        // Verificar o número de registros
+        $totalRegistros = $query->count();
+        
+        // Se houver mais de 200 registros e não foi confirmado, retornar para confirmar
+        if ($totalRegistros > 200 && !$request->has('confirmar_pdf')) {
+            return redirect()->route('movimentacoes.index', $request->all())
+                ->with('warning', "Atenção: Existem {$totalRegistros} registros que serão incluídos no PDF. Isso pode tornar o documento muito grande e lento para carregar. Considere aplicar mais filtros para reduzir o número de registros.")
+                ->with('pdf_count', $totalRegistros);
+        }
+        
+        // Buscar todos os registros para o PDF (sem paginação)
+        $movimentacoes = $query->get();
+        
+        // Carregar os dados necessários para os filtros
+        $produtos = Produto::orderBy('referencia')->get();
+        $situacoes = Situacao::orderBy('descricao')->get();
+        $tipos = Tipo::orderBy('descricao')->get();
+        $localizacoes = Localizacao::orderBy('nome_localizacao')->get();
+        
+        // Gerar PDF
+        $pdf = PDF::loadView('movimentacoes.pdf_lista', compact('movimentacoes', 'produtos', 
+                                                             'situacoes', 'tipos', 'localizacoes', 
+                                                             'request', 'totalRegistros'))
+                ->setPaper('a4', 'landscape');
+        
+        return $pdf->stream('lista-movimentacoes.pdf');
     }
 }

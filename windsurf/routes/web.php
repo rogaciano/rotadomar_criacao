@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tecidos/{tecido}/atualizar-estoque', [TecidoController::class, 'atualizarEstoque'])->name('tecidos.atualizar-estoque');
     Route::get('tecidos-atualizar-todos-estoques', [TecidoController::class, 'atualizarTodosEstoques'])->name('tecidos.atualizar-todos-estoques');
     Route::get('tecidos/{tecido}/estoque-por-cor', [TecidoController::class, 'estoquePorCor'])->name('tecidos.estoque-por-cor');
+    Route::post('tecidos/{tecido}/salvar-quantidades', [TecidoController::class, 'salvarQuantidades'])->name('tecidos.salvar-quantidades');
     Route::get('tecidos-importar-estoque', [TecidoController::class, 'importarEstoqueForm'])->name('tecidos.importar-estoque-form');
     Route::post('tecidos-importar-estoque', [TecidoController::class, 'importarEstoque'])->name('tecidos.importar-estoque');
     Route::get('debug-estoque/{referencia}', [TecidoController::class, 'debugEstoque'])->name('tecidos.debug-estoque');
@@ -64,11 +65,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Routes para Produtos
     Route::resource('produtos', ProdutoController::class);
+    Route::get('produtos/{id}/pdf', [ProdutoController::class, 'generatePdf'])->name('produtos.pdf');
     
     // Routes para Movimentações
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([
         'movimentacoes' => 'movimentacao'
     ]);
+    Route::get('movimentacoes/{movimentacao}/pdf', [MovimentacaoController::class, 'generatePdf'])->name('movimentacoes.pdf');
+    Route::get('movimentacoes-lista-pdf', [MovimentacaoController::class, 'generateListPdf'])->name('movimentacoes.lista.pdf');
     
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');

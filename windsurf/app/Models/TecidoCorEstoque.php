@@ -14,12 +14,14 @@ class TecidoCorEstoque extends Model
         'cor',
         'codigo_cor',
         'quantidade',
+        'quantidade_pretendida',
         'data_atualizacao',
         'observacoes'
     ];
 
     protected $casts = [
         'quantidade' => 'decimal:2',
+        'quantidade_pretendida' => 'decimal:2',
         'data_atualizacao' => 'date'
     ];
 

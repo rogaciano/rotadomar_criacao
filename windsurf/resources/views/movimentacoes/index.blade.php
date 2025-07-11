@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12 bg-gray-900">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="w-[98%] mx-auto px-2">
             <!-- Botões de ação -->
             <div class="flex flex-wrap gap-2 mb-4">
                 <a href="{{ route('movimentacoes.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -14,6 +14,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     Nova Movimentação
+                </a>
+                <!-- Botão para gerar PDF da lista -->
+                <a href="{{ route('movimentacoes.lista.pdf', request()->query()) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Exportar PDF
                 </a>
             </div>
 
@@ -113,13 +120,26 @@
                     <p>{{ session('error') }}</p>
                 </div>
             @endif
+            
+            @if(session('warning') && session('pdf_count'))
+                <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                    <p class="font-medium">{{ session('warning') }}</p>
+                    <div class="mt-2 flex items-center">
+                        <p>Deseja continuar mesmo assim?</p>
+                        <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['confirmar_pdf' => 1])) }}" 
+                           class="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-xs">
+                            Sim, gerar PDF com {{ session('pdf_count') }} registros
+                        </a>
+                    </div>
+                </div>
+            @endif
 
                     <!-- Tabela de Movimentações -->
-                    <div class="relative overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
+                    <div class="relative overflow-hidden">
+                        <table class="w-full divide-y divide-gray-200 text-sm table-fixed">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'produto', 'direction' => request('sort') == 'produto' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Produto
                                             @if(request('sort') == 'produto')
@@ -133,7 +153,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'localizacao', 'direction' => request('sort') == 'localizacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Localização
                                             @if(request('sort') == 'localizacao')
@@ -147,7 +167,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'tipo', 'direction' => request('sort') == 'tipo' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Tipo
                                             @if(request('sort') == 'tipo')
@@ -161,7 +181,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'situacao', 'direction' => request('sort') == 'situacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Situação
                                             @if(request('sort') == 'situacao')
@@ -175,7 +195,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_entrada', 'direction' => request('sort') == 'data_entrada' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Data Entrada
                                             @if(request('sort') == 'data_entrada')
@@ -189,7 +209,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_saida', 'direction' => request('sort') == 'data_saida' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Data Saída
                                             @if(request('sort') == 'data_saida')
@@ -203,7 +223,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_devolucao', 'direction' => request('sort') == 'data_devolucao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Data Devolução
                                             @if(request('sort') == 'data_devolucao')
@@ -217,7 +237,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'comprometido', 'direction' => request('sort') == 'comprometido' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Comprometido
                                             @if(request('sort') == 'comprometido')
@@ -231,7 +251,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'observacao', 'direction' => request('sort') == 'observacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Observação
                                             @if(request('sort') == 'observacao')
@@ -245,7 +265,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => request('sort') == 'created_at' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Criado em
                                             @if(request('sort') == 'created_at')
@@ -267,22 +287,25 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($movimentacoes as $movimentacao)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
                                             @if($movimentacao->produto_id)
-                                                {{ $movimentacao->produto->referencia }} - {{ $movimentacao->produto->descricao }}
+                                                <div>{{ $movimentacao->produto->referencia }}</div>
+                                                <div class="text-gray-500 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
+                                                    {{ Str::limit($movimentacao->produto->descricao, 25, '...') }}
+                                                </div>
                                             @else
                                                 <span class="text-red-500">Produto não encontrado</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             {{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->tipo && $movimentacao->tipo->descricao == 'Entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                 {{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             @if($movimentacao->situacao)
                                                 <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 text-gray-800' }}">
                                                     {{ $movimentacao->situacao->descricao ?? 'N/A' }}
@@ -293,36 +316,42 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             {{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             {{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y H:i') : 'N/A' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             {{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y H:i') : 'N/A' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
                                                 {{ $movimentacao->comprometido ? 'Sim' : 'Não' }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $movimentacao->observacao ?: 'N/A' }}
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 max-w-[120px] overflow-hidden">
+                                            @if($movimentacao->observacao)
+                                                <div class="truncate" title="{{ $movimentacao->observacao }}">
+                                                    {{ Str::limit($movimentacao->observacao, 20, '...') }}
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             {{ $movimentacao->created_at ? $movimentacao->created_at->format('d/m/Y H:i') : 'N/A' }}
                                         </td>
-                                        <td class="sticky right-0 px-6 py-4 whitespace-nowrap text-right text-sm font-medium bg-white shadow-md z-10">
-                                            <div class="flex justify-end space-x-2">
+                                        <td class="sticky right-0 px-3 py-2 whitespace-nowrap text-right text-xs font-medium bg-white shadow-md z-10">
+                                            <div class="flex justify-end space-x-1">
                                                 <a href="{{ route('movimentacoes.show', $movimentacao) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                 </a>
                                                 <a href="{{ route('movimentacoes.edit', $movimentacao) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </a>
@@ -330,7 +359,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-100">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
                                                     </button>

@@ -12,6 +12,7 @@
                     <form action="{{ route('movimentacoes.update', $movimentacao) }}" method="POST">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" name="current_page" value="{{ request()->query('page') }}">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Produto -->

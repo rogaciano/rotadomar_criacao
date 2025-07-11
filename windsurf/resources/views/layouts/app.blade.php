@@ -44,6 +44,31 @@
                 </header>
             @endisset
 
+            <!-- Flash Messages -->
+            <div class="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+                @if(session('success'))
+                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 relative" role="alert">
+                        <p>{{ session('success') }}</p>
+                        <button type="button" class="absolute top-0 right-0 mt-3 mr-3 text-green-700 hover:text-green-900" onclick="this.parentElement.style.display='none'">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 relative" role="alert">
+                        <p>{{ session('error') }}</p>
+                        <button type="button" class="absolute top-0 right-0 mt-3 mr-3 text-red-700 hover:text-red-900" onclick="this.parentElement.style.display='none'">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                @endif
+            </div>
+            
             <!-- Page Content -->
             <main>
                 {{ $slot }}

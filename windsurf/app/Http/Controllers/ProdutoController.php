@@ -11,6 +11,7 @@ use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProdutoController extends Controller
 {
@@ -390,5 +391,21 @@ class ProdutoController extends Controller
 
         return redirect()->route('produtos.index')
             ->with('success', $message);
+    }
+    
+    /**
+     * Gera um PDF do produto
+     */
+    public function generatePdf(string $id)
+    {
+        $produto = Produto::with(['marca', 'grupoProduto', 'status', 'estilista', 'tecidos', 
+            'movimentacoes' => function($query) {
+                $query->with(['localizacao', 'tipo', 'situacao'])->latest('data_entrada');
+            }])->findOrFail($id);
+        
+        $pdf = PDF::loadView('produtos.pdf', compact('produto'))
+               ->setPaper('a4', 'landscape');
+        
+        return $pdf->stream('produto-' . $produto->referencia . '.pdf');
     }
 }

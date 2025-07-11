@@ -372,6 +372,113 @@ class TecidoController extends Controller
     }
     
     /**
+     * Salva as quantidades pretendidas para as cores selecionadas
+     */
+    public function salvarQuantidades(Request $request, $id)
+    {
+        $tecido = Tecido::findOrFail($id);
+        
+        // Log para depuração - dados recebidos
+        \Log::debug('Dados recebidos no salvarQuantidades:', $request->all());
+        
+        // Validar os dados recebidos
+        $validator = Validator::make($request->all(), [
+            'cores' => 'required|array',
+            'cores.*.quantidade_pretendida' => 'nullable|numeric|min:0',
+        ]);
+        
+        if ($validator->fails()) {
+            \Log::debug('Validação falhou:', $validator->errors()->toArray());
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        
+        $coresSelecionadas = 0;
+        $coresAtualizadas = 0;
+        $logAtualizacoes = [];
+        
+        // Processar apenas as cores que foram selecionadas
+        foreach ($request->cores as $estoqueCorId => $dados) {
+            // Verificar se a cor foi selecionada
+            if (!isset($dados['selecionada']) || $dados['selecionada'] != 1) {
+                \Log::debug("Cor ID {$estoqueCorId} não selecionada, pulando.");
+                continue;
+            }
+            
+            $coresSelecionadas++;
+            \Log::debug("Cor ID {$estoqueCorId} selecionada.");
+            
+            // Verificar se a quantidade pretendida foi informada
+            if (!isset($dados['quantidade_pretendida']) || $dados['quantidade_pretendida'] == '') {
+                \Log::debug("Cor ID {$estoqueCorId} sem quantidade pretendida informada, pulando.");
+                continue;
+            }
+            
+            \Log::debug("Cor ID {$estoqueCorId} com quantidade pretendida: {$dados['quantidade_pretendida']}");
+            
+            // Buscar o registro de estoque da cor
+            $estoqueCor = TecidoCorEstoque::find($estoqueCorId);
+            
+            if (!$estoqueCor) {
+                \Log::debug("Cor ID {$estoqueCorId} não encontrada no banco de dados.");
+                continue;
+            }
+            
+            if ($estoqueCor->tecido_id != $tecido->id) {
+                \Log::debug("Cor ID {$estoqueCorId} não pertence ao tecido ID {$tecido->id}.");
+                continue; // Ignorar se o registro não pertencer ao tecido
+            }
+            
+            // Atualizar a quantidade pretendida
+            $valorAntigo = $estoqueCor->quantidade_pretendida;
+            $estoqueCor->quantidade_pretendida = $dados['quantidade_pretendida'];
+            
+            try {
+                $salvou = $estoqueCor->save();
+                \Log::debug("Salvamento da cor ID {$estoqueCorId}: " . ($salvou ? 'Sucesso' : 'Falha'));
+                
+                // Verificar se o valor foi realmente salvo
+                $estoqueCor->refresh();
+                \Log::debug("Valor após salvar: {$estoqueCor->quantidade_pretendida}, Valor esperado: {$dados['quantidade_pretendida']}");
+                
+                $logAtualizacoes[] = [
+                    'id' => $estoqueCorId,
+                    'cor' => $estoqueCor->cor,
+                    'valor_antigo' => $valorAntigo,
+                    'valor_novo' => $estoqueCor->quantidade_pretendida,
+                    'valor_esperado' => $dados['quantidade_pretendida'],
+                    'salvou' => $salvou
+                ];
+                
+                $coresAtualizadas++;
+            } catch (\Exception $e) {
+                \Log::error("Erro ao salvar cor ID {$estoqueCorId}: " . $e->getMessage());
+            }
+        }
+        
+        \Log::debug('Resumo das atualizações:', [
+            'cores_selecionadas' => $coresSelecionadas,
+            'cores_atualizadas' => $coresAtualizadas,
+            'detalhes' => $logAtualizacoes
+        ]);
+        
+        
+        if ($coresSelecionadas == 0) {
+            return redirect()->route('tecidos.estoque-por-cor', $tecido->id)
+                ->with('warning', 'Nenhuma cor foi selecionada.');
+        }
+        
+        if ($coresAtualizadas == 0) {
+            return redirect()->route('tecidos.estoque-por-cor', $tecido->id)
+                ->with('warning', 'Nenhuma quantidade pretendida foi informada para as cores selecionadas.');
+        }
+        
+        return redirect()->route('tecidos.estoque-por-cor', $tecido->id)
+            ->with('success', "Quantidades pretendidas atualizadas para {$coresAtualizadas} cores.");
+    }
+    
+    /**
      * Exibe o formulário para importação de estoque por cores
      */
     public function importarEstoqueForm()
