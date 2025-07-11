@@ -98,7 +98,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">ROTA DO AMAR - DETALHES DA MOVIMENTAÇÃO #{{ $movimentacao->id }}</div>
+            <div class="title">ROTA DO AMAR - DETALHES DA MOVIMENTAÇÃO #{{ $movimentacao->id ?? 'N/A' }}</div>
             <div class="subtitle">Data do relatório: {{ now()->format('d/m/Y H:i') }}</div>
         </div>
 
@@ -108,25 +108,25 @@
                     <div class="section-title">Informações do Produto</div>
                     <div class="info-row">
                         <span class="info-label">Referência:</span>
-                        <span class="info-value">{{ $movimentacao->produto->referencia }}</span>
+                        <span class="info-value">{{ $movimentacao->produto ? $movimentacao->produto->referencia : 'N/A' }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Descrição:</span>
-                        <span class="info-value">{{ $movimentacao->produto->descricao }}</span>
+                        <span class="info-value">{{ $movimentacao->produto ? $movimentacao->produto->descricao : 'N/A' }}</span>
                     </div>
-                    @if($movimentacao->produto->marca)
+                    @if($movimentacao->produto && $movimentacao->produto->marca)
                     <div class="info-row">
                         <span class="info-label">Marca:</span>
                         <span class="info-value">{{ $movimentacao->produto->marca->nome_marca }}</span>
                     </div>
                     @endif
-                    @if($movimentacao->produto->grupoProduto)
+                    @if($movimentacao->produto && $movimentacao->produto->grupoProduto)
                     <div class="info-row">
                         <span class="info-label">Grupo:</span>
                         <span class="info-value">{{ $movimentacao->produto->grupoProduto->nome_grupo }}</span>
                     </div>
                     @endif
-                    @if($movimentacao->produto->status)
+                    @if($movimentacao->produto && $movimentacao->produto->status)
                     <div class="info-row">
                         <span class="info-label">Status:</span>
                         <span class="info-value">{{ $movimentacao->produto->status->descricao }}</span>
@@ -134,7 +134,7 @@
                     @endif
                     <div class="info-row">
                         <span class="info-label">Quantidade:</span>
-                        <span class="info-value">{{ $movimentacao->produto->quantidade }}</span>
+                        <span class="info-value">{{ $movimentacao->produto ? $movimentacao->produto->quantidade : 'N/A' }}</span>
                     </div>
                 </div>
             </div>
@@ -144,11 +144,11 @@
                     <div class="section-title">Informações da Movimentação</div>
                     <div class="info-row">
                         <span class="info-label">ID:</span>
-                        <span class="info-value">{{ $movimentacao->id }}</span>
+                        <span class="info-value">{{ $movimentacao->id ?? 'N/A' }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Data de Entrada:</span>
-                        <span class="info-value">{{ $movimentacao->data_entrada->format('d/m/Y H:i') }}</span>
+                        <span class="info-value">{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Data de Saída:</span>
@@ -168,11 +168,11 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Criado em:</span>
-                        <span class="info-value">{{ $movimentacao->created_at->format('d/m/Y H:i') }}</span>
+                        <span class="info-value">{{ $movimentacao->created_at ? $movimentacao->created_at->format('d/m/Y H:i') : 'N/A' }}</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Atualizado em:</span>
-                        <span class="info-value">{{ $movimentacao->updated_at->format('d/m/Y H:i') }}</span>
+                        <span class="info-value">{{ $movimentacao->updated_at ? $movimentacao->updated_at->format('d/m/Y H:i') : 'N/A' }}</span>
                     </div>
                 </div>
             </div>

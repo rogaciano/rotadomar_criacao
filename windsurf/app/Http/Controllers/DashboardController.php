@@ -93,6 +93,26 @@ class DashboardController extends Controller
                                     ->latest()
                                     ->take(5)
                                     ->get();
+                                    
+        // Produtos do setor do usuário autenticado
+        $produtosDoSetor = collect();
+        $localizacaoUsuario = auth()->user()->localizacao_id;
+        
+        if ($localizacaoUsuario) {
+            // Busca produtos que estão na localização do usuário (setor) através da última movimentação
+            $produtosDoSetor = Produto::whereHas('movimentacoes', function($query) use ($localizacaoUsuario) {
+                $query->where('localizacao_id', $localizacaoUsuario)
+                      ->whereIn('id', function($subquery) {
+                          $subquery->selectRaw('MAX(id)')
+                                   ->from('movimentacoes')
+                                   ->groupBy('produto_id');
+                      });
+            })
+            ->with(['marca', 'status', 'estilista', 'grupoProduto'])
+            ->latest()
+            ->take(10)
+            ->get();
+        }
 
 
         // Estatísticas por tipo de movimentação
@@ -170,7 +190,8 @@ class DashboardController extends Controller
             'estatisticasPorTipo',
             'produtosAtivosPorEstilista',
             'produtosAtivosPorMes',
-            'mesesLabels'
+            'mesesLabels',
+            'produtosDoSetor'
         ));
     }
     

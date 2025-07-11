@@ -31,11 +31,11 @@
             </div>
         </div>
 
-        <!-- Email Address -->
+        <!-- Login (Email ou Nome) -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <input id="email" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" style="position: relative; z-index: 20;" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <x-input-label for="login" :value="__('Email ou Nome')" />
+            <input id="login" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" type="text" name="login" value="{{ old('login') }}" required autofocus autocomplete="username" style="position: relative; z-index: 20;" />
+            <x-input-error :messages="$errors->get('login')" class="mt-2" />
         </div>
 
         <!-- Password -->
