@@ -178,53 +178,6 @@
             </div>
         </div>
 
-        <div class="info-section">
-            <div class="section-title">Histórico de Movimentações</div>
-            @if(count($produto->movimentacoes) > 0)
-            <table style="width: 100%">
-                <thead>
-                    <tr>
-                        <th width="5%">ID</th>
-                        <th width="15%">Data Entrada</th>
-                        <th width="15%">Data Saída</th>
-                        <th width="18%">Localização</th>
-                        <th width="12%">Tipo</th>
-                        <th width="15%">Situação</th>
-                        <th width="20%">Observação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php
-                        $movimentacoesOrdenadas = collect();
-                        if ($produto->movimentacoes && $produto->movimentacoes->count() > 0) {
-                            $movimentacoesOrdenadas = $produto->movimentacoes->filter(function($mov) {
-                                return $mov && $mov->data_entrada;
-                            })->sortByDesc(function($mov) {
-                                return $mov->data_entrada;
-                            })->take(15);
-                        }
-                    @endphp
-                    @foreach($movimentacoesOrdenadas as $movimentacao)
-                    <tr>
-                        <td>{{ $movimentacao->id ?? 'N/A' }}</td>
-                        <td>{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}</td>
-                        <td>{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y H:i') : '-' }}</td>
-                        <td>{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}</td>
-                        <td>{{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}</td>
-                        <td>{{ $movimentacao->situacao ? $movimentacao->situacao->descricao : 'N/A' }}</td>
-                        <td>{{ $movimentacao->observacao ? Str::limit($movimentacao->observacao, 40, '...') : '-' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div style="font-size: 10px; margin-top: 5px; font-style: italic; text-align: right;">
-                * Mostrando as 15 movimentações mais recentes
-            </div>
-            @else
-            <p>Nenhuma movimentação registrada para este produto.</p>
-            @endif
-        </div>
-
         @if($produto->tecidos && count($produto->tecidos) > 0)
         <div class="info-section">
             <div class="section-title">Tecidos Associados</div>
@@ -250,6 +203,50 @@
             </table>
         </div>
         @endif
+
+        <div class="info-section">
+            <div class="section-title">Histórico de Movimentações</div>
+            @if(count($produto->movimentacoes) > 0)
+            <table style="width: 100%">
+                <thead>
+                    <tr>
+                        <th width="5%">ID</th>
+                        <th width="15%">Data Entrada</th>
+                        <th width="15%">Data Saída</th>
+                        <th width="18%">Localização</th>
+                        <th width="12%">Tipo</th>
+                        <th width="15%">Situação</th>
+                        <th width="20%">Observação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        $movimentacoesOrdenadas = collect();
+                        if ($produto->movimentacoes && $produto->movimentacoes->count() > 0) {
+                            $movimentacoesOrdenadas = $produto->movimentacoes->filter(function($mov) {
+                                return $mov && $mov->data_entrada;
+                            })->sortByDesc(function($mov) {
+                                return $mov->data_entrada;
+                            });
+                        }
+                    @endphp
+                    @foreach($movimentacoesOrdenadas as $movimentacao)
+                    <tr>
+                        <td>{{ $movimentacao->id ?? 'N/A' }}</td>
+                        <td>{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}</td>
+                        <td>{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y H:i') : '-' }}</td>
+                        <td>{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}</td>
+                        <td>{{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}</td>
+                        <td>{{ $movimentacao->situacao ? $movimentacao->situacao->descricao : 'N/A' }}</td>
+                        <td>{{ $movimentacao->observacao ? Str::limit($movimentacao->observacao, 40, '...') : '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+            <p>Nenhuma movimentação registrada para este produto.</p>
+            @endif
+        </div>
 
         <div class="footer">
             <p>ROTA DO AMAR - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
