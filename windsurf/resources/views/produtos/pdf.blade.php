@@ -194,15 +194,25 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($produto->movimentacoes->sortByDesc('data_entrada')->take(15) as $movimentacao)
+                    @php
+                        $movimentacoesOrdenadas = collect();
+                        if ($produto->movimentacoes && $produto->movimentacoes->count() > 0) {
+                            $movimentacoesOrdenadas = $produto->movimentacoes->filter(function($mov) {
+                                return $mov && $mov->data_entrada;
+                            })->sortByDesc(function($mov) {
+                                return $mov->data_entrada;
+                            })->take(15);
+                        }
+                    @endphp
+                    @foreach($movimentacoesOrdenadas as $movimentacao)
                     <tr>
-                        <td>{{ $movimentacao->id }}</td>
-                        <td>{{ $movimentacao->data_entrada->format('d/m/Y H:i') }}</td>
+                        <td>{{ $movimentacao->id ?? 'N/A' }}</td>
+                        <td>{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}</td>
                         <td>{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y H:i') : '-' }}</td>
-                        <td>{{ $movimentacao->localizacao->nome_localizacao }}</td>
-                        <td>{{ $movimentacao->tipo->descricao }}</td>
-                        <td>{{ $movimentacao->situacao->descricao }}</td>
-                        <td>{{ Str::limit($movimentacao->observacao, 40, '...') ?: '-' }}</td>
+                        <td>{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}</td>
+                        <td>{{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}</td>
+                        <td>{{ $movimentacao->situacao ? $movimentacao->situacao->descricao : 'N/A' }}</td>
+                        <td>{{ $movimentacao->observacao ? Str::limit($movimentacao->observacao, 40, '...') : '-' }}</td>
                     </tr>
                     @endforeach
                 </tbody>

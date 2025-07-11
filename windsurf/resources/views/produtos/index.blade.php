@@ -50,7 +50,7 @@
 
                             <div>
                                 <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido</label>
-                                <select name="tecido_id" id="tecido_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <select name="tecido_id" id="tecido_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($tecidos as $tecido)
                                         <option value="{{ $tecido->id }}" {{ request('tecido_id') == $tecido->id ? 'selected' : '' }}>
@@ -62,7 +62,7 @@
 
                             <div>
                                 <label for="estilista_id" class="block text-sm font-medium text-gray-700 mb-1">Estilista</label>
-                                <select name="estilista_id" id="estilista_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <select name="estilista_id" id="estilista_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($estilistas as $estilista)
                                         <option value="{{ $estilista->id }}" {{ (request('estilista_id') == $estilista->id || (request('estilista') == $estilista->nome_estilista)) ? 'selected' : '' }}>
@@ -77,7 +77,7 @@
 
                             <div>
                                 <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-                                <select name="grupo_id" id="grupo_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <select name="grupo_id" id="grupo_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($grupos as $grupo)
                                         <option value="{{ $grupo->id }}" {{ (request('grupo_id') == $grupo->id || (request('grupo') == $grupo->descricao)) ? 'selected' : '' }}>
@@ -107,7 +107,7 @@
 
                             <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                                <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($localizacoes as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ (request('localizacao_id') == $localizacao->id || (request('localizacao') == $localizacao->nome_localizacao)) ? 'selected' : '' }}>
@@ -282,4 +282,23 @@
             });
         });
     </script>
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Inicializar Select2 nos filtros
+        $('.select2').select2({
+            placeholder: "Selecione uma opção",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Ajustar estilo do Select2 para combinar com Tailwind
+        $('.select2-container--default .select2-selection--single').css({
+            'height': '38px',
+            'padding': '5px'
+        });
+    });
+</script>
+@endpush
+
 </x-app-layout>

@@ -312,8 +312,10 @@
                                                         {{ $movimentacao->comprometido ? 'Sim' : 'Não' }}
                                                     </span>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {{ $movimentacao->observacao ?? 'N/A' }}
+                                                <td class="px-6 py-4 text-sm text-gray-500">
+                                                    <div class="max-w-[150px] max-h-[50px] overflow-hidden" title="{{ $movimentacao->observacao ?? 'N/A' }}">
+                                                        <div class="truncate">{{ $movimentacao->observacao ?? 'N/A' }}</div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach
