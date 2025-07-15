@@ -142,6 +142,15 @@ class ProdutoController extends Controller
             $request->merge(['referencia' => trim($request->referencia)]);
         }
 
+        $messages = [
+            'referencia.unique' => 'Atenção: Esta referência já está cadastrada no sistema. Por favor, utilize outra referência.',
+            'tecidos.required' => 'É necessário adicionar pelo menos um tecido ao produto.',
+            'tecidos.min' => 'É necessário adicionar pelo menos um tecido ao produto.',
+            'tecidos.*.tecido_id.required' => 'Selecione um tecido válido.',
+            'tecidos.*.tecido_id.exists' => 'Um dos tecidos selecionados não existe no sistema.',
+            'tecidos.*.consumo.min' => 'O consumo do tecido deve ser maior que zero.',
+        ];
+        
         $validator = Validator::make($request->all(), [
             'referencia' => 'required|string|max:50|unique:produtos,referencia',
             'descricao' => 'required|string|max:255',
@@ -154,7 +163,7 @@ class ProdutoController extends Controller
             'status_id' => 'required|exists:status,id',
             'ficha_producao' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'catalogo_vendas' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-        ]);
+        ], $messages);
 
         if ($validator->fails()) {
             return redirect()->route('produtos.create')
@@ -202,7 +211,12 @@ class ProdutoController extends Controller
             $tecidosData = [];
             foreach ($request->tecidos as $tecido) {
                 if (!empty($tecido['tecido_id'])) {
-                    $tecidosData[$tecido['tecido_id']] = ['consumo' => $tecido['consumo'] ?? null];
+                    // Se o consumo estiver vazio, definir como 0
+                    $consumo = $tecido['consumo'];
+                    if (empty($consumo) || $consumo === null) {
+                        $consumo = 0;
+                    }
+                    $tecidosData[$tecido['tecido_id']] = ['consumo' => $consumo];
                 }
             }
             $produto->tecidos()->sync($tecidosData);
@@ -262,6 +276,16 @@ class ProdutoController extends Controller
 
         $produto = Produto::findOrFail($id);
 
+        // Mensagens de erro personalizadas
+        $messages = [
+            'referencia.required' => 'A referência do produto é obrigatória.',
+            'tecidos.required' => 'É necessário adicionar pelo menos um tecido ao produto.',
+            'tecidos.min' => 'É necessário adicionar pelo menos um tecido ao produto.',
+            'tecidos.*.tecido_id.required' => 'Selecione um tecido válido.',
+            'tecidos.*.tecido_id.exists' => 'Um dos tecidos selecionados não existe no sistema.',
+            'tecidos.*.consumo.min' => 'O consumo do tecido deve ser maior que zero.',
+        ];
+
         // Custom validation rules
         $rules = [
             'descricao' => 'required|string|max:255',
@@ -299,7 +323,7 @@ class ProdutoController extends Controller
             },
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return redirect()->route('produtos.edit', $produto->id)

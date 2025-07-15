@@ -26,6 +26,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Rotas para gerenciamento de usuários (apenas para administradores)
     Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
         Route::resource('users', \App\Http\Controllers\UserController::class);
+        
+        // Rotas para gerenciamento de grupos de usuários
+        Route::get('user-groups', [\App\Http\Controllers\UserGroupController::class, 'index'])->name('user-groups.index');
+        Route::get('user-groups/{user}/edit', [\App\Http\Controllers\UserGroupController::class, 'edit'])->name('user-groups.edit');
+        Route::put('user-groups/{user}', [\App\Http\Controllers\UserGroupController::class, 'update'])->name('user-groups.update');
+        Route::get('user-groups/{user}/permissions', [\App\Http\Controllers\UserGroupController::class, 'showPermissions'])->name('user-groups.permissions');
+        
+        // Rotas para gerenciamento de permissões
+        Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
+        
+        // Rotas para gerenciamento de grupos
+        Route::resource('groups', \App\Http\Controllers\GroupController::class);
+        Route::post('groups/{id}/restore', [\App\Http\Controllers\GroupController::class, 'restore'])->name('groups.restore');
+        Route::delete('groups/{id}/force-delete', [\App\Http\Controllers\GroupController::class, 'forceDelete'])->name('groups.force-delete');
     });
 
     // Routes para Tecidos

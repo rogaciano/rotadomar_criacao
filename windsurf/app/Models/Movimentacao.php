@@ -21,18 +21,35 @@ class Movimentacao extends Model
         'data_devolucao',
         'tipo_id',
         'situacao_id',
-        'observacao'
+        'observacao',
+        'anexo',
+        'concluido'
     ];
 
     protected $casts = [
         'data_entrada' => 'date',
         'data_saida' => 'date',
         'data_devolucao' => 'date',
-        'comprometido' => 'integer'
+        'comprometido' => 'integer',
+        'concluido' => 'boolean'
     ];
 
     // Definindo relacionamentos para serem carregados automaticamente
     protected $with = ['produto', 'localizacao', 'tipo', 'situacao'];
+
+    // Accessor para URL do anexo
+    public function getAnexoUrlAttribute()
+    {
+        if (!$this->anexo) {
+            return null;
+        }
+        // Se caminho começa com uploads/, usar asset direto
+        if (\Illuminate\Support\Str::startsWith($this->anexo, 'uploads/')) {
+            return asset($this->anexo);
+        }
+        // Caso contrário, assumir que está no disco public
+        return \Illuminate\Support\Facades\Storage::url($this->anexo);
+    }
 
     // Relacionamentos
     public function produto()

@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
-                    <form action="{{ route('movimentacoes.update', $movimentacao) }}" method="POST">
+                    <form action="{{ route('movimentacoes.update', $movimentacao) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="current_page" value="{{ request()->query('page') }}">
@@ -92,17 +92,34 @@
                             </div>
 
                             <!-- Observação -->
-                            <div>
+                            <div class="md:col-span-2">
                                 <x-label for="observacao" value="{{ __('Observação (opcional)') }}" />
                                 <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
                                 <x-input-error for="observacao" class="mt-2" />
                             </div>
 
-                            <!-- Observação -->
+                            <!-- Anexo -->
                             <div class="md:col-span-2">
-                                <x-label for="observacao" value="{{ __('Observação (opcional)') }}" />
-                                <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
-                                <x-input-error for="observacao" class="mt-2" />
+                                <x-label for="anexo" value="{{ __('Anexo (opcional)') }}" />
+                                <input type="file" id="anexo" name="anexo" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPG, JPEG, PNG. Tamanho máximo: 10MB.</p>
+                                @if($movimentacao->anexo)
+                                <div class="mt-2">
+                                    <p class="text-sm">Anexo atual: <span class="font-medium">{{ basename($movimentacao->anexo) }}</span></p>
+                                    <img src="{{ asset('storage/' . $movimentacao->anexo) }}" class="mt-2 max-w-xs rounded border" alt="Anexo atual">
+                                </div>
+                                @endif
+                                <x-input-error for="anexo" class="mt-2" />
+                            </div>
+                            
+                            <!-- Concluido -->
+                            <div class="md:col-span-2">
+                                <div class="flex items-center mt-2">
+                                    <input type="checkbox" id="concluido" name="concluido" value="1" {{ old('concluido', $movimentacao->concluido) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label for="concluido" class="ml-2 block text-sm font-medium text-gray-700">Movimentação concluída</label>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">Marque esta opção se a movimentação foi finalizada.</p>
+                                <x-input-error for="concluido" class="mt-2" />
                             </div>
                         </div>
 

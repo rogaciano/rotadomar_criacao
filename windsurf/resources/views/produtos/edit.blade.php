@@ -139,7 +139,7 @@
                             <!-- Estilista -->
                             <div>
                                 <label for="estilista_id" class="block text-sm font-medium text-gray-700 mb-1">Estilista</label>
-                                <select name="estilista_id" id="estilista_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
+                                <select name="estilista_id" id="estilista_id" class="estilista-select block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um estilista</option>
                                     @foreach($estilistas as $estilista)
                                         <option value="{{ $estilista->id }}" {{ old('estilista_id', $produto->estilista_id) == $estilista->id ? 'selected' : '' }} class="text-gray-700">
@@ -152,7 +152,7 @@
                             <!-- Grupo -->
                             <div>
                                 <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-                                <select name="grupo_id" id="grupo_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
+                                <select name="grupo_id" id="grupo_id" class="grupo-select block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um grupo</option>
                                     @foreach($grupos as $grupo)
                                         <option value="{{ $grupo->id }}" {{ old('grupo_id', $produto->grupo_id) == $grupo->id ? 'selected' : '' }} class="text-gray-700">
@@ -201,7 +201,7 @@
                                     </div>
                                 @endif
                                 <input type="file" name="ficha_producao" id="ficha_producao" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX (máx. 10MB)</p>
+                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX, PNG, JPG (máx. 10MB)</p>
                             </div>
 
                             <!-- Catálogo de Vendas -->
@@ -218,7 +218,7 @@
                                     </div>
                                 @endif
                                 <input type="file" name="catalogo_vendas" id="catalogo_vendas" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX (máx. 10MB)</p>
+                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX, PNG, JPG (máx. 10MB)</p>
                             </div>
                         </div>
 
@@ -370,24 +370,67 @@
                 });
             });
             
-            // Initialize Select2 on all tecido selects
-            $(document).ready(function() {
-                initializeSelect2();
+            // Verificar campos de consumo vazios antes de enviar o formulário
+            document.querySelector('form').addEventListener('submit', function(e) {
+                // Encontrar todos os campos de consumo
+                const consumoInputs = document.querySelectorAll('input[name^="tecidos"][name$="[consumo]"]');
+                
+                // Definir como zero se estiver vazio
+                consumoInputs.forEach(input => {
+                    if (input.value === '' || input.value === null || input.value.trim() === '') {
+                        input.value = '0';
+                    }
+                });
+                
+                // Verificar novamente para garantir que nenhum campo ficou vazio
+                let todosPreenchidos = true;
+                consumoInputs.forEach(input => {
+                    if (input.value === '' || input.value === null || input.value.trim() === '') {
+                        todosPreenchidos = false;
+                        input.value = '0'; // Tentar definir novamente
+                    }
+                });
+                
+                if (!todosPreenchidos) {
+                    console.log('Alguns campos de consumo foram automaticamente definidos como zero');
+                }
             });
             
-            function initializeSelect2() {
-                $('select[name^="tecidos"]').select2({
-                    placeholder: 'Selecione um tecido',
+            // Inicializar Select2 nos campos de grupo e estilista
+            $(document).ready(function() {
+                $('.grupo-select').select2({
+                    placeholder: "Selecione um grupo",
                     allowClear: true,
-                    width: '100%',
-                    language: {
-                        noResults: function() {
-                            return "Nenhum resultado encontrado";
-                        },
-                        searching: function() {
-                            return "Buscando...";
-                        }
-                    }
+                    width: '100%'
+                });
+                
+                $('.estilista-select').select2({
+                    placeholder: "Selecione um estilista",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+            
+            // Initialize Select2 on all tecido selects
+            $(document).ready(function() {
+                $('.tecido-select').select2({
+                    placeholder: "Selecione um tecido",
+                    allowClear: true,
+                    width: '100%'
+                });
+                
+                // Ajustar estilo do Select2 para combinar com o Tailwind
+                $('.select2-container--default .select2-selection--single').css({
+                    'height': '42px',
+                    'padding': '6px 4px',
+                    'border-color': '#d1d5db'
+                });
+                
+                // Garantir que o container do Select2 respeite o layout flex
+                $('.select2-container').css({
+                    'width': '100%',
+                    'max-width': '100%',
+                    'display': 'block'
                 });
                 
                 // Re-initialize Select2 after adding a new tecido

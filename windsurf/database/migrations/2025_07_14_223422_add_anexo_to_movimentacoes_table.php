@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('estilistas', function (Blueprint $table) {
-            $table->string('foto')->nullable()->after('suporte_marca')->comment('Caminho para a foto do estilista');
+        Schema::table('movimentacoes', function (Blueprint $table) {
+            $table->string('anexo')->nullable()->after('observacao');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('estilistas', function (Blueprint $table) {
-            $table->dropColumn('foto');
+        Schema::table('movimentacoes', function (Blueprint $table) {
+            $table->dropColumn('anexo');
         });
     }
 };

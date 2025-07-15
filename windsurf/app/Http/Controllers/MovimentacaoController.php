@@ -143,6 +143,8 @@ class MovimentacaoController extends Controller
             'data_saida' => 'nullable|date|after_or_equal:data_entrada',
             'data_devolucao' => 'nullable|date|after_or_equal:data_entrada',
             'observacao' => 'nullable|string',
+            'anexo' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // 10MB máximo
+            'concluido' => 'boolean',
         ]);
 
         try {
@@ -157,6 +159,49 @@ class MovimentacaoController extends Controller
             $movimentacao->data_devolucao = $validated['data_devolucao'] ?? null;
             $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
+            $movimentacao->concluido = $request->has('concluido'); // Checkbox marcado = true, não marcado = false
+            
+            // Upload de anexo se existir
+            if ($request->hasFile('anexo')) {
+                error_log('Anexo encontrado na request');
+                
+                if ($request->file('anexo')->isValid()) {
+                    error_log('Anexo é válido');
+                    
+                    $anexoFile = $request->file('anexo');
+                    $originalName = $anexoFile->getClientOriginalName();
+                    error_log("Nome original: {$originalName}");
+                    
+                    // Tenta mover o arquivo manualmente para o diretório public
+                    $targetDir = public_path('uploads');
+                    
+                    // Cria o diretório se não existir
+                    if (!file_exists($targetDir)) {
+                        mkdir($targetDir, 0755, true);
+                        error_log("Diretório criado: {$targetDir}");
+                    }
+                    
+                    $newFileName = 'anexo_' . time() . '_' . rand(1000, 9999) . '.' . $anexoFile->getClientOriginalExtension();
+                    $targetPath = $targetDir . '/' . $newFileName;
+                    
+                    // Tenta mover o arquivo
+                    try {
+                        if ($anexoFile->move($targetDir, $newFileName)) {
+                            error_log("Arquivo movido com sucesso para: {$targetPath}");
+                            $movimentacao->anexo = 'uploads/' . $newFileName;
+                        } else {
+                            error_log("Falha ao mover arquivo");
+                        }
+                    } catch (\Exception $e) {
+                        error_log("Erro ao mover arquivo: " . $e->getMessage());
+                    }
+                } else {
+                    error_log('Anexo inválido: ' . $request->file('anexo')->getErrorMessage());
+                }
+            } else {
+                error_log('Nenhum anexo na request');
+            }
+            
             $movimentacao->save();
 
             // Registrar sucesso no log para depuração
@@ -224,14 +269,31 @@ class MovimentacaoController extends Controller
             'data_saida' => 'nullable|date|after_or_equal:data_entrada',
             'data_devolucao' => 'nullable|date|after_or_equal:data_entrada',
             'observacao' => 'nullable|string',
+            'anexo' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // 10MB máximo
         ]);
+        
+        // Gerenciar upload do arquivo de anexo
+        if ($request->hasFile('anexo') && $request->file('anexo')->isValid()) {
+            // Remover o anexo antigo se existir
+            if ($movimentacao->anexo) {
+                \Storage::disk('public')->delete($movimentacao->anexo);
+            }
+            
+            // Upload do novo anexo
+            $anexoPath = $request->file('anexo')->store('anexos/movimentacoes', 'public');
+            $validated['anexo'] = $anexoPath;
+        } else {
+            // Se não houver novo arquivo, manter o atual
+            unset($validated['anexo']);
+        }
+        
+        // Tratar checkbox concluido (quando não marcado, não vem no request)
+        $validated['concluido'] = $request->has('concluido');
 
         $movimentacao->update($validated);
         
-        // Redirecionar para a mesma página que estava antes
-        $page = $request->input('current_page') ? ['page' => $request->input('current_page')] : [];
-        
-        return redirect()->route('movimentacoes.index', $page)
+        // Redirecionar para a página de visualização da movimentação
+        return redirect()->route('movimentacoes.show', $movimentacao)
             ->with('success', 'Movimentação atualizada com sucesso.');
     }
 

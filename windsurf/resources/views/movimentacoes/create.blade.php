@@ -29,7 +29,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('movimentacoes.store') }}" method="POST">
+                    <form action="{{ route('movimentacoes.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         @if(isset($produto_id))
@@ -112,6 +112,22 @@
                             <div class="md:col-span-2">
                                 <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação (opcional)</label>
                                 <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao') }}</textarea>
+                            </div>
+
+                            <!-- Anexo -->
+                            <div class="md:col-span-2">
+                                <label for="anexo" class="block text-sm font-medium text-gray-700 mb-1">Anexo (opcional)</label>
+                                <input type="file" id="anexo" name="anexo" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPG, JPEG, PNG. Tamanho máximo: 10MB.</p>
+                            </div>
+
+                            <!-- Concluido -->
+                            <div class="md:col-span-2">
+                                <div class="flex items-center mt-2">
+                                    <input type="checkbox" id="concluido" name="concluido" value="1" {{ old('concluido') ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <label for="concluido" class="ml-2 block text-sm font-medium text-gray-700">Movimentação concluída</label>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">Marque esta opção se a movimentação foi finalizada.</p>
                             </div>
                         </div>
 
