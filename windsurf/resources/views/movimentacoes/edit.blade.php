@@ -26,7 +26,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <x-input-error for="produto_id" class="mt-2" />
+                                <x-input-error :messages="$errors->get('produto_id')" class="mt-2" />
                             </div>
 
                             <!-- Localização -->
@@ -40,7 +40,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <x-input-error for="localizacao_id" class="mt-2" />
+                                <x-input-error :messages="$errors->get('localizacao_id')" class="mt-2" />
                             </div>
 
                             <!-- Tipo -->
@@ -54,7 +54,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <x-input-error for="tipo_id" class="mt-2" />
+                                <x-input-error :messages="$errors->get('tipo_id')" class="mt-2" />
                             </div>
 
                             <!-- Situação -->
@@ -68,34 +68,34 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <x-input-error for="situacao_id" class="mt-2" />
+                                <x-input-error :messages="$errors->get('situacao_id')" class="mt-2" />
                             </div>
 
                             <!-- Data Entrada -->
                             <div>
                                 <x-label for="data_entrada" value="{{ __('Data de Entrada') }}" />
                                 <x-input id="data_entrada" class="block mt-1 w-full" type="datetime-local" name="data_entrada" :value="old('data_entrada', $movimentacao->data_entrada->format('Y-m-d\TH:i'))" required />
-                                <x-input-error for="data_entrada" class="mt-2" />
+                                <x-input-error :messages="$errors->get('data_entrada')" class="mt-2" />
                             </div>
 
                             <!-- Data Saída -->
                             <div>
                                 <x-label for="data_saida" value="{{ __('Data de Saída (opcional)') }}" />
                                 <x-input id="data_saida" class="block mt-1 w-full" type="datetime-local" name="data_saida" :value="old('data_saida', $movimentacao->data_saida ? $movimentacao->data_saida->format('Y-m-d\TH:i') : null)" />
-                                <x-input-error for="data_saida" class="mt-2" />
+                                <x-input-error :messages="$errors->get('data_saida')" class="mt-2" />
                             </div>
                             <!-- Data Devolução -->
                             <div>
                                 <x-label for="data_devolucao" value="{{ __('Data de Devolução (opcional)') }}" />
                                 <x-input id="data_devolucao" class="block mt-1 w-full" type="datetime-local" name="data_devolucao" :value="old('data_devolucao', $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('Y-m-d\TH:i') : null)" />
-                                <x-input-error for="data_devolucao" class="mt-2" />
+                                <x-input-error :messages="$errors->get('data_devolucao')" class="mt-2" />
                             </div>
 
                             <!-- Observação -->
                             <div class="md:col-span-2">
                                 <x-label for="observacao" value="{{ __('Observação (opcional)') }}" />
                                 <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
-                                <x-input-error for="observacao" class="mt-2" />
+                                <x-input-error :messages="$errors->get('observacao')" class="mt-2" />
                             </div>
 
                             <!-- Anexo -->
@@ -109,7 +109,7 @@
                                     <img src="{{ asset('storage/' . $movimentacao->anexo) }}" class="mt-2 max-w-xs rounded border" alt="Anexo atual">
                                 </div>
                                 @endif
-                                <x-input-error for="anexo" class="mt-2" />
+                                <x-input-error :messages="$errors->get('anexo')" class="mt-2" />
                             </div>
                             
                             <!-- Concluido -->
@@ -119,7 +119,7 @@
                                     <label for="concluido" class="ml-2 block text-sm font-medium text-gray-700">Movimentação concluída</label>
                                 </div>
                                 <p class="mt-1 text-sm text-gray-500">Marque esta opção se a movimentação foi finalizada.</p>
-                                <x-input-error for="concluido" class="mt-2" />
+                                <x-input-error :messages="$errors->get('concluido')" class="mt-2" />
                             </div>
                         </div>
 

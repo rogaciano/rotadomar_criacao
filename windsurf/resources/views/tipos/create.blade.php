@@ -17,14 +17,14 @@
                             <div class="md:col-span-2">
                                 <x-label for="descricao" value="{{ __('Descrição') }}" />
                                 <x-input id="descricao" class="block mt-1 w-full" type="text" name="descricao" :value="old('descricao')" required autofocus />
-                                <x-input-error for="descricao" class="mt-2" />
+                                <x-input-error :messages="$errors->get('descricao')" class="mt-2" />
                             </div>
                             
                             <!-- Observações -->
                             <div class="md:col-span-2">
                                 <x-label for="observacoes" value="{{ __('Observações') }}" />
                                 <textarea id="observacoes" name="observacoes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ old('observacoes') }}</textarea>
-                                <x-input-error for="observacoes" class="mt-2" />
+                                <x-input-error :messages="$errors->get('observacoes')" class="mt-2" />
                             </div>
 
                             <!-- Status -->

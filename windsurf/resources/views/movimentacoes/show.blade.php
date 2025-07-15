@@ -120,23 +120,11 @@
                         <div class="mt-8">
                             <h3 class="text-lg font-medium text-gray-900">Anexo</h3>
                             <div class="mt-4">
-                                {{-- Debug removido --}}
-                                <div class="mb-4 p-4 border border-gray-200 rounded bg-gray-50">
-                                    <p class="text-sm text-gray-600"><strong>Valor do campo anexo:</strong> {{ $movimentacao->anexo }}</p>
-                                    @php $movimentacao->anexo_url = Str::startsWith($movimentacao->anexo, 'uploads/') ? asset($movimentacao->anexo) : Storage::url($movimentacao->anexo); @endphp
-                                    <p class="text-sm text-gray-600"><strong>URL completa:</strong> {{ $movimentacao->anexo_url }}</p>
-                                </div>
-                                
+
                                 <a href="{{ $movimentacao->anexo_url }}" target="_blank">
                                     <img src="{{ $movimentacao->anexo_url }}" alt="Anexo da Movimentação" class="max-w-md rounded-lg shadow-md hover:opacity-90 transition-opacity">
                                 </a>
                                 <p class="mt-2 text-sm text-gray-600">Clique na imagem para ampliar</p>
-                                
-                                <!-- Alternativa direta para testar -->
-                                <div class="mt-4">
-                                    <h4 class="font-medium text-gray-800">Alternativa de visualização:</h4>
-                                    <img src="{{ $movimentacao->anexo_url }}" alt="Anexo (caminho alternativo)" class="mt-2 max-w-md rounded-lg shadow-md">
-                                </div>
                             </div>
                         </div>
                     @else

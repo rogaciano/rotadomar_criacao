@@ -36,13 +36,8 @@
                             </div>
 
                             <div class="md:col-span-2">
-                                <label for="produto_id" class="block text-sm font-medium text-gray-700 mb-1">Produto</label>
-                                <select name="produto_id" id="produto_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
-                                    @foreach($produtos ?? [] as $produto)
-                                        <option value="{{ $produto->id }}" {{ request('produto_id') == $produto->id ? 'selected' : '' }}>{{ $produto->referencia }} - {{ $produto->descricao }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="produto" class="block text-sm font-medium text-gray-700 mb-1">Produto</label>
+                                <input type="text" name="produto" id="produto" value="{{ request('produto') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência ou descrição do produto">
                             </div>
 
                             <div>
@@ -92,6 +87,15 @@
                             <div>
                                 <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Entrada (Fim)</label>
                                 <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+
+                            <div>
+                                <label for="concluido" class="block text-sm font-medium text-gray-700 mb-1">Status Conclusão</label>
+                                <select name="concluido" id="concluido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="" {{ request('concluido') === null ? 'selected' : '' }}>Todos</option>
+                                    <option value="1" {{ request('concluido') === '1' ? 'selected' : '' }}>Concluídas</option>
+                                    <option value="0" {{ request('concluido') === '0' ? 'selected' : '' }}>Não Concluídas</option>
+                                </select>
                             </div>
 
                             <div class="md:col-span-4 flex justify-end space-x-2">

@@ -26,14 +26,14 @@
                             <div>
                                 <x-label for="name" value="{{ __('Nome') }}" />
                                 <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name', $user->name)" required autofocus />
-                                <x-input-error for="name" class="mt-2" />
+                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
 
                             <!-- Email -->
                             <div>
                                 <x-label for="email" value="{{ __('Email') }}" />
                                 <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $user->email)" required />
-                                <x-input-error for="email" class="mt-2" />
+                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
                             </div>
 
                             <!-- Localização -->
@@ -47,7 +47,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <x-input-error for="localizacao_id" class="mt-2" />
+                                <x-input-error :messages="$errors->get('localizacao_id')" class="mt-2" />
                             </div>
 
                             <!-- Tipo de Usuário -->
@@ -61,21 +61,21 @@
                                     </label>
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">O campo is_admin deve ser verdadeiro ou falso.</p>
-                                <x-input-error for="is_admin" class="mt-2" />
+                                <x-input-error :messages="$errors->get('is_admin')" class="mt-2" />
                             </div>
 
                             <!-- Senha -->
                             <div>
                                 <x-label for="password" value="{{ __('Nova Senha (deixe em branco para manter a atual)') }}" />
                                 <x-input id="password" class="block mt-1 w-full" type="password" name="password" autocomplete="new-password" />
-                                <x-input-error for="password" class="mt-2" />
+                                <x-input-error :messages="$errors->get('password')" class="mt-2" />
                             </div>
 
                             <!-- Confirmar Senha -->
                             <div>
                                 <x-label for="password_confirmation" value="{{ __('Confirmar Nova Senha') }}" />
                                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" autocomplete="new-password" />
-                                <x-input-error for="password_confirmation" class="mt-2" />
+                                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                             </div>
                         </div>
 

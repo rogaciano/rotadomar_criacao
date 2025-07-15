@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Bypass de permissões em desenvolvimento
+        if (config('permissions.bypass')) {
+            Gate::before(fn ($user, $ability) => true);
+        }
+
         //
     }
 }
