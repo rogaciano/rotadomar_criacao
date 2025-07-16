@@ -188,14 +188,17 @@
         </div>
     </div>
 
+    @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Aguardar que o DOM e jQuery estejam totalmente carregados
+        $(function() {
             const container = document.getElementById('tecidos-container');
             const addButton = document.getElementById('add-tecido');
             let tecidoCount = 0;
 
             // Inicializar Select2 para os selects existentes
-            $('.tecido-select').select2({
+            $(document).ready(function() {
+                $('.tecido-select').select2({
                 placeholder: "Selecione um tecido",
                 allowClear: true,
                 width: '100%'
@@ -206,6 +209,7 @@
                 'height': '42px',
                 'padding': '6px 4px',
                 'border-color': '#d1d5db'
+            });
             });
 
             // Show/hide remove buttons based on number of tecido items
@@ -277,7 +281,7 @@
             }
 
             // Add new tecido item
-            addButton.addEventListener('click', function() {
+            $(addButton).on('click', function() {
                 tecidoCount++;
                 const newItem = document.createElement('div');
                 newItem.className = 'tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200';
@@ -336,26 +340,19 @@
                     'display': 'block'
                 });
 
-                // Add event listener to the new remove button
-                newItem.querySelector('.remove-tecido').addEventListener('click', function() {
-                    newItem.remove();
-                    updateRemoveButtons();
-                    updateSelectOptions();
-                });
+                // Não precisamos adicionar event listener aqui, pois usaremos delegação de eventos
             });
 
-            // Add event listeners to existing remove buttons
-            document.querySelectorAll('.remove-tecido').forEach(button => {
-                button.addEventListener('click', function() {
-                    button.closest('.tecido-item').remove();
-                    updateRemoveButtons();
-                    updateSelectOptions();
-                });
+            // Add event listeners to existing remove buttons using event delegation
+            $(container).on('click', '.remove-tecido', function() {
+                $(this).closest('.tecido-item').remove();
+                updateRemoveButtons();
+                updateSelectOptions();
             });
 
-            // Add change event listeners to existing selects
-            document.querySelectorAll('select[name^="tecidos"]').forEach(select => {
-                select.addEventListener('change', updateSelectOptions);
+            // Add change event listeners to existing selects using event delegation
+            $(container).on('change', 'select[name^="tecidos"]', function() {
+                updateSelectOptions();
             });
 
             // Initialize
@@ -404,4 +401,5 @@
             });
         });
     </script>
+    @endpush
 </x-app-layout>

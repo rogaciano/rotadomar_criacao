@@ -82,7 +82,7 @@
                             <!-- Situação -->
                             <div>
                                 <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação</label>
-                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <option value="">Selecione uma situação</option>
                                     @foreach($situacoes as $situacao)
                                         <option value="{{ $situacao->id }}" {{ old('situacao_id') == $situacao->id ? 'selected' : '' }}>

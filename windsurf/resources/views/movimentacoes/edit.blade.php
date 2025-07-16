@@ -32,7 +32,7 @@
                             <!-- Localização -->
                             <div>
                                 <x-label for="localizacao_id" value="{{ __('Localização') }}" />
-                                <select id="localizacao_id" name="localizacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="localizacao_id" name="localizacao_id" class="select2 block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma localização</option>
                                     @foreach($localizacoes as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ old('localizacao_id', $movimentacao->localizacao_id) == $localizacao->id ? 'selected' : '' }}>
@@ -60,7 +60,7 @@
                             <!-- Situação -->
                             <div>
                                 <x-label for="situacao_id" value="{{ __('Situação') }}" />
-                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <option value="">Selecione uma situação</option>
                                     @foreach($situacoes as $situacao)
                                         <option value="{{ $situacao->id }}" {{ old('situacao_id', $movimentacao->situacao_id) == $situacao->id ? 'selected' : '' }}>
@@ -105,13 +105,27 @@
                                 <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPG, JPEG, PNG. Tamanho máximo: 10MB.</p>
                                 @if($movimentacao->anexo)
                                 <div class="mt-2">
-                                    <p class="text-sm">Anexo atual: <span class="font-medium">{{ basename($movimentacao->anexo) }}</span></p>
-                                    <img src="{{ asset('storage/' . $movimentacao->anexo) }}" class="mt-2 max-w-xs rounded border" alt="Anexo atual">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm">Anexo atual: <span class="font-medium">{{ basename($movimentacao->anexo) }}</span></p>
+                                        <form action="{{ route('movimentacoes.remover-anexo', $movimentacao->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium" onclick="return confirm('Tem certeza que deseja remover este anexo?')">
+                                                <span class="flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    Remover anexo
+                                                </span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <img src="{{ $movimentacao->anexo_url }}" class="mt-2 max-w-xs rounded border" alt="Anexo atual">
                                 </div>
                                 @endif
                                 <x-input-error :messages="$errors->get('anexo')" class="mt-2" />
                             </div>
-                            
+
                             <!-- Concluido -->
                             <div class="md:col-span-2">
                                 <div class="flex items-center mt-2">
@@ -136,4 +150,23 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: "Selecione uma localização",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Ajustar estilo do Select2 para combinar com o Tailwind
+            $('.select2-container--default .select2-selection--single').css({
+                'height': '42px',
+                'padding': '6px 4px',
+                'border-color': '#d1d5db'
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

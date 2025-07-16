@@ -22,6 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/dados-por-ano', [DashboardController::class, 'getDadosPorAno'])->name('dashboard.dados-por-ano');
+    
+    // Rota para servir arquivos de rede
+    Route::get('/arquivo/rede', [\App\Http\Controllers\ArquivoController::class, 'servirArquivoRede'])->name('arquivo.rede');
 
     // Rotas para gerenciamento de usuários (apenas para administradores)
     Route::middleware(\App\Http\Middleware\AdminMiddleware::class)->group(function () {
@@ -80,6 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([
         'movimentacoes' => 'movimentacao'
     ]);
+    Route::delete('movimentacoes/{movimentacao}/remover-anexo', [MovimentacaoController::class, 'removerAnexo'])->name('movimentacoes.remover-anexo');
     Route::get('movimentacoes/{movimentacao}/pdf', [MovimentacaoController::class, 'generatePdf'])->name('movimentacoes.pdf');
     Route::get('movimentacoes-lista-pdf', [MovimentacaoController::class, 'generateListPdf'])->name('movimentacoes.lista.pdf');
 

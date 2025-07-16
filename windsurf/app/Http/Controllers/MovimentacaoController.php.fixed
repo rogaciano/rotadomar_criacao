@@ -443,30 +443,4 @@ class MovimentacaoController extends Controller
 
         return $pdf->stream('lista-movimentacoes.pdf');
     }
-
-    /**
-     * Remove o anexo da movimentação especificada
-     *
-     * @param Movimentacao $movimentacao
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function removerAnexo(Movimentacao $movimentacao)
-    {
-        if ($movimentacao->anexo) {
-            // Verificar se o anexo está no storage ou é um caminho de rede
-            if (\Illuminate\Support\Str::startsWith($movimentacao->anexo, 'uploads/') || 
-                \Illuminate\Support\Str::startsWith($movimentacao->anexo, 'anexos/')) {
-                // Remover arquivo do storage
-                \Storage::disk('public')->delete($movimentacao->anexo);
-            }
-            
-            // Atualizar o registro no banco de dados
-            $movimentacao->anexo = null;
-            $movimentacao->save();
-            
-            return redirect()->back()->with('success', 'Anexo removido com sucesso.');
-        }
-        
-        return redirect()->back()->with('error', 'Nenhum anexo encontrado para remover.');
-    }
 }

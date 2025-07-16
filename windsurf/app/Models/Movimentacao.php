@@ -43,10 +43,20 @@ class Movimentacao extends Model
         if (!$this->anexo) {
             return null;
         }
+
         // Se caminho começa com uploads/, usar asset direto
         if (\Illuminate\Support\Str::startsWith($this->anexo, 'uploads/')) {
             return asset($this->anexo);
         }
+
+        // Se for um caminho de rede (começa com // ou \\)
+        if (\Illuminate\Support\Str::startsWith($this->anexo, '//') || \Illuminate\Support\Str::startsWith($this->anexo, '\\\\')) {
+            // Converter para uma URL válida - usar uma rota específica para servir arquivos de rede
+            // Codificar o caminho para evitar problemas com caracteres especiais na URL
+            $encodedPath = urlencode($this->anexo);
+            return route('arquivo.rede', ['path' => $encodedPath]);
+        }
+
         // Caso contrário, assumir que está no disco public
         return \Illuminate\Support\Facades\Storage::url($this->anexo);
     }

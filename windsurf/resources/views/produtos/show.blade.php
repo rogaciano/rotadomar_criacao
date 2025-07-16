@@ -30,37 +30,105 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8" style="max-width: 95%;">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6">
                     <!-- Informações do Produto -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Referência</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->referencia }}</span>
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Descrição</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->descricao }}</span>
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Data de Cadastro</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_cadastro ? $produto->data_cadastro->format('d/m/Y') : 'N/A' }}</span>
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Marca</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
                             </div>
-                            
-                            <div class="col-span-1 md:col-span-3">
-                                <span class="block text-sm font-medium text-gray-500 mb-2">Tecidos</span>
-                                @if($produto->tecidos->count() > 0)
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Estilista</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Grupo</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Quantidade</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Status</span>
+                                <span class="block mt-1">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        {{ $produto->status ? $produto->status->descricao : 'N/A' }}
+                                    </span>
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Localização Atual</span>
+                                <span class="block mt-1">
+                                    @if($produto->localizacao_atual)
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            {{ $produto->localizacao_atual->nome_localizacao }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-sm italic">Não localizado</span>
+                                    @endif
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
+                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Preço Varejo</span>
+                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Criado em</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Última atualização</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
+                            </div>
+
+                            @if($produto->deleted_at)
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Excluído em</span>
+                                    <span class="block mt-1 text-sm text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Tecidos -->
+                    <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Tecidos</h3>
+
+                        @if($produto->tecidos->count() > 0)
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200">
                                             <thead class="bg-gray-50">
@@ -88,78 +156,12 @@
                                 @else
                                     <span class="text-gray-400 italic">Nenhum tecido associado a este produto</span>
                                 @endif
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Estilista</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Grupo</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Quantidade</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Status</span>
-                                <span class="block mt-1">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                        {{ $produto->status ? $produto->status->descricao : 'N/A' }}
-                                    </span>
-                                </span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Localização Atual</span>
-                                <span class="block mt-1">
-                                    @if($produto->localizacao_atual)
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {{ $produto->localizacao_atual->nome_localizacao }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400 text-sm italic">Não localizado</span>
-                                    @endif
-                                </span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
-                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Preço Varejo</span>
-                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Criado em</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
-                            </div>
-                            
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Última atualização</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
-                            </div>
-                            
-                            @if($produto->deleted_at)
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Excluído em</span>
-                                    <span class="block mt-1 text-sm text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
-                                </div>
-                            @endif
-                        </div>
                     </div>
-                    
+
                     <!-- Documentos -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Documentos</h3>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <span class="block text-sm font-medium text-gray-500 mb-2">Ficha de Produção</span>
@@ -174,7 +176,7 @@
                                     <span class="text-gray-400 italic">Nenhuma ficha de produção disponível</span>
                                 @endif
                             </div>
-                            
+
                             <div>
                                 <span class="block text-sm font-medium text-gray-500 mb-2">Catálogo de Vendas</span>
                                 @if($produto->anexo_catalogo_vendas)
@@ -190,7 +192,63 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Carrossel de Imagens das Movimentações -->
+                    @php
+                        $movimentacoesComAnexo = $movimentacoes->filter(function($mov) {
+                            return !empty($mov->anexo);
+                        });
+                    @endphp
+
+                    @if($movimentacoesComAnexo->count() > 0)
+                    <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Imagens das Movimentações</h3>
+
+                        <div class="relative">
+                            <!-- Carrossel de imagens -->
+                            <div class="carousel-container overflow-hidden">
+                                <div class="carousel-inner flex transition-transform duration-300 ease-in-out">
+                                    @foreach($movimentacoesComAnexo as $index => $movimentacao)
+                                        <div class="carousel-item min-w-full flex flex-col items-center justify-center" data-index="{{ $index }}">
+                                            <div class="relative w-full max-w-2xl">
+                                                <img src="{{ $movimentacao->anexo_url }}" alt="Anexo da movimentação" class="w-full h-auto max-h-96 object-contain rounded-lg shadow-md">
+                                                <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 rounded-b-lg">
+                                                    <p class="text-sm">{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }} -
+                                                    {{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }} -
+                                                    {{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <!-- Controles do carrossel -->
+                            @if($movimentacoesComAnexo->count() > 1)
+                                <button class="carousel-control prev absolute top-1/2 left-2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <button class="carousel-control next absolute top-1/2 right-2 transform -translate-y-1/2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 focus:outline-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            @endif
+
+                            <!-- Indicadores do carrossel -->
+                            @if($movimentacoesComAnexo->count() > 1)
+                                <div class="carousel-indicators flex justify-center mt-4">
+                                    @foreach($movimentacoesComAnexo as $index => $movimentacao)
+                                        <button class="carousel-indicator w-3 h-3 rounded-full mx-1 {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }}" data-index="{{ $index }}"></button>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Movimentações -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6">
                         <div class="flex justify-between items-center mb-4">
@@ -202,7 +260,7 @@
                                 Nova Movimentação
                             </a>
                         </div>
-                        
+
                         @if($movimentacoes->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -232,9 +290,7 @@
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Obs
                                             </th>
-                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                
-                                            </th>
+                                            <th scope="col" class="px-6 py-3"></th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
@@ -269,7 +325,7 @@
                                                         $prazoExcedido = false;
                                                         $indexAtual = $loop->index;
                                                         $movimentacaoAnterior = $indexAtual > 0 ? $movimentacoes[$indexAtual - 1] : null;
-                                                        
+
                                                         if ($indexAtual === 0) {
                                                             // Primeira linha, exibir zero
                                                             $diasEntre = 0;
@@ -278,7 +334,7 @@
                                                             // Calcular dias entre a movimentação atual e a anterior
                                                             // Usando abs() para garantir que o valor seja sempre positivo
                                                             $diasEntre = abs($movimentacao->data_entrada->diffInDays($movimentacaoAnterior->data_entrada));
-                                                            
+
                                                             // Verificar se excede o prazo do setor anterior
                                                             if ($movimentacaoAnterior->localizacao && $movimentacaoAnterior->localizacao->prazo) {
                                                                 $prazoExcedido = $diasEntre > $movimentacaoAnterior->localizacao->prazo;
@@ -286,7 +342,7 @@
                                                             }
                                                         }
                                                     @endphp
-                                                    
+
                                                     @if($diasEntre !== null)
                                                         @if($indexAtual === 0)
                                                             <div class="text-center">
@@ -317,10 +373,14 @@
                                                 </td>
                                                 <td class="px-6 py-4 text-sm text-gray-500">
                                                     @if($movimentacao->observacao)
-                                                        <div class="flex items-center justify-center" title="{{ $movimentacao->observacao }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 hover:text-blue-700 cursor-help" viewBox="0 0 20 20" fill="currentColor">
+                                                        <div class="relative tooltip-container flex items-center justify-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 hover:text-blue-700 cursor-help tooltip-trigger" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
                                                             </svg>
+                                                            <div class="tooltip-content absolute z-50 w-64 p-2 bg-black text-white text-xs rounded-lg hidden -top-2 transform -translate-y-full left-1/2 -translate-x-1/2">
+                                                                {{ $movimentacao->observacao }}
+                                                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-black rotate-45"></div>
+                                                            </div>
                                                         </div>
                                                     @else
                                                         <span class="text-gray-400">-</span>
@@ -349,4 +409,59 @@
             </div>
         </div>
     </div>
+    <!-- Script para o carrossel -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carouselInner = document.querySelector('.carousel-inner');
+            const carouselItems = document.querySelectorAll('.carousel-item');
+            const prevButton = document.querySelector('.carousel-control.prev');
+            const nextButton = document.querySelector('.carousel-control.next');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+
+            if (!carouselInner || carouselItems.length === 0) return;
+
+            let currentIndex = 0;
+            const itemCount = carouselItems.length;
+
+            // Função para atualizar o carrossel
+            function updateCarousel() {
+                const translateValue = -currentIndex * 100 + '%';
+                carouselInner.style.transform = 'translateX(' + translateValue + ')';
+
+                // Atualizar indicadores
+                indicators.forEach((indicator, index) => {
+                    if (index === currentIndex) {
+                        indicator.classList.remove('bg-gray-300');
+                        indicator.classList.add('bg-blue-600');
+                    } else {
+                        indicator.classList.remove('bg-blue-600');
+                        indicator.classList.add('bg-gray-300');
+                    }
+                });
+            }
+
+            // Eventos para os botões de navegação
+            if (prevButton) {
+                prevButton.addEventListener('click', function() {
+                    currentIndex = (currentIndex - 1 + itemCount) % itemCount;
+                    updateCarousel();
+                });
+            }
+
+            if (nextButton) {
+                nextButton.addEventListener('click', function() {
+                    currentIndex = (currentIndex + 1) % itemCount;
+                    updateCarousel();
+                });
+            }
+
+            // Eventos para os indicadores
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', function() {
+                    currentIndex = index;
+                    updateCarousel();
+                });
+            });
+        });
+    </script>
 </x-app-layout>
