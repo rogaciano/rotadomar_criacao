@@ -170,59 +170,25 @@
                             </button>
                         </div>
 
-                        <!-- Anexos Antigos (Compatibilidade) -->
-                        @if($produto->anexo_ficha_producao || $produto->anexo_catalogo_vendas)
-                            <div class="mb-6 border-b border-gray-200 pb-4">
-                                <h4 class="text-sm font-medium text-gray-700 mb-3">Anexos Anteriores</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    @if($produto->anexo_ficha_producao)
-                                        <div class="bg-white p-3 rounded-md border border-gray-200 flex items-center justify-between">
-                                            <div class="flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                </svg>
-                                                <span class="text-sm text-gray-700">Ficha de Produção</span>
-                                            </div>
-                                            <a href="{{ asset('storage/' . $produto->anexo_ficha_producao) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
-                                                Visualizar
-                                            </a>
-                                        </div>
-                                    @endif
 
-                                    @if($produto->anexo_catalogo_vendas)
-                                        <div class="bg-white p-3 rounded-md border border-gray-200 flex items-center justify-between">
-                                            <div class="flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                </svg>
-                                                <span class="text-sm text-gray-700">Catálogo de Vendas</span>
-                                            </div>
-                                            <a href="{{ asset('storage/' . $produto->anexo_catalogo_vendas) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
-                                                Visualizar
-                                            </a>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
 
                         <!-- Novos Anexos -->
                         <div>
                             @if($produto->anexos && $produto->anexos->count() > 0)
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                                     @foreach($produto->anexos as $anexo)
                                         <div class="bg-white p-3 rounded-md border border-gray-200 flex items-center justify-between">
                                             <div class="flex items-center">
                                                 @php
                                                     $icone = 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z';
                                                     $corIcone = 'text-blue-500';
-                                                    
+
                                                     if (in_array($anexo->tipo_arquivo, ['jpg', 'jpeg', 'png'])) {
                                                         $icone = 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z';
                                                         $corIcone = 'text-green-500';
                                                     }
                                                 @endphp
-                                                
+
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 {{ $corIcone }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icone }}" />
                                                 </svg>
@@ -274,7 +240,7 @@
                                     <div>
                                         <label for="arquivo" class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
                                         <input type="file" name="arquivo" id="arquivo" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
-                                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, PNG, JPG, JPEG (máx. 10MB)</p>
+                                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PNG, JPG, JPEG (máx. 10MB) e PDF (máx. 1MB)</p>
                                     </div>
                                 </div>
                                 <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">

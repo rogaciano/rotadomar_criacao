@@ -28,15 +28,42 @@ class ProdutoAnexoController extends Controller
             ]);
         }
         
-        // Validação mais flexível para PDFs
+        // Validação inicial
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255',
-            'arquivo' => 'required|file|max:10240',
+            'arquivo' => 'required|file',
         ], [
             'descricao.required' => 'A descrição do anexo é obrigatória.',
             'arquivo.required' => 'O arquivo é obrigatório.',
-            'arquivo.max' => 'O arquivo não pode ser maior que 10MB.',
         ]);
+        
+        // Validação de tamanho com limites diferentes para PDF e imagens
+        if ($request->hasFile('arquivo')) {
+            $arquivo = $request->file('arquivo');
+            $extensao = strtolower($arquivo->getClientOriginalExtension());
+            $mimeType = $arquivo->getMimeType();
+            $tamanhoEmMB = $arquivo->getSize() / 1024 / 1024; // Tamanho em MB
+            
+            \Log::info('Verificando tamanho do arquivo', [
+                'tamanho_mb' => $tamanhoEmMB,
+                'extensao' => $extensao,
+                'mime_type' => $mimeType
+            ]);
+            
+            // Limite de 1MB para PDFs
+            if (($extensao === 'pdf' || strpos($mimeType, 'pdf') !== false) && $tamanhoEmMB > 1) {
+                return redirect()->back()
+                    ->withErrors(['arquivo' => 'Arquivos PDF não podem ser maiores que 1MB. Seu arquivo tem aproximadamente ' . round($tamanhoEmMB, 2) . 'MB.'])
+                    ->withInput();
+            }
+            
+            // Limite de 10MB para outros arquivos
+            if ($tamanhoEmMB > 10) {
+                return redirect()->back()
+                    ->withErrors(['arquivo' => 'O arquivo não pode ser maior que 10MB.'])
+                    ->withInput();
+            }
+        }
         
         // Validação manual do tipo de arquivo
         if ($request->hasFile('arquivo')) {

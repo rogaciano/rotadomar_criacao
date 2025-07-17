@@ -122,53 +122,19 @@
                                 </select>
                             </div>
 
-                            <!-- Documentos Antigos (Compatibilidade) -->
-                            <div class="col-span-1 md:col-span-2">
-                                <h3 class="text-md font-medium text-gray-700 mb-3">Documentos Antigos</h3>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                    <!-- Ficha de Produção -->
-                                    <div>
-                                        <label for="ficha_producao" class="block text-sm font-medium text-gray-700 mb-1">Ficha de Produção</label>
-                                        @if($produto->anexo_ficha_producao)
-                                            <div class="mb-2 flex items-center">
-                                                <a href="{{ asset('storage/' . $produto->anexo_ficha_producao) }}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                    </svg>
-                                                    Visualizar ficha atual
-                                                </a>
-                                            </div>
-                                        @endif
-                                        <input type="file" name="ficha_producao" id="ficha_producao" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, PNG, JPG, JPEG (máx. 10MB)</p>
-                                    </div>
 
-                                    <!-- Catálogo de Vendas -->
-                                    <div>
-                                        <label for="catalogo_vendas" class="block text-sm font-medium text-gray-700 mb-1">Catálogo de Vendas</label>
-                                        @if($produto->anexo_catalogo_vendas)
-                                            <div class="mb-2 flex items-center">
-                                                <a href="{{ asset('storage/' . $produto->anexo_catalogo_vendas) }}" target="_blank" class="text-blue-600 hover:text-blue-800 flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                    </svg>
-                                                    Visualizar catálogo atual
-                                                </a>
-                                            </div>
-                                        @endif
-                                        <input type="file" name="catalogo_vendas" id="catalogo_vendas" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, PNG, JPG, JPEG (máx. 10MB)</p>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 italic mb-6">Nota: Para uma gestão mais flexível de documentos, utilize a seção de anexos abaixo.</p>
-                            </div>
-                            
                             <!-- Anexos Flexíveis -->
                             <div class="col-span-1 md:col-span-2">
                                 <div class="flex justify-between items-center mb-3">
                                     <h3 class="text-md font-medium text-gray-700">Anexos</h3>
+                                    <button type="button" onclick="document.getElementById('modal-anexo').classList.remove('hidden')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Adicionar Anexo
+                                    </button>
                                 </div>
-                                
+
                                 @if($produto->anexos && $produto->anexos->count() > 0)
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         @foreach($produto->anexos as $anexo)
@@ -177,13 +143,13 @@
                                                     @php
                                                         $icone = 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z';
                                                         $corIcone = 'text-blue-500';
-                                                        
+
                                                         if (in_array($anexo->tipo_arquivo, ['jpg', 'jpeg', 'png'])) {
                                                             $icone = 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z';
                                                             $corIcone = 'text-green-500';
                                                         }
                                                     @endphp
-                                                    
+
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 {{ $corIcone }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icone }}" />
                                                     </svg>
@@ -209,8 +175,8 @@
                                         Nenhum anexo adicionado. Salve o produto e adicione anexos na tela de visualização.
                                     </div>
                                 @endif
-                                
-                                <p class="text-sm text-gray-500">Após salvar o produto, você poderá adicionar múltiplos anexos com descrições na tela de visualização.</p>
+
+                                <p class="text-sm text-gray-500">Você pode adicionar múltiplos anexos com descrições clicando no botão "Adicionar Anexo".</p>
                             </div>
                         </div>
 
@@ -291,6 +257,42 @@
         </div>
     </div>
 
+    <!-- Modal para adicionar anexo -->
+    <div id="modal-anexo" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('modal-anexo').classList.add('hidden')"></div>
+
+            <!-- Modal panel -->
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form action="{{ route('produtos.anexos.store', $produto->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Adicionar Anexo</h3>
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                        <input type="text" name="descricao" id="descricao" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                    </div>
+                                    <div>
+                                        <label for="arquivo" class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
+                                        <input type="file" name="arquivo" id="arquivo" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
+                                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PNG, JPG, JPEG (máx. 10MB) e PDF (máx. 1MB)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">Salvar</button>
+                        <button type="button" onclick="document.getElementById('modal-anexo').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script>
         // Aguardar que o DOM e jQuery estejam totalmente carregados
@@ -311,41 +313,41 @@
                     }
                 });
             }
-            
+
             // Get all currently selected tecido IDs
             function getSelectedTecidoIds() {
                 const selects = container.querySelectorAll('select[name^="tecidos"]');
                 return Array.from(selects).map(select => select.value).filter(value => value !== '');
             }
-            
+
             // Update all selects to properly show available options
             function updateSelectOptions() {
                 const selectedIds = getSelectedTecidoIds();
                 const selects = container.querySelectorAll('select[name^="tecidos"]');
-                
+
                 // Get all available options from the first select (which has all options)
                 const firstSelect = container.querySelector('select');
                 const allOptions = Array.from(firstSelect.options);
-                
+
                 selects.forEach(select => {
                     const currentValue = select.value;
-                    
+
                     // Clear all options except the first one (placeholder)
                     while (select.options.length > 1) {
                         select.remove(1);
                     }
-                    
+
                     // Add back all options, ensuring the current selection remains available
                     allOptions.forEach(option => {
                         // Include option if:
                         // 1. It's the empty placeholder, or
                         // 2. It's the currently selected value for this dropdown, or
                         // 3. It's not selected in any other dropdown
-                        if (option.value === '' || 
-                            option.value === currentValue || 
-                            !selectedIds.includes(option.value) || 
+                        if (option.value === '' ||
+                            option.value === currentValue ||
+                            !selectedIds.includes(option.value) ||
                             (selectedIds.filter(id => id === option.value).length < 2 && option.value === currentValue)) {
-                            
+
                             const newOption = document.createElement('option');
                             newOption.value = option.value;
                             newOption.text = option.text;
@@ -364,7 +366,7 @@
                 tecidoCount++;
                 const newItem = document.createElement('div');
                 newItem.className = 'tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200';
-                
+
                 // Get all available options excluding already selected ones
                 const selectedIds = getSelectedTecidoIds();
                 const firstSelect = container.querySelector('select');
@@ -372,7 +374,7 @@
                     .filter(opt => opt.value === '' || !selectedIds.includes(opt.value))
                     .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
                     .join('');
-                
+
                 newItem.innerHTML = `
                     <div class="flex items-center gap-4">
                         <div class="flex-grow">
@@ -390,42 +392,42 @@
                         </button>
                     </div>
                 `;
-                
+
                 container.appendChild(newItem);
                 updateRemoveButtons();
-                
+
                 // Não precisamos adicionar event listener aqui, pois estamos usando delegação de eventos
                 const newSelect = newItem.querySelector('select');
-                
+
                 // Não precisamos adicionar event listener aqui, pois estamos usando delegação de eventos
             });
-            
+
             // Add event listeners to existing remove buttons using event delegation
             $(container).on('click', '.remove-tecido', function() {
                 $(this).closest('.tecido-item').remove();
                 updateRemoveButtons();
                 updateSelectOptions();
             });
-            
+
             // Add change event listeners to existing selects using event delegation
             $(container).on('change', 'select[name^="tecidos"]', function() {
                 updateSelectOptions();
                 // Trigger Select2 to update
                 $(this).trigger('change.select2');
             });
-            
+
             // Verificar campos de consumo vazios antes de enviar o formulário
             document.querySelector('form').addEventListener('submit', function(e) {
                 // Encontrar todos os campos de consumo
                 const consumoInputs = document.querySelectorAll('input[name^="tecidos"][name$="[consumo]"]');
-                
+
                 // Definir como zero se estiver vazio
                 consumoInputs.forEach(input => {
                     if (input.value === '' || input.value === null || input.value.trim() === '') {
                         input.value = '0';
                     }
                 });
-                
+
                 // Verificar novamente para garantir que nenhum campo ficou vazio
                 let todosPreenchidos = true;
                 consumoInputs.forEach(input => {
@@ -434,12 +436,12 @@
                         input.value = '0'; // Tentar definir novamente
                     }
                 });
-                
+
                 if (!todosPreenchidos) {
                     console.log('Alguns campos de consumo foram automaticamente definidos como zero');
                 }
             });
-            
+
             // Inicializar Select2 nos campos de grupo e estilista
             $(document).ready(function() {
                 $('.grupo-select').select2({
@@ -447,14 +449,14 @@
                     allowClear: true,
                     width: '100%'
                 });
-                
+
                 $('.estilista-select').select2({
                     placeholder: "Selecione um estilista",
                     allowClear: true,
                     width: '100%'
                 });
             });
-            
+
             // Initialize Select2 on all tecido selects
             $(document).ready(function() {
                 $('.tecido-select').select2({
@@ -462,21 +464,21 @@
                     allowClear: true,
                     width: '100%'
                 });
-                
+
                 // Ajustar estilo do Select2 para combinar com o Tailwind
                 $('.select2-container--default .select2-selection--single').css({
                     'height': '42px',
                     'padding': '6px 4px',
                     'border-color': '#d1d5db'
                 });
-                
+
                 // Garantir que o container do Select2 respeite o layout flex
                 $('.select2-container').css({
                     'width': '100%',
                     'max-width': '100%',
                     'display': 'block'
                 });
-                
+
                 // Re-initialize Select2 after adding a new tecido
                 $('#add-tecido').on('click', function() {
                     setTimeout(function() {
@@ -496,7 +498,7 @@
                     }, 100);
                 });
             });
-            
+
             // Initialize
             updateRemoveButtons();
             updateSelectOptions();
