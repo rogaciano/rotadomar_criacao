@@ -6,6 +6,30 @@
     </x-slot>
 
     <div class="py-12 bg-gray-900">
+        @php
+        // Função para calcular dias úteis entre duas datas (excluindo sábados e domingos)
+        function calcularDiasUteis($dataInicio, $dataFim) {
+            if (!$dataInicio) return null;
+            
+            if (!$dataFim) {
+                $dataFim = now();
+            }
+            
+            $diasUteis = 0;
+            $dataAtual = clone $dataInicio;
+            
+            while ($dataAtual <= $dataFim) {
+                // 6 = sábado, 0 = domingo
+                $diaDaSemana = $dataAtual->dayOfWeek;
+                if ($diaDaSemana != 0 && $diaDaSemana != 6) {
+                    $diasUteis++;
+                }
+                $dataAtual->addDay();
+            }
+            
+            return $diasUteis;
+        }
+        @endphp
         <div class="w-[98%] mx-auto px-2">
             <!-- Botões de ação -->
             <div class="flex flex-wrap gap-2 mb-4">
@@ -140,7 +164,9 @@
 
                     <!-- Tabela de Movimentações -->
                     <div class="relative overflow-hidden">
-                        <table class="w-full divide-y divide-gray-200 text-sm table-fixed">
+                        <!-- Versão para desktop/tablet -->
+                        <div class="hidden md:block">
+                            <table class="w-full divide-y divide-gray-200 text-sm table-fixed">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -185,7 +211,7 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'situacao', 'direction' => request('sort') == 'situacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Situação
                                             @if(request('sort') == 'situacao')
@@ -199,8 +225,8 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_entrada', 'direction' => request('sort') == 'data_entrada' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
+                                    <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px]">
+                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_entrada', 'direction' => request('sort') == 'data_entrada' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center justify-end hover:text-gray-700">
                                             Data Entrada
                                             @if(request('sort') == 'data_entrada')
                                                 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -213,8 +239,8 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_saida', 'direction' => request('sort') == 'data_saida' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
+                                    <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px]">
+                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_saida', 'direction' => request('sort') == 'data_saida' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center justify-end hover:text-gray-700">
                                             Data Saída
                                             @if(request('sort') == 'data_saida')
                                                 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -227,8 +253,8 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_devolucao', 'direction' => request('sort') == 'data_devolucao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
+                                    <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px]">
+                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_devolucao', 'direction' => request('sort') == 'data_devolucao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center justify-end hover:text-gray-700">
                                             Data Devolução
                                             @if(request('sort') == 'data_devolucao')
                                                 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -270,18 +296,7 @@
                                         </a>
                                     </th>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => request('sort') == 'created_at' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
-                                            Criado em
-                                            @if(request('sort') == 'created_at')
-                                                <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                    @if(request('direction') == 'asc')
-                                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-                                                    @else
-                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                                    @endif
-                                                </svg>
-                                            @endif
-                                        </a>
+                                        Dias
                                     </th>
                                     <th scope="col" class="sticky right-0 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 shadow-md z-10">
                                         Ações
@@ -302,7 +317,13 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            {{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}
+                                            @if($movimentacao->localizacao)
+                                                <div class="truncate max-w-[100px]" title="{{ $movimentacao->localizacao->nome_localizacao }}">
+                                                    {{ Str::limit($movimentacao->localizacao->nome_localizacao, 15, '...') }}
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->tipo && $movimentacao->tipo->descricao == 'Entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -311,23 +332,25 @@
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             @if($movimentacao->situacao)
-                                                <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 text-gray-800' }}">
-                                                    {{ $movimentacao->situacao->descricao ?? 'N/A' }}
-                                                </span>
+                                                <div class="truncate max-w-[100px]" title="{{ $movimentacao->situacao->descricao }}">
+                                                    <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 text-gray-800' }}">
+                                                        {{ Str::limit($movimentacao->situacao->descricao, 15, '...') }}
+                                                    </span>
+                                                </div>
                                             @else
                                                 <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
                                                     N/A
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            {{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
+                                            {{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            {{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y H:i') : 'N/A' }}
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
+                                            {{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : 'N/A' }}
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            {{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y H:i') : 'N/A' }}
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
+                                            {{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y') : 'N/A' }}
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
@@ -344,21 +367,65 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            {{ $movimentacao->created_at ? $movimentacao->created_at->format('d/m/Y H:i') : 'N/A' }}
+                                            @php
+                                                $diasEntre = null;
+                                                $prazoExcedido = false;
+                                                $prazoSetor = null;
+                                                
+                                                if ($movimentacao->data_entrada) {
+                                                    if ($movimentacao->data_saida) {
+                                                        // Se tem data de saída, calcular dias úteis entre entrada e saída
+                                                        $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
+                                                    } else {
+                                                        // Se não tem data de saída, calcular dias úteis entre entrada e data atual
+                                                        $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
+                                                    }
+                                                    
+                                                    // Verificar se excede o prazo do setor
+                                                    if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                        $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
+                                                        $prazoSetor = $movimentacao->localizacao->prazo;
+                                                    }
+                                                }
+                                            @endphp
+                                            
+                                            @if($diasEntre !== null)
+                                                <div class="text-center">
+                                                    <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
+                                                        {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                                    </span>
+                                                    @if($prazoExcedido && isset($prazoSetor))
+                                                        <div class="text-xs mt-1 text-red-600 font-medium">
+                                                            (Prazo: {{ $prazoSetor }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div class="text-center">
+                                                    <span class="text-gray-400">-</span>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="sticky right-0 px-3 py-2 whitespace-nowrap text-right text-xs font-medium bg-white shadow-md z-10">
                                             <div class="flex justify-end space-x-1">
-                                                <a href="{{ route('movimentacoes.show', $movimentacao) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
+                                                <a href="{{ route('movimentacoes.show', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                 </a>
-                                                <a href="{{ route('movimentacoes.edit', $movimentacao) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
+                                                <a href="{{ route('movimentacoes.edit', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </a>
+                                                @if($movimentacao->anexo)
+                                                <button type="button" onclick="openImageModal('{{ $movimentacao->anexo_url }}', {{ $movimentacao->id }})" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                </button>
+                                                @endif
                                                 <form action="{{ route('movimentacoes.destroy', $movimentacao) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta movimentação?');">
                                                     @csrf
                                                     @method('DELETE')
@@ -380,11 +447,138 @@
                                 @endforelse
                             </tbody>
                         </table>
+                        </div>
+                        
+                        <!-- Versão para dispositivos móveis (cards) -->
+                        <div class="md:hidden space-y-4">
+                            @forelse($movimentacoes as $movimentacao)
+                                <div class="bg-white shadow rounded-lg p-4">
+                                    <!-- Produto -->
+                                    <div class="mb-3 border-b pb-2">
+                                        <div class="font-medium text-gray-900">{{ $movimentacao->produto->referencia }}</div>
+                                        <div class="text-sm text-gray-500 truncate" title="{{ $movimentacao->produto->descricao }}">{{ Str::limit($movimentacao->produto->descricao, 40, '...') }}</div>
+                                    </div>
+                                    
+                                    <!-- Informações principais -->
+                                    <div class="grid grid-cols-2 gap-2 mb-3">
+                                        <div>
+                                            <div class="text-xs text-gray-500 font-medium">LOCALIZAÇÃO</div>
+                                            <div class="text-sm">{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 font-medium">SITUAÇÃO</div>
+                                            @if($movimentacao->situacao)
+                                                <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 text-gray-800' }}">
+                                                    {{ $movimentacao->situacao->descricao ?? 'N/A' }}
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">N/A</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Tipo e Dias -->
+                                    <div class="flex justify-between mb-3">
+                                        <div class="flex-1">
+                                            <div class="text-xs text-gray-500 font-medium">TIPO</div>
+                                            <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->tipo && $movimentacao->tipo->descricao == 'Entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}
+                                            </span>
+                                        </div>
+                                        <div class="flex-1 text-right">
+                                            <div class="text-xs text-gray-500 font-medium">DIAS</div>
+                                            @php
+                                                $diasEntre = null;
+                                                $prazoExcedido = false;
+                                                $prazoSetor = null;
+                                                
+                                                if ($movimentacao->data_entrada) {
+                                                    if ($movimentacao->data_saida) {
+                                                        $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
+                                                    } else {
+                                                        $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
+                                                    }
+                                                    
+                                                    if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                        $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
+                                                        $prazoSetor = $movimentacao->localizacao->prazo;
+                                                    }
+                                                }
+                                            @endphp
+                                            
+                                            @if($diasEntre !== null)
+                                                <div class="text-sm {{ $prazoExcedido ? 'text-red-600 font-bold' : 'text-blue-600' }}">
+                                                    {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                                    @if($prazoSetor)
+                                                        <span class="text-xs text-gray-500">({{ $prazoSetor }})</span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Datas - Agora em uma única linha -->
+                                    <div class="flex justify-between mb-3 text-right">
+                                        <div class="flex-1 text-center">
+                                            <div class="text-xs text-gray-500 font-medium">ENTRADA</div>
+                                            <div class="text-sm">{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}</div>
+                                        </div>
+                                        
+                                        <div class="flex-1 text-center border-l border-r border-gray-200 px-2">
+                                            <div class="text-xs text-gray-500 font-medium">SAÍDA</div>
+                                            <div class="text-sm">{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : 'N/A' }}</div>
+                                        </div>
+                                        
+                                        <div class="flex-1 text-center">
+                                            <div class="text-xs text-gray-500 font-medium">DEVOLUÇÃO</div>
+                                            <div class="text-sm">{{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y') : 'N/A' }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Ações -->
+                                    <div class="flex justify-end space-x-2 pt-2 border-t">
+                                        <a href="{{ route('movimentacoes.show', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </a>
+                                        <a href="{{ route('movimentacoes.edit', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                        @if($movimentacao->anexo)
+                                        <button type="button" onclick="openImageModal('{{ $movimentacao->anexo_url }}', {{ $movimentacao->id }})" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </button>
+                                        @endif
+                                        <form action="{{ route('movimentacoes.destroy', $movimentacao) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta movimentação?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-100">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="bg-white shadow rounded-lg p-4 text-center text-gray-500">
+                                    Nenhuma movimentação encontrada.
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     <!-- Paginação -->
                     <div class="mt-4">
-                        {{ $movimentacoes->links() }}
+                        {{ $movimentacoes->appends(request()->query())->links('vendor.pagination.simple-tailwind') }}
                     </div>
                 </div>
             </div>
@@ -402,10 +596,57 @@
             toggleButton.addEventListener('click', function() {
                 if (filterContainer.style.display === 'none') {
                     filterContainer.style.display = 'block';
+                    toggleButton.textContent = 'Ocultar Filtros';
                 } else {
                     filterContainer.style.display = 'none';
+                    toggleButton.textContent = 'Mostrar Filtros';
+                }
+            });
+
+            // Funções para o modal de imagem
+            window.openImageModal = function(imageUrl, id) {
+                const modal = document.getElementById('imageModal');
+                const modalImage = document.getElementById('modalImage');
+                modalImage.src = imageUrl;
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Impede rolagem do body
+                console.log('Modal aberto: ' + imageUrl);
+            }
+
+            window.closeImageModal = function() {
+                const modal = document.getElementById('imageModal');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // Restaura rolagem do body
+            }
+
+            // Fechar o modal ao clicar fora da imagem
+            const modal = document.getElementById('imageModal');
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeImageModal();
+                }
+            });
+
+            // Fechar o modal com a tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !document.getElementById('imageModal').classList.contains('hidden')) {
+                    closeImageModal();
                 }
             });
         });
     </script>
+
+    <!-- Modal para exibir imagem -->
+    <div id="imageModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75" style="display: none;">
+        <div class="relative max-w-4xl max-h-screen p-2">
+            <button type="button" onclick="closeImageModal()" class="absolute top-2 right-2 bg-white rounded-full p-1 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <img id="modalImage" src="" alt="Anexo da Movimentação" class="max-w-full max-h-[90vh] rounded-lg shadow-lg object-contain bg-white p-1">
+        </div>
+    </div>
 </x-app-layout>
