@@ -218,8 +218,18 @@
                     </div>
 
                     <!-- Modal para adicionar anexo -->
-                    <div id="modal-adicionar-anexo" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
-                        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                    <div id="modal-adicionar-anexo" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
+                        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                            <!-- Overlay de fundo -->
+                            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                            </div>
+                            
+                            <!-- Centralização vertical -->
+                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                            
+                            <!-- Modal propriamente dito -->
+                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                             <div class="px-6 py-4 border-b border-gray-200">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-lg font-medium text-gray-900">Adicionar Anexo</h3>
@@ -252,6 +262,7 @@
                                     </button>
                                 </div>
                             </form>
+                            </div>
                         </div>
                     </div>
 
@@ -313,6 +324,25 @@
 
                     <!-- Movimentações -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        @php
+                        // Função para calcular dias úteis entre duas datas (excluindo sábados e domingos)
+                        function calcularDiasUteis($dataInicio, $dataFim) {
+                            $diasUteis = 0;
+                            $dataAtual = clone $dataInicio;
+                            
+                            while ($dataAtual <= $dataFim) {
+                                // 6 = sábado, 0 = domingo
+                                $diaDaSemana = $dataAtual->dayOfWeek;
+                                if ($diaDaSemana != 0 && $diaDaSemana != 6) {
+                                    $diasUteis++;
+                                }
+                                $dataAtual->addDay();
+                            }
+                            
+                            return $diasUteis;
+                        }
+                        @endphp
+                        
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-800">Movimentações</h3>
                             <a href="{{ route('movimentacoes.create', ['produto_id' => $produto->id]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
@@ -385,43 +415,37 @@
                                                     @php
                                                         $diasEntre = null;
                                                         $prazoExcedido = false;
-                                                        $indexAtual = $loop->index;
-                                                        $movimentacaoAnterior = $indexAtual > 0 ? $movimentacoes[$indexAtual - 1] : null;
-
-                                                        if ($indexAtual === 0) {
-                                                            // Primeira linha, exibir zero
-                                                            $diasEntre = 0;
-                                                            $prazoExcedido = false;
-                                                        } elseif ($movimentacaoAnterior && $movimentacao->data_entrada && $movimentacaoAnterior->data_entrada) {
-                                                            // Calcular dias entre a movimentação atual e a anterior
-                                                            // Usando abs() para garantir que o valor seja sempre positivo
-                                                            $diasEntre = abs($movimentacao->data_entrada->diffInDays($movimentacaoAnterior->data_entrada));
-
-                                                            // Verificar se excede o prazo do setor anterior
-                                                            if ($movimentacaoAnterior->localizacao && $movimentacaoAnterior->localizacao->prazo) {
-                                                                $prazoExcedido = $diasEntre > $movimentacaoAnterior->localizacao->prazo;
-                                                                $prazoSetor = $movimentacaoAnterior->localizacao->prazo;
+                                                        $prazoSetor = null;
+                                                        
+                                                        // Calcular dias úteis entre DATA ENTRADA e DATA SAIDA (ou data atual se não houver saída)
+                                                        if ($movimentacao->data_entrada) {
+                                                            if ($movimentacao->data_saida) {
+                                                                // Se tem data de saída, calcular dias úteis entre entrada e saída
+                                                                $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
+                                                            } else {
+                                                                // Se não tem data de saída, calcular dias úteis entre entrada e data atual
+                                                                $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
+                                                            }
+                                                            
+                                                            // Verificar se excede o prazo do setor
+                                                            if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                                $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
+                                                                $prazoSetor = $movimentacao->localizacao->prazo;
                                                             }
                                                         }
                                                     @endphp
 
                                                     @if($diasEntre !== null)
-                                                        @if($indexAtual === 0)
-                                                            <div class="text-center">
-                                                                <span class="px-2 py-1 inline-block text-xs bg-gray-100 text-gray-600 rounded-full">0 dias</span>
-                                                            </div>
-                                                        @else
-                                                            <div class="text-center">
-                                                                <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
-                                                                    {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
-                                                                </span>
-                                                                @if($prazoExcedido && isset($prazoSetor))
-                                                                    <div class="text-xs mt-1 text-red-600 font-medium">
-                                                                        (Prazo: {{ $prazoSetor }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        @endif
+                                                        <div class="text-center">
+                                                            <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
+                                                                {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                                            </span>
+                                                            @if($prazoExcedido && isset($prazoSetor))
+                                                                <div class="text-xs mt-1 text-red-600 font-medium">
+                                                                    (Prazo: {{ $prazoSetor }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     @else
                                                         <div class="text-center">
                                                             <span class="text-gray-400">-</span>
