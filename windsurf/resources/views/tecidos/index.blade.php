@@ -174,7 +174,7 @@
 
                     <!-- Paginação -->
                     <div class="mt-4">
-                        {{ $tecidos->links() }}
+                        {{ $tecidos->appends(request()->query())->links() }}
                     </div>
                 </div>
             </div>
