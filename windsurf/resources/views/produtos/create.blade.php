@@ -121,19 +121,7 @@
                                 </select>
                             </div>
 
-                            <!-- Ficha de Produção -->
-                            <div>
-                                <label for="ficha_producao" class="block text-sm font-medium text-gray-700 mb-1">Ficha de Produção</label>
-                                <input type="file" name="ficha_producao" id="ficha_producao" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX, PNG, JPG (máx. 10MB)</p>
-                            </div>
 
-                            <!-- Catálogo de Vendas -->
-                            <div>
-                                <label for="catalogo_vendas" class="block text-sm font-medium text-gray-700 mb-1">Catálogo de Vendas</label>
-                                <input type="file" name="catalogo_vendas" id="catalogo_vendas" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, DOC, DOCX, PNG, JPG (máx. 10MB)</p>
-                            </div>
                         </div>
 
                         <!-- Seção de Tecidos separada em uma única coluna -->
@@ -358,19 +346,19 @@
             // Initialize
             updateRemoveButtons();
             updateSelectOptions();
-            
+
             // Verificar campos de consumo vazios antes de enviar o formulário
             document.querySelector('form').addEventListener('submit', function(e) {
                 // Encontrar todos os campos de consumo
                 const consumoInputs = document.querySelectorAll('input[name^="tecidos"][name$="[consumo]"]');
-                
+
                 // Definir como zero se estiver vazio
                 consumoInputs.forEach(input => {
                     if (input.value === '' || input.value === null || input.value.trim() === '') {
                         input.value = '0';
                     }
                 });
-                
+
                 // Verificar novamente para garantir que nenhum campo ficou vazio
                 let todosPreenchidos = true;
                 consumoInputs.forEach(input => {
@@ -379,12 +367,12 @@
                         input.value = '0'; // Tentar definir novamente
                     }
                 });
-                
+
                 if (!todosPreenchidos) {
                     console.log('Alguns campos de consumo foram automaticamente definidos como zero');
                 }
             });
-            
+
             // Inicializar Select2 nos campos de grupo e estilista
             $(document).ready(function() {
                 $('.grupo-select').select2({
@@ -392,7 +380,7 @@
                     allowClear: true,
                     width: '100%'
                 });
-                
+
                 $('.estilista-select').select2({
                     placeholder: "Selecione um estilista",
                     allowClear: true,

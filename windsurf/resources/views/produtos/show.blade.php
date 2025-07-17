@@ -158,38 +158,134 @@
                                 @endif
                     </div>
 
-                    <!-- Documentos -->
+                    <!-- Documentos e Anexos -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Documentos</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Documentos e Anexos</h3>
+                            <button type="button" onclick="document.getElementById('modal-adicionar-anexo').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
+                                Adicionar Anexo
+                            </button>
+                        </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500 mb-2">Ficha de Produção</span>
-                                @if($produto->anexo_ficha_producao)
-                                    <a href="{{ asset('storage/' . $produto->anexo_ficha_producao) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                        </svg>
-                                        Visualizar Ficha
-                                    </a>
-                                @else
-                                    <span class="text-gray-400 italic">Nenhuma ficha de produção disponível</span>
-                                @endif
-                            </div>
+                        <!-- Anexos Antigos (Compatibilidade) -->
+                        @if($produto->anexo_ficha_producao || $produto->anexo_catalogo_vendas)
+                            <div class="mb-6 border-b border-gray-200 pb-4">
+                                <h4 class="text-sm font-medium text-gray-700 mb-3">Anexos Anteriores</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @if($produto->anexo_ficha_producao)
+                                        <div class="bg-white p-3 rounded-md border border-gray-200 flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                </svg>
+                                                <span class="text-sm text-gray-700">Ficha de Produção</span>
+                                            </div>
+                                            <a href="{{ asset('storage/' . $produto->anexo_ficha_producao) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                Visualizar
+                                            </a>
+                                        </div>
+                                    @endif
 
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500 mb-2">Catálogo de Vendas</span>
-                                @if($produto->anexo_catalogo_vendas)
-                                    <a href="{{ asset('storage/' . $produto->anexo_catalogo_vendas) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-100 border border-transparent rounded-md font-medium text-sm text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                        </svg>
-                                        Visualizar Catálogo
-                                    </a>
-                                @else
-                                    <span class="text-gray-400 italic">Nenhum catálogo de vendas disponível</span>
-                                @endif
+                                    @if($produto->anexo_catalogo_vendas)
+                                        <div class="bg-white p-3 rounded-md border border-gray-200 flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                </svg>
+                                                <span class="text-sm text-gray-700">Catálogo de Vendas</span>
+                                            </div>
+                                            <a href="{{ asset('storage/' . $produto->anexo_catalogo_vendas) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                                                Visualizar
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
+                        @endif
+
+                        <!-- Novos Anexos -->
+                        <div>
+                            @if($produto->anexos && $produto->anexos->count() > 0)
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    @foreach($produto->anexos as $anexo)
+                                        <div class="bg-white p-3 rounded-md border border-gray-200 flex items-center justify-between">
+                                            <div class="flex items-center">
+                                                @php
+                                                    $icone = 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z';
+                                                    $corIcone = 'text-blue-500';
+                                                    
+                                                    if (in_array($anexo->tipo_arquivo, ['jpg', 'jpeg', 'png'])) {
+                                                        $icone = 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z';
+                                                        $corIcone = 'text-green-500';
+                                                    }
+                                                @endphp
+                                                
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 {{ $corIcone }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icone }}" />
+                                                </svg>
+                                                <span class="text-sm text-gray-700">{{ $anexo->descricao }}</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <a href="{{ asset('storage/' . $anexo->arquivo_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm mr-3">
+                                                    Visualizar
+                                                </a>
+                                                <form action="{{ route('produtos.anexos.destroy', $anexo->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este anexo?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                        Excluir
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-4 text-gray-500 italic">
+                                    Nenhum anexo adicionado. Clique em "Adicionar Anexo" para incluir documentos.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Modal para adicionar anexo -->
+                    <div id="modal-adicionar-anexo" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-lg font-medium text-gray-900">Adicionar Anexo</h3>
+                                    <button type="button" onclick="document.getElementById('modal-adicionar-anexo').classList.add('hidden')" class="text-gray-400 hover:text-gray-500">
+                                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <form action="{{ route('produtos.anexos.store', $produto->id) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="px-6 py-4">
+                                    <div class="mb-4">
+                                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                        <input type="text" name="descricao" id="descricao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                                    </div>
+                                    <div>
+                                        <label for="arquivo" class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
+                                        <input type="file" name="arquivo" id="arquivo" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
+                                        <p class="mt-1 text-sm text-gray-500">Formatos aceitos: PDF, PNG, JPG, JPEG (máx. 10MB)</p>
+                                    </div>
+                                </div>
+                                <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
+                                    <button type="button" onclick="document.getElementById('modal-adicionar-anexo').classList.add('hidden')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Salvar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
 

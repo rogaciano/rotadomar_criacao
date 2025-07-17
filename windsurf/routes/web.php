@@ -10,6 +10,7 @@ use App\Http\Controllers\TipoController;
 use App\Http\Controllers\SituacaoController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\ProdutoAnexoController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -78,6 +79,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes para Produtos
     Route::resource('produtos', ProdutoController::class);
     Route::get('produtos/{id}/pdf', [ProdutoController::class, 'generatePdf'])->name('produtos.pdf');
+    
+    // Routes para Anexos de Produtos
+    Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
+    Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');
 
     // Routes para Movimentações
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([

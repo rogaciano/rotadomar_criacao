@@ -76,6 +76,14 @@ class Produto extends Model
     }
     
     /**
+     * Relacionamento com os anexos do produto
+     */
+    public function anexos()
+    {
+        return $this->hasMany(ProdutoAnexo::class);
+    }
+    
+    /**
      * Retorna a localização atual do produto baseada na última movimentação
      */
     public function getLocalizacaoAtualAttribute()
