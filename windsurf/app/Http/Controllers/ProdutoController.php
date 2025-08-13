@@ -486,4 +486,57 @@ class ProdutoController extends Controller
 
         return response()->json(['colors' => $cores]);
     }
+
+    /**
+     * Verificar inconsistências nos produtos
+     */
+    public function inconsistencias()
+    {
+        // Buscar produtos com possíveis inconsistências
+        $produtos = Produto::with(['cores', 'marca', 'grupoProduto', 'status'])
+            ->whereHas('cores')
+            ->get()
+            ->filter(function ($produto) {
+                $totalCores = $produto->cores->sum('quantidade');
+                return $totalCores != $produto->quantidade;
+            });
+
+        return view('produtos.inconsistencias', compact('produtos'));
+    }
+
+    /**
+     * Gerar PDF da lista de produtos
+     */
+    public function generateListPdf(Request $request)
+    {
+        $query = Produto::with(['marca', 'grupoProduto', 'status', 'estilista']);
+
+        // Aplicar filtros se existirem
+        if ($request->filled('referencia')) {
+            $query->where('referencia', 'like', '%' . $request->referencia . '%');
+        }
+
+        if ($request->filled('descricao')) {
+            $query->where('descricao', 'like', '%' . $request->descricao . '%');
+        }
+
+        if ($request->filled('marca_id')) {
+            $query->where('marca_id', $request->marca_id);
+        }
+
+        if ($request->filled('grupo_id')) {
+            $query->where('grupo_id', $request->grupo_id);
+        }
+
+        if ($request->filled('status_id')) {
+            $query->where('status_id', $request->status_id);
+        }
+
+        $produtos = $query->orderBy('referencia')->get();
+
+        $pdf = PDF::loadView('produtos.lista-pdf', compact('produtos'))
+               ->setPaper('a4', 'landscape');
+        
+        return $pdf->stream('lista-produtos.pdf');
+    }
 }

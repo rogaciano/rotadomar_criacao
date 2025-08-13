@@ -49,6 +49,25 @@
                                 <p class="mt-1 text-sm text-gray-900 font-semibold">{{ number_format($tecido->quantidade_estoque, 2, ',', '.') }} metros</p>
                             </div>
                         </div>
+
+                        <!-- Resumo de Necessidades -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-blue-800">Cálculo da Necessidade</h3>
+                                    <div class="mt-2 text-sm text-blue-700">
+                                        <p>A <strong>Necessidade</strong> é calculada automaticamente com base nos produtos que usam este tecido:</p>
+                                        <p class="mt-1"><strong>Necessidade = Quantidade da cor no produto × Consumo do tecido</strong></p>
+                                        <p class="mt-1">O <strong>Saldo</strong> mostra se há estoque suficiente (verde) ou déficit (vermelho).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-6">
@@ -59,11 +78,13 @@
                             <div class="overflow-x-auto bg-white rounded-lg shadow">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
-                                        <tr>
+                                         <tr>
                                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Selecionar</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
                                             <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque Atual</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Necessidade</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo</th>
                                             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade Pretendida</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observações</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Atualização</th>
@@ -90,6 +111,18 @@
                                                 {{ number_format($estoqueCor->quantidade, 2, ',', '.') }}
                                                 <input type="hidden" name="cores[{{ $estoqueCor->id }}][quantidade_atual]" value="{{ $estoqueCor->quantidade }}">
                                             </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                                                {{ number_format($estoqueCor->necessidade, 2, ',', '.') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
+                                                @php
+                                                    $saldo = $estoqueCor->saldo;
+                                                    $corSaldo = $saldo >= 0 ? 'text-green-600' : 'text-red-600';
+                                                @endphp
+                                                <span class="{{ $corSaldo }}">
+                                                    {{ number_format($saldo, 2, ',', '.') }}
+                                                </span>
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                                 <input type="number" name="cores[{{ $estoqueCor->id }}][quantidade_pretendida]" step="0.01" min="0" class="mt-1 block w-24 mx-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="0.00">
                                             </td>
@@ -109,6 +142,21 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
                                                 {{ number_format($tecido->total_estoque_por_cores, 2, ',', '.') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                                                @php
+                                                    $totalNecessidade = $tecido->estoquesCores->sum('necessidade');
+                                                @endphp
+                                                {{ number_format($totalNecessidade, 2, ',', '.') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                                                @php
+                                                    $totalSaldo = $tecido->total_estoque_por_cores - $totalNecessidade;
+                                                    $corTotalSaldo = $totalSaldo >= 0 ? 'text-green-600' : 'text-red-600';
+                                                @endphp
+                                                <span class="{{ $corTotalSaldo }} font-medium">
+                                                    {{ number_format($totalSaldo, 2, ',', '.') }}
+                                                </span>
                                             </td>
                                             <td colspan="3"></td>
                                         </tr>

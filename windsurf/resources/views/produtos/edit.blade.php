@@ -496,11 +496,30 @@
             });
 
             // Initialize Select2 on all tecido selects
-            $(document).ready(function() {
-                $('.tecido-select').select2({
+            // Função para inicializar Select2 de forma consistente
+            function initializeSelect2(selector) {
+                $(selector).select2({
                     placeholder: "Selecione um tecido",
                     allowClear: true,
-                    width: '100%'
+                    width: '100%',
+                    language: {
+                        noResults: function() {
+                            return "Nenhum tecido encontrado";
+                        }
+                    },
+                    // Configuração para busca mais flexível
+                    minimumInputLength: 0,
+                    escapeMarkup: function(markup) {
+                        return markup;
+                    },
+                    // Forçar fechamento do dropdown após seleção
+                    closeOnSelect: true
+                }).on('select2:select', function (e) {
+                    // Debug: log quando um item é selecionado
+                    console.log('Tecido selecionado:', e.params.data);
+                    
+                    // Forçar o valor no select
+                    $(this).val(e.params.data.id).trigger('change');
                 });
 
                 // Ajustar estilo do Select2 para combinar com o Tailwind
@@ -514,8 +533,12 @@
                 $('.select2-container').css({
                     'width': '100%',
                     'max-width': '100%',
-                    'display': 'block'
+                    'flex': '1'
                 });
+            }
+
+            $(document).ready(function() {
+                initializeSelect2('.tecido-select');
 
                 // Re-initialize Select2 after adding a new tecido
                 $('#add-tecido').on('click', function() {

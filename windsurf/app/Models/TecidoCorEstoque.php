@@ -32,4 +32,42 @@ class TecidoCorEstoque extends Model
     {
         return $this->belongsTo(Tecido::class);
     }
+
+    /**
+     * Calcula a necessidade total desta cor baseada nos produtos que usam o tecido
+     * Necessidade = Quantidade da cor no produto × Consumo do tecido
+     * 
+     * @return float
+     */
+    public function getNecessidadeAttribute()
+    {
+        $necessidade = 0;
+        
+        // Buscar todos os produtos que usam este tecido
+        $produtos = $this->tecido->produtos;
+        
+        foreach ($produtos as $produto) {
+            // Buscar se o produto tem esta cor específica
+            $produtoCor = $produto->cores()
+                ->where('cor', $this->cor)
+                ->first();
+            
+            if ($produtoCor) {
+                // Necessidade = Quantidade da cor no produto × Consumo do tecido
+                $necessidade += $produtoCor->quantidade * $produto->pivot->consumo;
+            }
+        }
+        
+        return $necessidade;
+    }
+
+    /**
+     * Calcula o saldo (estoque - necessidade)
+     * 
+     * @return float
+     */
+    public function getSaldoAttribute()
+    {
+        return $this->quantidade - $this->necessidade;
+    }
 }

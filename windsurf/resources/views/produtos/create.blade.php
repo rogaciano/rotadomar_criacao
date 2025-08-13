@@ -201,20 +201,50 @@
             const addButton = document.getElementById('add-tecido');
             let tecidoCount = 0;
 
+            // Função para inicializar Select2 de forma consistente
+            function initializeSelect2(selector) {
+                $(selector).select2({
+                    placeholder: "Selecione um tecido",
+                    allowClear: true,
+                    width: '100%',
+                    language: {
+                        noResults: function() {
+                            return "Nenhum tecido encontrado";
+                        }
+                    },
+                    // Configuração para busca mais flexível
+                    minimumInputLength: 0,
+                    escapeMarkup: function(markup) {
+                        return markup;
+                    },
+                    // Forçar fechamento do dropdown após seleção
+                    closeOnSelect: true
+                }).on('select2:select', function (e) {
+                    // Debug: log quando um item é selecionado
+                    console.log('Tecido selecionado:', e.params.data);
+                    
+                    // Forçar o valor no select
+                    $(this).val(e.params.data.id).trigger('change');
+                });
+
+                // Ajustar estilo do Select2 para combinar com o Tailwind
+                $('.select2-container--default .select2-selection--single').css({
+                    'height': '42px',
+                    'padding': '6px 4px',
+                    'border-color': '#d1d5db'
+                });
+
+                // Garantir que o container do Select2 respeite o layout flex
+                $('.select2-container').css({
+                    'width': '100%',
+                    'max-width': '100%',
+                    'flex': '1'
+                });
+            }
+
             // Inicializar Select2 para os selects existentes
             $(document).ready(function() {
-                $('.tecido-select').select2({
-                placeholder: "Selecione um tecido",
-                allowClear: true,
-                width: '100%'
-            });
-
-            // Ajustar estilo do Select2 para combinar com o Tailwind
-            $('.select2-container--default .select2-selection--single').css({
-                'height': '42px',
-                'padding': '6px 4px',
-                'border-color': '#d1d5db'
-            });
+                initializeSelect2('.tecido-select');
             });
 
             // Show/hide remove buttons based on number of tecido items
@@ -324,26 +354,8 @@
                 const newSelect = newItem.querySelector('select');
                 newSelect.addEventListener('change', updateSelectOptions);
 
-                // Initialize Select2 on the new select
-                $(newSelect).select2({
-                    placeholder: "Selecione um tecido",
-                    allowClear: true,
-                    width: '100%'
-                });
-
-                // Ajustar estilo do Select2 para combinar com o Tailwind
-                $('.select2-container--default .select2-selection--single').css({
-                    'height': '42px',
-                    'padding': '6px 4px',
-                    'border-color': '#d1d5db'
-                });
-
-                // Garantir que o container do Select2 respeite o layout flex
-                $('.select2-container').css({
-                    'width': '100%',
-                    'max-width': '100%',
-                    'display': 'block'
-                });
+                // Initialize Select2 on the new select using helper function
+                initializeSelect2(newSelect);
 
                 // Não precisamos adicionar event listener aqui, pois usaremos delegação de eventos
             });
