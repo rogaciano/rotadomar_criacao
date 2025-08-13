@@ -108,7 +108,14 @@ class MovimentacaoController extends Controller
         $produtos = Produto::orderBy('referencia')->get();
         $situacoes = Situacao::orderBy('descricao')->get();
         $tipos = Tipo::orderBy('descricao')->get();
-        $localizacoes = Localizacao::orderBy('nome_localizacao')->get();
+        
+        // Carregar localizações ativas primeiro, depois inativas
+        $localizacoesAtivas = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $localizacoesInativas = Localizacao::where('ativo', false)->orderBy('nome_localizacao')->get();
+        
+        // Combinar as coleções: ativas primeiro, depois inativas
+        $localizacoes = $localizacoesAtivas->concat($localizacoesInativas);
+        
         $status = Status::where('ativo', true)->orderBy('descricao')->get();
 
         return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status'));
@@ -299,8 +306,13 @@ class MovimentacaoController extends Controller
 
         $movimentacao->update($validated);
 
-        // Redirecionar para a página de visualização da movimentação
-        return redirect()->route('movimentacoes.show', $movimentacao)
+        // Redirecionar para a página de visualização da movimentação, preservando back_url
+        $redirectUrl = route('movimentacoes.show', $movimentacao);
+        if ($request->has('back_url')) {
+            $redirectUrl .= '?back_url=' . urlencode($request->input('back_url'));
+        }
+        
+        return redirect($redirectUrl)
             ->with('success', 'Movimentação atualizada com sucesso.');
     }
 

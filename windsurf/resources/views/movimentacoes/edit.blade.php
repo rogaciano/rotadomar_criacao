@@ -13,6 +13,7 @@
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="current_page" value="{{ request()->query('page') }}">
+                        <input type="hidden" name="back_url" value="{{ request('back_url') }}">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Produto -->
@@ -36,7 +37,7 @@
                                     <option value="">Selecione uma localização</option>
                                     @foreach($localizacoes as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ old('localizacao_id', $movimentacao->localizacao_id) == $localizacao->id ? 'selected' : '' }}>
-                                            {{ $localizacao->nome_localizacao }}
+                                            {{ $localizacao->nome_localizacao }}{{ !$localizacao->ativo ? ' (Inativa)' : '' }}
                                         </option>
                                     @endforeach
                                 </select>

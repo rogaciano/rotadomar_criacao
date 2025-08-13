@@ -89,7 +89,9 @@
                                 <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($localizacoes ?? [] as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ request('localizacao_id') == $localizacao->id ? 'selected' : '' }}>{{ $localizacao->nome_localizacao }}</option>
+                                        <option value="{{ $localizacao->id }}" {{ request('localizacao_id') == $localizacao->id ? 'selected' : '' }}>
+                                            {{ $localizacao->nome_localizacao }}{{ !$localizacao->ativo ? ' (Inativa)' : '' }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -175,7 +177,7 @@
                     <!-- Tabela de Movimentações -->
                     <div class="relative overflow-hidden">
                         <!-- Versão para desktop/tablet -->
-                        <div class="hidden md:block">
+                        <div class="block">
                             <table class="w-full divide-y divide-gray-200 text-sm table-fixed">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -460,7 +462,7 @@
                         </div>
                         
                         <!-- Versão para dispositivos móveis (cards) -->
-                        <div class="md:hidden space-y-4">
+                        <div class="hidden space-y-4">
                             @forelse($movimentacoes as $movimentacao)
                                 <div class="bg-white shadow rounded-lg p-4">
                                     <!-- Produto -->
