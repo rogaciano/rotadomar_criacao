@@ -243,6 +243,44 @@
                             <p class="mt-1 text-xs text-gray-500">Adicione um ou mais tecidos utilizados neste produto</p>
                         </div>
 
+                        <!-- Seção de Variações de Cores -->
+                        <div class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Variações de Cores</label>
+                            <div class="border border-gray-300 rounded-md p-4">
+                                <div id="cores-container">
+                                    @forelse($produto->cores as $index => $produtoCor)
+                                        <div class="cor-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
+                                            <div class="flex items-center gap-4">
+                                                <div class="flex-grow">
+                                                    <input type="text" name="cores[{{ $index }}][cor]" value="{{ $produtoCor->cor }}" placeholder="Nome da cor" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>
+                                                </div>
+                                                <div class="w-1/4">
+                                                    <input type="text" name="cores[{{ $index }}][codigo_cor]" value="{{ $produtoCor->codigo_cor }}" placeholder="Código" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>
+                                                </div>
+                                                <div class="w-1/4">
+                                                    <input type="number" name="cores[{{ $index }}][quantidade]" value="{{ $produtoCor->quantidade }}" placeholder="Quantidade" min="1" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                                </div>
+                                                <button type="button" class="remove-cor text-red-500 hover:text-red-700">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <!-- As cores serão adicionadas dinamicamente via JavaScript -->
+                                    @endforelse
+                                </div>
+                                <button type="button" id="add-cor" class="mt-3 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    Adicionar Cor
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">As cores disponíveis serão carregadas automaticamente com base nos tecidos selecionados</p>
+                        </div>
+
                         <div class="flex justify-end mt-6">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -502,6 +540,160 @@
             // Initialize
             updateRemoveButtons();
             updateSelectOptions();
+
+            // === SEÇÃO DE VARIAÇÕES DE CORES ===
+            const coresContainer = document.getElementById('cores-container');
+            const addCorButton = document.getElementById('add-cor');
+            let corCount = {{ $produto->cores->count() }};
+            let availableColors = [];
+
+            // Função para obter cores disponíveis dos tecidos selecionados
+            function getAvailableColors() {
+                const selectedTecidoIds = getSelectedTecidoIds();
+                
+                if (selectedTecidoIds.length === 0) {
+                    availableColors = [];
+                    updateCoresContainer();
+                    return;
+                }
+
+                // Fazer requisição AJAX para obter as cores dos tecidos selecionados
+                $.ajax({
+                    url: '{{ route("produtos.get-available-colors") }}',
+                    method: 'POST',
+                    data: {
+                        tecido_ids: selectedTecidoIds,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        availableColors = response.colors || [];
+                        updateCoresContainer();
+                    },
+                    error: function() {
+                        console.error('Erro ao carregar cores disponíveis');
+                        availableColors = [];
+                        updateCoresContainer();
+                    }
+                });
+            }
+
+            // Atualizar container de cores com base nas cores disponíveis
+            function updateCoresContainer() {
+                // Se não há cores disponíveis e não há cores existentes, mostrar mensagem
+                if (availableColors.length === 0 && coresContainer.querySelectorAll('.cor-item').length === 0) {
+                    coresContainer.innerHTML = '<p class="text-gray-500 text-sm">Selecione tecidos para ver as cores disponíveis</p>';
+                    return;
+                }
+
+                // Coletar cores e quantidades existentes
+                const existingColors = {};
+                const existingItems = coresContainer.querySelectorAll('.cor-item');
+                existingItems.forEach(item => {
+                    const corInput = item.querySelector('input[name*="[cor]"]');
+                    const quantidadeInput = item.querySelector('input[name*="[quantidade]"]');
+                    if (corInput && corInput.value) {
+                        existingColors[corInput.value] = {
+                            codigo_cor: item.querySelector('input[name*="[codigo_cor]"]')?.value || '',
+                            quantidade: quantidadeInput?.value || ''
+                        };
+                    }
+                });
+
+                // Se há cores disponíveis, atualizar inteligentemente
+                if (availableColors.length > 0) {
+                    // Limpar container completamente para recriar
+                    coresContainer.innerHTML = '';
+
+                    // Adicionar cores disponíveis dos tecidos, preservando quantidades existentes
+                    availableColors.forEach((color, index) => {
+                        // Verificar se esta cor já existe
+                        const existingColor = existingColors[color.cor];
+                        if (existingColor) {
+                            // Cor já existe, manter quantidade existente
+                            addCorItem(color.cor, color.codigo_cor, index, existingColor.quantidade);
+                            delete existingColors[color.cor]; // Marcar como processada
+                        } else {
+                            // Nova cor dos tecidos
+                            addCorItem(color.cor, color.codigo_cor, index);
+                        }
+                    });
+
+                    // Adicionar cores existentes que não estão mais nos tecidos (para não perder dados)
+                    Object.keys(existingColors).forEach(corNome => {
+                        const existingColor = existingColors[corNome];
+                        corCount++;
+                        addCorItem(corNome, existingColor.codigo_cor, corCount, existingColor.quantidade);
+                    });
+                }
+            }
+
+            // Adicionar item de cor
+            function addCorItem(corNome = '', codigoCor = '', index = null, quantidade = '') {
+                if (index === null) {
+                    corCount++;
+                    index = corCount;
+                }
+
+                const newItem = document.createElement('div');
+                newItem.className = 'cor-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200';
+
+                newItem.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="flex-grow">
+                            <input type="text" name="cores[${index}][cor]" value="${corNome}" placeholder="Nome da cor" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>
+                        </div>
+                        <div class="w-1/4">
+                            <input type="text" name="cores[${index}][codigo_cor]" value="${codigoCor}" placeholder="Código" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>
+                        </div>
+                        <div class="w-1/4">
+                            <input type="number" name="cores[${index}][quantidade]" value="${quantidade}" placeholder="Quantidade" min="1" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                        </div>
+                        <button type="button" class="remove-cor text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                coresContainer.appendChild(newItem);
+                updateCoresRemoveButtons();
+            }
+
+            // Atualizar botões de remoção de cores
+            function updateCoresRemoveButtons() {
+                const items = coresContainer.querySelectorAll('.cor-item');
+                items.forEach(item => {
+                    const removeButton = item.querySelector('.remove-cor');
+                    if (items.length > 1) {
+                        removeButton.style.display = 'block';
+                    } else {
+                        removeButton.style.display = 'none';
+                    }
+                });
+            }
+
+            // Event listeners para cores
+            $(addCorButton).on('click', function() {
+                addCorItem();
+            });
+
+            $(coresContainer).on('click', '.remove-cor', function() {
+                $(this).closest('.cor-item').remove();
+                updateCoresRemoveButtons();
+            });
+
+            // Monitorar mudanças nos tecidos para atualizar cores disponíveis
+            $(container).on('change', 'select[name^="tecidos"]', function() {
+                updateSelectOptions();
+                getAvailableColors();
+            });
+
+            // Inicializar cores quando a página carregar
+            $(document).ready(function() {
+                updateCoresRemoveButtons();
+                getAvailableColors();
+            });
         });
     </script>
     @endpush

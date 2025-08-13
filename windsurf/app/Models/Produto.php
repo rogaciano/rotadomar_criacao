@@ -82,6 +82,45 @@ class Produto extends Model
     {
         return $this->hasMany(ProdutoAnexo::class);
     }
+
+    /**
+     * Relacionamento com as variações de cores do produto
+     */
+    public function cores()
+    {
+        return $this->hasMany(ProdutoCor::class);
+    }
+
+    /**
+     * Retorna a quantidade total do produto baseada na soma das quantidades por cor
+     */
+    public function getQuantidadeTotalPorCoresAttribute()
+    {
+        return $this->cores()->sum('quantidade');
+    }
+
+    /**
+     * Retorna as cores disponíveis dos tecidos vinculados ao produto
+     */
+    public function getCoresDisponiveisAttribute()
+    {
+        $coresDisponiveis = collect();
+        
+        foreach ($this->tecidos as $tecido) {
+            foreach ($tecido->estoquesCores as $estoqueCor) {
+                $coresDisponiveis->push([
+                    'cor' => $estoqueCor->cor,
+                    'codigo_cor' => $estoqueCor->codigo_cor,
+                    'tecido_id' => $tecido->id,
+                    'tecido_descricao' => $tecido->descricao
+                ]);
+            }
+        }
+        
+        return $coresDisponiveis->unique(function ($item) {
+            return $item['cor'] . '|' . $item['codigo_cor'];
+        });
+    }
     
     /**
      * Retorna a localização atual do produto baseada na última movimentação

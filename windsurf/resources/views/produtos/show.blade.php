@@ -158,6 +158,79 @@
                                 @endif
                     </div>
 
+                    <!-- Variações de Cores -->
+                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Variações de Cores</h3>
+                         
+                         @if($produto->cores->count() > 0)
+                             <div class="overflow-x-auto">
+                                 <table class="min-w-full divide-y divide-gray-200">
+                                     <thead class="bg-gray-50">
+                                         <tr>
+                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
+                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody class="bg-white divide-y divide-gray-200">
+                                         @foreach($produto->cores as $cor)
+                                             <tr>
+                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                     <div class="flex items-center">
+                                                         @if($cor->codigo_cor)
+                                                             <div class="w-4 h-4 rounded-full mr-2 border border-gray-300" style="background-color: {{ $cor->codigo_cor }}"></div>
+                                                         @endif
+                                                         {{ $cor->cor }}
+                                                     </div>
+                                                 </td>
+                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $cor->codigo_cor ?? 'N/A' }}</td>
+                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($cor->quantidade, 0, ',', '.') }}</td>
+                                             </tr>
+                                         @endforeach
+                                     </tbody>
+                                     <tfoot class="bg-gray-50">
+                                         <tr>
+                                             <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Geral:</td>
+                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                                                 <div class="flex items-center">
+                                                     <span class="mr-2">{{ number_format($produto->cores->sum('quantidade'), 0, ',', '.') }}</span>
+                                                     @php
+                                                         $totalCores = $produto->cores->sum('quantidade');
+                                                         $quantidadeProduto = $produto->quantidade ?? 0;
+                                                         $isEqual = $totalCores == $quantidadeProduto;
+                                                     @endphp
+                                                     @if($isEqual)
+                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
+                                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                         </svg>
+                                                     @else
+                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores ({{ number_format($totalCores, 0, ',', '.') }}) é diferente da quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
+                                                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                         </svg>
+                                                     @endif
+                                                 </div>
+                                             </td>
+                                         </tr>
+                                         @if(!$isEqual)
+                                             <tr>
+                                                 <td colspan="3" class="px-4 py-2 text-xs text-gray-600 bg-yellow-50">
+                                                     <div class="flex items-center">
+                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                         </svg>
+                                                         <span>Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} | Diferença: {{ number_format(abs($totalCores - $quantidadeProduto), 0, ',', '.') }}</span>
+                                                     </div>
+                                                 </td>
+                                             </tr>
+                                         @endif
+                                     </tfoot>
+                                 </table>
+                             </div>
+                         @else
+                             <span class="text-gray-400 italic">Nenhuma variação de cor definida para este produto</span>
+                         @endif
+                     </div>
+
                     <!-- Documentos e Anexos -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                         <div class="flex justify-between items-center mb-4">

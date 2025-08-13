@@ -149,6 +149,9 @@ class ProdutoController extends Controller
             'tecidos.*.tecido_id.required' => 'Selecione um tecido válido.',
             'tecidos.*.tecido_id.exists' => 'Um dos tecidos selecionados não existe no sistema.',
             'tecidos.*.consumo.min' => 'O consumo do tecido deve ser maior que zero.',
+            'cores.*.cor.required' => 'O nome da cor é obrigatório.',
+            'cores.*.quantidade.required' => 'A quantidade da cor é obrigatória.',
+            'cores.*.quantidade.min' => 'A quantidade da cor deve ser maior que zero.',
         ];
         
         $validator = Validator::make($request->all(), [
@@ -220,6 +223,19 @@ class ProdutoController extends Controller
                 }
             }
             $produto->tecidos()->sync($tecidosData);
+        }
+
+        // Associar as variações de cores ao produto
+        if ($request->has('cores')) {
+            foreach ($request->cores as $cor) {
+                if (!empty($cor['cor']) && !empty($cor['quantidade'])) {
+                    $produto->cores()->create([
+                        'cor' => $cor['cor'],
+                        'codigo_cor' => !empty($cor['codigo_cor']) ? $cor['codigo_cor'] : null,
+                        'quantidade' => $cor['quantidade']
+                    ]);
+                }
+            }
         }
 
         return redirect()->route('produtos.show', $produto->id)
@@ -392,6 +408,23 @@ class ProdutoController extends Controller
             $produto->tecidos()->sync($tecidosData);
         }
 
+        // Atualizar as variações de cores do produto
+        if ($request->has('cores')) {
+            // Remover todas as cores existentes
+            $produto->cores()->delete();
+            
+            // Adicionar as novas cores
+            foreach ($request->cores as $cor) {
+                if (!empty($cor['cor']) && !empty($cor['quantidade'])) {
+                    $produto->cores()->create([
+                        'cor' => $cor['cor'],
+                        'codigo_cor' => !empty($cor['codigo_cor']) ? $cor['codigo_cor'] : null,
+                        'quantidade' => $cor['quantidade']
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto atualizado com sucesso!');
     }
@@ -431,5 +464,26 @@ class ProdutoController extends Controller
                ->setPaper('a4', 'landscape');
         
         return $pdf->stream('produto-' . $produto->referencia . '.pdf');
+    }
+
+    /**
+     * Obter cores disponíveis dos tecidos selecionados
+     */
+    public function getAvailableColors(Request $request)
+    {
+        $tecidoIds = $request->input('tecido_ids', []);
+        
+        if (empty($tecidoIds)) {
+            return response()->json(['colors' => []]);
+        }
+
+        // Buscar todas as cores dos tecidos selecionados
+        $cores = \App\Models\TecidoCorEstoque::whereIn('tecido_id', $tecidoIds)
+            ->select('cor', 'codigo_cor')
+            ->distinct()
+            ->orderBy('cor')
+            ->get();
+
+        return response()->json(['colors' => $cores]);
     }
 }

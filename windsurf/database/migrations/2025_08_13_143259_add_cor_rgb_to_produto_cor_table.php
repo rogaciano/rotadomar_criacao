@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produto_cor', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('produto_cor', function (Blueprint $table) {
+            $table->string('cor_rgb', 7)->nullable()->after('codigo_cor'); // Formato #RRGGBB
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('produto_cor');
+        Schema::table('produto_cor', function (Blueprint $table) {
+            $table->dropColumn('cor_rgb');
+        });
     }
 };

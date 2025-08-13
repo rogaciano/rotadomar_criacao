@@ -79,6 +79,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes para Produtos
     Route::resource('produtos', ProdutoController::class);
     Route::get('produtos/{id}/pdf', [ProdutoController::class, 'generatePdf'])->name('produtos.pdf');
+    Route::post('produtos/get-available-colors', [ProdutoController::class, 'getAvailableColors'])->name('produtos.get-available-colors');
     
     // Routes para Anexos de Produtos
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');

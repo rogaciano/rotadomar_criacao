@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cors', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('tecido_cor_estoques', function (Blueprint $table) {
+            $table->string('cor_rgb', 7)->nullable(); // Formato #RRGGBB
         });
     }
 
@@ -22,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cors');
+        Schema::table('tecido_cor_estoques', function (Blueprint $table) {
+            $table->dropColumn('cor_rgb');
+        });
     }
 };
