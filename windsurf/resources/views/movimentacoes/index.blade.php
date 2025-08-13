@@ -86,7 +86,7 @@
 
                             <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                                <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($localizacoes ?? [] as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ request('localizacao_id') == $localizacao->id ? 'selected' : '' }}>{{ $localizacao->nome_localizacao }}</option>
@@ -119,6 +119,16 @@
                                     <option value="" {{ request('concluido') === null ? 'selected' : '' }}>Todos</option>
                                     <option value="1" {{ request('concluido') === '1' ? 'selected' : '' }}>Concluídas</option>
                                     <option value="0" {{ request('concluido') === '0' ? 'selected' : '' }}>Não Concluídas</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <select name="status_id" id="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todos</option>
+                                    @foreach($status ?? [] as $st)
+                                        <option value="{{ $st->id }}" {{ request('status_id') == $st->id ? 'selected' : '' }}>{{ $st->descricao }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
@@ -587,6 +597,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Select2 no filtro de localização
+            $('#localizacao_id').select2({
+                placeholder: "Selecione uma localização",
+                allowClear: true
+            });
+            
+            // Ajustar estilo do Select2 para combinar com Tailwind
+            $('.select2-container--default .select2-selection--single').css({
+                'height': '38px',
+                'padding': '5px 0',
+                'border-color': 'rgb(209, 213, 219)'
+            });
             const toggleButton = document.getElementById('toggle-filters');
             const filterContainer = document.getElementById('filter-container');
 

@@ -7,6 +7,7 @@ use App\Models\Produto;
 use App\Models\Localizacao;
 use App\Models\Tipo;
 use App\Models\Situacao;
+use App\Models\Status;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -108,8 +109,9 @@ class MovimentacaoController extends Controller
         $situacoes = Situacao::orderBy('descricao')->get();
         $tipos = Tipo::orderBy('descricao')->get();
         $localizacoes = Localizacao::orderBy('nome_localizacao')->get();
+        $status = Status::where('ativo', true)->orderBy('descricao')->get();
 
-        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes'));
+        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status'));
     }
 
     /**

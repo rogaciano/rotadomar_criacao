@@ -143,6 +143,10 @@
             <x-responsive-nav-link :href="route('produtos.index')" :active="request()->routeIs('produtos.*')">
                 {{ __('Produtos') }}
             </x-responsive-nav-link>
+            
+            <x-responsive-nav-link :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
+                {{ __('Movimentações') }}
+            </x-responsive-nav-link>
 
             <!-- Responsive Cadastros -->
             <div class="pt-2 pb-3 space-y-1">
