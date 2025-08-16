@@ -1,0 +1,36 @@
+<!-- container com Tailwind para rolagem -->
+<div class="max-h-[480px] overflow-y-auto border rounded" x-data x-init="
+  const table = new Tabulator($refs.grid, {
+    data: [
+      { id:1, nome:'João', idade:12, serie:'6º', ativo:true },
+      { id:2, nome:'Ana',  idade:11, serie:'5º', ativo:false },
+      // ...muitas linhas
+    ],
+    height: 450,                // ativa virtualização/scroll interno
+    layout: 'fitColumns',
+    movableColumns: true,       // mover colunas por drag
+    index: 'id',
+    columns: [
+      { title:'#', field:'id', width:60, hozAlign:'center' },
+      { title:'Nome', field:'nome', editor:'input' },       // EDITÁVEL
+      { title:'Idade', field:'idade', editor:'number' },    // EDITÁVEL
+      { title:'Série', field:'serie', editor:'select', editorParams:{values:['5º','6º','7º']} },
+      { title:'Ativo', field:'ativo', hozAlign:'center', editor:true, formatter:'tickCross' }
+    ],
+    cellEdited: async (cell) => {
+      // enviar mudança pro backend (Laravel) via fetch
+      const row = cell.getRow().getData();
+      await fetch('/alunos/'+row.id, {
+        method: 'PUT',
+        headers: { 'Content-Type':'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+        body: JSON.stringify({ [cell.getField()]: cell.getValue() })
+      });
+    }
+  });
+">
+  <div x-ref="grid"></div>
+</div>
+
+<!-- Import do Tabulator (via CDN só pra demo) -->
+<link href="https://unpkg.com/tabulator-tables@5.6.2/dist/css/tabulator.min.css" rel="stylesheet">
+<script src="https://unpkg.com/tabulator-tables@5.6.2/dist/js/tabulator.min.js"></script>

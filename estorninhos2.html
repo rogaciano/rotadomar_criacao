@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação de Murmuração de Estorninhos</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #2c3e50, #3498db);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+
+        canvas {
+            display: block;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="info">Clique na tela para atrair os pássaros</div>
+    <canvas id="boidsCanvas"></canvas>
+
+    <script>
+        // --- Setup do Canvas ---
+        const canvas = document.getElementById('boidsCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth * 0.95;
+        canvas.height = window.innerHeight * 0.95;
+
+        // --- Variáveis da Simulação ---
+        const flock = [];
+        const boidCount = 250;
+        const visualRange = 75;
+        const separationDistance = 25;
+        let mouse = { x: canvas.width / 2, y: canvas.height / 2, active: false };
+
+        // --- Vetor Helper ---
+        // Uma classe simples para lidar com operações de vetores 2D
+        class Vector {
+            constructor(x = 0, y = 0) {
+                this.x = x;
+                this.y = y;
+            }
+            add(v) {
+                this.x += v.x;
+                this.y += v.y;
+                return this;
+            }
+            sub(v) {
+                this.x -= v.x;
+                this.y -= v.y;
+                return this;
+            }
+            div(scalar) {
+                this.x /= scalar;
+                this.y /= scalar;
+                return this;
+            }
+            mult(scalar) {
+                this.x *= scalar;
+                this.y *= scalar;
+                return this;
+            }
+            mag() {
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            }
+            normalize() {
+                const m = this.mag();
+                if (m > 0) {
+                    this.div(m);
+                }
+                return this;
+            }
+            limit(max) {
+                if (this.mag() > max) {
+                    this.normalize().mult(max);
+                }
+                return this;
+            }
+            static sub(v1, v2) {
+                return new Vector(v1.x - v2.x, v1.y - v2.y);
+            }
+        }
+
+        // --- Classe Boid (Pássaro) ---
+        class Boid {
+            constructor() {
+                this.position = new Vector(Math.random() * canvas.width, Math.random() * canvas.height);
+                this.velocity = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1);
+                this.velocity.normalize().mult(Math.random() * 2 + 2);
+                this.acceleration = new Vector();
+                this.maxForce = 0.2; // Força de direção
+                this.maxSpeed = 4;   // Velocidade máxima
+            }
+
+            // Lógica para manter os boids dentro da tela
+            edges() {
+                if (this.position.x > canvas.width) this.position.x = 0;
+                else if (this.position.x < 0) this.position.x = canvas.width;
+                if (this.position.y > canvas.height) this.position.y = 0;
+                else if (this.position.y < 0) this.position.y = canvas.height;
+            }
+
+            // REGRA 1: Alinhamento - Voar na mesma direção dos vizinhos
+            align(boids) {
+                let steering = new Vector();
+                let total = 0;
+                for (let other of boids) {
+                    let d = Vector.sub(this.position, other.position).mag();
+                    if (other !== this && d < visualRange) {
+                        steering.add(other.velocity);
+                        total++;
+                    }
+                }
+                if (total > 0) {
+                    steering.div(total);
+                    steering.normalize().mult(this.maxSpeed);
+                    steering.sub(this.velocity).limit(this.maxForce);
+                }
+                return steering;
+            }
+
+            // REGRA 2: Coesão - Ficar perto do centro do grupo
+            cohesion(boids) {
+                let steering = new Vector();
+                let total = 0;
+                for (let other of boids) {
+                    let d = Vector.sub(this.position, other.position).mag();
+                    if (other !== this && d < visualRange) {
+                        steering.add(other.position);
+                        total++;
+                    }
+                }
+                if (total > 0) {
+                    steering.div(total);
+                    steering.sub(this.position);
+                    steering.normalize().mult(this.maxSpeed);
+                    steering.sub(this.velocity).limit(this.maxForce);
+                }
+                return steering;
+            }
+
+            // REGRA 3: Separação - Evitar colisões
+            separation(boids) {
+                let steering = new Vector();
+                let total = 0;
+                for (let other of boids) {
+                    let d = Vector.sub(this.position, other.position).mag();
+                    if (other !== this && d < separationDistance) {
+                        let diff = Vector.sub(this.position, other.position);
+                        diff.div(d * d); // Ponderar pela distância (quanto mais perto, mais forte)
+                        steering.add(diff);
+                        total++;
+                    }
+                }
+                if (total > 0) {
+                    steering.div(total);
+                    steering.normalize().mult(this.maxSpeed);
+                    steering.sub(this.velocity).limit(this.maxForce);
+                }
+                return steering;
+            }
+
+            // REGRA BÔNUS: Seguir o mouse
+            seek(target) {
+                let desired = Vector.sub(target, this.position);
+                desired.normalize().mult(this.maxSpeed);
+                let steer = Vector.sub(desired, this.velocity);
+                steer.limit(this.maxForce * 1.5); // Força extra para seguir o mouse
+                return steer;
+            }
+
+            // Aplica todas as forças de direção
+            flock(boids) {
+                let alignment = this.align(boids);
+                let cohesion = this.cohesion(boids);
+                let separation = this.separation(boids);
+
+                // Ponderar as forças
+                alignment.mult(1.0);
+                cohesion.mult(1.0);
+                separation.mult(1.5);
+
+                this.acceleration.add(alignment);
+                this.acceleration.add(cohesion);
+                this.acceleration.add(separation);
+
+                if (mouse.active) {
+                    let seekForce = this.seek(mouse);
+                    seekForce.mult(0.5);
+                    this.acceleration.add(seekForce);
+                }
+            }
+
+            // Atualiza a posição e velocidade do boid
+            update() {
+                this.velocity.add(this.acceleration);
+                this.velocity.limit(this.maxSpeed);
+                this.position.add(this.velocity);
+                this.acceleration.mult(0); // Reseta a aceleração a cada ciclo
+            }
+
+            // Desenha o boid na tela (como um triângulo para indicar a direção)
+            draw() {
+                let angle = Math.atan2(this.velocity.y, this.velocity.x);
+                ctx.save();
+                ctx.translate(this.position.x, this.position.y);
+                ctx.rotate(angle);
+                ctx.beginPath();
+                ctx.moveTo(10, 0);
+                ctx.lineTo(-5, -5);
+                ctx.lineTo(-5, 5);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // --- Loop Principal da Animação ---
+        function setup() {
+            for (let i = 0; i < boidCount; i++) {
+                flock.push(new Boid());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let boid of flock) {
+                boid.edges();
+                boid.flock(flock);
+                boid.update();
+                boid.draw();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // --- Event Listeners ---
+        canvas.addEventListener('mousemove', e => {
+            mouse.x = e.offsetX;
+            mouse.y = e.offsetY;
+        });
+
+        canvas.addEventListener('mousedown', () => {
+            mouse.active = true;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            mouse.active = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            mouse.active = false;
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth * 0.95;
+            canvas.height = window.innerHeight * 0.95;
+        });
+
+        // --- Iniciar Simulação ---
+        setup();
+        animate();
+    </script>
+</body>
+
+</html>

@@ -23,14 +23,21 @@
                     <!-- Filtros -->
                     <div class="mb-6 bg-gray-100 p-4 rounded-lg">
                         <form action="{{ route('produtos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-1">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
-                                <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
+                                <input type="text" name="referencia" id="referencia" value="{{ $filters['referencia'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
                             </div>
 
                             <div class="md:col-span-2">
                                 <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                                <input type="text" name="descricao" id="descricao" value="{{ request('descricao') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do produto">
+                                <input type="text" name="descricao" id="descricao" value="{{ $filters['descricao'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do produto">
+                            </div>
+                            
+                            <div class="md:col-span-1 flex items-end pb-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ isset($filters['incluir_excluidos']) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                                    <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Incluir excluídos</label>
+                                </div>
                             </div>
 
                             <div>
@@ -38,7 +45,7 @@
                                 <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($marcas as $marca)
-                                        <option value="{{ $marca->id }}" {{ (request('marca_id') == $marca->id || (request('marca') == $marca->nome_marca)) ? 'selected' : '' }}>
+                                        <option value="{{ $marca->id }}" {{ (($filters['marca_id'] ?? '') == $marca->id || (($filters['marca'] ?? '') == $marca->nome_marca)) ? 'selected' : '' }}>
                                             {{ $marca->nome_marca }}
                                         </option>
                                     @endforeach
@@ -53,7 +60,7 @@
                                 <select name="tecido_id" id="tecido_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($tecidos as $tecido)
-                                        <option value="{{ $tecido->id }}" {{ request('tecido_id') == $tecido->id ? 'selected' : '' }}>
+                                        <option value="{{ $tecido->id }}" {{ ($filters['tecido_id'] ?? '') == $tecido->id ? 'selected' : '' }}>
                                             {{ $tecido->descricao }}
                                         </option>
                                     @endforeach
@@ -65,7 +72,7 @@
                                 <select name="estilista_id" id="estilista_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($estilistas as $estilista)
-                                        <option value="{{ $estilista->id }}" {{ (request('estilista_id') == $estilista->id || (request('estilista') == $estilista->nome_estilista)) ? 'selected' : '' }}>
+                                        <option value="{{ $estilista->id }}" {{ (($filters['estilista_id'] ?? '') == $estilista->id || (($filters['estilista'] ?? '') == $estilista->nome_estilista)) ? 'selected' : '' }}>
                                             {{ $estilista->nome_estilista }}
                                         </option>
                                     @endforeach
@@ -80,7 +87,7 @@
                                 <select name="grupo_id" id="grupo_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($grupos as $grupo)
-                                        <option value="{{ $grupo->id }}" {{ (request('grupo_id') == $grupo->id || (request('grupo') == $grupo->descricao)) ? 'selected' : '' }}>
+                                        <option value="{{ $grupo->id }}" {{ (($filters['grupo_id'] ?? '') == $grupo->id || (($filters['grupo'] ?? '') == $grupo->descricao)) ? 'selected' : '' }}>
                                             {{ $grupo->descricao }}
                                         </option>
                                     @endforeach
@@ -95,7 +102,7 @@
                                 <select name="status_id" id="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($statuses as $status)
-                                        <option value="{{ $status->id }}" {{ (request('status_id') == $status->id || (request('status') == $status->descricao)) ? 'selected' : '' }}>
+                                        <option value="{{ $status->id }}" {{ (($filters['status_id'] ?? '') == $status->id || (($filters['status'] ?? '') == $status->descricao)) ? 'selected' : '' }}>
                                             {{ $status->descricao }}
                                         </option>
                                     @endforeach
@@ -110,7 +117,7 @@
                                 <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($localizacoes as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ (request('localizacao_id') == $localizacao->id || (request('localizacao') == $localizacao->nome_localizacao)) ? 'selected' : '' }}>
+                                        <option value="{{ $localizacao->id }}" {{ (($filters['localizacao_id'] ?? '') == $localizacao->id || (($filters['localizacao'] ?? '') == $localizacao->nome_localizacao)) ? 'selected' : '' }}>
                                             {{ $localizacao->nome_localizacao }}
                                         </option>
                                     @endforeach
@@ -120,10 +127,16 @@
                                 @endif
                             </div>
 
-                            <div class="flex items-center mt-6">
-                                <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ request('incluir_excluidos') ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
-                                <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Incluir excluídos</label>
+                            <div>
+                                <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Início)</label>
+                                <input type="date" name="data_inicio" id="data_inicio" value="{{ $filters['data_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
+
+                            <div>
+                                <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Fim)</label>
+                                <input type="date" name="data_fim" id="data_fim" value="{{ $filters['data_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+
 
                             <div class="md:col-span-4 flex justify-end space-x-2">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -271,15 +284,18 @@
             const toggleButton = document.getElementById('toggle-filters');
             const filterContainer = document.getElementById('filter-container');
 
-            toggleButton.addEventListener('click', function() {
-                if (filterContainer.style.display === 'none') {
-                    filterContainer.style.display = 'block';
-                    toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>';
-                } else {
-                    filterContainer.style.display = 'none';
-                    toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>';
-                }
-            });
+            // Only add event listener if the toggle button exists
+            if (toggleButton && filterContainer) {
+                toggleButton.addEventListener('click', function() {
+                    if (filterContainer.style.display === 'none') {
+                        filterContainer.style.display = 'block';
+                        toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>';
+                    } else {
+                        filterContainer.style.display = 'none';
+                        toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>';
+                    }
+                });
+            }
         });
     </script>
 @push('scripts')

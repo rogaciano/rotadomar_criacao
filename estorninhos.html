@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação da Murmuração dos Estorninhos</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        #canvas {
+            display: block;
+            cursor: crosshair;
+            background: radial-gradient(ellipse at center, #87CEEB 0%, #4682B4 50%, #191970 100%);
+        }
+
+        .controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls h3 {
+            margin: 0 0 15px 0;
+            color: #87CEEB;
+            font-size: 18px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #E0E0E0;
+        }
+
+        input[type="range"] {
+            width: 200px;
+            margin-bottom: 5px;
+        }
+
+        button {
+            background: #4682B4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #5A9BD4;
+        }
+
+        .info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+            max-width: 300px;
+        }
+
+        .stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="controls">
+        <h3>🐦 Controles da Murmuração</h3>
+
+        <div class="control-group">
+            <label>Número de Estorninhos: <span id="birdCountValue">150</span></label>
+            <input type="range" id="birdCount" min="50" max="500" value="150">
+        </div>
+
+        <div class="control-group">
+            <label>Velocidade Máxima: <span id="maxSpeedValue">2</span></label>
+            <input type="range" id="maxSpeed" min="1" max="5" value="2" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>Raio de Percepção: <span id="perceptionValue">50</span></label>
+            <input type="range" id="perception" min="20" max="100" value="50">
+        </div>
+
+        <div class="control-group">
+            <label>Força de Separação: <span id="separationValue">1.5</span></label>
+            <input type="range" id="separation" min="0.5" max="3" value="1.5" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>Força de Alinhamento: <span id="alignmentValue">1</span></label>
+            <input type="range" id="alignment" min="0.5" max="3" value="1" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>Força de Coesão: <span id="cohesionValue">1</span></label>
+            <input type="range" id="cohesion" min="0.5" max="3" value="1" step="0.1">
+        </div>
+
+        <button onclick="addPredator()">🦅 Adicionar Predador</button>
+        <button onclick="resetSimulation()">🔄 Reiniciar</button>
+        <button onclick="togglePause()">⏯️ Pausar/Continuar</button>
+    </div>
+
+    <div class="stats">
+        <h3>📊 Estatísticas</h3>
+        <div>FPS: <span id="fps">60</span></div>
+        <div>Estorninhos: <span id="currentBirds">150</span></div>
+        <div>Predadores: <span id="predatorCount">0</span></div>
+        <div>Densidade: <span id="density">Baixa</span></div>
+    </div>
+
+    <div class="info">
+        <h3>ℹ️ Como Funciona</h3>
+        <p><strong>Regras de Reynolds:</strong></p>
+        <p>• <strong>Separação:</strong> Evita colisões com vizinhos próximos</p>
+        <p>• <strong>Alinhamento:</strong> Segue a direção média dos vizinhos</p>
+        <p>• <strong>Coesão:</strong> Move-se em direção ao centro do grupo</p>
+        <p><strong>Clique</strong> para atrair os estorninhos!</p>
+    </div>
+
+    <script>
+        class Vector2D {
+            constructor(x = 0, y = 0) {
+                this.x = x;
+                this.y = y;
+            }
+
+            add(vector) {
+                this.x += vector.x;
+                this.y += vector.y;
+                return this;
+            }
+
+            subtract(vector) {
+                this.x -= vector.x;
+                this.y -= vector.y;
+                return this;
+            }
+
+            multiply(scalar) {
+                this.x *= scalar;
+                this.y *= scalar;
+                return this;
+            }
+
+            divide(scalar) {
+                if (scalar !== 0) {
+                    this.x /= scalar;
+                    this.y /= scalar;
+                }
+                return this;
+            }
+
+            magnitude() {
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            }
+
+            normalize() {
+                const mag = this.magnitude();
+                if (mag > 0) {
+                    this.divide(mag);
+                }
+                return this;
+            }
+
+            limit(max) {
+                if (this.magnitude() > max) {
+                    this.normalize().multiply(max);
+                }
+                return this;
+            }
+
+            distance(vector) {
+                const dx = this.x - vector.x;
+                const dy = this.y - vector.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+
+            copy() {
+                return new Vector2D(this.x, this.y);
+            }
+
+            static subtract(v1, v2) {
+                return new Vector2D(v1.x - v2.x, v1.y - v2.y);
+            }
+
+            static add(v1, v2) {
+                return new Vector2D(v1.x + v2.x, v1.y + v2.y);
+            }
+        }
+
+        class Starling {
+            constructor(x, y) {
+                this.position = new Vector2D(x, y);
+                this.velocity = new Vector2D(
+                    (Math.random() - 0.5) * 2,
+                    (Math.random() - 0.5) * 2
+                );
+                this.acceleration = new Vector2D(0, 0);
+                this.maxSpeed = 2;
+                this.maxForce = 0.03;
+                this.perceptionRadius = 50;
+                this.size = 3;
+                this.hue = 200 + Math.random() * 60; // Tons de azul/roxo
+                this.trail = [];
+                this.maxTrailLength = 8;
+            }
+
+            update() {
+                // Atualiza velocidade e posição
+                this.velocity.add(this.acceleration);
+                this.velocity.limit(this.maxSpeed);
+                this.position.add(this.velocity);
+                this.acceleration.multiply(0);
+
+                // Adiciona rastro
+                this.trail.push(this.position.copy());
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+
+                // Wraparound nas bordas
+                this.wrapAround();
+            }
+
+            wrapAround() {
+                if (this.position.x < 0) this.position.x = canvas.width;
+                if (this.position.x > canvas.width) this.position.x = 0;
+                if (this.position.y < 0) this.position.y = canvas.height;
+                if (this.position.y > canvas.height) this.position.y = 0;
+            }
+
+            applyForce(force) {
+                this.acceleration.add(force);
+            }
+
+            seek(target) {
+                const desired = Vector2D.subtract(target, this.position);
+                desired.normalize().multiply(this.maxSpeed);
+                const steer = Vector2D.subtract(desired, this.velocity);
+                steer.limit(this.maxForce);
+                return steer;
+            }
+
+            flee(target) {
+                const desired = Vector2D.subtract(this.position, target);
+                desired.normalize().multiply(this.maxSpeed);
+                const steer = Vector2D.subtract(desired, this.velocity);
+                steer.limit(this.maxForce * 2); // Força maior para fugir
+                return steer;
+            }
+
+            separate(neighbors) {
+                const desiredSeparation = 25;
+                const steer = new Vector2D(0, 0);
+                let count = 0;
+
+                neighbors.forEach(other => {
+                    const distance = this.position.distance(other.position);
+                    if (distance > 0 && distance < desiredSeparation) {
+                        const diff = Vector2D.subtract(this.position, other.position);
+                        diff.normalize().divide(distance); // Peso baseado na distância
+                        steer.add(diff);
+                        count++;
+                    }
+                });
+
+                if (count > 0) {
+                    steer.divide(count);
+                    steer.normalize().multiply(this.maxSpeed);
+                    steer.subtract(this.velocity);
+                    steer.limit(this.maxForce);
+                }
+
+                return steer;
+            }
+
+            align(neighbors) {
+                const steer = new Vector2D(0, 0);
+                let count = 0;
+
+                neighbors.forEach(other => {
+                    steer.add(other.velocity);
+                    count++;
+                });
+
+                if (count > 0) {
+                    steer.divide(count);
+                    steer.normalize().multiply(this.maxSpeed);
+                    steer.subtract(this.velocity);
+                    steer.limit(this.maxForce);
+                }
+
+                return steer;
+            }
+
+            cohesion(neighbors) {
+                const center = new Vector2D(0, 0);
+                let count = 0;
+
+                neighbors.forEach(other => {
+                    center.add(other.position);
+                    count++;
+                });
+
+                if (count > 0) {
+                    center.divide(count);
+                    return this.seek(center);
+                }
+
+                return new Vector2D(0, 0);
+            }
+
+            flock(starlings, predators = []) {
+                const neighbors = this.getNeighbors(starlings);
+
+                const separation = this.separate(neighbors).multiply(separationForce);
+                const alignment = this.align(neighbors).multiply(alignmentForce);
+                const cohesion = this.cohesion(neighbors).multiply(cohesionForce);
+
+                this.applyForce(separation);
+                this.applyForce(alignment);
+                this.applyForce(cohesion);
+
+                // Foge de predadores
+                predators.forEach(predator => {
+                    const distance = this.position.distance(predator.position);
+                    if (distance < 100) {
+                        const flee = this.flee(predator.position).multiply(3);
+                        this.applyForce(flee);
+                    }
+                });
+
+                // Atração para o mouse (se ativo)
+                if (mouseAttraction && mousePosition) {
+                    const attraction = this.seek(mousePosition).multiply(0.5);
+                    this.applyForce(attraction);
+                }
+            }
+
+            getNeighbors(starlings) {
+                return starlings.filter(other => {
+                    const distance = this.position.distance(other.position);
+                    return other !== this && distance < this.perceptionRadius;
+                });
+            }
+
+            draw(ctx) {
+                // Desenha rastro
+                ctx.strokeStyle = `hsla(${this.hue}, 70%, 60%, 0.3)`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let i = 0; i < this.trail.length - 1; i++) {
+                    const alpha = i / this.trail.length;
+                    ctx.globalAlpha = alpha * 0.5;
+                    ctx.moveTo(this.trail[i].x, this.trail[i].y);
+                    ctx.lineTo(this.trail[i + 1].x, this.trail[i + 1].y);
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+
+                // Desenha o estorninho
+                ctx.save();
+                ctx.translate(this.position.x, this.position.y);
+
+                const angle = Math.atan2(this.velocity.y, this.velocity.x);
+                ctx.rotate(angle);
+
+                // Corpo do pássaro
+                ctx.fillStyle = `hsl(${this.hue}, 70%, 50%)`;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.size * 2, this.size, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Asas
+                ctx.fillStyle = `hsl(${this.hue}, 60%, 40%)`;
+                ctx.beginPath();
+                ctx.ellipse(-this.size, -this.size * 0.5, this.size * 1.5, this.size * 0.5, 0, 0, Math.PI * 2);
+                ctx.ellipse(-this.size, this.size * 0.5, this.size * 1.5, this.size * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        class Predator {
+            constructor(x, y) {
+                this.position = new Vector2D(x, y);
+                this.velocity = new Vector2D(
+                    (Math.random() - 0.5) * 3,
+                    (Math.random() - 0.5) * 3
+                );
+                this.size = 8;
+                this.maxSpeed = 3;
+                this.huntRadius = 150;
+            }
+
+            update(starlings) {
+                // Caça o estorninho mais próximo
+                let closest = null;
+                let closestDistance = Infinity;
+
+                starlings.forEach(starling => {
+                    const distance = this.position.distance(starling.position);
+                    if (distance < closestDistance && distance < this.huntRadius) {
+                        closest = starling;
+                        closestDistance = distance;
+                    }
+                });
+
+                if (closest) {
+                    const hunt = Vector2D.subtract(closest.position, this.position);
+                    hunt.normalize().multiply(this.maxSpeed);
+                    this.velocity = hunt;
+                } else {
+                    // Movimento aleatório
+                    this.velocity.add(new Vector2D(
+                        (Math.random() - 0.5) * 0.2,
+                        (Math.random() - 0.5) * 0.2
+                    ));
+                }
+
+                this.velocity.limit(this.maxSpeed);
+                this.position.add(this.velocity);
+
+                // Wraparound
+                if (this.position.x < 0) this.position.x = canvas.width;
+                if (this.position.x > canvas.width) this.position.x = 0;
+                if (this.position.y < 0) this.position.y = canvas.height;
+                if (this.position.y > canvas.height) this.position.y = 0;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.position.x, this.position.y);
+
+                const angle = Math.atan2(this.velocity.y, this.velocity.x);
+                ctx.rotate(angle);
+
+                // Corpo do predador
+                ctx.fillStyle = '#8B4513';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, this.size * 2, this.size, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Asas maiores
+                ctx.fillStyle = '#654321';
+                ctx.beginPath();
+                ctx.ellipse(-this.size, -this.size, this.size * 2, this.size, 0, 0, Math.PI * 2);
+                ctx.ellipse(-this.size, this.size, this.size * 2, this.size, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.restore();
+
+                // Círculo de caça
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.1)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.huntRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        // Configuração do canvas
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Variáveis da simulação
+        let starlings = [];
+        let predators = [];
+        let mousePosition = null;
+        let mouseAttraction = false;
+        let isPaused = false;
+
+        // Parâmetros ajustáveis
+        let birdCount = 150;
+        let maxSpeed = 2;
+        let perceptionRadius = 50;
+        let separationForce = 1.5;
+        let alignmentForce = 1;
+        let cohesionForce = 1;
+
+        // Estatísticas
+        let frameCount = 0;
+        let lastTime = performance.now();
+        let fps = 60;
+
+        // Event listeners para controles
+        document.getElementById('birdCount').addEventListener('input', (e) => {
+            birdCount = parseInt(e.target.value);
+            document.getElementById('birdCountValue').textContent = birdCount;
+            initializeStarlings();
+        });
+
+        document.getElementById('maxSpeed').addEventListener('input', (e) => {
+            maxSpeed = parseFloat(e.target.value);
+            document.getElementById('maxSpeedValue').textContent = maxSpeed;
+            starlings.forEach(starling => starling.maxSpeed = maxSpeed);
+        });
+
+        document.getElementById('perception').addEventListener('input', (e) => {
+            perceptionRadius = parseInt(e.target.value);
+            document.getElementById('perceptionValue').textContent = perceptionRadius;
+            starlings.forEach(starling => starling.perceptionRadius = perceptionRadius);
+        });
+
+        document.getElementById('separation').addEventListener('input', (e) => {
+            separationForce = parseFloat(e.target.value);
+            document.getElementById('separationValue').textContent = separationForce;
+        });
+
+        document.getElementById('alignment').addEventListener('input', (e) => {
+            alignmentForce = parseFloat(e.target.value);
+            document.getElementById('alignmentValue').textContent = alignmentForce;
+        });
+
+        document.getElementById('cohesion').addEventListener('input', (e) => {
+            cohesionForce = parseFloat(e.target.value);
+            document.getElementById('cohesionValue').textContent = cohesionForce;
+        });
+
+        // Event listeners para mouse
+        canvas.addEventListener('mousemove', (e) => {
+            mousePosition = new Vector2D(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('mousedown', () => {
+            mouseAttraction = true;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            mouseAttraction = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            mouseAttraction = false;
+            mousePosition = null;
+        });
+
+        // Funções de controle
+        function initializeStarlings() {
+            starlings = [];
+            for (let i = 0; i < birdCount; i++) {
+                starlings.push(new Starling(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height
+                ));
+            }
+        }
+
+        function addPredator() {
+            predators.push(new Predator(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height
+            ));
+        }
+
+        function resetSimulation() {
+            predators = [];
+            initializeStarlings();
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+        }
+
+        function updateStats() {
+            document.getElementById('currentBirds').textContent = starlings.length;
+            document.getElementById('predatorCount').textContent = predators.length;
+
+            const density = starlings.length / ((canvas.width * canvas.height) / 10000);
+            let densityText = 'Baixa';
+            if (density > 2) densityText = 'Média';
+            if (density > 4) densityText = 'Alta';
+            document.getElementById('density').textContent = densityText;
+        }
+
+        function calculateFPS() {
+            frameCount++;
+            const currentTime = performance.now();
+            if (currentTime - lastTime >= 1000) {
+                fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                document.getElementById('fps').textContent = fps;
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+        }
+
+        // Loop principal da animação
+        function animate() {
+            if (!isPaused) {
+                // Limpa o canvas
+                ctx.fillStyle = 'rgba(25, 25, 112, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Atualiza e desenha estorninhos
+                starlings.forEach(starling => {
+                    starling.flock(starlings, predators);
+                    starling.update();
+                    starling.draw(ctx);
+                });
+
+                // Atualiza e desenha predadores
+                predators.forEach(predator => {
+                    predator.update(starlings);
+                    predator.draw(ctx);
+                });
+
+                updateStats();
+            }
+
+            calculateFPS();
+            requestAnimationFrame(animate);
+        }
+
+        // Inicialização
+        initializeStarlings();
+        animate();
+    </script>
+</body>
+
+</html>

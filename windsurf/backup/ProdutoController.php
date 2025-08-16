@@ -20,80 +20,58 @@ class ProdutoController extends Controller
      */
     public function index(Request $request)
     {
-        // Verifica se é uma nova pesquisa ou se deve usar os filtros da sessão
-        $useSessionFilters = !$request->hasAny([
-            'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
-            'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
-            'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-            'data_inicio', 'data_fim'
-        ]) && $request->method() === 'GET' && !$request->ajax();
-        
-        // Se for uma nova pesquisa, salva os filtros na sessão
-        if (!$useSessionFilters && $request->method() === 'GET') {
-            $filters = $request->only([
-                'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
-                'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
-                'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-                'data_inicio', 'data_fim'
-            ]);
-            session(['produtos_filters' => $filters]);
-        }
-        
-        // Se não há filtros na requisição, usa os da sessão
-        $filters = $useSessionFilters ? session('produtos_filters', []) : $request->all();
-        
         $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao']);
 
         // Filtros
-        if (!empty($filters['referencia'])) {
-            $query->where('referencia', 'like', '%' . $filters['referencia'] . '%');
+        if ($request->filled('referencia')) {
+            $query->where('referencia', 'like', '%' . $request->referencia . '%');
         }
 
-        if (!empty($filters['descricao'])) {
-            $query->where('descricao', 'like', '%' . $filters['descricao'] . '%');
+        if ($request->filled('descricao')) {
+            $query->where('descricao', 'like', '%' . $request->descricao . '%');
         }
 
         // Filtro por marca (aceita ID ou nome)
-        if (!empty($filters['marca_id'])) {
-            $query->where('marca_id', $filters['marca_id']);
-        } elseif (!empty($filters['marca'])) {
-            $marcaId = Marca::where('nome_marca', $filters['marca'])->value('id');
+        if ($request->filled('marca_id')) {
+            $query->where('marca_id', $request->marca_id);
+        } elseif ($request->filled('marca')) {
+            $marcaId = Marca::where('nome_marca', $request->marca)->value('id');
             if ($marcaId) {
                 $query->where('marca_id', $marcaId);
             }
         }
 
-        if (!empty($filters['tecido_id'])) {
-            $query->whereHas('tecidos', function($q) use ($filters) {
-                $q->where('tecidos.id', $filters['tecido_id']);
+        if ($request->filled('tecido_id')) {
+            $query->whereHas('tecidos', function($q) use ($request) {
+                $q->where('tecidos.id', $request->tecido_id);
             });
         }
 
         // Filtro por estilista (aceita ID ou nome)
-        if (!empty($filters['estilista_id'])) {
-            $query->where('estilista_id', $filters['estilista_id']);
-        } elseif (!empty($filters['estilista'])) {
-            $estilistaId = Estilista::where('nome_estilista', $filters['estilista'])->value('id');
+        if ($request->filled('estilista_id')) {
+            $query->where('estilista_id', $request->estilista_id);
+        } elseif ($request->filled('estilista')) {
+            $estilistaId = Estilista::where('nome_estilista', $request->estilista)->value('id');
             if ($estilistaId) {
                 $query->where('estilista_id', $estilistaId);
             }
         }
 
         // Filtro por grupo (aceita ID ou nome)
-        if (!empty($filters['grupo_id'])) {
-            $query->where('grupo_id', $filters['grupo_id']);
-        } elseif (!empty($filters['grupo'])) {
-            $grupoId = GrupoProduto::where('descricao', $filters['grupo'])->value('id');
+        if ($request->filled('grupo_id')) {
+            $query->where('grupo_id', $request->grupo_id);
+        } elseif ($request->filled('grupo')) {
+            $grupoId = GrupoProduto::where('descricao', $request->grupo)->value('id');
             if ($grupoId) {
                 $query->where('grupo_id', $grupoId);
             }
         }
 
         // Filtro por status (aceita ID ou nome)
-        if (!empty($filters['status_id'])) {
-            $query->where('status_id', $filters['status_id']);
-        } elseif (!empty($filters['status'])) {
-            $statusId = Status::where('descricao', $filters['status'])->value('id');
+        if ($request->filled('status_id')) {
+            $query->where('status_id', $request->status_id);
+        } elseif ($request->filled('status')) {
+            $statusId = Status::where('descricao', $request->status)->value('id');
             if ($statusId) {
                 $query->where('status_id', $statusId);
             }
@@ -102,10 +80,10 @@ class ProdutoController extends Controller
         // Filtro por localização (aceita ID ou nome)
         $localizacaoId = null;
         
-        if (!empty($filters['localizacao_id'])) {
-            $localizacaoId = $filters['localizacao_id'];
-        } elseif (!empty($filters['localizacao'])) {
-            $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $filters['localizacao'])->value('id');
+        if ($request->filled('localizacao_id')) {
+            $localizacaoId = $request->localizacao_id;
+        } elseif ($request->filled('localizacao')) {
+            $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $request->localizacao)->value('id');
         }
         
         if ($localizacaoId) {
@@ -122,18 +100,8 @@ class ProdutoController extends Controller
         }
 
         // Incluir excluídos se solicitado
-        if (!empty($filters['incluir_excluidos'])) {
+        if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
-        }
-
-        // Filtro por data de cadastro (início)
-        if (!empty($filters['data_inicio'])) {
-            $query->whereDate('created_at', '>=', $filters['data_inicio']);
-        }
-
-        // Filtro por data de cadastro (fim)
-        if (!empty($filters['data_fim'])) {
-            $query->whereDate('created_at', '<=', $filters['data_fim']);
         }
 
         $produtos = $query->orderBy('referencia')->paginate(10);
@@ -145,14 +113,8 @@ class ProdutoController extends Controller
         $grupos = GrupoProduto::orderBy('descricao')->get();
         $statuses = Status::orderBy('descricao')->get();
         $localizacoes = \App\Models\Localizacao::orderBy('nome_localizacao')->get();
-        
-        // Preservar os filtros na paginação
-        $produtos->appends($filters);
 
-        return view('produtos.index', compact(
-            'produtos', 'marcas', 'tecidos', 'estilistas', 'grupos', 
-            'statuses', 'localizacoes', 'filters'
-        ));
+        return view('produtos.index', compact('produtos', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes'));
     }
 
     /**
@@ -318,7 +280,6 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-
         // Trim spaces from referencia field if it exists
         if ($request->has('referencia')) {
             $request->merge(['referencia' => trim($request->referencia)]);
@@ -386,7 +347,6 @@ class ProdutoController extends Controller
                 ->withInput();
         }
 
-
         $data = $request->except('tecidos');
 
         // Upload da ficha de produção, se fornecida
@@ -453,9 +413,9 @@ class ProdutoController extends Controller
             // Remover todas as cores existentes
             $produto->cores()->delete();
             
-            // Adicionar apenas as cores com quantidade > 0
+            // Adicionar as novas cores
             foreach ($request->cores as $cor) {
-                if (!empty($cor['cor']) && isset($cor['quantidade']) && $cor['quantidade'] > 0) {
+                if (!empty($cor['cor']) && !empty($cor['quantidade'])) {
                     $produto->cores()->create([
                         'cor' => $cor['cor'],
                         'codigo_cor' => !empty($cor['codigo_cor']) ? $cor['codigo_cor'] : null,
@@ -464,7 +424,6 @@ class ProdutoController extends Controller
                 }
             }
         }
-
 
         return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto atualizado com sucesso!');
@@ -513,100 +472,19 @@ class ProdutoController extends Controller
     public function getAvailableColors(Request $request)
     {
         $tecidoIds = $request->input('tecido_ids', []);
-        $produtoId = $request->input('produto_id');
-
-
-        // Funções de normalização
-        $normalizeCodigo = function ($value) {
-            if ($value === null) return null;
-            $v = trim((string) $value);
-            if ($v === '' || strtolower($v) === 'null' || $v === '-') return null;
-            return $v;
-        };
-
-        $normalizeCor = function ($value) {
-            $v = preg_replace('/\s+/', ' ', trim((string) $value)); // colapsa múltiplos espaços
-            return $v;
-        };
-
-        $makeKey = function ($cor, $codigo) use ($normalizeCor, $normalizeCodigo) {
-            // Comparação case-insensitive para evitar duplicidades por diferença de caixa
-            $c = mb_strtoupper($normalizeCor($cor), 'UTF-8');
-            $codNorm = $normalizeCodigo($codigo);
-            $cod = $codNorm !== null ? mb_strtoupper($codNorm, 'UTF-8') : '';
-            return $c . '|' . $cod;
-        };
-
-        $coresExistentes = collect([]);
-        $coresDisponiveis = collect([]);
-
-        // 1. Buscar cores já cadastradas no produto (primeira prioridade)
-        if ($produtoId) {
-            $produto = \App\Models\Produto::find($produtoId);
-            if ($produto) {
-                $coresExistentes = $produto->cores()->select('cor', 'codigo_cor', 'quantidade')->get()
-                    ->map(function($cor) use ($normalizeCor, $normalizeCodigo) {
-                        return [
-                            'cor' => $normalizeCor($cor->cor),
-                            'codigo_cor' => $normalizeCodigo($cor->codigo_cor),
-                            'quantidade' => $cor->quantidade,
-                            'tipo' => 'existente'
-                        ];
-                    })
-                    // Deduplicar cores existentes após normalização (somando quantidades)
-                    ->groupBy(function($c) use ($makeKey) {
-                        return $makeKey($c['cor'], $c['codigo_cor']);
-                    })
-                    ->map(function($group) {
-                        $first = $group->first();
-                        // Somar quantidades de duplicados
-                        $totalQtd = 0;
-                        foreach ($group as $g) {
-                            $totalQtd += (int) ($g['quantidade'] ?? 0);
-                        }
-                        $first['quantidade'] = $totalQtd;
-                        return $first;
-                    })
-                    ->values();
-            }
+        
+        if (empty($tecidoIds)) {
+            return response()->json(['colors' => []]);
         }
 
-        // 2. Buscar cores disponíveis nos tecidos selecionados
-        if (!empty($tecidoIds)) {
-            $coresDisponiveis = \App\Models\TecidoCorEstoque::whereIn('tecido_id', $tecidoIds)
-                ->select('cor', 'codigo_cor')
-                ->distinct()
-                ->orderBy('cor')
-                ->get()
-                ->map(function($cor) use ($normalizeCor, $normalizeCodigo) {
-                    return [
-                        'cor' => $normalizeCor($cor->cor),
-                        'codigo_cor' => $normalizeCodigo($cor->codigo_cor),
-                        'quantidade' => 0,
-                        'tipo' => 'disponivel'
-                    ];
-                })
-                // Deduplicar após normalização
-                ->unique(function($c) use ($makeKey) { return $makeKey($c['cor'], $c['codigo_cor']); })
-                ->values();
-                
-        }
+        // Buscar todas as cores dos tecidos selecionados
+        $cores = \App\Models\TecidoCorEstoque::whereIn('tecido_id', $tecidoIds)
+            ->select('cor', 'codigo_cor')
+            ->distinct()
+            ->orderBy('cor')
+            ->get();
 
-        // 3. Filtrar cores disponíveis que já não estejam cadastradas no produto
-        $coresExistentesKeys = $coresExistentes->map(function($cor) use ($makeKey) {
-            return $makeKey($cor['cor'], $cor['codigo_cor']);
-        });
-
-        $coresDisponiveisFiltered = $coresDisponiveis->filter(function($cor) use ($coresExistentesKeys, $makeKey) {
-            $key = $makeKey($cor['cor'], $cor['codigo_cor']);
-            return !$coresExistentesKeys->contains($key);
-        });
-
-        // 4. Combinar: primeiro as existentes, depois as disponíveis
-        $todasCores = $coresExistentes->concat($coresDisponiveisFiltered)->values();
-
-
-        return response()->json(['cores' => $todasCores]);
+        return response()->json(['colors' => $cores]);
     }
 
     /**

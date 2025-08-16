@@ -159,9 +159,13 @@
                                                     <a href="{{ asset('storage/' . $anexo->arquivo_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm mr-3">
                                                         Visualizar
                                                     </a>
-                                                    <button type="button" onclick="deleteAttachment({{ $anexo->id }})" class="text-red-600 hover:text-red-800 text-sm">
-                                                        Excluir
-                                                    </button>
+                                                    <form action="{{ route('produtos.anexos.destroy', $anexo->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este anexo?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                            Excluir
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         @endforeach
@@ -267,7 +271,12 @@
                                         <!-- As cores serão adicionadas dinamicamente via JavaScript -->
                                     @endforelse
                                 </div>
-
+                                <button type="button" id="add-cor" class="mt-3 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    Adicionar Cor
+                                </button>
                             </div>
                             <p class="mt-1 text-xs text-gray-500">As cores disponíveis serão carregadas automaticamente com base nos tecidos selecionados</p>
                         </div>
@@ -323,315 +332,369 @@
     </div>
 
     @push('scripts')
-<script>
-    // Function to delete attachment via AJAX
-    function deleteAttachment(anexoId) {
-        if (!confirm('Tem certeza que deseja excluir este anexo?')) {
-            return;
-        }
-        
-        $.ajax({
-            url: '/produtos/anexos/' + anexoId,
-            type: 'DELETE',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                // Reload the page to show updated attachments
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Erro ao excluir anexo: ' + error);
-            }
-        });
-    }
+    <script>
+        // Aguardar que o DOM e jQuery estejam totalmente carregados
+        $(function() {
+            const container = document.getElementById('tecidos-container');
+            const addButton = document.getElementById('add-tecido');
+            let tecidoCount = {{ count($produto->tecidos) > 0 ? count($produto->tecidos) : 0 }};
 
-    $(document).ready(function() {
-        // Debug para verificar se o script está carregando
-        
-        // Debug: Capturar evento de submit do formulário
-        $('form').on('submit', function(e) {
-            
-            // Verificar campos obrigatórios
-            let camposVazios = [];
-            
-            // Verificar campos required
-            $(this).find('[required]').each(function() {
-                const campo = $(this);
-                const valor = campo.val();
-                const nome = campo.attr('name') || campo.attr('id');
-                
-                if (!valor || valor.trim() === '') {
-                    camposVazios.push(nome);
-                }
-            });
-            
-            // Verificar se há pelo menos um tecido selecionado
-            const tecidosSelecionados = $('.tecido-select').filter(function() {
-                return $(this).val() && $(this).val() !== '';
-            }).length;
-            
-            if (tecidosSelecionados === 0) {
-                camposVazios.push('tecidos');
-            }
-            
-            if (camposVazios.length > 0) {
-                e.preventDefault();
-                alert('Por favor, preencha todos os campos obrigatórios: ' + camposVazios.join(', '));
-                return false;
-            }
-
-            // Não prevenir o envio se tudo estiver OK
-        });
-
-        const tecidosContainer = $('#tecidos-container');
-        const coresContainer = $('#cores-container');
-        const addTecidoBtn = $('#add-tecido');
-
-
-        function initializeSelect2(selector, placeholder) {
-            $(selector).select2({
-                placeholder: placeholder,
-                allowClear: true,
-                width: '100%',
-                language: { noResults: () => "Nenhum resultado encontrado" }
-            }).on('select2:open', () => {
-                $('.select2-dropdown').addClass('rounded-md shadow-lg');
-                $('.select2-search__field').addClass('border-gray-300 rounded-md');
-            });
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                const context = this;
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(context, args), wait);
-            };
-        }
-
-        function updateColorVariations() {
-            const selectedTecidos = [];
-            $('.tecido-select').each(function() {
-                const val = $(this).val();
-                if (val && val !== '') {
-                    selectedTecidos.push(val);
-                }
-            });
-
-
-            if (selectedTecidos.length === 0) {
-                coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Selecione pelo menos um tecido para ver as cores disponíveis.</div>');
-                return;
-            }
-
-            // Log antes da requisição
-
-
-            try {
-                // Fazer requisição AJAX
-                var ajaxCall = $.ajax({
-                url: '{{ route("produtos.get-available-colors") }}',
-                method: 'POST',
-                data: {
-                    tecido_ids: selectedTecidos,
-                    produto_id: {{ $produto->id }},
-                    _token: '{{ csrf_token() }}'
-                },
-                beforeSend: function() {
-                },
-                success: function(response) {
-                    renderCores(response.cores || []);
-                },
-                error: function(xhr, status, error) {
-                    coresContainer.html('<div class="text-center py-4 text-red-500 italic">Erro ao carregar cores: ' + error + '</div>');
-                }
+            // Show/hide remove buttons based on number of tecido items
+            function updateRemoveButtons() {
+                const items = container.querySelectorAll('.tecido-item');
+                items.forEach(item => {
+                    const removeButton = item.querySelector('.remove-tecido');
+                    if (items.length > 1) {
+                        removeButton.style.display = 'block';
+                    } else {
+                        removeButton.style.display = 'none';
+                    }
                 });
-            } catch (e) {
-            }
-        }
-
-        function renderCores(cores) {
-            
-            if (!cores || cores.length === 0) {
-                coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Nenhuma cor disponível para os tecidos selecionados.</div>');
-                return;
             }
 
-            let htmlExistentes = '';
-            let htmlDisponiveis = '';
-            let indexExistentes = 0;
-            let indexDisponiveis = 0;
-
-            cores.forEach(function(cor) {
-                const backgroundColor = cor.codigo_cor && cor.codigo_cor !== '' ? cor.codigo_cor : '#FFFFFF';
-                const borderColor = cor.tipo === 'existente' ? 'border-green-300 bg-green-50' : 'border-blue-300 bg-blue-50';
-                const labelColor = cor.tipo === 'existente' ? 'text-green-700' : 'text-blue-700';
-                const typeLabel = cor.tipo === 'existente' ? 'Cadastrada' : 'Disponível';
-                
-                const corHtml = `
-                    <div class="mb-3 p-3 border ${borderColor} rounded-md">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 rounded border border-gray-300" style="background-color: ${backgroundColor}" title="${cor.codigo_cor || 'N/A'}"></div>
-                                <div>
-                                    <div class="font-medium text-gray-900">${cor.cor || ''}</div>
-                                    <div class="text-sm text-gray-500">${cor.codigo_cor || ''}</div>
-                                    <div class="text-xs ${labelColor} font-medium">${typeLabel}</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" 
-                                       name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][quantidade]" 
-                                       value="${cor.quantidade || 0}" 
-                                       placeholder="0" 
-                                       min="0" 
-                                       class="w-20 text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][cor]" value="${cor.cor}">
-                                <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][codigo_cor]" value="${cor.codigo_cor}">
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                if (cor.tipo === 'existente') {
-                    htmlExistentes += corHtml;
-                    indexExistentes++;
-                } else {
-                    htmlDisponiveis += corHtml;
-                    indexDisponiveis++;
-                }
-            });
-
-            let finalHtml = '';
-            
-            if (htmlExistentes) {
-                finalHtml += `
-                    <div class="mb-4">
-                        <h4 class="text-sm font-medium text-green-700 mb-2">Cores já cadastradas no produto:</h4>
-                        ${htmlExistentes}
-                    </div>
-                `;
+            // Get all currently selected tecido IDs
+            function getSelectedTecidoIds() {
+                const selects = container.querySelectorAll('select[name^="tecidos"]');
+                return Array.from(selects).map(select => select.value).filter(value => value !== '');
             }
-            
-            if (htmlDisponiveis) {
-                finalHtml += `
-                    <div class="mb-4">
-                        <h4 class="text-sm font-medium text-blue-700 mb-2">Cores disponíveis nos tecidos:</h4>
-                        ${htmlDisponiveis}
-                    </div>
-                `;
-            }
-            
-            coresContainer.html(finalHtml);
-        }
 
-        function updateRemoveTecidoButtons() {
-            const items = tecidosContainer.find('.tecido-item');
-            if (items.length > 1) {
-                items.find('.remove-tecido').show();
-            } else {
-                items.find('.remove-tecido').hide();
-            }
-        }
+            // Update all selects to properly show available options
+            function updateSelectOptions() {
+                const selectedIds = getSelectedTecidoIds();
+                const selects = container.querySelectorAll('select[name^="tecidos"]');
 
-        function reindexTecidos() {
-            tecidosContainer.find('.tecido-item').each(function(index) {
-                $(this).find('[name^="tecidos"]').each(function() {
-                    const oldName = $(this).attr('name');
-                    const newName = oldName.replace(/tecidos\[\d+\]/, `tecidos[${index}]`);
-                    $(this).attr('name', newName);
+                // Get all available options from the first select (which has all options)
+                const firstSelect = container.querySelector('select');
+                const allOptions = Array.from(firstSelect.options);
+
+                selects.forEach(select => {
+                    const currentValue = select.value;
+
+                    // Clear all options except the first one (placeholder)
+                    while (select.options.length > 1) {
+                        select.remove(1);
+                    }
+
+                    // Add back all options, ensuring the current selection remains available
+                    allOptions.forEach(option => {
+                        // Include option if:
+                        // 1. It's the empty placeholder, or
+                        // 2. It's the currently selected value for this dropdown, or
+                        // 3. It's not selected in any other dropdown
+                        if (option.value === '' ||
+                            option.value === currentValue ||
+                            !selectedIds.includes(option.value) ||
+                            (selectedIds.filter(id => id === option.value).length < 2 && option.value === currentValue)) {
+
+                            const newOption = document.createElement('option');
+                            newOption.value = option.value;
+                            newOption.text = option.text;
+                            newOption.className = 'text-gray-700';
+                            if (option.value === currentValue) {
+                                newOption.selected = true;
+                            }
+                            select.add(newOption);
+                        }
+                    });
                 });
-            });
-        }
+            }
 
-        // Adicionar tecido - usando event delegation para garantir que funcione
-        $(document).on('click', '#add-tecido', function(e) {
-            e.preventDefault();
-            
-            const newIndex = tecidosContainer.find('.tecido-item').length;
-            
-            const template = `
-                <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t border-gray-200">
+            // Add new tecido item
+            $(addButton).on('click', function() {
+                tecidoCount++;
+                const newItem = document.createElement('div');
+                newItem.className = 'tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200';
+
+                // Get all available options excluding already selected ones
+                const selectedIds = getSelectedTecidoIds();
+                const firstSelect = container.querySelector('select');
+                const filteredOptions = Array.from(firstSelect.options)
+                    .filter(opt => opt.value === '' || !selectedIds.includes(opt.value))
+                    .map(opt => `<option value="${opt.value}">${opt.text}</option>`)
+                    .join('');
+
+                newItem.innerHTML = `
                     <div class="flex items-center gap-4">
                         <div class="flex-grow">
-                            <select name="tecidos[${newIndex}][tecido_id]" class="tecido-select-new block w-full">
-                                <option></option>
-                                @foreach($tecidos as $tecido)
-                                    <option value="{{ $tecido->id }}">{{ $tecido->descricao }} @if($tecido->referencia) ({{ $tecido->referencia }}) @endif</option>
-                                @endforeach
+                            <select name="tecidos[${tecidoCount}][tecido_id]" class="tecido-select block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                ${filteredOptions}
                             </select>
                         </div>
-                        <div class="w-1/4"><input type="number" name="tecidos[${newIndex}][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"></div>
-                        <button type="button" class="remove-tecido text-red-500 hover:text-red-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
+                        <div class="w-1/4">
+                            <input type="number" name="tecidos[${tecidoCount}][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                        </div>
+                        <button type="button" class="remove-tecido text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
                     </div>
-                </div>`;
-            
-            tecidosContainer.append(template);
-            const newSelect = tecidosContainer.find('.tecido-select-new');
-            initializeSelect2(newSelect, 'Selecione um tecido');
-            newSelect.removeClass('tecido-select-new').addClass('tecido-select');
-            updateRemoveTecidoButtons();
-            updateColorVariations();
-        });
+                `;
 
-        // Remover tecido - usando event delegation
-        $(document).on('click', '.remove-tecido', function(e) {
-            e.preventDefault();
-            $(this).closest('.tecido-item').remove();
-            reindexTecidos();
-            updateRemoveTecidoButtons();
-            updateColorVariations();
-        });
+                container.appendChild(newItem);
+                updateRemoveButtons();
 
-        // Initial setup
-        initializeSelect2('.grupo-select', 'Selecione um grupo');
-        initializeSelect2('.estilista-select', 'Selecione um estilista');
-        
-        // Inicializar Select2 para tecidos e verificar se foram inicializados corretamente
-        const tecidoSelects = $('.tecido-select');
-        initializeSelect2('.tecido-select', 'Selecione um tecido');
-        
-        // Verificar valores iniciais dos selects de tecido
-        tecidoSelects.each(function(index) {
-        });
-        
-        // Atualizar cores quando um tecido é alterado
-        const debouncedUpdateColors = debounce(updateColorVariations, 400);
-        tecidosContainer.on('change', '.tecido-select', function() {
-            debouncedUpdateColors();
-        });
-        
-        // Inicialização
-        
-        // Atualizar botões de remover tecido
-        updateRemoveTecidoButtons();
-        
-        // Carregar cores diretamente com delay maior para garantir que Select2 esteja inicializado
-        setTimeout(function() {
-            // updateColorVariations(); // COMENTADO para evitar dupla chamada
-            
-            // Verificar novamente os tecidos selecionados
-            const tecidosSelecionados = [];
-            $('.tecido-select').each(function() {
-                const val = $(this).val();
-                if (val && val !== '') {
-                    tecidosSelecionados.push(val);
+                // Não precisamos adicionar event listener aqui, pois estamos usando delegação de eventos
+                const newSelect = newItem.querySelector('select');
+
+                // Não precisamos adicionar event listener aqui, pois estamos usando delegação de eventos
+            });
+
+            // Add event listeners to existing remove buttons using event delegation
+            $(container).on('click', '.remove-tecido', function() {
+                $(this).closest('.tecido-item').remove();
+                updateRemoveButtons();
+                updateSelectOptions();
+            });
+
+            // Add change event listeners to existing selects using event delegation
+            $(container).on('change', 'select[name^="tecidos"]', function() {
+                updateSelectOptions();
+                // Trigger Select2 to update
+                $(this).trigger('change.select2');
+            });
+
+            // Verificar campos de consumo vazios antes de enviar o formulário
+            document.querySelector('form').addEventListener('submit', function(e) {
+                // Encontrar todos os campos de consumo
+                const consumoInputs = document.querySelectorAll('input[name^="tecidos"][name$="[consumo]"]');
+
+                // Definir como zero se estiver vazio
+                consumoInputs.forEach(input => {
+                    if (input.value === '' || input.value === null || input.value.trim() === '') {
+                        input.value = '0';
+                    }
+                });
+
+                // Verificar novamente para garantir que nenhum campo ficou vazio
+                let todosPreenchidos = true;
+                consumoInputs.forEach(input => {
+                    if (input.value === '' || input.value === null || input.value.trim() === '') {
+                        todosPreenchidos = false;
+                        input.value = '0'; // Tentar definir novamente
+                    }
+                });
+
+                if (!todosPreenchidos) {
+                    console.log('Alguns campos de consumo foram automaticamente definidos como zero');
                 }
             });
-            
-            if (tecidosSelecionados.length > 0) {
-                updateColorVariations(); // Chamar apenas se houver tecidos selecionados
-            } else {
-                coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Selecione pelo menos um tecido para ver as cores disponíveis.</div>');
+
+            // Inicializar Select2 nos campos de grupo e estilista
+            $(document).ready(function() {
+                $('.grupo-select').select2({
+                    placeholder: "Selecione um grupo",
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                $('.estilista-select').select2({
+                    placeholder: "Selecione um estilista",
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+
+            // Initialize Select2 on all tecido selects
+            $(document).ready(function() {
+                $('.tecido-select').select2({
+                    placeholder: "Selecione um tecido",
+                    allowClear: true,
+                    width: '100%'
+                });
+
+                // Ajustar estilo do Select2 para combinar com o Tailwind
+                $('.select2-container--default .select2-selection--single').css({
+                    'height': '42px',
+                    'padding': '6px 4px',
+                    'border-color': '#d1d5db'
+                });
+
+                // Garantir que o container do Select2 respeite o layout flex
+                $('.select2-container').css({
+                    'width': '100%',
+                    'max-width': '100%',
+                    'display': 'block'
+                });
+
+                // Re-initialize Select2 after adding a new tecido
+                $('#add-tecido').on('click', function() {
+                    setTimeout(function() {
+                        $('select[name^="tecidos"]').last().select2({
+                            placeholder: 'Selecione um tecido',
+                            allowClear: true,
+                            width: '100%',
+                            language: {
+                                noResults: function() {
+                                    return "Nenhum resultado encontrado";
+                                },
+                                searching: function() {
+                                    return "Buscando...";
+                                }
+                            }
+                        });
+                    }, 100);
+                });
+            });
+
+            // Initialize
+            updateRemoveButtons();
+            updateSelectOptions();
+
+            // === SEÇÃO DE VARIAÇÕES DE CORES ===
+            const coresContainer = document.getElementById('cores-container');
+            const addCorButton = document.getElementById('add-cor');
+            let corCount = {{ $produto->cores->count() }};
+            let availableColors = [];
+
+            // Função para obter cores disponíveis dos tecidos selecionados
+            function getAvailableColors() {
+                const selectedTecidoIds = getSelectedTecidoIds();
+                
+                if (selectedTecidoIds.length === 0) {
+                    availableColors = [];
+                    updateCoresContainer();
+                    return;
+                }
+
+                // Fazer requisição AJAX para obter as cores dos tecidos selecionados
+                $.ajax({
+                    url: '{{ route("produtos.get-available-colors") }}',
+                    method: 'POST',
+                    data: {
+                        tecido_ids: selectedTecidoIds,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        availableColors = response.colors || [];
+                        updateCoresContainer();
+                    },
+                    error: function() {
+                        console.error('Erro ao carregar cores disponíveis');
+                        availableColors = [];
+                        updateCoresContainer();
+                    }
+                });
             }
-        }, 1500);
-        
-        // Exibir mensagem ao usuário
-        const infoMsg = $('<div class="mt-2 text-xs text-blue-600">Todas as cores disponíveis para os tecidos selecionados serão exibidas automaticamente.</div>');
-        coresContainer.parent().append(infoMsg);
-        
-    });
-</script>
-@endpush
+
+            // Atualizar container de cores com base nas cores disponíveis
+            function updateCoresContainer() {
+                // Se não há cores disponíveis e não há cores existentes, mostrar mensagem
+                if (availableColors.length === 0 && coresContainer.querySelectorAll('.cor-item').length === 0) {
+                    coresContainer.innerHTML = '<p class="text-gray-500 text-sm">Selecione tecidos para ver as cores disponíveis</p>';
+                    return;
+                }
+
+                // Coletar cores e quantidades existentes
+                const existingColors = {};
+                const existingItems = coresContainer.querySelectorAll('.cor-item');
+                existingItems.forEach(item => {
+                    const corInput = item.querySelector('input[name*="[cor]"]');
+                    const quantidadeInput = item.querySelector('input[name*="[quantidade]"]');
+                    if (corInput && corInput.value) {
+                        existingColors[corInput.value] = {
+                            codigo_cor: item.querySelector('input[name*="[codigo_cor]"]')?.value || '',
+                            quantidade: quantidadeInput?.value || ''
+                        };
+                    }
+                });
+
+                // Se há cores disponíveis, atualizar inteligentemente
+                if (availableColors.length > 0) {
+                    // Limpar container completamente para recriar
+                    coresContainer.innerHTML = '';
+
+                    // Adicionar cores disponíveis dos tecidos, preservando quantidades existentes
+                    availableColors.forEach((color, index) => {
+                        // Verificar se esta cor já existe
+                        const existingColor = existingColors[color.cor];
+                        if (existingColor) {
+                            // Cor já existe, manter quantidade existente
+                            addCorItem(color.cor, color.codigo_cor, index, existingColor.quantidade);
+                            delete existingColors[color.cor]; // Marcar como processada
+                        } else {
+                            // Nova cor dos tecidos
+                            addCorItem(color.cor, color.codigo_cor, index);
+                        }
+                    });
+
+                    // Adicionar cores existentes que não estão mais nos tecidos (para não perder dados)
+                    Object.keys(existingColors).forEach(corNome => {
+                        const existingColor = existingColors[corNome];
+                        corCount++;
+                        addCorItem(corNome, existingColor.codigo_cor, corCount, existingColor.quantidade);
+                    });
+                }
+            }
+
+            // Adicionar item de cor
+            function addCorItem(corNome = '', codigoCor = '', index = null, quantidade = '') {
+                if (index === null) {
+                    corCount++;
+                    index = corCount;
+                }
+
+                const newItem = document.createElement('div');
+                newItem.className = 'cor-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200';
+
+                newItem.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="flex-grow">
+                            <input type="text" name="cores[${index}][cor]" value="${corNome}" placeholder="Nome da cor" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>
+                        </div>
+                        <div class="w-1/4">
+                            <input type="text" name="cores[${index}][codigo_cor]" value="${codigoCor}" placeholder="Código" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>
+                        </div>
+                        <div class="w-1/4">
+                            <input type="number" name="cores[${index}][quantidade]" value="${quantidade}" placeholder="Quantidade" min="1" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                        </div>
+                        <button type="button" class="remove-cor text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+
+                coresContainer.appendChild(newItem);
+                updateCoresRemoveButtons();
+            }
+
+            // Atualizar botões de remoção de cores
+            function updateCoresRemoveButtons() {
+                const items = coresContainer.querySelectorAll('.cor-item');
+                items.forEach(item => {
+                    const removeButton = item.querySelector('.remove-cor');
+                    if (items.length > 1) {
+                        removeButton.style.display = 'block';
+                    } else {
+                        removeButton.style.display = 'none';
+                    }
+                });
+            }
+
+            // Event listeners para cores
+            $(addCorButton).on('click', function() {
+                addCorItem();
+            });
+
+            $(coresContainer).on('click', '.remove-cor', function() {
+                $(this).closest('.cor-item').remove();
+                updateCoresRemoveButtons();
+            });
+
+            // Monitorar mudanças nos tecidos para atualizar cores disponíveis
+            $(container).on('change', 'select[name^="tecidos"]', function() {
+                updateSelectOptions();
+                getAvailableColors();
+            });
+
+            // Inicializar cores quando a página carregar
+            $(document).ready(function() {
+                updateCoresRemoveButtons();
+                getAvailableColors();
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>
