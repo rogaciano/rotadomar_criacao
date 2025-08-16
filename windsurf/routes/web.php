@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/dados-por-ano', [DashboardController::class, 'getDadosPorAno'])->name('dashboard.dados-por-ano');
+    Route::get('/dashboard/produtos-por-estilista', [DashboardController::class, 'produtosPorEstilista'])->name('dashboard.produtos-por-estilista');
     
     // Rota para servir arquivos de rede
     Route::get('/arquivo/rede', [\App\Http\Controllers\ArquivoController::class, 'servirArquivoRede'])->name('arquivo.rede');
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');
+    Route::get('consultas/media-dias-atraso', [DashboardController::class, 'mediaDiasAtraso'])->name('consultas.media-dias-atraso');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -15,6 +15,7 @@ use App\Models\Localizacao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
 {
@@ -283,5 +284,180 @@ class DashboardController extends Controller
             ],
             'ano' => $ano
         ]);
+    }
+
+    /**
+     * Exibe um gráfico de rosca (donut chart) dos produtos criados nos últimos 12 meses por estilista.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function produtosPorEstilista()
+    {
+        // Data de início (12 meses atrás)
+        $dataInicio = Carbon::now()->subMonths(12);
+        
+        // Buscar produtos dos últimos 12 meses agrupados por estilista
+        $produtosPorEstilista = Produto::select('estilistas.nome_estilista', DB::raw('count(*) as total'))
+            ->join('estilistas', 'produtos.estilista_id', '=', 'estilistas.id')
+            ->where('produtos.created_at', '>=', $dataInicio)
+            ->groupBy('estilistas.nome_estilista')
+            ->orderByDesc('total')
+            ->get();
+        
+        // Separar os top 10 estilistas
+        $topEstilistas = $produtosPorEstilista->take(10);
+        
+        // Calcular o total de produtos dos estilistas restantes
+        $outrosTotal = $produtosPorEstilista->skip(10)->sum('total');
+        
+        // Criar a coleção final com os top 10 + outros
+        $dadosGrafico = $topEstilistas->toArray();
+        
+        // Adicionar a categoria "Outros" se houver estilistas além dos top 10
+        if ($outrosTotal > 0) {
+            $dadosGrafico[] = [
+                'nome_estilista' => 'Outros',
+                'total' => $outrosTotal
+            ];
+        }
+        
+        // Preparar dados para o gráfico
+        $labels = array_column($dadosGrafico, 'nome_estilista');
+        $data = array_column($dadosGrafico, 'total');
+        
+        // Gerar cores aleatórias para o gráfico
+        $cores = [];
+        foreach ($labels as $index => $label) {
+            // Gerar cores HSL com boa separação visual
+            $hue = ($index * 137) % 360; // Fórmula para distribuir bem as cores
+            $cores[] = "hsl($hue, 70%, 60%)";
+        }
+        
+        // Período do relatório
+        $periodoInicio = $dataInicio->format('d/m/Y');
+        $periodoFim = Carbon::now()->format('d/m/Y');
+        
+        return view('dashboard.produtos-por-estilista', compact('labels', 'data', 'cores', 'periodoInicio', 'periodoFim'));
+    }
+    
+    /**
+     * Exibe um resumo da média de atraso em dias por localização para movimentações não concluídas.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function mediaDiasAtraso()
+    {
+        // Função para calcular dias úteis entre duas datas (excluindo sábados e domingos)
+        $calcularDiasUteis = function($dataInicio, $dataFim) {
+            if (!$dataInicio) return 0;
+            
+            if (!$dataFim) {
+                $dataFim = now();
+            }
+            
+            $diasUteis = 0;
+            $dataAtual = clone $dataInicio;
+            
+            while ($dataAtual <= $dataFim) {
+                // 6 = sábado, 0 = domingo
+                $diaDaSemana = $dataAtual->dayOfWeek;
+                if ($diaDaSemana != 0 && $diaDaSemana != 6) {
+                    $diasUteis++;
+                }
+                $dataAtual->addDay();
+            }
+            
+            return $diasUteis;
+        };
+        
+        // Buscar todas as movimentações não concluídas
+        $movimentacoes = Movimentacao::with(['localizacao'])
+            ->where('concluido', false)
+            ->get();
+        
+        // Agrupar por localização e calcular média de dias
+        $localizacoes = $movimentacoes->groupBy('localizacao_id');
+        
+        $mediaDiasPorLocalizacao = new Collection();
+        
+        foreach ($localizacoes as $localizacaoId => $grupo) {
+            $localizacao = $grupo->first()->localizacao;
+            
+            if (!$localizacao) continue;
+            
+            $totalDias = 0;
+            $totalMovimentacoes = 0;
+            $totalAtrasados = 0;
+            
+            foreach ($grupo as $movimentacao) {
+                // Calcular dias úteis entre data de entrada e hoje (ou data de saída se existir)
+                $dataFim = $movimentacao->data_saida ?? now();
+                $diasUteis = $calcularDiasUteis($movimentacao->data_entrada, $dataFim);
+                
+                $totalDias += $diasUteis;
+                $totalMovimentacoes++;
+                
+                // Verificar se está atrasado em relação ao prazo do setor
+                if ($localizacao->prazo && $diasUteis > $localizacao->prazo) {
+                    $totalAtrasados++;
+                }
+            }
+            
+            // Calcular média de dias
+            $mediaDias = $totalMovimentacoes > 0 ? round($totalDias / $totalMovimentacoes, 1) : 0;
+            
+            // Calcular percentual de atrasados
+            $percentualAtrasados = $totalMovimentacoes > 0 ? round(($totalAtrasados / $totalMovimentacoes) * 100) : 0;
+            
+            // Determinar status baseado no prazo do setor
+            $status = 'normal';
+            if ($localizacao->prazo) {
+                if ($mediaDias > $localizacao->prazo * 1.5) {
+                    $status = 'critico';
+                } elseif ($mediaDias > $localizacao->prazo) {
+                    $status = 'atencao';
+                }
+            }
+            
+            $mediaDiasPorLocalizacao->push([
+                'localizacao' => $localizacao->nome_localizacao,
+                'localizacao_id' => $localizacao->id,
+                'media_dias' => $mediaDias,
+                'total_movimentacoes' => $totalMovimentacoes,
+                'total_atrasados' => $totalAtrasados,
+                'percentual_atrasados' => $percentualAtrasados,
+                'prazo_setor' => $localizacao->prazo,
+                'status' => $status,
+                'ativo' => $localizacao->ativo
+            ]);
+        }
+        
+        // Ordenar por status (crítico primeiro) e depois por média de dias (decrescente)
+        $mediaDiasPorLocalizacao = $mediaDiasPorLocalizacao->sortBy([
+            ['status', 'desc'],
+            ['media_dias', 'desc']
+        ])->values();
+        
+        // Separar localizações ativas e inativas
+        $localizacoesAtivas = $mediaDiasPorLocalizacao->where('ativo', true)->values();
+        $localizacoesInativas = $mediaDiasPorLocalizacao->where('ativo', false)->values();
+        
+        // Preparar dados para o gráfico
+        $labels = $localizacoesAtivas->pluck('localizacao')->toArray();
+        $data = $localizacoesAtivas->pluck('media_dias')->toArray();
+        
+        // Gerar cores baseadas no status
+        $cores = $localizacoesAtivas->map(function ($item) {
+            switch ($item['status']) {
+                case 'critico':
+                    return 'rgb(239, 68, 68)'; // Vermelho
+                case 'atencao':
+                    return 'rgb(245, 158, 11)'; // Amarelo
+                default:
+                    return 'rgb(34, 197, 94)'; // Verde
+            }
+        })->toArray();
+        
+        return view('consultas.media-dias-atraso', compact('localizacoesAtivas', 'localizacoesInativas', 'labels', 'data', 'cores'));
     }
 }

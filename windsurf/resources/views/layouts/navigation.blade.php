@@ -73,6 +73,9 @@
                             <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute z-50 mt-2 w-48 rounded-md shadow-lg origin-top-right right-0" style="display: none;">
                                 <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">
                                     <a href="{{ route('consultas.produtos-ativos-por-localizacao') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.produtos-ativos-por-localizacao') ? 'bg-gray-100' : '' }}">{{ __('Produtos por Localização') }}</a>
+                                    <a href="{{ route('consultas.media-dias-atraso') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.media-dias-atraso') ? 'bg-gray-100' : '' }}">{{ __('Média de Dias por Localização') }}</a>
+                                    <a href="{{ route('dashboard.produtos-por-estilista') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.media-dias-atraso') ? 'bg-gray-100' : '' }}">Ver gráfico de rosca (últimos 12 meses)</a>
+
                                 </div>
                             </div>
                         </div>
@@ -143,7 +146,7 @@
             <x-responsive-nav-link :href="route('produtos.index')" :active="request()->routeIs('produtos.*')">
                 {{ __('Produtos') }}
             </x-responsive-nav-link>
-            
+
             <x-responsive-nav-link :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
                 {{ __('Movimentações') }}
             </x-responsive-nav-link>
@@ -172,8 +175,11 @@
                 <x-responsive-nav-link :href="route('consultas.produtos-ativos-por-localizacao')" :active="request()->routeIs('consultas.produtos-ativos-por-localizacao')" class="pl-6">
                     {{ __('Produtos por Localização') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('consultas.media-dias-atraso')" :active="request()->routeIs('consultas.media-dias-atraso')" class="pl-6">
+                    {{ __('Média de Dias por Localização') }}
+                </x-responsive-nav-link>
             </div>
-            
+
             <!-- Responsive Admin Menu (visível apenas para administradores) -->
             @if(auth()->user()->isAdmin())
             <div class="pt-2 pb-3 space-y-1">
