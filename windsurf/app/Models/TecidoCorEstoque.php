@@ -70,4 +70,46 @@ class TecidoCorEstoque extends Model
     {
         return $this->quantidade - $this->necessidade;
     }
+    
+    /**
+     * Calcula quantos produtos podem ser fabricados com o estoque disponível desta cor
+     * 
+     * @return array
+     */
+    public function getProdutosPossiveisAttribute()
+    {
+        $resultado = [];
+        $estoque = $this->quantidade;
+        
+        if ($estoque <= 0) {
+            return $resultado;
+        }
+        
+        // Buscar todos os produtos que usam este tecido
+        $produtos = $this->tecido->produtos;
+        
+        foreach ($produtos as $produto) {
+            // Buscar se o produto tem esta cor específica
+            $produtoCor = $produto->cores()
+                ->where('cor', $this->cor)
+                ->first();
+            
+            if ($produtoCor && $produto->pivot->consumo > 0) {
+                // Quantidade possível = Estoque disponível / Consumo do tecido
+                $quantidadePossivel = floor($estoque / $produto->pivot->consumo);
+                
+                if ($quantidadePossivel > 0) {
+                    $resultado[] = [
+                        'produto_id' => $produto->id,
+                        'referencia' => $produto->referencia,
+                        'descricao' => $produto->descricao,
+                        'consumo' => $produto->pivot->consumo,
+                        'quantidade_possivel' => $quantidadePossivel
+                    ];
+                }
+            }
+        }
+        
+        return $resultado;
+    }
 }

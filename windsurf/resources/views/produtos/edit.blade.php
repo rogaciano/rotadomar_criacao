@@ -428,26 +428,44 @@
             // Log antes da requisição
 
 
+            // Armazenar a requisição AJAX atual para poder cancelá-la se necessário
+            if (window.currentAjaxRequest) {
+                window.currentAjaxRequest.abort();
+            }
+            
             try {
                 // Fazer requisição AJAX
-                var ajaxCall = $.ajax({
-                url: '{{ route("produtos.get-available-colors") }}',
-                method: 'POST',
-                data: {
-                    tecido_ids: selectedTecidos,
-                    produto_id: {{ $produto->id }},
-                    _token: '{{ csrf_token() }}'
-                },
-                beforeSend: function() {
-                },
-                success: function(response) {
-                    renderCores(response.cores || []);
-                },
-                error: function(xhr, status, error) {
-                    coresContainer.html('<div class="text-center py-4 text-red-500 italic">Erro ao carregar cores: ' + error + '</div>');
-                }
+                window.currentAjaxRequest = $.ajax({
+                    url: '{{ route("produtos.get-available-colors") }}',
+                    method: 'POST',
+                    data: {
+                        tecido_ids: selectedTecidos,
+                        produto_id: {{ $produto->id }},
+                        _token: '{{ csrf_token() }}'
+                    },
+                    beforeSend: function() {
+                        coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Carregando cores disponíveis...</div>');
+                    },
+                    success: function(response) {
+                        if (response && response.cores) {
+                            renderCores(response.cores);
+                        } else {
+                            coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Nenhuma cor disponível para os tecidos selecionados.</div>');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Não mostrar erro se a requisição foi abortada intencionalmente
+                        if (status !== 'abort') {
+                            coresContainer.html('<div class="text-center py-4 text-red-500 italic">Erro ao carregar cores: ' + error + '</div>');
+                        }
+                    },
+                    complete: function() {
+                        window.currentAjaxRequest = null;
+                    }
                 });
             } catch (e) {
+                console.error('Erro ao iniciar requisição AJAX:', e);
+                coresContainer.html('<div class="text-center py-4 text-red-500 italic">Erro ao iniciar requisição: ' + e.message + '</div>');
             }
         }
 
@@ -469,26 +487,53 @@
                 const labelColor = cor.tipo === 'existente' ? 'text-green-700' : 'text-blue-700';
                 const typeLabel = cor.tipo === 'existente' ? 'Cadastrada' : 'Disponível';
                 
+                // Formatar valores numéricos
+                const estoque = parseFloat(cor.estoque || 0).toFixed(2).replace('.', ',');
+                const necessidade = parseFloat(cor.necessidade || 0).toFixed(2).replace('.', ',');
+                const producaoPossivel = parseInt(cor.producao_possivel || 0);
+                
+                // Determinar a cor do saldo (estoque - necessidade)
+                const saldo = parseFloat(cor.estoque || 0) - parseFloat(cor.necessidade || 0);
+                const saldoFormatado = saldo.toFixed(2).replace('.', ',');
+                const saldoClass = saldo >= 0 ? 'text-green-600' : 'text-red-600';
+                
                 const corHtml = `
                     <div class="mb-3 p-3 border ${borderColor} rounded-md">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-8 h-8 rounded border border-gray-300" style="background-color: ${backgroundColor}" title="${cor.codigo_cor || 'N/A'}"></div>
-                                <div>
-                                    <div class="font-medium text-gray-900">${cor.cor || ''}</div>
-                                    <div class="text-sm text-gray-500">${cor.codigo_cor || ''}</div>
-                                    <div class="text-xs ${labelColor} font-medium">${typeLabel}</div>
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded border border-gray-300" style="background-color: ${backgroundColor}" title="${cor.codigo_cor || 'N/A'}"></div>
+                                    <div>
+                                        <div class="font-medium text-gray-900">${cor.cor || ''}</div>
+                                        <div class="text-sm text-gray-500">${cor.codigo_cor || ''}</div>
+                                        <div class="text-xs ${labelColor} font-medium">${typeLabel}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-sm text-gray-700">Quantidade:</label>
+                                    <input type="number" 
+                                           name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][quantidade]" 
+                                           value="${cor.quantidade || 0}" 
+                                           placeholder="0" 
+                                           min="0" 
+                                           class="w-20 text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][cor]" value="${cor.cor}">
+                                    <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][codigo_cor]" value="${cor.codigo_cor}">
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" 
-                                       name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][quantidade]" 
-                                       value="${cor.quantidade || 0}" 
-                                       placeholder="0" 
-                                       min="0" 
-                                       class="w-20 text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][cor]" value="${cor.cor}">
-                                <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][codigo_cor]" value="${cor.codigo_cor}">
+                            <div class="border-t border-gray-200 pt-3">
+                                <table class="w-full text-sm">
+                                    <tr>
+                                        <td class="pr-2"><span class="font-medium text-gray-700">Estoque:</span></td>
+                                        <td class="pr-4">${estoque} m</td>
+                                        <td class="pr-2"><span class="font-medium text-gray-700">Necessidade:</span></td>
+                                        <td class="pr-4">${necessidade} m</td>
+                                        <td class="pr-2"><span class="font-medium text-gray-700">Saldo:</span></td>
+                                        <td class="pr-4"><span class="${saldoClass}">${saldoFormatado} m</span></td>
+                                        <td class="pr-2"><span class="font-medium text-gray-700">Produção possível:</span></td>
+                                        <td><span class="font-semibold ${producaoPossivel > 0 ? 'text-green-600' : 'text-gray-600'}">${producaoPossivel} unidades</span></td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
                     </div>

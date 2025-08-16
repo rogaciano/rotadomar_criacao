@@ -292,8 +292,54 @@ class ProdutoController extends Controller
             ->with(['localizacao', 'tipo', 'situacao'])
             ->orderBy('data_entrada', 'asc')
             ->get();
+            
+        // Enriquecer as cores do produto com informações de estoque
+        $coresEnriquecidas = collect([]);
+        
+        foreach ($produto->cores as $cor) {
+            $corInfo = [
+                'id' => $cor->id,
+                'cor' => $cor->cor,
+                'codigo_cor' => $cor->codigo_cor,
+                'quantidade' => $cor->quantidade,
+                'estoque' => 0,
+                'necessidade' => 0,
+                'saldo' => 0,
+                'producao_possivel' => 0,
+                'consumo_deste_produto' => 0,
+                'consumo_total' => 0
+            ];
+            
+            // Para cada tecido do produto, verificar estoque da cor
+            foreach ($produto->tecidos as $tecido) {
+                $estoqueCor = \App\Models\TecidoCorEstoque::where('tecido_id', $tecido->id)
+                    ->where('cor', $cor->cor)
+                    ->first();
+                    
+                if ($estoqueCor) {
+                    $corInfo['estoque'] += $estoqueCor->quantidade;
+                    $corInfo['necessidade'] += $estoqueCor->necessidade;
+                    $corInfo['saldo'] += $estoqueCor->saldo;
+                    
+                    // Calcular consumo específico deste produto
+                    // Consumo deste produto = quantidade da cor * consumo do tecido
+                    $consumoProduto = $cor->quantidade * $tecido->pivot->consumo;
+                    $corInfo['consumo_deste_produto'] += $consumoProduto;
+                    $corInfo['consumo_total'] += $tecido->pivot->consumo;
+                    
+                    // Calcular produção possível se houver consumo definido
+                    if ($tecido->pivot->consumo > 0) {
+                        // Usar o saldo ao invés da quantidade para calcular a produção possível
+                        $producaoPossivel = floor($estoqueCor->saldo / $tecido->pivot->consumo);
+                        $corInfo['producao_possivel'] += $producaoPossivel;
+                    }
+                }
+            }
+            
+            $coresEnriquecidas->push($corInfo);
+        }
 
-        return view('produtos.show', compact('produto', 'movimentacoes'));
+        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas'));
     }
 
     /**
@@ -515,7 +561,6 @@ class ProdutoController extends Controller
         $tecidoIds = $request->input('tecido_ids', []);
         $produtoId = $request->input('produto_id');
 
-
         // Funções de normalização
         $normalizeCodigo = function ($value) {
             if ($value === null) return null;
@@ -539,10 +584,11 @@ class ProdutoController extends Controller
 
         $coresExistentes = collect([]);
         $coresDisponiveis = collect([]);
+        $produto = null;
 
         // 1. Buscar cores já cadastradas no produto (primeira prioridade)
         if ($produtoId) {
-            $produto = \App\Models\Produto::find($produtoId);
+            $produto = \App\Models\Produto::with('tecidos')->find($produtoId);
             if ($produto) {
                 $coresExistentes = $produto->cores()->select('cor', 'codigo_cor', 'quantidade')->get()
                     ->map(function($cor) use ($normalizeCor, $normalizeCodigo) {
@@ -550,7 +596,10 @@ class ProdutoController extends Controller
                             'cor' => $normalizeCor($cor->cor),
                             'codigo_cor' => $normalizeCodigo($cor->codigo_cor),
                             'quantidade' => $cor->quantidade,
-                            'tipo' => 'existente'
+                            'tipo' => 'existente',
+                            'estoque' => 0,
+                            'necessidade' => 0,
+                            'producao_possivel' => 0
                         ];
                     })
                     // Deduplicar cores existentes após normalização (somando quantidades)
@@ -571,25 +620,58 @@ class ProdutoController extends Controller
             }
         }
 
-        // 2. Buscar cores disponíveis nos tecidos selecionados
+        // 2. Buscar cores disponíveis nos tecidos selecionados com informações de estoque
         if (!empty($tecidoIds)) {
-            $coresDisponiveis = \App\Models\TecidoCorEstoque::whereIn('tecido_id', $tecidoIds)
-                ->select('cor', 'codigo_cor')
-                ->distinct()
-                ->orderBy('cor')
+            $estoquesCores = \App\Models\TecidoCorEstoque::whereIn('tecido_id', $tecidoIds)
+                ->with('tecido')
                 ->get()
-                ->map(function($cor) use ($normalizeCor, $normalizeCodigo) {
+                ->map(function($estoqueCor) use ($normalizeCor, $normalizeCodigo, $produto) {
+                    // Calcular produção possível usando saldo ao invés de quantidade
+                    $producaoPossivel = 0;
+                    if ($produto && $estoqueCor->tecido) {
+                        $tecidoProduto = $produto->tecidos->firstWhere('id', $estoqueCor->tecido_id);
+                        if ($tecidoProduto && $tecidoProduto->pivot->consumo > 0) {
+                            // Usar saldo ao invés de quantidade para calcular produção possível
+                            $producaoPossivel = floor($estoqueCor->saldo / $tecidoProduto->pivot->consumo);
+                        }
+                    }
+                    
                     return [
-                        'cor' => $normalizeCor($cor->cor),
-                        'codigo_cor' => $normalizeCodigo($cor->codigo_cor),
+                        'cor' => $normalizeCor($estoqueCor->cor),
+                        'codigo_cor' => $normalizeCodigo($estoqueCor->codigo_cor),
                         'quantidade' => 0,
-                        'tipo' => 'disponivel'
+                        'tipo' => 'disponivel',
+                        'estoque' => $estoqueCor->quantidade,
+                        'necessidade' => $estoqueCor->necessidade,
+                        'saldo' => $estoqueCor->saldo,
+                        'producao_possivel' => $producaoPossivel
                     ];
                 })
-                // Deduplicar após normalização
-                ->unique(function($c) use ($makeKey) { return $makeKey($c['cor'], $c['codigo_cor']); })
+                // Deduplicar após normalização, mantendo o maior estoque para cada cor
+                ->groupBy(function($c) use ($makeKey) { 
+                    return $makeKey($c['cor'], $c['codigo_cor']); 
+                })
+                ->map(function($group) {
+                    $first = $group->first();
+                    
+                    // Encontrar o maior estoque e a maior produção possível entre duplicados
+                    $maxEstoque = 0;
+                    $maxNecessidade = 0;
+                    $maxProducaoPossivel = 0;
+                    
+                    foreach ($group as $g) {
+                        $maxEstoque = max($maxEstoque, $g['estoque']);
+                        $maxNecessidade = max($maxNecessidade, $g['necessidade']);
+                        $maxProducaoPossivel = max($maxProducaoPossivel, $g['producao_possivel']);
+                    }
+                    
+                    $first['estoque'] = $maxEstoque;
+                    $first['necessidade'] = $maxNecessidade;
+                    $first['producao_possivel'] = $maxProducaoPossivel;
+                    
+                    return $first;
+                })
                 ->values();
-                
         }
 
         // 3. Filtrar cores disponíveis que já não estejam cadastradas no produto
@@ -597,14 +679,35 @@ class ProdutoController extends Controller
             return $makeKey($cor['cor'], $cor['codigo_cor']);
         });
 
-        $coresDisponiveisFiltered = $coresDisponiveis->filter(function($cor) use ($coresExistentesKeys, $makeKey) {
+        // 4. Atualizar informações de estoque para cores existentes
+        if (!empty($tecidoIds) && !$coresExistentes->isEmpty()) {
+            $coresExistentes = $coresExistentes->map(function($corExistente) use ($estoquesCores, $makeKey) {
+                $key = $makeKey($corExistente['cor'], $corExistente['codigo_cor']);
+                
+                // Encontrar a mesma cor nas cores disponíveis para obter informações de estoque
+                $corDisponivel = $estoquesCores->first(function($c) use ($key, $makeKey) {
+                    return $makeKey($c['cor'], $c['codigo_cor']) === $key;
+                });
+                
+                if ($corDisponivel) {
+                    $corExistente['estoque'] = $corDisponivel['estoque'];
+                    $corExistente['necessidade'] = $corDisponivel['necessidade'];
+                    $corExistente['saldo'] = $corDisponivel['saldo'];
+                    $corExistente['producao_possivel'] = $corDisponivel['producao_possivel'];
+                }
+                
+                return $corExistente;
+            });
+        }
+
+        // Adicionar cores disponíveis que não estão no produto
+        $coresDisponiveis = $estoquesCores->filter(function($cor) use ($coresExistentesKeys, $makeKey) {
             $key = $makeKey($cor['cor'], $cor['codigo_cor']);
             return !$coresExistentesKeys->contains($key);
         });
 
-        // 4. Combinar: primeiro as existentes, depois as disponíveis
-        $todasCores = $coresExistentes->concat($coresDisponiveisFiltered)->values();
-
+        // 5. Combinar: primeiro as existentes, depois as disponíveis
+        $todasCores = $coresExistentes->concat($coresDisponiveis)->values();
 
         return response()->json(['cores' => $todasCores]);
     }

@@ -161,64 +161,98 @@
                     <!-- Variações de Cores -->
                      <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                          <h3 class="text-lg font-semibold text-gray-800 mb-4">Variações de Cores</h3>
-                         
+
                          @if($produto->cores->count() > 0)
-                             <div class="overflow-x-auto">
-                                 <table class="min-w-full divide-y divide-gray-200">
-                                     <thead class="bg-gray-50">
-                                         <tr>
-                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
-                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
-                                         </tr>
-                                     </thead>
-                                     <tbody class="bg-white divide-y divide-gray-200">
-                                         @foreach($produto->cores as $cor)
-                                             <tr>
-                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                                     <div class="flex items-center">
-                                                         @if($cor->codigo_cor)
-                                                             <div class="w-4 h-4 rounded-full mr-2 border border-gray-300" style="background-color: {{ $cor->codigo_cor }}"></div>
-                                                         @endif
-                                                         {{ $cor->cor }}
-                                                     </div>
-                                                 </td>
-                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $cor->codigo_cor ?? 'N/A' }}</td>
-                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($cor->quantidade, 0, ',', '.') }}</td>
-                                             </tr>
-                                         @endforeach
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque (m)</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <div class="flex items-center">
+                                                    <span>Necessidade Geral(m)</span>
+                                                    <div class="tooltip-container ml-1" style="position: relative;">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help tooltip-trigger" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <div class="tooltip-content fixed z-[9999] w-64 p-2 bg-black text-xs rounded-lg hidden" style="color: white !important; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
+                                                            Necessidade total de todos os produtos que usam esta cor de tecido.
+                                                            <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black rotate-45"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumo deste Produto (m)</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo (m)</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produção Possível</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        @foreach($coresEnriquecidas as $cor)
+                                            <tr>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                    <div class="flex items-center">
+                                                        @if($cor['codigo_cor'])
+                                                            <div class="w-4 h-4 rounded-full mr-2 border border-gray-300" style="background-color: {{ $cor['codigo_cor'] }}"></div>
+                                                        @endif
+                                                        {{ $cor['cor'] }}
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $cor['codigo_cor'] ?? 'N/A' }}</td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($cor['quantidade'], 0, ',', '.') }}</td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ number_format($cor['estoque'], 2, ',', '.') }}</td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ number_format($cor['necessidade'], 2, ',', '.') }}</td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ number_format($cor['consumo_deste_produto'], 2, ',', '.') }}</td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm {{ $cor['saldo'] >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium' }}">
+                                                    {{ number_format($cor['saldo'], 2, ',', '.') }}
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm {{ $cor['producao_possivel'] > 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium' }}">
+                                                    {{ number_format($cor['producao_possivel'], 0, ',', '.') }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                      </tbody>
                                      <tfoot class="bg-gray-50">
-                                         <tr>
-                                             <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Geral:</td>
-                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
-                                                 <div class="flex items-center">
-                                                     <span class="mr-2">{{ number_format($produto->cores->sum('quantidade'), 0, ',', '.') }}</span>
-                                                     @php
-                                                         $totalCores = $produto->cores->sum('quantidade');
-                                                         $quantidadeProduto = $produto->quantidade ?? 0;
-                                                         $isEqual = $totalCores == $quantidadeProduto;
-                                                     @endphp
-                                                     @if($isEqual)
-                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
-                                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                                         </svg>
-                                                     @else
-                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores ({{ number_format($totalCores, 0, ',', '.') }}) é diferente da quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
-                                                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                                         </svg>
-                                                     @endif
-                                                 </div>
-                                             </td>
-                                         </tr>
-                                         @if(!$isEqual)
+                                        <tr>
+                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Geral:</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                                                <div class="flex items-center">
+                                                    <span class="mr-2">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</span>
+                                                    @php
+                                                        $totalCores = collect($coresEnriquecidas)->sum('quantidade');
+                                                        $quantidadeProduto = $produto->quantidade ?? 0;
+                                                        $isEqual = $totalCores == $quantidadeProduto;
+                                                    @endphp
+                                                    @if($isEqual)
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    @else
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores não está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
+                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('estoque'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('necessidade'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('consumo_deste_produto'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ collect($coresEnriquecidas)->sum('saldo') >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ number_format(collect($coresEnriquecidas)->sum('saldo'), 2, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900"></td>
+                                        </tr>
+                                        @if(!$isEqual)
                                              <tr>
-                                                 <td colspan="3" class="px-4 py-2 text-xs text-gray-600 bg-yellow-50">
+                                                 <td colspan="8" class="px-4 py-2 text-xs text-gray-600 bg-yellow-50">
                                                      <div class="flex items-center">
-                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                         </svg>
-                                                         <span>Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} | Diferença: {{ number_format(abs($totalCores - $quantidadeProduto), 0, ',', '.') }}</span>
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        <span>Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} | Diferença: {{ number_format(abs($totalCores - $quantidadeProduto), 0, ',', '.') }}</span>
                                                      </div>
                                                  </td>
                                              </tr>
@@ -297,10 +331,10 @@
                             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
                                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
                             </div>
-                            
+
                             <!-- Centralização vertical -->
                             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                            
+
                             <!-- Modal propriamente dito -->
                             <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                             <div class="px-6 py-4 border-b border-gray-200">
@@ -402,7 +436,7 @@
                         function calcularDiasUteis($dataInicio, $dataFim) {
                             $diasUteis = 0;
                             $dataAtual = clone $dataInicio;
-                            
+
                             while ($dataAtual <= $dataFim) {
                                 // 6 = sábado, 0 = domingo
                                 $diaDaSemana = $dataAtual->dayOfWeek;
@@ -411,11 +445,11 @@
                                 }
                                 $dataAtual->addDay();
                             }
-                            
+
                             return $diasUteis;
                         }
                         @endphp
-                        
+
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-800">Movimentações</h3>
                             <a href="{{ route('movimentacoes.create', ['produto_id' => $produto->id]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
@@ -489,7 +523,7 @@
                                                         $diasEntre = null;
                                                         $prazoExcedido = false;
                                                         $prazoSetor = null;
-                                                        
+
                                                         // Calcular dias úteis entre DATA ENTRADA e DATA SAIDA (ou data atual se não houver saída)
                                                         if ($movimentacao->data_entrada) {
                                                             if ($movimentacao->data_saida) {
@@ -499,7 +533,7 @@
                                                                 // Se não tem data de saída, calcular dias úteis entre entrada e data atual
                                                                 $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
                                                             }
-                                                            
+
                                                             // Verificar se excede o prazo do setor
                                                             if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
                                                                 $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
@@ -532,13 +566,13 @@
                                                 </td>
                                                 <td class="px-6 py-4 text-sm text-gray-500">
                                                     @if($movimentacao->observacao)
-                                                        <div class="relative tooltip-container flex items-center justify-center">
+                                                        <div class="tooltip-container flex items-center justify-center" style="position: static;">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 hover:text-blue-700 cursor-help tooltip-trigger" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
                                                             </svg>
-                                                            <div class="tooltip-content absolute z-50 w-64 p-2 bg-black text-white text-xs rounded-lg hidden -top-2 transform -translate-y-full left-1/2 -translate-x-1/2">
+                                                            <div class="tooltip-content fixed z-[9999] w-64 p-2 bg-black text-xs rounded-lg hidden" style="color: white !important; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
                                                                 {{ $movimentacao->observacao }}
-                                                                <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-black rotate-45"></div>
+                                                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black rotate-45"></div>
                                                             </div>
                                                         </div>
                                                     @else
@@ -619,6 +653,51 @@
                 indicator.addEventListener('click', function() {
                     currentIndex = index;
                     updateCarousel();
+                });
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tooltip functionality
+            const tooltipTriggers = document.querySelectorAll('.tooltip-trigger');
+
+            tooltipTriggers.forEach(trigger => {
+                trigger.addEventListener('mouseenter', function(e) {
+                    const tooltipContent = this.closest('.tooltip-container').querySelector('.tooltip-content');
+                    
+                    // Get position of the trigger
+                    const triggerRect = this.getBoundingClientRect();
+                    
+                    // Position the tooltip above the trigger with some offset
+                    tooltipContent.style.position = 'fixed';
+                    tooltipContent.style.zIndex = '9999';
+                    tooltipContent.style.top = (triggerRect.top - 15) + 'px';
+                    tooltipContent.style.left = (triggerRect.left + (triggerRect.width / 2)) + 'px';
+                    tooltipContent.style.transform = 'translate(-50%, -100%)';
+                    
+                    // Ensure tooltip is visible and above all other elements
+                    tooltipContent.classList.remove('hidden');
+                    
+                    // Prevent tooltip from being cut off at the top of the screen
+                    const tooltipRect = tooltipContent.getBoundingClientRect();
+                    if (tooltipRect.top < 10) {
+                        // If too close to the top, position below the trigger instead
+                        tooltipContent.style.top = (triggerRect.bottom + 15) + 'px';
+                        tooltipContent.style.transform = 'translate(-50%, 0)';
+                        
+                        // Move the arrow to the top
+                        const arrow = tooltipContent.querySelector('div[class*="absolute"]');
+                        if (arrow) {
+                            arrow.style.top = '-5px';
+                            arrow.style.bottom = 'auto';
+                        }
+                    }
+                });
+
+                trigger.addEventListener('mouseleave', function() {
+                    const tooltipContent = this.closest('.tooltip-container').querySelector('.tooltip-content');
+                    tooltipContent.classList.add('hidden');
                 });
             });
         });
