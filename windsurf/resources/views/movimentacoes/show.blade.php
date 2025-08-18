@@ -51,26 +51,6 @@
                                     <span class="text-gray-500">Localização:</span>
                                     <span class="ml-2 text-gray-900"><strong>{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}</strong></span>
                                 </div>
-                                <div>
-                                    <span class="text-gray-500">Status:</span>
-                                    <span class="ml-2">
-                                        @if($movimentacao->concluido)
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-green-400" fill="currentColor" viewBox="0 0 8 8">
-                                                    <circle cx="4" cy="4" r="3" />
-                                                </svg>
-                                                Concluído
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                <svg class="-ml-0.5 mr-1.5 h-2 w-2 text-yellow-400" fill="currentColor" viewBox="0 0 8 8">
-                                                    <circle cx="4" cy="4" r="3" />
-                                                </svg>
-                                                Em andamento
-                                            </span>
-                                        @endif
-                                    </span>
-                                </div>
                             </div>
                         </div>
 
@@ -89,6 +69,18 @@
                                     <div>
                                         <span class="text-gray-500">Marca:</span>
                                         <span class="ml-2 text-gray-900">{{ $movimentacao->produto->marca ? $movimentacao->produto->marca->nome_marca : 'N/A' }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Status:</span>
+                                        <span class="ml-2">
+                                            @if($movimentacao->produto->status)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    {{ $movimentacao->produto->status->descricao }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
+                                        </span>
                                     </div>
                                     @if($movimentacao->produto->marca && $movimentacao->produto->marca->logo_path)
                                     <div class="mt-2">

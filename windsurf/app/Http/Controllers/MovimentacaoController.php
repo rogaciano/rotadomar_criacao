@@ -18,7 +18,7 @@ class MovimentacaoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Movimentacao::with(['produto', 'localizacao', 'tipo', 'situacao']);
+        $query = Movimentacao::with(['produto.status', 'localizacao', 'tipo', 'situacao']);
 
         // Aplicar filtros
         if ($request->filled('referencia')) {
@@ -252,7 +252,7 @@ class MovimentacaoController extends Controller
      */
     public function show(Movimentacao $movimentacao)
     {
-        $movimentacao->load(['produto', 'localizacao', 'tipo', 'situacao']);
+        $movimentacao->load(['produto.status', 'produto.marca', 'localizacao', 'tipo', 'situacao']);
         return view('movimentacoes.show', compact('movimentacao'));
     }
 
@@ -346,7 +346,7 @@ class MovimentacaoController extends Controller
     public function generateListPdf(Request $request)
     {
         // Replicar a lógica de filtros do método index
-        $query = Movimentacao::with(['produto', 'localizacao', 'tipo', 'situacao']);
+        $query = Movimentacao::with(['produto.status', 'localizacao', 'tipo', 'situacao']);
 
         // Aplicar filtros
         if ($request->filled('referencia')) {

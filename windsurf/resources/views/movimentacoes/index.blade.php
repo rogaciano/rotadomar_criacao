@@ -196,6 +196,20 @@
                                         </a>
                                     </th>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => request('sort') == 'status' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
+                                            Status
+                                            @if(request('sort') == 'status')
+                                                <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    @if(request('direction') == 'asc')
+                                                        <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                                                    @else
+                                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                                    @endif
+                                                </svg>
+                                            @endif
+                                        </a>
+                                    </th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'localizacao', 'direction' => request('sort') == 'localizacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Localização
                                             @if(request('sort') == 'localizacao')
@@ -329,6 +343,15 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                            @if($movimentacao->produto && $movimentacao->produto->status)
+                                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                                    {{ $movimentacao->produto->status->descricao }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             @if($movimentacao->localizacao)
                                                 <div class="truncate max-w-[100px]" title="{{ $movimentacao->localizacao->nome_localizacao }}">
                                                     {{ Str::limit($movimentacao->localizacao->nome_localizacao, 15, '...') }}
@@ -452,7 +475,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="10" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="11" class="px-6 py-4 text-center text-gray-500">
                                             Nenhuma movimentação encontrada.
                                         </td>
                                     </tr>
@@ -465,9 +488,18 @@
                         <div class="hidden space-y-4">
                             @forelse($movimentacoes as $movimentacao)
                                 <div class="bg-white shadow rounded-lg p-4">
-                                    <!-- Produto -->
+                                    <!-- Produto e Status -->
                                     <div class="mb-3 border-b pb-2">
-                                        <div class="font-medium text-gray-900">{{ $movimentacao->produto->referencia }}</div>
+                                        <div class="flex justify-between items-center">
+                                            <div class="font-medium text-gray-900">{{ $movimentacao->produto->referencia }}</div>
+                                            @if($movimentacao->produto && $movimentacao->produto->status)
+                                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                                    {{ $movimentacao->produto->status->descricao }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
+                                        </div>
                                         <div class="text-sm text-gray-500 truncate" title="{{ $movimentacao->produto->descricao }}">{{ Str::limit($movimentacao->produto->descricao, 40, '...') }}</div>
                                     </div>
                                     
