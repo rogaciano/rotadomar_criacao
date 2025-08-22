@@ -108,18 +108,14 @@
                                 <div class="mt-2">
                                     <div class="flex items-center justify-between">
                                         <p class="text-sm">Anexo atual: <span class="font-medium">{{ basename($movimentacao->anexo) }}</span></p>
-                                        <form action="{{ route('movimentacoes.remover-anexo', $movimentacao->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium" onclick="return confirm('Tem certeza que deseja remover este anexo?')">
-                                                <span class="flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                    Remover anexo
-                                                </span>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="text-red-600 hover:text-red-800 text-sm font-medium" onclick="confirmarRemocao()">
+                                            <span class="flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Remover anexo
+                                            </span>
+                                        </button>
                                     </div>
                                     <img src="{{ $movimentacao->anexo_url }}" class="mt-2 max-w-xs rounded border" alt="Anexo atual">
                                 </div>
@@ -147,6 +143,14 @@
                             </x-button>
                         </div>
                     </form>
+
+                    <!-- Formulário para remover anexo (fora do formulário principal) -->
+                    @if($movimentacao->anexo)
+                    <form id="form-remover-anexo" action="{{ route('movimentacoes.remover-anexo', $movimentacao->id) }}" method="POST" class="hidden">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                    @endif
                 </div>
             </div>
         </div>
@@ -168,6 +172,12 @@
                 'border-color': '#d1d5db'
             });
         });
+        
+        function confirmarRemocao() {
+            if (confirm('Tem certeza que deseja remover este anexo?')) {
+                document.getElementById('form-remover-anexo').submit();
+            }
+        }
     </script>
     @endpush
 </x-app-layout>
