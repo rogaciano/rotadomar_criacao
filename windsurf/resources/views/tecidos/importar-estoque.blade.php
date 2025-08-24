@@ -19,6 +19,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    @php $canUpdate = auth()->user() && auth()->user()->canUpdate('tecidos'); @endphp
                     <div class="mb-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Instruções para Importação</h3>
                         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
@@ -58,12 +59,13 @@ T002,Vermelho,12.0,#FF0000,Lote 125</pre>
                             <div class="mb-6">
                                 <label for="arquivo_csv" class="block text-sm font-medium text-gray-700 mb-1">Arquivo CSV</label>
                                 <input type="file" name="arquivo_csv" id="arquivo_csv" accept=".csv,.txt" required
-                                    class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                                    class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" {{ $canUpdate ? '' : 'disabled' }}>
                                 @error('arquivo_csv')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
 
+                            @if($canUpdate)
                             <div class="flex items-center justify-end mt-6">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -72,6 +74,11 @@ T002,Vermelho,12.0,#FF0000,Lote 125</pre>
                                     Importar Dados
                                 </button>
                             </div>
+                            @else
+                            <div class="mt-4 p-3 rounded bg-gray-50 text-sm text-gray-600">
+                                Você não tem permissão para importar estoque de tecidos.
+                            </div>
+                            @endif
                         </form>
                     </div>
                 </div>

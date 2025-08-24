@@ -22,6 +22,12 @@ class TecidoController extends Controller
      */
     public function index(Request $request)
     {
+        // Autorização: leitura de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canRead('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+
         $query = Tecido::query();
 
         // Filtros
@@ -59,6 +65,11 @@ class TecidoController extends Controller
      */
     public function create()
     {
+        // Autorização: criação de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canCreate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         return view('tecidos.create');
     }
 
@@ -67,6 +78,12 @@ class TecidoController extends Controller
      */
     public function store(Request $request)
     {
+        // Autorização: criação de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canCreate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255',
             'ativo' => 'boolean',
@@ -94,6 +111,11 @@ class TecidoController extends Controller
      */
     public function show(string $id)
     {
+        // Autorização: leitura de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canRead('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecido = Tecido::withTrashed()->findOrFail($id);
         return view('tecidos.show', compact('tecido'));
     }
@@ -103,6 +125,11 @@ class TecidoController extends Controller
      */
     public function edit(string $id)
     {
+        // Autorização: atualização de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecido = Tecido::withTrashed()->findOrFail($id);
         return view('tecidos.edit', compact('tecido'));
     }
@@ -112,6 +139,12 @@ class TecidoController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Autorização: atualização de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+
         $validator = Validator::make($request->all(), [
             'descricao' => 'required|string|max:255',
             'ativo' => 'boolean',
@@ -139,6 +172,11 @@ class TecidoController extends Controller
      */
     public function destroy(string $id)
     {
+        // Autorização: exclusão de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canDelete('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecido = Tecido::withTrashed()->findOrFail($id);
         $tecido->delete(); // Soft delete
 
@@ -151,6 +189,11 @@ class TecidoController extends Controller
      */
     public function atualizarEstoque($id)
     {
+        // Autorização: atualização de tecidos (estoque)
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecido = Tecido::findOrFail($id);
 
         if (empty($tecido->referencia)) {
@@ -217,6 +260,11 @@ class TecidoController extends Controller
      */
     public function atualizarTodosEstoques()
     {
+        // Autorização: atualização de tecidos (estoques em massa)
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecidos = Tecido::whereNotNull('referencia')->get();
 
         if ($tecidos->isEmpty()) {
@@ -311,6 +359,12 @@ class TecidoController extends Controller
      */
     public function debugEstoque($referencia)
     {
+        // Autorização: leitura de tecidos (debug)
+        $user = auth()->user();
+        if (!$user || !$user->canRead('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+
         // Fazer a requisição diretamente para a API
         $response = Http::get(config('estoque.api_url'), [
             'empresa' => config('estoque.empresa'),
@@ -361,6 +415,11 @@ class TecidoController extends Controller
      */
     public function estoquePorCor($id)
     {
+        // Autorização: leitura de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canRead('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecido = Tecido::with('estoquesCores')->findOrFail($id);
         
         if ($tecido->estoquesCores->isEmpty()) {
@@ -376,6 +435,11 @@ class TecidoController extends Controller
      */
     public function salvarQuantidades(Request $request, $id)
     {
+        // Autorização: atualização de tecidos (quantidades)
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $tecido = Tecido::findOrFail($id);
         
         // Log para depuração - dados recebidos
@@ -483,6 +547,11 @@ class TecidoController extends Controller
      */
     public function importarEstoqueForm()
     {
+        // Autorização: atualização de tecidos (importação)
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         return view('tecidos.importar-estoque');
     }
     
@@ -491,6 +560,11 @@ class TecidoController extends Controller
      */
     public function importarEstoque(Request $request)
     {
+        // Autorização: atualização de tecidos (importação)
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
         $request->validate([
             'arquivo_csv' => 'required|file|mimes:csv,txt|max:2048',
         ]);

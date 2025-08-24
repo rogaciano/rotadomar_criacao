@@ -17,6 +17,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    @php $canUpdate = auth()->user() && auth()->user()->canUpdate('tecidos'); @endphp
                     <!-- Erros de validação -->
                     @if ($errors->any())
                         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
@@ -30,6 +31,7 @@
                     @endif
 
                     <!-- Formulário de Edição -->
+                    @if($canUpdate)
                     <form action="{{ route('tecidos.update', $tecido->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -57,6 +59,11 @@
                             </button>
                         </div>
                     </form>
+                    @else
+                        <div class="mt-4 p-3 rounded bg-gray-50 text-sm text-gray-600">
+                            Você não tem permissão para atualizar tecidos.
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

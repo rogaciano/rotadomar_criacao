@@ -8,6 +8,7 @@ use App\Models\Localizacao;
 use App\Models\Tipo;
 use App\Models\Situacao;
 use App\Models\Status;
+use App\Models\Marca;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -18,6 +19,9 @@ class MovimentacaoController extends Controller
      */
     public function index(Request $request)
     {
+        if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $query = Movimentacao::with(['produto.status', 'localizacao', 'tipo', 'situacao']);
 
         // Aplicar filtros
@@ -29,6 +33,12 @@ class MovimentacaoController extends Controller
 
         if ($request->filled('produto_id')) {
             $query->where('produto_id', $request->produto_id);
+        }
+
+        if ($request->filled('marca_id')) {
+            $query->whereHas('produto', function($q) use ($request) {
+                $q->where('marca_id', $request->marca_id);
+            });
         }
 
         if ($request->filled('tipo_id')) {
@@ -117,8 +127,11 @@ class MovimentacaoController extends Controller
         $localizacoes = $localizacoesAtivas->concat($localizacoesInativas);
         
         $status = Status::where('ativo', true)->orderBy('descricao')->get();
+        
+        // Carregar marcas para o filtro
+        $marcas = Marca::where('ativo', true)->orderBy('nome_marca')->get();
 
-        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status'));
+        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status', 'marcas'));
     }
 
     /**
@@ -126,6 +139,9 @@ class MovimentacaoController extends Controller
      */
     public function create(Request $request)
     {
+        if (!auth()->user() || !auth()->user()->canCreate('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $produtos = Produto::all();
         $localizacoes = Localizacao::all();
         $tipos = Tipo::all();
@@ -147,6 +163,9 @@ class MovimentacaoController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user() || !auth()->user()->canCreate('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         // Validar os dados do formulário
         $validated = $request->validate([
             'produto_id' => 'required|exists:produtos,id',
@@ -250,23 +269,44 @@ class MovimentacaoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Movimentacao $movimentacao)
+    public function show(Request $request, Movimentacao $movimentacao)
     {
+        if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $movimentacao->load(['produto.status', 'produto.marca', 'localizacao', 'tipo', 'situacao']);
-        return view('movimentacoes.show', compact('movimentacao'));
+        
+        // Se não houver back_url, criar uma com os filtros atuais
+        if (!$request->has('back_url')) {
+            $back_url = url()->previous();
+        } else {
+            $back_url = $request->input('back_url');
+        }
+        
+        return view('movimentacoes.show', compact('movimentacao', 'back_url'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Movimentacao $movimentacao)
+    public function edit(Request $request, Movimentacao $movimentacao)
     {
+        if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $produtos = Produto::all();
         $localizacoes = Localizacao::all();
         $tipos = Tipo::all();
         $situacoes = Situacao::all();
 
-        return view('movimentacoes.edit', compact('movimentacao', 'produtos', 'localizacoes', 'tipos', 'situacoes'));
+        // Se não houver back_url, criar uma com os filtros atuais
+        if (!$request->has('back_url')) {
+            $back_url = url()->previous();
+        } else {
+            $back_url = $request->input('back_url');
+        }
+
+        return view('movimentacoes.edit', compact('movimentacao', 'produtos', 'localizacoes', 'tipos', 'situacoes', 'back_url'));
     }
 
     /**
@@ -274,6 +314,9 @@ class MovimentacaoController extends Controller
      */
     public function update(Request $request, Movimentacao $movimentacao)
     {
+        if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $validated = $request->validate([
             'produto_id' => 'required|exists:produtos,id',
             'localizacao_id' => 'required|exists:localizacoes,id',
@@ -321,6 +364,9 @@ class MovimentacaoController extends Controller
      */
     public function destroy(Movimentacao $movimentacao)
     {
+        if (!auth()->user() || !auth()->user()->canDelete('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $movimentacao->delete();
 
         return redirect()->route('movimentacoes.index')
@@ -332,6 +378,9 @@ class MovimentacaoController extends Controller
      */
     public function generatePdf(Movimentacao $movimentacao)
     {
+        if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         $movimentacao->load(['produto', 'produto.marca', 'localizacao', 'tipo', 'situacao']);
 
         $pdf = PDF::loadView('movimentacoes.pdf', compact('movimentacao'))
@@ -345,6 +394,9 @@ class MovimentacaoController extends Controller
      */
     public function generateListPdf(Request $request)
     {
+        if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         // Replicar a lógica de filtros do método index
         $query = Movimentacao::with(['produto.status', 'localizacao', 'tipo', 'situacao']);
 
@@ -357,6 +409,12 @@ class MovimentacaoController extends Controller
 
         if ($request->filled('produto_id')) {
             $query->where('produto_id', $request->produto_id);
+        }
+        
+        if ($request->filled('marca_id')) {
+            $query->whereHas('produto', function($q) use ($request) {
+                $q->where('marca_id', $request->marca_id);
+            });
         }
 
         if ($request->filled('tipo_id')) {
@@ -466,6 +524,9 @@ class MovimentacaoController extends Controller
      */
     public function removerAnexo(Movimentacao $movimentacao)
     {
+        if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
         if ($movimentacao->anexo) {
             // Verificar se o anexo está no storage ou é um caminho de rede
             if (\Illuminate\Support\Str::startsWith($movimentacao->anexo, 'uploads/') || 

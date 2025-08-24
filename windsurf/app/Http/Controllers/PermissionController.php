@@ -21,20 +21,14 @@ class PermissionController extends Controller
             $search = $request->get('search');
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%")
-                  ->orWhere('module', 'like', "%{$search}%");
+                  ->orWhere('display_name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
             });
         }
         
-        // Apply module filter if provided
-        if ($request->has('module') && $request->get('module') !== '') {
-            $query->where('module', $request->get('module'));
-        }
+        $permissions = $query->orderBy('name')->paginate(10);
         
-        $permissions = $query->orderBy('module')->orderBy('name')->paginate(10);
-        $modules = Permission::distinct('module')->pluck('module');
-        
-        return view('permissions.index', compact('permissions', 'modules'));
+        return view('permissions.index', compact('permissions'));
     }
 
     /**
@@ -42,8 +36,7 @@ class PermissionController extends Controller
      */
     public function create()
     {
-        $modules = Permission::distinct('module')->pluck('module');
-        return view('permissions.create', compact('modules'));
+        return view('permissions.create');
     }
 
     /**
@@ -53,20 +46,14 @@ class PermissionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:permissions,slug',
-            'module' => 'nullable|string|max:255',
+            'display_name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-        
-        // Generate slug from name if not provided
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['name']);
-        }
         
         Permission::create($validated);
         
         return redirect()->route('permissions.index')
-            ->with('success', 'Permission created successfully.');
+            ->with('success', 'Permissão criada com sucesso.');
     }
 
     /**
@@ -82,8 +69,7 @@ class PermissionController extends Controller
      */
     public function edit(Permission $permission)
     {
-        $modules = Permission::distinct('module')->pluck('module');
-        return view('permissions.edit', compact('permission', 'modules'));
+        return view('permissions.edit', compact('permission'));
     }
 
     /**
@@ -93,25 +79,14 @@ class PermissionController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique('permissions')->ignore($permission->id),
-            ],
-            'module' => 'nullable|string|max:255',
+            'display_name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-        
-        // Generate slug from name if not provided
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['name']);
-        }
         
         $permission->update($validated);
         
         return redirect()->route('permissions.index')
-            ->with('success', 'Permission updated successfully.');
+            ->with('success', 'Permissão atualizada com sucesso.');
     }
 
     /**
@@ -122,7 +97,7 @@ class PermissionController extends Controller
         $permission->delete();
         
         return redirect()->route('permissions.index')
-            ->with('success', 'Permission deleted successfully.');
+            ->with('success', 'Permissão excluída com sucesso.');
     }
     
     /**
@@ -134,7 +109,7 @@ class PermissionController extends Controller
         $permission->restore();
         
         return redirect()->route('permissions.index')
-            ->with('success', 'Permission restored successfully.');
+            ->with('success', 'Permissão restaurada com sucesso.');
     }
     
     /**
@@ -146,6 +121,6 @@ class PermissionController extends Controller
         $permission->forceDelete();
         
         return redirect()->route('permissions.index')
-            ->with('success', 'Permission permanently deleted.');
+            ->with('success', 'Permissão excluída permanentemente.');
     }
 }

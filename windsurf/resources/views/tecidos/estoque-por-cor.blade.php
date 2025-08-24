@@ -5,12 +5,14 @@
                 {{ __('Estoque por Cor') }} - {{ $tecido->descricao }}
             </h2>
             <div>
+                @if(auth()->user() && auth()->user()->canUpdate('tecidos'))
                 <a href="{{ route('tecidos.atualizar-estoque', $tecido->id) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Atualizar Estoque
                 </a>
+                @endif
                 <a href="{{ route('tecidos.show', $tecido->id) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -73,6 +75,7 @@
                     <div class="mb-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Estoque por Cor</h3>
                         
+                        @php $canUpdate = auth()->user() && auth()->user()->canUpdate('tecidos'); @endphp
                         <form action="{{ route('tecidos.salvar-quantidades', $tecido->id) }}" method="POST">
                             @csrf
                             <div class="overflow-x-auto bg-white rounded-lg shadow">
@@ -94,7 +97,7 @@
                                         @foreach($tecido->estoquesCores as $estoqueCor)
                                         <tr>
                                             <td class="px-3 py-4 whitespace-nowrap">
-                                                <input type="checkbox" name="cores[{{ $estoqueCor->id }}][selecionada]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                <input type="checkbox" name="cores[{{ $estoqueCor->id }}][selecionada]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $canUpdate ? '' : 'disabled' }}>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
@@ -124,7 +127,7 @@
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="number" name="cores[{{ $estoqueCor->id }}][quantidade_pretendida]" step="0.01" min="0" class="mt-1 block w-24 mx-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="0.00">
+                                                <input type="number" name="cores[{{ $estoqueCor->id }}][quantidade_pretendida]" step="0.01" min="0" class="mt-1 block w-24 mx-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="0.00" {{ $canUpdate ? '' : 'disabled' }}>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500">
                                                 {{ $estoqueCor->observacoes ?: '-' }}
@@ -164,6 +167,7 @@
                                 </table>
                             </div>
                             
+                            @if($canUpdate)
                             <div class="mt-6 flex justify-end">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -172,6 +176,7 @@
                                     Salvar Quantidades Selecionadas
                                 </button>
                             </div>
+                            @endif
                         </form>
                     </div>
 

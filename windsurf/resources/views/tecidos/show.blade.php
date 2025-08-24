@@ -5,13 +5,15 @@
                 {{ __('Detalhes do Tecido') }}
             </h2>
             <div>
+                @if(auth()->user() && auth()->user()->canUpdate('tecidos'))
                 <a href="{{ route('tecidos.edit', $tecido->id) }}" class="inline-flex items-center px-4 py-2 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 focus:bg-yellow-700 active:bg-yellow-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Editar
                 </a>
-                @if($tecido->referencia)
+                @endif
+                @if($tecido->referencia && auth()->user() && auth()->user()->canUpdate('tecidos'))
                 <a href="{{ route('tecidos.atualizar-estoque', $tecido->id) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -78,9 +80,13 @@
                             <ul class="divide-y divide-gray-200">
                                 @foreach($tecido->produtos as $produto)
                                             <li class="py-2">
-                                                <a href="{{ route('produtos.show', $produto->id) }}" class="text-indigo-600 hover:text-indigo-900">
-                                                    {{ $produto->referencia }} - {{ $produto->descricao }}
-                                                </a>
+                                                @if(auth()->user() && auth()->user()->canRead('produtos'))
+                                                    <a href="{{ route('produtos.show', $produto->id) }}" class="text-indigo-600 hover:text-indigo-900">
+                                                        {{ $produto->referencia }} - {{ $produto->descricao }}
+                                                    </a>
+                                                @else
+                                                    <span class="text-gray-700">{{ $produto->referencia }} - {{ $produto->descricao }}</span>
+                                                @endif
                                             </li>
                                         @endforeach
                                     </ul>

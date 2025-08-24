@@ -33,19 +33,23 @@
         <div class="w-[98%] mx-auto px-2">
             <!-- Botões de ação -->
             <div class="flex flex-wrap gap-2 mb-4">
+                @if(auth()->user() && auth()->user()->canCreate('movimentacoes'))
                 <a href="{{ route('movimentacoes.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     Nova Movimentação
                 </a>
+                @endif
                 <!-- Botão para gerar PDF da lista -->
+                @if(auth()->user() && auth()->user()->canRead('movimentacoes'))
                 <a href="{{ route('movimentacoes.lista.pdf', request()->query()) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Exportar PDF
                 </a>
+                @endif
             </div>
 
             <!-- Filtros -->
@@ -125,6 +129,16 @@
                             </div>
 
                             <div>
+                                <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                                <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todas</option>
+                                    @foreach($marcas ?? [] as $marca)
+                                        <option value="{{ $marca->id }}" {{ request('marca_id') == $marca->id ? 'selected' : '' }}>{{ $marca->nome_marca }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
                                 <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                                 <select name="status_id" id="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
@@ -195,8 +209,8 @@
                                             @endif
                                         </a>
                                     </th>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => request('sort') == 'status' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
+                                    <th scope="col" class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'produto.status', 'direction' => request('sort') == 'produto.status' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center justify-center hover:text-gray-700">
                                             Status
                                             @if(request('sort') == 'status')
                                                 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -208,6 +222,9 @@
                                                 </svg>
                                             @endif
                                         </a>
+                                    </th>
+                                    <th scope="col" class="px-3 py-2 whitespace-nowrap text-xs text-center font-medium text-gray-500 uppercase tracking-wider">
+                                        Concluído
                                     </th>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'localizacao', 'direction' => request('sort') == 'localizacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
@@ -338,17 +355,33 @@
                                                 <div class="text-gray-500 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
                                                     {{ Str::limit($movimentacao->produto->descricao, 25, '...') }}
                                                 </div>
+                                                @if($movimentacao->produto->marca)
+                                                <div class="text-gray-400 text-[10px] truncate max-w-[150px]" title="{{ $movimentacao->produto->marca->nome_marca }}">
+                                                    {{ $movimentacao->produto->marca->nome_marca }}
+                                                </div>
+                                                @endif
                                             @else
                                                 <span class="text-red-500">Produto não encontrado</span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-center">
                                             @if($movimentacao->produto && $movimentacao->produto->status)
                                                 <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
                                                     {{ $movimentacao->produto->status->descricao }}
                                                 </span>
                                             @else
                                                 <span class="text-gray-400">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-center">
+                                            @if($movimentacao->concluido)
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                </svg>
+                                            @else
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-auto text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                </svg>
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
@@ -443,24 +476,29 @@
                                         </td>
                                         <td class="sticky right-0 px-3 py-2 whitespace-nowrap text-right text-xs font-medium bg-white shadow-md z-10">
                                             <div class="flex justify-end space-x-1">
+                                                @if(auth()->user() && auth()->user()->canRead('movimentacoes'))
                                                 <a href="{{ route('movimentacoes.show', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                 </a>
+                                                @endif
+                                                @if(auth()->user() && auth()->user()->canUpdate('movimentacoes'))
                                                 <a href="{{ route('movimentacoes.edit', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </a>
-                                                @if($movimentacao->anexo)
+                                                @endif
+                                                @if($movimentacao->anexo && auth()->user() && auth()->user()->canRead('movimentacoes'))
                                                 <button type="button" onclick="openImageModal('{{ $movimentacao->anexo_url }}', {{ $movimentacao->id }})" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
                                                 </button>
                                                 @endif
+                                                @if(auth()->user() && auth()->user()->canDelete('movimentacoes'))
                                                 <form action="{{ route('movimentacoes.destroy', $movimentacao) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta movimentação?');">
                                                     @csrf
                                                     @method('DELETE')
@@ -470,6 +508,7 @@
                                                         </svg>
                                                     </button>
                                                 </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -583,24 +622,29 @@
                                     
                                     <!-- Ações -->
                                     <div class="flex justify-end space-x-2 pt-2 border-t">
+                                        @if(auth()->user() && auth()->user()->canRead('movimentacoes'))
                                         <a href="{{ route('movimentacoes.show', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </a>
+                                        @endif
+                                        @if(auth()->user() && auth()->user()->canUpdate('movimentacoes'))
                                         <a href="{{ route('movimentacoes.edit', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </a>
-                                        @if($movimentacao->anexo)
+                                        @endif
+                                        @if($movimentacao->anexo && auth()->user() && auth()->user()->canRead('movimentacoes'))
                                         <button type="button" onclick="openImageModal('{{ $movimentacao->anexo_url }}', {{ $movimentacao->id }})" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                         </button>
                                         @endif
+                                        @if(auth()->user() && auth()->user()->canDelete('movimentacoes'))
                                         <form action="{{ route('movimentacoes.destroy', $movimentacao) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta movimentação?');">
                                             @csrf
                                             @method('DELETE')
@@ -610,6 +654,7 @@
                                                 </svg>
                                             </button>
                                         </form>
+                                        @endif
                                     </div>
                                 </div>
                             @empty

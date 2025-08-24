@@ -105,6 +105,15 @@
                         <x-dropdown-link :href="route('users.index')">
                             {{ __('Usuários') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('permissions.index')">
+                            {{ __('Permissões') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('logs.index')">
+                            {{ __('Logs') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('activity-log.index')">
+                            {{ __('Log de Atividades') }}
+                        </x-dropdown-link>
                         @endif
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
@@ -186,6 +195,15 @@
                 <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Admin') }}</div>
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="pl-6">
                     {{ __('Usuários') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')" class="pl-6">
+                    {{ __('Permissões') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('logs.index')" :active="request()->routeIs('logs.*')" class="pl-6">
+                    {{ __('Logs') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')" class="pl-6">
+                    {{ __('Log de Atividades') }}
                 </x-responsive-nav-link>
             </div>
             @endif

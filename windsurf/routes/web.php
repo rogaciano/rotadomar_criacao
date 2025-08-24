@@ -13,6 +13,7 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProdutoAnexoController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,7 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/dados-por-ano', [DashboardController::class, 'getDadosPorAno'])->name('dashboard.dados-por-ano');
     Route::get('/dashboard/produtos-por-estilista', [DashboardController::class, 'produtosPorEstilista'])->name('dashboard.produtos-por-estilista');
-    
+
     // Rota para servir arquivos de rede
     Route::get('/arquivo/rede', [\App\Http\Controllers\ArquivoController::class, 'servirArquivoRede'])->name('arquivo.rede');
 
@@ -40,6 +41,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Rotas para gerenciamento de permissões
         Route::resource('permissions', \App\Http\Controllers\PermissionController::class);
+
+        // Rotas para permissões específicas por usuário (granulares)
+        Route::get('user-permissions/{user}/edit', [\App\Http\Controllers\UserPermissionController::class, 'edit'])->name('user-permissions.edit');
+        Route::put('user-permissions/{user}', [\App\Http\Controllers\UserPermissionController::class, 'update'])->name('user-permissions.update');
+
+        // ALIAS legados (compatibilidade com views antigas que usam underscore nos nomes das rotas)
+        Route::get('user_permissions/{user}/edit', [\App\Http\Controllers\UserPermissionController::class, 'edit'])->name('user_permissions.edit');
+        Route::put('user_permissions/{user}', [\App\Http\Controllers\UserPermissionController::class, 'update'])->name('user_permissions.update');
+        Route::get('user_permissions', [\App\Http\Controllers\UserController::class, 'index'])->name('user_permissions.index');
+
+        // Rotas para visualização de logs
+        Route::get('logs', [\App\Http\Controllers\LogController::class, 'index'])->name('logs.index');
+        Route::get('logs/{filename}', [\App\Http\Controllers\LogController::class, 'show'])->name('logs.show');
+        Route::get('logs/{filename}/download', [\App\Http\Controllers\LogController::class, 'download'])->name('logs.download');
+        Route::delete('logs/{filename}', [\App\Http\Controllers\LogController::class, 'destroy'])->name('logs.destroy');
+
+        // Rotas para o log de atividades
+        Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+        Route::get('activity-log/{id}', [ActivityLogController::class, 'show'])->name('activity-log.show');
+
+        // Alias plurais para compatibilidade com views que usam activity-logs.*
+        Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+        Route::get('activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
 
     // Routes para Tecidos
@@ -83,7 +107,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('produtos/get-available-colors', [ProdutoController::class, 'getAvailableColors'])->name('produtos.get-available-colors');
     Route::get('produtos-inconsistencias', [ProdutoController::class, 'inconsistencias'])->name('produtos.inconsistencias');
     Route::get('produtos-lista-pdf', [ProdutoController::class, 'generateListPdf'])->name('produtos.lista.pdf');
-    
+
     // Routes para Anexos de Produtos
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
     Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');

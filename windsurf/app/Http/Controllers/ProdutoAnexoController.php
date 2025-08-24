@@ -15,6 +15,12 @@ class ProdutoAnexoController extends Controller
      */
     public function store(Request $request, $produtoId)
     {
+        // Autorização: apenas usuários com permissão de atualização em produtos
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('produtos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+
         $produto = Produto::findOrFail($produtoId);
 
         // Log para depuração antes da validação
@@ -202,6 +208,12 @@ class ProdutoAnexoController extends Controller
      */
     public function destroy($id)
     {
+        // Autorização: apenas usuários com permissão de atualização em produtos
+        $user = auth()->user();
+        if (!$user || !$user->canUpdate('produtos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+
         $anexo = ProdutoAnexo::findOrFail($id);
         $produtoId = $anexo->produto_id;
 

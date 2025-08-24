@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\Localizacao;
 use App\Models\Group;
 use App\Models\Permission;
+use App\Models\UserPermission;
 
 class User extends Authenticatable
 {
@@ -78,6 +79,14 @@ class User extends Authenticatable
     }
     
     /**
+     * Relação com permissões específicas do usuário.
+     */
+    public function userPermissions()
+    {
+        return $this->hasMany(UserPermission::class);
+    }
+    
+    /**
      * Verifica se o usuário tem uma permissão específica.
      *
      * @param string $permissionSlug
@@ -90,10 +99,19 @@ class User extends Authenticatable
             return true;
         }
         
+        // Se o usuário possui uma permissão específica cadastrada com qualquer ação permitida, considera que ele possui a permissão
+        $permission = Permission::where('name', $permissionSlug)->first();
+        if ($permission) {
+            $up = $this->userPermissions()->where('permission_id', $permission->id)->first();
+            if ($up && ($up->can_create || $up->can_read || $up->can_update || $up->can_delete)) {
+                return true;
+            }
+        }
+        
         // Verifica se o usuário tem a permissão através de seus grupos
         foreach ($this->groups as $group) {
             foreach ($group->permissions as $permission) {
-                if ($permission->slug === $permissionSlug) {
+                if ($permission->name === $permissionSlug) {
                     return true;
                 }
             }
@@ -134,5 +152,56 @@ class User extends Authenticatable
         }
         
         return true;
+    }
+
+    /**
+     * Verifica se o usuário pode executar uma ação específica (create, read, update, delete)
+     * para uma permissão (identificada pelo slug).
+     */
+    public function canAction(string $action, string $permissionSlug): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        $action = strtolower($action);
+        if (!in_array($action, ['create', 'read', 'update', 'delete'], true)) {
+            return false;
+        }
+
+        $permission = Permission::where('name', $permissionSlug)->first();
+        if (!$permission) {
+            return false;
+        }
+
+        // Se houver configuração específica do usuário, ela prevalece
+        $up = $this->userPermissions()->where('permission_id', $permission->id)->first();
+        if ($up) {
+            $col = 'can_' . $action;
+            return (bool) data_get($up, $col);
+        }
+
+        // Fallback: usa a permissão por grupo
+        return $this->hasPermission($permissionSlug);
+    }
+
+    public function canCreate(string $permissionSlug): bool
+    {
+        return $this->canAction('create', $permissionSlug);
+    }
+
+    public function canRead(string $permissionSlug): bool
+    {
+        return $this->canAction('read', $permissionSlug);
+    }
+
+    public function canUpdate(string $permissionSlug): bool
+    {
+        return $this->canAction('update', $permissionSlug);
+    }
+
+    public function canDelete(string $permissionSlug): bool
+    {
+        return $this->canAction('delete', $permissionSlug);
     }
 }

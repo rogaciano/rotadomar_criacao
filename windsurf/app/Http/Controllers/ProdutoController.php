@@ -20,6 +20,7 @@ class ProdutoController extends Controller
      */
     public function index(Request $request)
     {
+        if (!auth()->user()->canRead('produtos')) { abort(403); }
         // Verifica se é uma nova pesquisa ou se deve usar os filtros da sessão
         $useSessionFilters = !$request->hasAny([
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
@@ -160,6 +161,7 @@ class ProdutoController extends Controller
      */
     public function create()
     {
+        if (!auth()->user()->canCreate('produtos')) { abort(403); }
         // Buscar dados para os selects
         $marcas = Marca::where('ativo', true)->orderBy('nome_marca')->get();
         $tecidos = Tecido::where('ativo', true)->orderBy('descricao')->get();
@@ -175,6 +177,7 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user()->canCreate('produtos')) { abort(403); }
         // Trim spaces from referencia field if it exists
         if ($request->has('referencia')) {
             $request->merge(['referencia' => trim($request->referencia)]);
@@ -285,6 +288,7 @@ class ProdutoController extends Controller
      */
     public function show(string $id)
     {
+        if (!auth()->user()->canRead('produtos')) { abort(403); }
         $produto = Produto::withTrashed()->with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status'])->findOrFail($id);
 
         // Carregar as movimentações relacionadas a este produto
@@ -347,6 +351,7 @@ class ProdutoController extends Controller
      */
     public function edit(string $id)
     {
+        if (!auth()->user()->canUpdate('produtos')) { abort(403); }
         $produto = Produto::findOrFail($id);
 
         // Buscar dados para os selects
@@ -365,6 +370,7 @@ class ProdutoController extends Controller
     public function update(Request $request, string $id)
     {
 
+        if (!auth()->user()->canUpdate('produtos')) { abort(403); }
         // Trim spaces from referencia field if it exists
         if ($request->has('referencia')) {
             $request->merge(['referencia' => trim($request->referencia)]);
@@ -521,6 +527,7 @@ class ProdutoController extends Controller
      */
     public function destroy(string $id)
     {
+        if (!auth()->user()->canDelete('produtos')) { abort(403); }
         $produto = Produto::withTrashed()->findOrFail($id);
 
         if ($produto->trashed()) {
@@ -542,6 +549,7 @@ class ProdutoController extends Controller
      */
     public function generatePdf(string $id)
     {
+        if (!auth()->user()->canRead('produtos')) { abort(403); }
         $produto = Produto::with(['marca', 'grupoProduto', 'status', 'estilista', 'tecidos', 
             'movimentacoes' => function($query) {
                 $query->with(['localizacao', 'tipo', 'situacao'])->latest('data_entrada');
@@ -558,6 +566,7 @@ class ProdutoController extends Controller
      */
     public function getAvailableColors(Request $request)
     {
+        if (!auth()->user()->canRead('produtos')) { abort(403); }
         $tecidoIds = $request->input('tecido_ids', []);
         $produtoId = $request->input('produto_id');
 
@@ -717,6 +726,7 @@ class ProdutoController extends Controller
      */
     public function inconsistencias()
     {
+        if (!auth()->user()->canRead('produtos')) { abort(403); }
         // Buscar produtos com possíveis inconsistências
         $produtos = Produto::with(['cores', 'marca', 'grupoProduto', 'status'])
             ->whereHas('cores')
@@ -734,6 +744,7 @@ class ProdutoController extends Controller
      */
     public function generateListPdf(Request $request)
     {
+        if (!auth()->user()->canRead('produtos')) { abort(403); }
         $query = Produto::with(['marca', 'grupoProduto', 'status', 'estilista']);
 
         // Aplicar filtros se existirem
