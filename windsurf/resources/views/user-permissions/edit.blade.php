@@ -44,6 +44,7 @@
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_read" title="Marcar/desmarcar todas as permissões de Ler">Ler</th>
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_update" title="Marcar/desmarcar todas as permissões de Atualizar">Atualizar</th>
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_delete" title="Marcar/desmarcar todas as permissões de Excluir">Excluir</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer all-toggle" title="Marcar/desmarcar todas as ações da tabela">Todas</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -68,6 +69,9 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                                 <input type="checkbox" name="permissions[{{ $permission->id }}][can_delete]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_delete ? 'checked' : '' }} />
                                             </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 row-toggle" title="Marcar/desmarcar todas as ações desta linha" />
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -88,6 +92,17 @@
                     </p>
                     <script>
                         (function() {
+                            function updateRowToggleFor(row) {
+                                var boxes = Array.from(row.querySelectorAll('input[type="checkbox"][name^="permissions"]'));
+                                var rowToggle = row.querySelector('.row-toggle');
+                                if (!rowToggle) return;
+                                var allChecked = boxes.length > 0 && boxes.every(function (b) { return b.checked; });
+                                rowToggle.checked = allChecked;
+                            }
+                            function updateAllRowToggles() {
+                                document.querySelectorAll('tbody tr').forEach(updateRowToggleFor);
+                            }
+
                             // Event delegation: normalize target to handle text-node clicks
                             document.addEventListener('click', function (e) {
                                 var target = e.target;
@@ -95,20 +110,24 @@
                                     target = target.parentNode;
                                 }
                                 if (!(target instanceof Element)) return;
-                                // Do not toggle when directly clicking a checkbox
-                                if (target.closest('input[type="checkbox"]')) return;
-                                // Row toggle by clicking the permission title
+
+                                // Ignore direct checkbox clicks except the special row-toggle
+                                if (target.closest('input[type="checkbox"]') && !target.closest('.row-toggle')) return;
+
+                                // Row toggle by clicking the permission title/cell
                                 var title = target.closest('.perm-title, .perm-cell');
                                 if (title) {
                                     var row = title.closest('tr');
                                     if (!row) return;
-                                    var boxes = Array.from(row.querySelectorAll('input[type="checkbox"]'));
+                                    var boxes = Array.from(row.querySelectorAll('input[type="checkbox"][name^="permissions"]'));
                                     if (boxes.length === 0) return;
                                     var allChecked = boxes.every(function (b) { return b.checked; });
                                     boxes.forEach(function (b) { b.checked = !allChecked; });
+                                    updateRowToggleFor(row);
                                     return;
                                 }
-                                // Column toggle by clicking the column header
+
+                                // Column toggle by clicking the column header (Criar/Ler/Atualizar/Excluir)
                                 var colHeader = target.closest('.col-toggle');
                                 if (colHeader) {
                                     var col = colHeader.getAttribute('data-col');
@@ -118,9 +137,40 @@
                                     if (colBoxes.length === 0) return;
                                     var colAllChecked = colBoxes.every(function (b) { return b.checked; });
                                     colBoxes.forEach(function (b) { b.checked = !colAllChecked; });
+                                    updateAllRowToggles();
+                                    return;
+                                }
+
+                                // Row toggle via the dedicated "Todas" checkbox
+                                var rowBtn = target.closest('.row-toggle');
+                                if (rowBtn) {
+                                    var row2 = rowBtn.closest('tr');
+                                    if (!row2) return;
+                                    var boxes2 = Array.from(row2.querySelectorAll('input[type="checkbox"][name^="permissions"]'));
+                                    var makeChecked = !boxes2.every(function (b) { return b.checked; });
+                                    boxes2.forEach(function (b) { b.checked = makeChecked; });
+                                    rowBtn.checked = makeChecked;
+                                    return;
+                                }
+
+                                // Toggle all permissions in the table via header "Todas"
+                                var allHeader = target.closest('.all-toggle');
+                                if (allHeader) {
+                                    var allBoxes = Array.from(document.querySelectorAll('tbody input[type="checkbox"][name^="permissions"]'));
+                                    if (allBoxes.length === 0) return;
+                                    var allAreChecked = allBoxes.every(function (b) { return b.checked; });
+                                    allBoxes.forEach(function (b) { b.checked = !allAreChecked; });
+                                    updateAllRowToggles();
                                     return;
                                 }
                             });
+
+                            // Initialize row toggle state on load
+                            if (document.readyState === 'loading') {
+                                document.addEventListener('DOMContentLoaded', updateAllRowToggles);
+                            } else {
+                                updateAllRowToggles();
+                            }
                         })();
                     </script>
                 </div>
