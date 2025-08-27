@@ -29,9 +29,9 @@ class Movimentacao extends Model
     ];
 
     protected $casts = [
-        'data_entrada' => 'date',
-        'data_saida' => 'date',
-        'data_devolucao' => 'date',
+        'data_entrada' => 'datetime',
+        'data_saida' => 'datetime',
+        'data_devolucao' => 'datetime',
         'comprometido' => 'integer',
         'concluido' => 'boolean'
     ];
@@ -66,7 +66,7 @@ class Movimentacao extends Model
     // Relacionamentos
     public function produto()
     {
-        return $this->belongsTo(Produto::class, 'produto_id');
+        return $this->belongsTo(Produto::class, 'produto_id')->withTrashed();
     }
 
     public function localizacao()
@@ -83,7 +83,7 @@ class Movimentacao extends Model
     {
         return $this->belongsTo(Situacao::class);
     }
-    
+
     /**
      * Configuração do registro de atividades
      */

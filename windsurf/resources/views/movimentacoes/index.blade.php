@@ -350,7 +350,7 @@
                                 @forelse($movimentacoes as $movimentacao)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
-                                            @if($movimentacao->produto_id)
+                                            @if($movimentacao->produto)
                                                 <div>{{ $movimentacao->produto->referencia }}</div>
                                                 <div class="text-gray-500 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
                                                     {{ Str::limit($movimentacao->produto->descricao, 25, '...') }}
@@ -412,13 +412,34 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
-                                            {{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}
+                                            @if($movimentacao->data_entrada)
+                                                <div class="leading-tight">
+                                                    <div>{{ $movimentacao->data_entrada->format('d/m/Y') }}</div>
+                                                    <div class="text-gray-400">{{ $movimentacao->data_entrada->format('H:i') }}</div>
+                                                </div>
+                                            @else
+                                                N/A
+                                            @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
-                                            {{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : 'N/A' }}
+                                            @if($movimentacao->data_saida)
+                                                <div class="leading-tight">
+                                                    <div>{{ $movimentacao->data_saida->format('d/m/Y') }}</div>
+                                                    <div class="text-gray-400">{{ $movimentacao->data_saida->format('H:i') }}</div>
+                                                </div>
+                                            @else
+                                                N/A
+                                            @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
-                                            {{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y') : 'N/A' }}
+                                            @if($movimentacao->data_devolucao)
+                                                <div class="leading-tight">
+                                                    <div>{{ $movimentacao->data_devolucao->format('d/m/Y') }}</div>
+                                                    <div class="text-gray-400">{{ $movimentacao->data_devolucao->format('H:i') }}</div>
+                                                </div>
+                                            @else
+                                                N/A
+                                            @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
                                             <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
@@ -530,7 +551,13 @@
                                     <!-- Produto e Status -->
                                     <div class="mb-3 border-b pb-2">
                                         <div class="flex justify-between items-center">
-                                            <div class="font-medium text-gray-900">{{ $movimentacao->produto->referencia }}</div>
+                                            <div class="font-medium text-gray-900">
+                                                @if($movimentacao->produto)
+                                                    {{ $movimentacao->produto->referencia }}
+                                                @else
+                                                    <span class="text-red-500">Produto não encontrado</span>
+                                                @endif
+                                            </div>
                                             @if($movimentacao->produto && $movimentacao->produto->status)
                                                 <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
                                                     {{ $movimentacao->produto->status->descricao }}
@@ -539,7 +566,11 @@
                                                 <span class="text-gray-400">N/A</span>
                                             @endif
                                         </div>
-                                        <div class="text-sm text-gray-500 truncate" title="{{ $movimentacao->produto->descricao }}">{{ Str::limit($movimentacao->produto->descricao, 40, '...') }}</div>
+                                        @if($movimentacao->produto)
+                                            <div class="text-sm text-gray-500 truncate" title="{{ $movimentacao->produto->descricao }}">{{ Str::limit($movimentacao->produto->descricao, 40, '...') }}</div>
+                                        @else
+                                            <div class="text-sm text-gray-400">N/A</div>
+                                        @endif
                                     </div>
                                     
                                     <!-- Informações principais -->
@@ -606,17 +637,38 @@
                                     <div class="flex justify-between mb-3 text-right">
                                         <div class="flex-1 text-center">
                                             <div class="text-xs text-gray-500 font-medium">ENTRADA</div>
-                                            <div class="text-sm">{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}</div>
+                                            <div class="text-sm">
+                                                @if($movimentacao->data_entrada)
+                                                    <div>{{ $movimentacao->data_entrada->format('d/m/Y') }}</div>
+                                                    <div class="text-xs text-gray-500">{{ $movimentacao->data_entrada->format('H:i') }}</div>
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </div>
                                         </div>
                                         
                                         <div class="flex-1 text-center border-l border-r border-gray-200 px-2">
                                             <div class="text-xs text-gray-500 font-medium">SAÍDA</div>
-                                            <div class="text-sm">{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : 'N/A' }}</div>
+                                            <div class="text-sm">
+                                                @if($movimentacao->data_saida)
+                                                    <div>{{ $movimentacao->data_saida->format('d/m/Y') }}</div>
+                                                    <div class="text-xs text-gray-500">{{ $movimentacao->data_saida->format('H:i') }}</div>
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </div>
                                         </div>
                                         
                                         <div class="flex-1 text-center">
                                             <div class="text-xs text-gray-500 font-medium">DEVOLUÇÃO</div>
-                                            <div class="text-sm">{{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y') : 'N/A' }}</div>
+                                            <div class="text-sm">
+                                                @if($movimentacao->data_devolucao)
+                                                    <div>{{ $movimentacao->data_devolucao->format('d/m/Y') }}</div>
+                                                    <div class="text-xs text-gray-500">{{ $movimentacao->data_devolucao->format('H:i') }}</div>
+                                                @else
+                                                    N/A
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                     
