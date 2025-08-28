@@ -99,8 +99,8 @@
 
             @if($request->filled('produto_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Produto:</span> 
-                    @php 
+                    <span class="filter-label">Produto:</span>
+                    @php
                         $produtoSelecionado = $produtos->firstWhere('id', $request->produto_id);
                     @endphp
                     {{ $produtoSelecionado ? $produtoSelecionado->referencia . ' - ' . $produtoSelecionado->descricao : 'N/A' }}
@@ -110,8 +110,8 @@
 
             @if($request->filled('tipo_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Tipo:</span> 
-                    @php 
+                    <span class="filter-label">Tipo:</span>
+                    @php
                         $tipoSelecionado = $tipos->firstWhere('id', $request->tipo_id);
                     @endphp
                     {{ $tipoSelecionado ? $tipoSelecionado->descricao : 'N/A' }}
@@ -121,8 +121,8 @@
 
             @if($request->filled('situacao_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Situação:</span> 
-                    @php 
+                    <span class="filter-label">Situação:</span>
+                    @php
                         $situacaoSelecionada = $situacoes->firstWhere('id', $request->situacao_id);
                     @endphp
                     {{ $situacaoSelecionada ? $situacaoSelecionada->descricao : 'N/A' }}
@@ -132,8 +132,8 @@
 
             @if($request->filled('localizacao_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Localização:</span> 
-                    @php 
+                    <span class="filter-label">Localização:</span>
+                    @php
                         $localizacaoSelecionada = $localizacoes->firstWhere('id', $request->localizacao_id);
                     @endphp
                     {{ $localizacaoSelecionada ? $localizacaoSelecionada->nome_localizacao : 'N/A' }}
@@ -143,9 +143,9 @@
 
             @if($request->filled('data_inicio') || $request->filled('data_fim'))
                 <div class="filter-item">
-                    <span class="filter-label">Período:</span> 
+                    <span class="filter-label">Período:</span>
                     {{ $request->filled('data_inicio') ? \Carbon\Carbon::parse($request->data_inicio)->format('d/m/Y') : 'Início' }}
-                    até 
+                    até
                     {{ $request->filled('data_fim') ? \Carbon\Carbon::parse($request->data_fim)->format('d/m/Y') : 'Hoje' }}
                 </div>
                 @php $hasFilters = true; @endphp
@@ -153,7 +153,7 @@
 
             @if($request->filled('comprometido'))
                 <div class="filter-item">
-                    <span class="filter-label">Comprometido:</span> 
+                    <span class="filter-label">Comprometido:</span>
                     {{ $request->comprometido == 1 ? 'Sim' : 'Não' }}
                 </div>
                 @php $hasFilters = true; @endphp
@@ -180,7 +180,7 @@
                         <th width="10%">Referência</th>
                         <th width="10%">Produto</th>
                         <th width="10%">Data Entrada</th>
-                        <th width="10%">Data Saída</th>
+                        <th width="10%">Data Conclusão</th>
                         <th width="15%">Localização</th>
                         <th width="10%">Tipo</th>
                         <th width="10%">Situação</th>

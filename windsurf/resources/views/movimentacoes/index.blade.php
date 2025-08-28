@@ -10,14 +10,14 @@
         // Função para calcular dias úteis entre duas datas (excluindo sábados e domingos)
         function calcularDiasUteis($dataInicio, $dataFim) {
             if (!$dataInicio) return null;
-            
+
             if (!$dataFim) {
                 $dataFim = now();
             }
-            
+
             $diasUteis = 0;
             $dataAtual = clone $dataInicio;
-            
+
             while ($dataAtual <= $dataFim) {
                 // 6 = sábado, 0 = domingo
                 $diaDaSemana = $dataAtual->dayOfWeek;
@@ -26,7 +26,7 @@
                 }
                 $dataAtual->addDay();
             }
-            
+
             return $diasUteis;
         }
         @endphp
@@ -57,15 +57,15 @@
                 <div class="p-6 text-gray-900">
                     <!-- Filtros -->
                     <div class="mb-6 bg-gray-100 p-4 rounded-lg">
-                        <form action="{{ route('movimentacoes.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <form action="{{ route('movimentacoes.index') }}" method="GET" id="filters-form" autocomplete="off" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-2">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
-                                <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
+                                <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" autocomplete="off" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
                             </div>
 
                             <div class="md:col-span-2">
                                 <label for="produto" class="block text-sm font-medium text-gray-700 mb-1">Produto</label>
-                                <input type="text" name="produto" id="produto" value="{{ request('produto') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência ou descrição do produto">
+                                <input type="text" name="produto" id="produto" value="{{ request('produto') }}" autocomplete="off" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência ou descrição do produto">
                             </div>
 
                             <div>
@@ -111,12 +111,12 @@
 
                             <div>
                                 <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Entrada (Início)</label>
-                                <input type="date" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <input type="date" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}" autocomplete="off" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
 
                             <div>
                                 <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Entrada (Fim)</label>
-                                <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" autocomplete="off" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
 
                             <div>
@@ -148,6 +148,16 @@
                                 </select>
                             </div>
 
+                            <div>
+                                <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido</label>
+                                <select name="tecido_id" id="tecido_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todos</option>
+                                    @foreach($tecidos ?? [] as $tecido)
+                                        <option value="{{ $tecido->id }}" {{ request('tecido_id') == $tecido->id ? 'selected' : '' }}>{{ $tecido->descricao }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div class="md:col-span-4 flex justify-end space-x-2">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,7 +165,7 @@
                                     </svg>
                                     Filtrar
                                 </button>
-                                <a href="{{ route('movimentacoes.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <a href="{{ route('movimentacoes.index') }}" id="btn-clear-filters" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                     Limpar
                                 </a>
                             </div>
@@ -174,13 +184,13 @@
                     <p>{{ session('error') }}</p>
                 </div>
             @endif
-            
+
             @if(session('warning') && session('pdf_count'))
                 <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
                     <p class="font-medium">{{ session('warning') }}</p>
                     <div class="mt-2 flex items-center">
                         <p>Deseja continuar mesmo assim?</p>
-                        <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['confirmar_pdf' => 1])) }}" 
+                        <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['confirmar_pdf' => 1])) }}"
                            class="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-xs">
                             Sim, gerar PDF com {{ session('pdf_count') }} registros
                         </a>
@@ -284,7 +294,7 @@
                                     </th>
                                     <th scope="col" class="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[90px]">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'data_saida', 'direction' => request('sort') == 'data_saida' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center justify-end hover:text-gray-700">
-                                            Data Saída
+                                            Data Conclusão
                                             @if(request('sort') == 'data_saida')
                                                 <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                     @if(request('direction') == 'asc')
@@ -460,7 +470,7 @@
                                                 $diasEntre = null;
                                                 $prazoExcedido = false;
                                                 $prazoSetor = null;
-                                                
+
                                                 if ($movimentacao->data_entrada) {
                                                     if ($movimentacao->data_saida) {
                                                         // Se tem data de saída, calcular dias úteis entre entrada e saída
@@ -469,7 +479,7 @@
                                                         // Se não tem data de saída, calcular dias úteis entre entrada e data atual
                                                         $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
                                                     }
-                                                    
+
                                                     // Verificar se excede o prazo do setor
                                                     if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
                                                         $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
@@ -477,7 +487,7 @@
                                                     }
                                                 }
                                             @endphp
-                                            
+
                                             @if($diasEntre !== null)
                                                 <div class="text-center">
                                                     <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
@@ -543,7 +553,7 @@
                             </tbody>
                         </table>
                         </div>
-                        
+
                         <!-- Versão para dispositivos móveis (cards) -->
                         <div class="hidden space-y-4">
                             @forelse($movimentacoes as $movimentacao)
@@ -572,7 +582,7 @@
                                             <div class="text-sm text-gray-400">N/A</div>
                                         @endif
                                     </div>
-                                    
+
                                     <!-- Informações principais -->
                                     <div class="grid grid-cols-2 gap-2 mb-3">
                                         <div>
@@ -590,7 +600,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Tipo e Dias -->
                                     <div class="flex justify-between mb-3">
                                         <div class="flex-1">
@@ -605,21 +615,21 @@
                                                 $diasEntre = null;
                                                 $prazoExcedido = false;
                                                 $prazoSetor = null;
-                                                
+
                                                 if ($movimentacao->data_entrada) {
                                                     if ($movimentacao->data_saida) {
                                                         $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
                                                     } else {
                                                         $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
                                                     }
-                                                    
+
                                                     if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
                                                         $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
                                                         $prazoSetor = $movimentacao->localizacao->prazo;
                                                     }
                                                 }
                                             @endphp
-                                            
+
                                             @if($diasEntre !== null)
                                                 <div class="text-sm {{ $prazoExcedido ? 'text-red-600 font-bold' : 'text-blue-600' }}">
                                                     {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
@@ -632,7 +642,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Datas - Agora em uma única linha -->
                                     <div class="flex justify-between mb-3 text-right">
                                         <div class="flex-1 text-center">
@@ -646,7 +656,7 @@
                                                 @endif
                                             </div>
                                         </div>
-                                        
+
                                         <div class="flex-1 text-center border-l border-r border-gray-200 px-2">
                                             <div class="text-xs text-gray-500 font-medium">SAÍDA</div>
                                             <div class="text-sm">
@@ -658,7 +668,7 @@
                                                 @endif
                                             </div>
                                         </div>
-                                        
+
                                         <div class="flex-1 text-center">
                                             <div class="text-xs text-gray-500 font-medium">DEVOLUÇÃO</div>
                                             <div class="text-sm">
@@ -671,7 +681,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Ações -->
                                     <div class="flex justify-end space-x-2 pt-2 border-t">
                                         @if(auth()->user() && auth()->user()->canRead('movimentacoes'))
@@ -728,33 +738,84 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicialização do JavaScript
+
             // Inicializar Select2 no filtro de localização
             $('#localizacao_id').select2({
                 placeholder: "Selecione uma localização",
                 allowClear: true
             });
             
+            // Inicializar Select2 no filtro de tecido
+            $('#tecido_id').select2({
+                placeholder: "Selecione um tecido",
+                allowClear: true
+            });
+
             // Ajustar estilo do Select2 para combinar com Tailwind
             $('.select2-container--default .select2-selection--single').css({
                 'height': '38px',
                 'padding': '5px 0',
                 'border-color': 'rgb(209, 213, 219)'
             });
+
+            // Limpar filtros: função utilitária e bind do botão
+            const form = document.getElementById('filters-form');
+            const clearButton = document.getElementById('btn-clear-filters');
+
+            function resetFiltersUI() {
+                if (!form) return;
+                // Limpar inputs de texto e data
+                form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(el) {
+                    el.value = '';
+                });
+                // Limpar selects (inclui Select2)
+                form.querySelectorAll('select').forEach(function(sel) {
+                    sel.value = '';
+                });
+                // Resetar Select2 explicitamente
+                if (typeof $ !== 'undefined') {
+                    if ($('#localizacao_id').length) {
+                        $('#localizacao_id').val(null).trigger('change');
+                    }
+                    if ($('#tecido_id').length) {
+                        $('#tecido_id').val(null).trigger('change');
+                    }
+                }
+            }
+
+            // Se a página foi carregada sem query string, garantir que a UI dos filtros esteja limpa
+            if (!window.location.search) {
+                resetFiltersUI();
+            }
+
+            // Ao clicar em Limpar, limpar a UI e navegar para a rota base (sem parâmetros)
+            if (clearButton) {
+                clearButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetFiltersUI();
+                    const url = this.getAttribute('href');
+                    // Substitui a entrada no histórico para evitar back que traga filtros antigos
+                    window.location.replace(url);
+                });
+            }
             const toggleButton = document.getElementById('toggle-filters');
             const filterContainer = document.getElementById('filter-container');
 
             // Inicialmente mostrar os filtros
             // filterContainer.style.display = 'block';
 
-            toggleButton.addEventListener('click', function() {
-                if (filterContainer.style.display === 'none') {
-                    filterContainer.style.display = 'block';
-                    toggleButton.textContent = 'Ocultar Filtros';
-                } else {
-                    filterContainer.style.display = 'none';
-                    toggleButton.textContent = 'Mostrar Filtros';
-                }
-            });
+            if (toggleButton && filterContainer) {
+                toggleButton.addEventListener('click', function() {
+                    if (filterContainer.style.display === 'none') {
+                        filterContainer.style.display = 'block';
+                        toggleButton.textContent = 'Ocultar Filtros';
+                    } else {
+                        filterContainer.style.display = 'none';
+                        toggleButton.textContent = 'Mostrar Filtros';
+                    }
+                });
+            }
 
             // Funções para o modal de imagem
             window.openImageModal = function(imageUrl, id) {

@@ -212,7 +212,7 @@
                     <tr>
                         <th width="5%">ID</th>
                         <th width="15%">Data Entrada</th>
-                        <th width="15%">Data Saída</th>
+                        <th width="15%">Data Conclusão</th>
                         <th width="18%">Localização</th>
                         <th width="12%">Tipo</th>
                         <th width="15%">Situação</th>

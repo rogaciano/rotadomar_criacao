@@ -79,7 +79,7 @@
                                 <x-input-error :messages="$errors->get('data_entrada')" class="mt-2" />
                             </div>
 
-                            <!-- Data Saída -->
+                            <!-- Data Conclusão -->
                             <div>
                                 <x-label for="data_saida" value="{{ __('Data de Saída (opcional)') }}" />
                                 <x-input id="data_saida" class="block mt-1 w-full" type="datetime-local" name="data_saida" :value="old('data_saida', $movimentacao->data_saida ? $movimentacao->data_saida->format('Y-m-d\TH:i') : null)" />
@@ -172,7 +172,7 @@
                 'border-color': '#d1d5db'
             });
         });
-        
+
         function confirmarRemocao() {
             if (confirm('Tem certeza que deseja remover este anexo?')) {
                 document.getElementById('form-remover-anexo').submit();

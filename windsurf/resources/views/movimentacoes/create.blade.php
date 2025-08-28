@@ -98,7 +98,7 @@
                                 <input type="datetime-local" name="data_entrada" id="data_entrada" value="{{ old('data_entrada', now()->format('Y-m-d\TH:i')) }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
-                            <!-- Data Saída -->
+                            <!-- Data Conclusão -->
                             <div>
                                 <label for="data_saida" class="block text-sm font-medium text-gray-700 mb-1">Data de Saída (opcional)</label>
                                 <input type="datetime-local" name="data_saida" id="data_saida" value="{{ old('data_saida') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">

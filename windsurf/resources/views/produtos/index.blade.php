@@ -24,7 +24,7 @@
                 <div class="p-6 text-gray-900">
                     <!-- Filtros -->
                     <div class="mb-6 bg-gray-100 p-4 rounded-lg">
-                        <form action="{{ route('produtos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <form id="filter-form" action="{{ route('produtos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-1">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
                                 <input type="text" name="referencia" id="referencia" value="{{ $filters['referencia'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
@@ -147,9 +147,9 @@
                                     </svg>
                                     Filtrar
                                 </button>
-                                <a href="{{ route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Limpar
-                                </a>
+                                <button type="button" id="btn-clear-filters" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    Limpar Pesquisa
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -239,7 +239,7 @@
                                         <td class="sticky right-0 px-6 py-4 whitespace-nowrap text-right text-sm font-medium bg-white shadow-md z-10">
                                             <div class="flex justify-end space-x-2">
                                                 @if(auth()->user()->canRead('produtos'))
-                                                    <a href="{{ route('produtos.show', $produto->id) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
+                                                    <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -248,7 +248,7 @@
                                                 @endif
 
                                                 @if(!$produto->trashed() && auth()->user()->canUpdate('produtos'))
-                                                    <a href="{{ route('produtos.edit', $produto->id) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
+                                                    <a href="{{ route('produtos.edit', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -303,6 +303,57 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Inicialização do JavaScript
+
+            // Inicializar Select2 nos filtros
+            $('.select2').select2({
+                placeholder: "Selecione uma opção",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Ajustar estilo do Select2 para combinar com Tailwind
+            $('.select2-container--default .select2-selection--single').css({
+                'height': '38px',
+                'padding': '5px',
+                'border-color': 'rgb(209, 213, 219)'
+            });
+
+            // Limpar filtros: função utilitária e bind do botão
+            const form = document.getElementById('filter-form');
+            const clearButton = document.getElementById('btn-clear-filters');
+
+            function resetFiltersUI() {
+                if (!form) return;
+                // Limpar inputs de texto e data
+                form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(el) {
+                    el.value = '';
+                });
+                // Limpar selects (inclui Select2)
+                form.querySelectorAll('select').forEach(function(sel) {
+                    sel.value = '';
+                });
+                // Resetar Select2 explicitamente
+                if (typeof $ !== 'undefined' && $('.select2').length) {
+                    $('.select2').val(null).trigger('change');
+                }
+            }
+
+            // Se a página foi carregada sem query string, garantir que a UI dos filtros esteja limpa
+            if (!window.location.search) {
+                resetFiltersUI();
+            }
+
+            // Ao clicar em Limpar, limpar a UI e submeter o formulário vazio para atualizar a listagem
+            if (clearButton) {
+                clearButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetFiltersUI();
+                    // Submeter o formulário vazio para atualizar a listagem
+                    form.submit();
+                });
+            }
+            
             const toggleButton = document.getElementById('toggle-filters');
             const filterContainer = document.getElementById('filter-container');
 
@@ -320,23 +371,5 @@
             }
         });
     </script>
-@push('scripts')
-<script>
-    $(document).ready(function() {
-        // Inicializar Select2 nos filtros
-        $('.select2').select2({
-            placeholder: "Selecione uma opção",
-            allowClear: true,
-            width: '100%'
-        });
-
-        // Ajustar estilo do Select2 para combinar com Tailwind
-        $('.select2-container--default .select2-selection--single').css({
-            'height': '38px',
-            'padding': '5px'
-        });
-    });
-</script>
-@endpush
 
 </x-app-layout>

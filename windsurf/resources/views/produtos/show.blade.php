@@ -21,7 +21,7 @@
                         PDF
                     </a>
                 @endif
-                <a href="{{ route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
+                <a href="{{ request('back_url') ? request('back_url') : route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -486,7 +486,7 @@
                                                 Data Entrada
                                             </th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Data Saída
+                                                Data Conclusão
                                             </th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Dias
@@ -673,27 +673,27 @@
             tooltipTriggers.forEach(trigger => {
                 trigger.addEventListener('mouseenter', function(e) {
                     const tooltipContent = this.closest('.tooltip-container').querySelector('.tooltip-content');
-                    
+
                     // Get position of the trigger
                     const triggerRect = this.getBoundingClientRect();
-                    
+
                     // Position the tooltip above the trigger with some offset
                     tooltipContent.style.position = 'fixed';
                     tooltipContent.style.zIndex = '9999';
                     tooltipContent.style.top = (triggerRect.top - 15) + 'px';
                     tooltipContent.style.left = (triggerRect.left + (triggerRect.width / 2)) + 'px';
                     tooltipContent.style.transform = 'translate(-50%, -100%)';
-                    
+
                     // Ensure tooltip is visible and above all other elements
                     tooltipContent.classList.remove('hidden');
-                    
+
                     // Prevent tooltip from being cut off at the top of the screen
                     const tooltipRect = tooltipContent.getBoundingClientRect();
                     if (tooltipRect.top < 10) {
                         // If too close to the top, position below the trigger instead
                         tooltipContent.style.top = (triggerRect.bottom + 15) + 'px';
                         tooltipContent.style.transform = 'translate(-50%, 0)';
-                        
+
                         // Move the arrow to the top
                         const arrow = tooltipContent.querySelector('div[class*="absolute"]');
                         if (arrow) {
