@@ -30,11 +30,20 @@
                                 <input type="text" name="referencia" id="referencia" value="{{ $filters['referencia'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
                             </div>
 
-                            <div class="md:col-span-2">
+                            <div>
                                 <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
                                 <input type="text" name="descricao" id="descricao" value="{{ $filters['descricao'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do produto">
                             </div>
                             
+                            <div>
+                                <label for="concluido" class="block text-sm font-medium text-gray-700 mb-1">Status de Conclusão</label>
+                                <select name="concluido" id="concluido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todos</option>
+                                    <option value="1" {{ ($filters['concluido'] ?? '') === '1' ? 'selected' : '' }}>Concluídos</option>
+                                    <option value="0" {{ ($filters['concluido'] ?? '') === '0' ? 'selected' : '' }}>Não Concluídos</option>
+                                </select>
+                            </div>
+
                             <div class="md:col-span-1 flex items-end pb-2">
                                 <div class="flex items-center">
                                     <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ isset($filters['incluir_excluidos']) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
@@ -182,7 +191,7 @@
                                         Status
                                     </th>
                                     <th scope="col" class="px-0 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
-                                        <span class="sr-only">Concluída</span>
+                                        <span class="sr-only">Concluído</span>
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Localização
@@ -217,7 +226,7 @@
                                             </span>
                                         </td>
                                         <td class="px-0 py-4 whitespace-nowrap text-xs text-center w-8">
-                                            @if($produto->localizacao_atual && $produto->localizacao_atual->id == 1)
+                                            @if($produto->concluido_atual)
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mx-auto text-green-600" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                                 </svg>
@@ -353,7 +362,7 @@
                     form.submit();
                 });
             }
-            
+
             const toggleButton = document.getElementById('toggle-filters');
             const filterContainer = document.getElementById('filter-container');
 

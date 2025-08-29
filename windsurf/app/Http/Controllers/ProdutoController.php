@@ -26,7 +26,7 @@ class ProdutoController extends Controller
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
             'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-            'data_inicio', 'data_fim'
+            'data_inicio', 'data_fim', 'concluido'
         ]) && $request->method() === 'GET' && !$request->ajax();
         
         // Se for uma nova pesquisa, salva os filtros na sessão
@@ -35,7 +35,7 @@ class ProdutoController extends Controller
                 'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
                 'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
                 'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-                'data_inicio', 'data_fim'
+                'data_inicio', 'data_fim', 'concluido'
             ]);
             session(['produtos_filters' => $filters]);
         }
@@ -113,6 +113,22 @@ class ProdutoController extends Controller
             // Obter IDs dos produtos cuja última movimentação está na localização selecionada
             $subquery = \App\Models\Movimentacao::select('produto_id')
                 ->where('localizacao_id', $localizacaoId)
+                ->whereIn('id', function($q) {
+                    $q->select(\DB::raw('MAX(id)'))
+                      ->from('movimentacoes')
+                      ->groupBy('produto_id');
+                });
+                
+            $query->whereIn('id', $subquery);
+        }
+        
+        // Filtro por status de conclusão (dropdown)
+        $concluido = isset($filters['concluido']) ? $filters['concluido'] : null;
+        if ($concluido !== null && $concluido !== '') {
+            $concluidoValue = $concluido === '1' ? 1 : 0;
+            
+            $subquery = \App\Models\Movimentacao::select('produto_id')
+                ->where('concluido', $concluidoValue)
                 ->whereIn('id', function($q) {
                     $q->select(\DB::raw('MAX(id)'))
                       ->from('movimentacoes')

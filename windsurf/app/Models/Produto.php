@@ -139,6 +139,19 @@ class Produto extends Model
     }
     
     /**
+     * Retorna o status de conclusão atual do produto baseado na última movimentação
+     */
+    public function getConcluidoAtualAttribute()
+    {
+        // Busca a última movimentação do produto ordenada pelo ID mais recente
+        $ultimaMovimentacao = $this->movimentacoes()
+            ->orderBy('id', 'desc')
+            ->first();
+            
+        return $ultimaMovimentacao ? $ultimaMovimentacao->concluido : null;
+    }
+    
+    /**
      * Configuração do registro de atividades
      */
     public function getActivitylogOptions(): LogOptions

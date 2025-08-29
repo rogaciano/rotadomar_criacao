@@ -111,12 +111,12 @@ class MovimentacaoController extends Controller
                     break;
                 case 'tipo':
                     $query->join('tipos', 'movimentacoes.tipo_id', '=', 'tipos.id')
-                          ->orderBy('tipos.nome_tipo', $direction)
+                          ->orderBy('tipos.descricao', $direction)
                           ->select('movimentacoes.*');
                     break;
                 case 'situacao':
                     $query->join('situacoes', 'movimentacoes.situacao_id', '=', 'situacoes.id')
-                          ->orderBy('situacoes.nome_situacao', $direction)
+                          ->orderBy('situacoes.descricao', $direction)
                           ->select('movimentacoes.*');
                     break;
                 case 'localizacao':
@@ -145,15 +145,15 @@ class MovimentacaoController extends Controller
         $produtos = Produto::orderBy('referencia')->get();
         
         // Carregar situações para o select
-        $situacoesAtivas = Situacao::where('ativo', true)->orderBy('nome_situacao')->get();
-        $situacoesInativas = Situacao::where('ativo', false)->orderBy('nome_situacao')->get();
+        $situacoesAtivas = Situacao::where('ativo', true)->orderBy('descricao')->get();
+        $situacoesInativas = Situacao::where('ativo', false)->orderBy('descricao')->get();
         
         // Combinar as coleções: ativas primeiro, depois inativas
         $situacoes = $situacoesAtivas->concat($situacoesInativas);
         
         // Carregar tipos para o select
-        $tiposAtivos = Tipo::where('ativo', true)->orderBy('nome_tipo')->get();
-        $tiposInativos = Tipo::where('ativo', false)->orderBy('nome_tipo')->get();
+        $tiposAtivos = Tipo::where('ativo', true)->orderBy('descricao')->get();
+        $tiposInativos = Tipo::where('ativo', false)->orderBy('descricao')->get();
         
         // Combinar as coleções: ativas primeiro, depois inativas
         $tipos = $tiposAtivos->concat($tiposInativos);
@@ -186,8 +186,8 @@ class MovimentacaoController extends Controller
         }
 
         $produtos = Produto::orderBy('referencia')->get();
-        $situacoes = Situacao::where('ativo', true)->orderBy('nome_situacao')->get();
-        $tipos = Tipo::where('ativo', true)->orderBy('nome_tipo')->get();
+        $situacoes = Situacao::where('ativo', true)->orderBy('descricao')->get();
+        $tipos = Tipo::where('ativo', true)->orderBy('descricao')->get();
         $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
 
         // Pré-selecionar produto se fornecido via query string
@@ -269,8 +269,8 @@ class MovimentacaoController extends Controller
         }
 
         $produtos = Produto::orderBy('referencia')->get();
-        $situacoes = Situacao::orderBy('nome_situacao')->get();
-        $tipos = Tipo::orderBy('nome_tipo')->get();
+        $situacoes = Situacao::orderBy('descricao')->get();
+        $tipos = Tipo::orderBy('descricao')->get();
         $localizacoes = Localizacao::orderBy('nome_localizacao')->get();
 
         return view('movimentacoes.edit', compact('movimentacao', 'produtos', 'situacoes', 'tipos', 'localizacoes'));
@@ -456,12 +456,12 @@ class MovimentacaoController extends Controller
                     break;
                 case 'tipo':
                     $query->join('tipos', 'movimentacoes.tipo_id', '=', 'tipos.id')
-                          ->orderBy('tipos.nome_tipo', $direction)
+                          ->orderBy('tipos.descricao', $direction)
                           ->select('movimentacoes.*');
                     break;
                 case 'situacao':
                     $query->join('situacoes', 'movimentacoes.situacao_id', '=', 'situacoes.id')
-                          ->orderBy('situacoes.nome_situacao', $direction)
+                          ->orderBy('situacoes.descricao', $direction)
                           ->select('movimentacoes.*');
                     break;
                 case 'localizacao':
