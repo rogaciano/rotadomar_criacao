@@ -26,7 +26,7 @@ class ProdutoController extends Controller
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
             'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-            'data_inicio', 'data_fim', 'concluido'
+            'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
         ]) && $request->method() === 'GET' && !$request->ajax();
         
         // Se for uma nova pesquisa, salva os filtros na sessão
@@ -35,7 +35,7 @@ class ProdutoController extends Controller
                 'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
                 'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
                 'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-                'data_inicio', 'data_fim', 'concluido'
+                'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
             ]);
             session(['produtos_filters' => $filters]);
         }
@@ -151,6 +151,16 @@ class ProdutoController extends Controller
         // Filtro por data de cadastro (fim)
         if (!empty($filters['data_fim'])) {
             $query->whereDate('created_at', '<=', $filters['data_fim']);
+        }
+
+        // Filtro por data prevista de produção (início)
+        if (!empty($filters['data_prevista_inicio'])) {
+            $query->whereDate('data_prevista_producao', '>=', $filters['data_prevista_inicio']);
+        }
+
+        // Filtro por data prevista de produção (fim)
+        if (!empty($filters['data_prevista_fim'])) {
+            $query->whereDate('data_prevista_producao', '<=', $filters['data_prevista_fim']);
         }
 
         $produtos = $query->orderBy('referencia')->paginate(10);
@@ -761,34 +771,179 @@ class ProdutoController extends Controller
     public function generateListPdf(Request $request)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        $query = Produto::with(['marca', 'grupoProduto', 'status', 'estilista']);
-
-        // Aplicar filtros se existirem
-        if ($request->filled('referencia')) {
-            $query->where('referencia', 'like', '%' . $request->referencia . '%');
-        }
-
-        if ($request->filled('descricao')) {
-            $query->where('descricao', 'like', '%' . $request->descricao . '%');
-        }
-
-        if ($request->filled('marca_id')) {
-            $query->where('marca_id', $request->marca_id);
-        }
-
-        if ($request->filled('grupo_id')) {
-            $query->where('grupo_id', $request->grupo_id);
-        }
-
-        if ($request->filled('status_id')) {
-            $query->where('status_id', $request->status_id);
-        }
-
-        $produtos = $query->orderBy('referencia')->get();
-
-        $pdf = PDF::loadView('produtos.lista-pdf', compact('produtos'))
-               ->setPaper('a4', 'landscape');
         
-        return $pdf->stream('lista-produtos.pdf');
+        // Usar os mesmos filtros da sessão ou da requisição
+        $useSessionFilters = !$request->hasAny([
+            'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
+            'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
+            'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
+            'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
+        ]) && $request->method() === 'GET' && !$request->ajax() && !$request->has('force_generate');
+        
+        $filters = $useSessionFilters ? session('produtos_filters', []) : $request->all();
+        
+        try {
+            // Simplify the query to avoid issues with count and complex selects
+            $query = Produto::select('produtos.*'); // Start with a clean select
+            
+            // Apply filters
+            if (!empty($filters['referencia'])) {
+                $query->where('referencia', 'like', '%' . $filters['referencia'] . '%');
+            }
+
+            if (!empty($filters['descricao'])) {
+                $query->where('descricao', 'like', '%' . $filters['descricao'] . '%');
+            }
+
+            // Filtro por marca (aceita ID ou nome)
+            if (!empty($filters['marca_id'])) {
+                $query->where('marca_id', $filters['marca_id']);
+            } elseif (!empty($filters['marca'])) {
+                $marcaId = Marca::where('nome_marca', $filters['marca'])->value('id');
+                if ($marcaId) {
+                    $query->where('marca_id', $marcaId);
+                }
+            }
+
+            if (!empty($filters['tecido_id'])) {
+                $query->whereHas('tecidos', function($q) use ($filters) {
+                    $q->where('tecidos.id', $filters['tecido_id']);
+                });
+            }
+
+            // Filtro por estilista (aceita ID ou nome)
+            if (!empty($filters['estilista_id'])) {
+                $query->where('estilista_id', $filters['estilista_id']);
+            } elseif (!empty($filters['estilista'])) {
+                $estilistaId = Estilista::where('nome_estilista', $filters['estilista'])->value('id');
+                if ($estilistaId) {
+                    $query->where('estilista_id', $estilistaId);
+                }
+            }
+
+            // Filtro por grupo (aceita ID ou nome)
+            if (!empty($filters['grupo_id'])) {
+                $query->where('grupo_id', $filters['grupo_id']);
+            } elseif (!empty($filters['grupo'])) {
+                $grupoId = GrupoProduto::where('descricao', $filters['grupo'])->value('id');
+                if ($grupoId) {
+                    $query->where('grupo_id', $grupoId);
+                }
+            }
+
+            // Filtro por status (aceita ID ou nome)
+            if (!empty($filters['status_id'])) {
+                $query->where('status_id', $filters['status_id']);
+            } elseif (!empty($filters['status'])) {
+                $statusId = Status::where('descricao', $filters['status'])->value('id');
+                if ($statusId) {
+                    $query->where('status_id', $statusId);
+                }
+            }
+
+            // Filtro por localização
+            $localizacaoId = null;
+            
+            if (!empty($filters['localizacao_id'])) {
+                $localizacaoId = $filters['localizacao_id'];
+            } elseif (!empty($filters['localizacao'])) {
+                $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $filters['localizacao'])->value('id');
+            }
+            
+            if ($localizacaoId) {
+                // Obter IDs dos produtos cuja última movimentação está na localização selecionada
+                $subquery = \App\Models\Movimentacao::select('produto_id')
+                    ->where('localizacao_id', $localizacaoId)
+                    ->whereIn('id', function($q) {
+                        $q->select(\DB::raw('MAX(id)'))
+                          ->from('movimentacoes')
+                          ->groupBy('produto_id');
+                    });
+                    
+                $query->whereIn('id', $subquery);
+            }
+            
+            // Filtro por status de conclusão
+            $concluido = isset($filters['concluido']) ? $filters['concluido'] : null;
+            if ($concluido !== null && $concluido !== '') {
+                $concluidoValue = $concluido === '1' ? 1 : 0;
+                
+                $subquery = \App\Models\Movimentacao::select('produto_id')
+                    ->where('concluido', $concluidoValue)
+                    ->whereIn('id', function($q) {
+                        $q->select(\DB::raw('MAX(id)'))
+                          ->from('movimentacoes')
+                          ->groupBy('produto_id');
+                    });
+                    
+                $query->whereIn('id', $subquery);
+            }
+
+            // Incluir excluídos se solicitado
+            if (!empty($filters['incluir_excluidos'])) {
+                $query->withTrashed();
+            }
+
+            // Filtro por data de cadastro
+            if (!empty($filters['data_inicio'])) {
+                $query->whereDate('created_at', '>=', $filters['data_inicio']);
+            }
+
+            if (!empty($filters['data_fim'])) {
+                $query->whereDate('created_at', '<=', $filters['data_fim']);
+            }
+            
+            // Filtro por data prevista de produção
+            if (!empty($filters['data_prevista_inicio'])) {
+                $query->whereDate('data_prevista_producao', '>=', $filters['data_prevista_inicio']);
+            }
+
+            if (!empty($filters['data_prevista_fim'])) {
+                $query->whereDate('data_prevista_producao', '<=', $filters['data_prevista_fim']);
+            }
+            
+            // Skip the count check and proceed directly to PDF generation
+            // This avoids the error when counting with complex queries
+            if ($request->has('force_generate')) {
+                // Continue with PDF generation
+            } else {
+                // Just to be safe, set a reasonable limit
+                $query->limit(500);
+            }
+
+            // Get the products with all necessary relationships
+            $produtos = $query->orderBy('referencia')
+                ->with(['marca', 'grupoProduto', 'status', 'estilista'])
+                ->get();
+                
+            // Now that we have the products, we can manually add the localizacao_atual and concluido_atual
+            foreach ($produtos as $produto) {
+                // Get the latest movimentacao for this product
+                $ultimaMovimentacao = \App\Models\Movimentacao::where('produto_id', $produto->id)
+                    ->with('localizacao')
+                    ->orderBy('id', 'desc')
+                    ->first();
+                    
+                if ($ultimaMovimentacao) {
+                    $produto->localizacao_atual = $ultimaMovimentacao->localizacao;
+                    $produto->concluido_atual = $ultimaMovimentacao->concluido;
+                } else {
+                    $produto->localizacao_atual = null;
+                    $produto->concluido_atual = null;
+                }
+            }
+
+            $pdf = PDF::loadView('produtos.lista-pdf', compact('produtos'))
+                   ->setPaper('a4', 'landscape');
+            
+            return $pdf->stream('lista-produtos.pdf');
+            
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error generating PDF: ' . $e->getMessage());
+            
+            // Return a user-friendly error message
+            return back()->with('error', 'Ocorreu um erro ao gerar o PDF. Por favor, tente novamente ou entre em contato com o suporte.');
+        }
     }
 }

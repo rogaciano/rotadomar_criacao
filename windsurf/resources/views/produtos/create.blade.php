@@ -51,6 +51,12 @@
                                 <input type="date" name="data_cadastro" id="data_cadastro" value="{{ old('data_cadastro', date('Y-m-d')) }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
+                            <!-- Data Prevista para Produção -->
+                            <div>
+                                <label for="data_prevista_producao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Produção</label>
+                                <input type="date" name="data_prevista_producao" id="data_prevista_producao" value="{{ old('data_prevista_producao') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            </div>
+
                             <!-- Marca -->
                             <div>
                                 <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>

@@ -56,6 +56,11 @@
                             </div>
 
                             <div>
+                                <span class="block text-sm font-medium text-gray-500">Data Prevista para Produção</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_producao ? $produto->data_prevista_producao->format('d/m/Y') : 'N/A' }}</span>
+                            </div>
+
+                            <div>
                                 <span class="block text-sm font-medium text-gray-500">Marca</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
                             </div>

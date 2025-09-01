@@ -16,6 +16,7 @@ class Produto extends Model
         'referencia',
         'descricao',
         'data_cadastro',
+        'data_prevista_producao',
         'marca_id',
         'quantidade',
         'estilista_id',
@@ -29,6 +30,7 @@ class Produto extends Model
 
     protected $casts = [
         'data_cadastro' => 'date',
+        'data_prevista_producao' => 'date',
         'preco_atacado' => 'decimal:2',
         'preco_varejo' => 'decimal:2',
         'quantidade' => 'integer'
@@ -136,6 +138,15 @@ class Produto extends Model
             ->first();
             
         return $ultimaMovimentacao ? $ultimaMovimentacao->localizacao : null;
+    }
+    
+    /**
+     * Relacionamento para a localização atual do produto
+     * Este relacionamento é usado para eager loading da localização atual
+     */
+    public function localizacao_atual()
+    {
+        return $this->belongsTo(\App\Models\Localizacao::class, 'localizacao_atual_id');
     }
     
     /**

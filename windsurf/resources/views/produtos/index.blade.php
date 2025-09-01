@@ -8,14 +8,25 @@
     <div class="py-12 bg-gray-900">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <!-- Botões de ação -->
-            <div class="flex flex-wrap gap-2 mb-4">
-                @if(auth()->user()->canCreate('produtos'))
+            <div class="flex flex-wrap justify-between mb-4">
+
+                <div>
+                    @if(auth()->user()->canCreate('produtos'))
                     <a href="{{ route('produtos.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
                         Adicionar Produto
                     </a>
+                    @endif
+                </div>
+                @if(auth()->user()->canRead('produtos'))
+                    <button id="btn-gerar-pdf" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        Gerar PDF
+                    </button>
                 @endif
             </div>
 
@@ -34,7 +45,7 @@
                                 <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
                                 <input type="text" name="descricao" id="descricao" value="{{ $filters['descricao'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do produto">
                             </div>
-                            
+
                             <div>
                                 <label for="concluido" class="block text-sm font-medium text-gray-700 mb-1">Status de Conclusão</label>
                                 <select name="concluido" id="concluido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -148,6 +159,16 @@
                                 <input type="date" name="data_fim" id="data_fim" value="{{ $filters['data_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
 
+                            <div>
+                                <label for="data_prevista_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista Produção (Início)</label>
+                                <input type="date" name="data_prevista_inicio" id="data_prevista_inicio" value="{{ $filters['data_prevista_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+
+                            <div>
+                                <label for="data_prevista_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista Produção (Fim)</label>
+                                <input type="date" name="data_prevista_fim" id="data_prevista_fim" value="{{ $filters['data_prevista_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+
 
                             <div class="md:col-span-4 flex justify-end space-x-2">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -182,6 +203,9 @@
                                         Descrição
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Data Prev. Produção
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Marca
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -209,6 +233,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $produto->descricao }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $produto->data_prevista_producao ? $produto->data_prevista_producao->format('d/m/Y') : 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             @if($produto->marca && $produto->marca->logo_path)
@@ -292,7 +319,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                        <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                                             Nenhum produto encontrado.
                                         </td>
                                     </tr>
@@ -327,6 +354,41 @@
                 'padding': '5px',
                 'border-color': 'rgb(209, 213, 219)'
             });
+
+            // Gerar PDF diretamente com force_generate=1 para evitar erros de contagem
+            const btnGerarPdf = document.getElementById('btn-gerar-pdf');
+            if (btnGerarPdf) {
+                btnGerarPdf.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Mostrar indicador de carregamento
+                    btnGerarPdf.disabled = true;
+                    btnGerarPdf.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando PDF...';
+
+                    // Obter os filtros do formulário
+                    const formData = new FormData(document.getElementById('filter-form'));
+                    const queryParams = new URLSearchParams(formData).toString();
+                    
+                    // Gerar o PDF diretamente com force_generate=1 para evitar o erro de contagem
+                    const pdfUrl = '{{ route("produtos.lista.pdf") }}?' + queryParams + '&force_generate=1';
+                    
+                    // Abrir o PDF em uma nova aba
+                    const pdfWindow = window.open(pdfUrl, '_blank');
+                    
+                    // Restaurar o botão após um curto período
+                    setTimeout(function() {
+                        btnGerarPdf.disabled = false;
+                        btnGerarPdf.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Gerar PDF';
+                    }, 1500);
+                    
+                    // Verificar se a janela do PDF foi bloqueada pelo navegador
+                    if (!pdfWindow || pdfWindow.closed || typeof pdfWindow.closed === 'undefined') {
+                        alert('Por favor, permita pop-ups para este site para visualizar o PDF.');
+                        btnGerarPdf.disabled = false;
+                        btnGerarPdf.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Gerar PDF';
+                    }
+                });
+            }
 
             // Limpar filtros: função utilitária e bind do botão
             const form = document.getElementById('filter-form');
