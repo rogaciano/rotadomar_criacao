@@ -10,6 +10,7 @@ use App\Models\Localizacao;
 use App\Models\Group;
 use App\Models\Permission;
 use App\Models\UserPermission;
+use App\Models\UserFilter;
 
 class User extends Authenticatable
 {
@@ -203,5 +204,47 @@ class User extends Authenticatable
     public function canDelete(string $permissionSlug): bool
     {
         return $this->canAction('delete', $permissionSlug);
+    }
+    
+    /**
+     * Relacionamento com os filtros do usuário
+     */
+    public function filters()
+    {
+        return $this->hasMany(UserFilter::class);
+    }
+    
+    /**
+     * Salvar filtros para um tipo de página
+     *
+     * @param string $pageType
+     * @param array $filters
+     * @return UserFilter
+     */
+    public function saveFilters(string $pageType, array $filters)
+    {
+        return UserFilter::saveFilters($this->id, $pageType, $filters);
+    }
+    
+    /**
+     * Obter filtros para um tipo de página
+     *
+     * @param string $pageType
+     * @return array
+     */
+    public function getFilters(string $pageType)
+    {
+        return UserFilter::getFilters($this->id, $pageType);
+    }
+    
+    /**
+     * Limpar filtros para um tipo de página
+     *
+     * @param string $pageType
+     * @return bool
+     */
+    public function clearFilters(string $pageType)
+    {
+        return UserFilter::clearFilters($this->id, $pageType);
     }
 }

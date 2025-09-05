@@ -23,6 +23,39 @@ class MovimentacaoController extends Controller
         if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
+        
+        // Verificar se é uma requisição de limpeza de filtros
+        if ($request->has('limpar_filtros')) {
+            auth()->user()->clearFilters('movimentacoes');
+            return redirect()->route('movimentacoes.index');
+        }
+        
+        // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
+        if ($request->anyFilled([
+            'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
+            'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
+            'comprometido', 'concluido', 'sort', 'direction'
+        ])) {
+            $filterParams = $request->only([
+                'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
+                'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
+                'comprometido', 'concluido', 'sort', 'direction'
+            ]);
+            
+            auth()->user()->saveFilters('movimentacoes', $filterParams);
+        } 
+        // Se não tem parâmetros na URL mas tem filtros salvos, redirecionar com os filtros salvos
+        else if (!$request->hasAny([
+            'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
+            'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
+            'comprometido', 'concluido', 'sort', 'direction'
+        ])) {
+            $savedFilters = auth()->user()->getFilters('movimentacoes');
+            
+            if (!empty($savedFilters)) {
+                return redirect()->route('movimentacoes.index', $savedFilters);
+            }
+        }
 
         $query = Movimentacao::with(['produto', 'produto.marca', 'tipo', 'situacao', 'localizacao']);
 
@@ -241,7 +274,11 @@ class MovimentacaoController extends Controller
 
             $movimentacao->save();
 
-            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação criada com sucesso!');
+            // Usar os filtros salvos do usuário
+            $savedFilters = auth()->user()->getFilters('movimentacoes');
+            
+            return redirect()->route('movimentacoes.index', $savedFilters)
+                    ->with('success', 'Movimentação criada com sucesso!');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Erro ao criar movimentação: ' . $e->getMessage());
         }
@@ -321,7 +358,11 @@ class MovimentacaoController extends Controller
 
         $movimentacao->update($validated);
 
-        return redirect()->route('movimentacoes.index')->with('success', 'Movimentação atualizada com sucesso!');
+        // Usar os filtros salvos do usuário
+        $savedFilters = auth()->user()->getFilters('movimentacoes');
+        
+        return redirect()->route('movimentacoes.index', $savedFilters)
+                ->with('success', 'Movimentação atualizada com sucesso!');
     }
 
     /**
@@ -343,7 +384,12 @@ class MovimentacaoController extends Controller
             }
 
             $movimentacao->delete();
-            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação excluída com sucesso!');
+            
+            // Usar os filtros salvos do usuário
+            $savedFilters = auth()->user()->getFilters('movimentacoes');
+            
+            return redirect()->route('movimentacoes.index', $savedFilters)
+                    ->with('success', 'Movimentação excluída com sucesso!');
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao excluir movimentação: ' . $e->getMessage());
         }
@@ -508,7 +554,16 @@ class MovimentacaoController extends Controller
             $movimentacao->anexo = null;
             $movimentacao->save();
 
-            return back()->with('success', 'Anexo removido com sucesso!');
+            // Se estamos na página de edição, voltar para lá
+            if (request()->is('*/edit') || request()->is('*/edit/*')) {
+                return back()->with('success', 'Anexo removido com sucesso!');
+            } else {
+                // Usar os filtros salvos do usuário
+                $savedFilters = auth()->user()->getFilters('movimentacoes');
+                
+                return redirect()->route('movimentacoes.index', $savedFilters)
+                        ->with('success', 'Anexo removido com sucesso!');
+            }
         }
 
         return back()->with('error', 'Nenhum anexo encontrado para remover.');

@@ -177,9 +177,9 @@
                                     </svg>
                                     Filtrar
                                 </button>
-                                <button type="button" id="btn-clear-filters" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Limpar Pesquisa
-                                </button>
+                                <a href="{{ route('produtos.index', ['limpar_filtros' => 1]) }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    Limpar Filtros
+                                </a>
                             </div>
                         </form>
                     </div>

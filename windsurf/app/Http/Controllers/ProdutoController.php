@@ -21,27 +21,38 @@ class ProdutoController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        // Verifica se é uma nova pesquisa ou se deve usar os filtros da sessão
-        $useSessionFilters = !$request->hasAny([
+        
+        // Verificar se é uma requisição de limpeza de filtros
+        if ($request->has('limpar_filtros')) {
+            auth()->user()->clearFilters('produtos');
+            return redirect()->route('produtos.index');
+        }
+        
+        // Lista de campos de filtro válidos
+        $validFilters = [
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
             'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-            'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
-        ]) && $request->method() === 'GET' && !$request->ajax();
+            'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido',
+            'sort', 'direction', 'page'
+        ];
         
-        // Se for uma nova pesquisa, salva os filtros na sessão
-        if (!$useSessionFilters && $request->method() === 'GET') {
-            $filters = $request->only([
-                'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
-                'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
-                'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
-                'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
-            ]);
-            session(['produtos_filters' => $filters]);
+        // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
+        if ($request->anyFilled($validFilters)) {
+            $filterParams = $request->only($validFilters);
+            auth()->user()->saveFilters('produtos', $filterParams);
+        } 
+        // Se não tem parâmetros na URL mas tem filtros salvos, redirecionar com os filtros salvos
+        else if (!$request->hasAny($validFilters) && !$request->ajax()) {
+            $savedFilters = auth()->user()->getFilters('produtos');
+            
+            if (!empty($savedFilters)) {
+                return redirect()->route('produtos.index', $savedFilters);
+            }
         }
         
-        // Se não há filtros na requisição, usa os da sessão
-        $filters = $useSessionFilters ? session('produtos_filters', []) : $request->all();
+        // Usar os filtros da requisição ou os filtros salvos
+        $filters = $request->all();
         
         $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao']);
 
@@ -305,6 +316,9 @@ class ProdutoController extends Controller
             }
         }
 
+        // Usar os filtros salvos do usuário
+        $savedFilters = auth()->user()->getFilters('produtos');
+        
         return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto criado com sucesso!');
     }
@@ -544,6 +558,9 @@ class ProdutoController extends Controller
         }
 
 
+        // Usar os filtros salvos do usuário
+        $savedFilters = auth()->user()->getFilters('produtos');
+        
         return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto atualizado com sucesso!');
     }
@@ -566,7 +583,10 @@ class ProdutoController extends Controller
             $message = 'Produto excluído com sucesso!';
         }
 
-        return redirect()->route('produtos.index')
+        // Usar os filtros salvos do usuário
+        $savedFilters = auth()->user()->getFilters('produtos');
+        
+        return redirect()->route('produtos.index', $savedFilters)
             ->with('success', $message);
     }
     

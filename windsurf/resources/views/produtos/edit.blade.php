@@ -4,12 +4,23 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Editar Produto') }}
             </h2>
-            <a href="{{ request('back_url') ? request('back_url') : route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                </svg>
-                Voltar
-            </a>
+            <div class="flex space-x-2">
+                <!-- Botão Salvar no topo -->
+                <button type="submit" form="produto-form" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Salvar
+                </button>
+                
+                <!-- Botão Voltar -->
+                <a href="{{ request('back_url') ? request('back_url') : route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    Voltar
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -29,7 +40,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('produtos.update', $produto->id) }}" method="POST" enctype="multipart/form-data">
+                    <form id="produto-form" action="{{ route('produtos.update', $produto->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -278,6 +289,12 @@
                             <p class="mt-1 text-xs text-gray-500">As cores disponíveis serão carregadas automaticamente com base nos tecidos selecionados</p>
                         </div>
 
+                        <!-- Contador de cores selecionadas -->
+                        <div class="mt-4 text-sm text-gray-700">
+                            <span id="cores-count">0</span> cores selecionadas
+                        </div>
+                        
+                        <!-- Botão de salvar -->
                         <div class="flex justify-end mt-6">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -353,6 +370,11 @@
     }
 
     $(document).ready(function() {
+        // Atualizar o contador de cores
+        function updateCoresCount(count) {
+            $('#cores-count').text(count);
+        }
+        
         // Debug para verificar se o script está carregando
         
         // Debug: Capturar evento de submit do formulário
@@ -479,6 +501,7 @@
             
             if (!cores || cores.length === 0) {
                 coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Nenhuma cor disponível para os tecidos selecionados.</div>');
+                updateCoresCount(0);
                 return;
             }
 
@@ -575,6 +598,14 @@
             }
             
             coresContainer.html(finalHtml);
+            
+            // Atualizar o contador de cores selecionadas
+            updateCoresCount(cores.length);
+        }
+        
+        // Função para atualizar o contador de cores
+        function updateCoresCount(count) {
+            $('#cores-count').text(count);
         }
 
         function updateRemoveTecidoButtons() {
