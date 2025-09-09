@@ -199,10 +199,10 @@
             @endif
 
                     <!-- Tabela de Movimentações -->
-                    <div class="relative overflow-hidden">
+                    <div class="relative overflow-x-auto">
                         <!-- Versão para desktop/tablet -->
                         <div class="block">
-                            <table class="w-full divide-y divide-gray-200 text-sm table-fixed">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

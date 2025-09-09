@@ -235,7 +235,7 @@
                                             {{ $produto->descricao }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $produto->data_prevista_producao ? $produto->data_prevista_producao->format('d/m/Y') : 'N/A' }}
+                                            {{ $produto->data_prevista_producao ? $produto->data_prevista_producao->format('m/Y') : 'N/A' }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             @if($produto->marca && $produto->marca->logo_path)
