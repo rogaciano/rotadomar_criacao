@@ -15,7 +15,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                         </svg>
-                        Produtos por Estilista (Últimos 12 meses)
+                        Produtos por Estilista ({{ $titulo ?? 'Últimos 12 meses' }})
                     </h5>
                 </div>
                 <div class="bg-white p-6 rounded-b-lg shadow">
@@ -25,10 +25,48 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <p>Este gráfico mostra a distribuição de produtos criados nos últimos 12 meses por estilista.
+                                <p>Este gráfico mostra a distribuição de produtos criados por estilista no período selecionado.
                                 Os 10 estilistas com mais produtos são mostrados individualmente, enquanto os demais são agrupados como "Outros".</p>
                             </div>
                         </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <form id="periodo-form" action="{{ route('dashboard.produtos-por-estilista') }}" method="GET" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-700 mb-3">Selecionar Período</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="periodo" class="block text-sm font-medium text-gray-700 mb-1">Período Predefinido</label>
+                                    <select id="periodo" name="periodo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <option value="ultimos_12_meses" {{ request('periodo', 'ultimos_12_meses') == 'ultimos_12_meses' ? 'selected' : '' }}>Últimos 12 meses</option>
+                                        <option value="ultimos_6_meses" {{ request('periodo') == 'ultimos_6_meses' ? 'selected' : '' }}>Últimos 6 meses</option>
+                                        <option value="ultimos_3_meses" {{ request('periodo') == 'ultimos_3_meses' ? 'selected' : '' }}>Últimos 3 meses</option>
+                                        <option value="ano_atual" {{ request('periodo') == 'ano_atual' ? 'selected' : '' }}>Ano atual</option>
+                                        <option value="ano_anterior" {{ request('periodo') == 'ano_anterior' ? 'selected' : '' }}>Ano anterior</option>
+                                        <option value="personalizado" {{ request('periodo') == 'personalizado' ? 'selected' : '' }}>Período personalizado</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="data-inicio-container" class="{{ request('periodo') == 'personalizado' ? '' : 'hidden' }}">
+                                    <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
+                                    <input type="date" id="data_inicio" name="data_inicio" value="{{ request('data_inicio', Carbon\Carbon::now()->subMonths(12)->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </div>
+                                
+                                <div id="data-fim-container" class="{{ request('periodo') == 'personalizado' ? '' : 'hidden' }}">
+                                    <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
+                                    <input type="date" id="data_fim" name="data_fim" value="{{ request('data_fim', Carbon\Carbon::now()->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 flex justify-end">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Atualizar Gráfico
+                                </button>
+                            </div>
+                        </form>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -52,16 +90,22 @@
                                             $total = array_sum($data);
                                         @endphp
                                         
-                                        @foreach($labels as $index => $label)
+                                        @foreach($dadosGrafico as $index => $item)
                                         <tr class="hover:bg-gray-50">
                                             <td class="py-3 px-4">
                                                 <div class="flex items-center">
                                                     <span class="color-indicator" style="background-color: {{ $cores[$index] }}"></span>
-                                                    {{ $label }}
+                                                    @if(isset($item['estilista_id']) && $item['estilista_id'])
+                                                        <a href="{{ route('estilistas.show', $item['estilista_id']) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                            {{ $item['nome_estilista'] }}
+                                                        </a>
+                                                    @else
+                                                        {{ $item['nome_estilista'] }}
+                                                    @endif
                                                 </div>
                                             </td>
-                                            <td class="py-3 px-4 text-center">{{ $data[$index] }}</td>
-                                            <td class="py-3 px-4 text-center">{{ number_format(($data[$index] / array_sum($data)) * 100, 1) }}%</td>
+                                            <td class="py-3 px-4 text-center">{{ $item['total'] }}</td>
+                                            <td class="py-3 px-4 text-center">{{ number_format(($item['total'] / array_sum($data)) * 100, 1) }}%</td>
                                         </tr>
                                         @endforeach
                                         
@@ -108,6 +152,21 @@
     
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('donutChart').getContext('2d');
+        
+        // Controle de exibição dos campos de data personalizada
+        const periodoSelect = document.getElementById('periodo');
+        const dataInicioContainer = document.getElementById('data-inicio-container');
+        const dataFimContainer = document.getElementById('data-fim-container');
+        
+        periodoSelect.addEventListener('change', function() {
+            if (this.value === 'personalizado') {
+                dataInicioContainer.classList.remove('hidden');
+                dataFimContainer.classList.remove('hidden');
+            } else {
+                dataInicioContainer.classList.add('hidden');
+                dataFimContainer.classList.add('hidden');
+            }
+        });
         
         // Dados do gráfico
         const data = {
@@ -174,9 +233,13 @@
         const element = document.querySelector('.bg-white.overflow-hidden.shadow-sm.sm\\:rounded-lg');
         
         // Configurações do PDF
+        const periodoInicio = '{{ $periodoInicio }}';
+        const periodoFim = '{{ $periodoFim }}';
+        const titulo = '{{ $titulo ?? "Ultimos-12-meses" }}'.replace(/ /g, '-').normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Remove acentos e espaços
+        
         const options = {
             margin: 10,
-            filename: 'produtos-por-estilista-ultimos-12-meses.pdf',
+            filename: `produtos-por-estilista-${titulo}-${periodoInicio.replace(/\//g, '-')}-a-${periodoFim.replace(/\//g, '-')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }

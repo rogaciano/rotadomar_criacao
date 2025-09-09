@@ -29,45 +29,45 @@ class DashboardController extends Controller
         $totalMovimentacoes = Movimentacao::count();
         $movimentacoesHoje = Movimentacao::whereDate('created_at', Carbon::today())->count();
         $totalGrupoProdutos = GrupoProduto::count();
-        
+
         // Estatísticas de produtos por ano
         $anoAtual = Carbon::now()->year;
         $dataAtual = Carbon::now();
-        
+
         // Produtos cadastrados no ano atual
         $produtosAnoAtual = Produto::whereYear('created_at', $anoAtual)->count();
-        
+
         // Produtos cadastrados no ano passado
         $produtosAnoPassado = Produto::whereYear('created_at', $anoAtual - 1)->count();
-        
+
         // Produtos cadastrados no ano atual até a data atual
         $produtosAnoAtualAteHoje = Produto::whereYear('created_at', $anoAtual)
             ->whereDate('created_at', '<=', $dataAtual)
             ->count();
-        
+
         // Produtos cadastrados no ano passado até a mesma data
         $dataAnoPassado = Carbon::now()->subYear();
         $produtosAnoPassadoAteHoje = Produto::whereYear('created_at', $anoAtual - 1)
             ->whereDate('created_at', '<=', $dataAnoPassado)
             ->count();
-        
+
         // Calcular variação percentual
-        $variacaoPercentual = $produtosAnoPassadoAteHoje > 0 
-            ? round((($produtosAnoAtualAteHoje - $produtosAnoPassadoAteHoje) / $produtosAnoPassadoAteHoje) * 100, 1) 
+        $variacaoPercentual = $produtosAnoPassadoAteHoje > 0
+            ? round((($produtosAnoAtualAteHoje - $produtosAnoPassadoAteHoje) / $produtosAnoPassadoAteHoje) * 100, 1)
             : 100;
-        
+
         // Estatísticas dos últimos 5 anos
         $estatisticasUltimos5Anos = [];
         for ($i = 0; $i < 5; $i++) {
             $ano = $anoAtual - $i;
             $estatisticasUltimos5Anos[$ano] = Produto::whereYear('created_at', $ano)->count();
         }
-        
+
         // Comparação do ano corrente com anos anteriores até a data atual
         $comparacaoAnos = [];
         $mesAtual = Carbon::now()->month;
         $diaAtual = Carbon::now()->day;
-        
+
         for ($i = 0; $i < 3; $i++) {
             $ano = $anoAtual - $i;
             $dataLimite = Carbon::create($ano, $mesAtual, $diaAtual);
@@ -75,12 +75,12 @@ class DashboardController extends Controller
                 ->whereDate('created_at', '<=', $dataLimite)
                 ->count();
         }
-        
+
         // Projeção para o ano atual
         $diasDecorridos = Carbon::now()->dayOfYear;
         $diasNoAno = Carbon::now()->isLeapYear() ? 366 : 365;
-        $projecaoProdutosAnoAtual = $diasNoAno > 0 
-            ? round(($produtosAnoAtualAteHoje / $diasDecorridos) * $diasNoAno) 
+        $projecaoProdutosAnoAtual = $diasNoAno > 0
+            ? round(($produtosAnoAtualAteHoje / $diasDecorridos) * $diasNoAno)
             : 0;
 
         // Produtos recentes
@@ -94,11 +94,11 @@ class DashboardController extends Controller
                                     ->latest()
                                     ->take(5)
                                     ->get();
-                                    
+
         // Produtos do setor do usuário autenticado
         $produtosDoSetor = collect();
         $localizacaoUsuario = auth()->user()->localizacao_id;
-        
+
         if ($localizacaoUsuario) {
             // Busca produtos que estão na localização do usuário (setor) através da última movimentação
             $produtosDoSetor = Produto::whereHas('movimentacoes', function($query) use ($localizacaoUsuario) {
@@ -121,11 +121,11 @@ class DashboardController extends Controller
                                 ->groupBy('tipo_id')
                                 ->with('tipo')
                                 ->get();
-                                
+
         // Estatísticas de produtos ativos por estilista
         $statusAtivo = Status::where('descricao', 'Ativo')->first();
         $statusAtivoId = $statusAtivo ? $statusAtivo->id : null;
-        
+
         $produtosAtivosPorEstilista = [];
         if ($statusAtivoId) {
             // Obter todos os estilistas com produtos ativos
@@ -135,16 +135,16 @@ class DashboardController extends Controller
                                 ->groupBy('estilistas.nome_estilista')
                                 ->orderByDesc('total')
                                 ->get();
-            
+
             // Separar os top 10 estilistas
             $top10Estilistas = $todosEstilistas->take(10);
-            
+
             // Calcular o total de produtos dos estilistas restantes
             $outrosTotal = $todosEstilistas->skip(10)->sum('total');
-            
+
             // Criar a coleção final com os top 10 + outros
             $produtosAtivosPorEstilista = $top10Estilistas;
-            
+
             // Adicionar a categoria "Outros" se houver estilistas além dos top 10
             if ($outrosTotal > 0) {
                 $produtosAtivosPorEstilista->push([
@@ -153,22 +153,22 @@ class DashboardController extends Controller
                 ]);
             }
         }
-        
+
         // Estatísticas de produtos ativos por estilista ao longo do tempo (últimos 12 meses)
         $produtosAtivosPorMes = [];
         $mesesLabels = [];
-        
+
         if ($statusAtivoId) {
             for ($i = 11; $i >= 0; $i--) {
                 $data = Carbon::now()->subMonths($i);
                 $mes = $data->format('M Y');
                 $mesesLabels[] = $mes;
-                
+
                 $produtosAtivosNoMes = Produto::where('status_id', $statusAtivoId)
                                         ->whereYear('created_at', $data->year)
                                         ->whereMonth('created_at', $data->month)
                                         ->count();
-                                        
+
                 $produtosAtivosPorMes[] = $produtosAtivosNoMes;
             }
         }
@@ -195,7 +195,7 @@ class DashboardController extends Controller
             'produtosDoSetor'
         ));
     }
-    
+
     /**
      * Busca dados de produtos por ano para atualização dinâmica dos gráficos.
      *
@@ -205,11 +205,11 @@ class DashboardController extends Controller
     public function getDadosPorAno(Request $request)
     {
         $ano = $request->input('ano', Carbon::now()->year);
-        
+
         // Estatísticas de produtos ativos por estilista para o ano selecionado
         $statusAtivo = Status::where('descricao', 'Ativo')->first();
         $statusAtivoId = $statusAtivo ? $statusAtivo->id : null;
-        
+
         $produtosAtivosPorEstilista = [];
         if ($statusAtivoId) {
             // Obter todos os estilistas com produtos ativos do ano selecionado
@@ -220,16 +220,16 @@ class DashboardController extends Controller
                                 ->groupBy('estilistas.nome_estilista')
                                 ->orderByDesc('total')
                                 ->get();
-            
+
             // Separar os top 10 estilistas
             $top10Estilistas = $todosEstilistas->take(10);
-            
+
             // Calcular o total de produtos dos estilistas restantes
             $outrosTotal = $todosEstilistas->skip(10)->sum('total');
-            
+
             // Criar a coleção final com os top 10 + outros
             $produtosAtivosPorEstilista = $top10Estilistas;
-            
+
             // Adicionar a categoria "Outros" se houver estilistas além dos top 10
             if ($outrosTotal > 0) {
                 $produtosAtivosPorEstilista->push([
@@ -238,37 +238,37 @@ class DashboardController extends Controller
                 ]);
             }
         }
-        
+
         // Estatísticas de produtos por mês para o ano selecionado
         $produtosPorMes = [];
         $mesesLabels = [];
-        
+
         for ($i = 1; $i <= 12; $i++) {
             $data = Carbon::createFromDate($ano, $i, 1);
             $mes = $data->format('M');
             $mesesLabels[] = $mes;
-            
+
             $produtosNoMes = Produto::whereYear('created_at', $ano)
                             ->whereMonth('created_at', $i)
                             ->count();
-                            
+
             $produtosPorMes[] = $produtosNoMes;
         }
-        
+
         // Produtos ativos por mês para o ano selecionado
         $produtosAtivosPorMes = [];
-        
+
         if ($statusAtivoId) {
             for ($i = 1; $i <= 12; $i++) {
                 $produtosAtivosNoMes = Produto::where('status_id', $statusAtivoId)
                                         ->whereYear('created_at', $ano)
                                         ->whereMonth('created_at', $i)
                                         ->count();
-                                        
+
                 $produtosAtivosPorMes[] = $produtosAtivosNoMes;
             }
         }
-        
+
         return response()->json([
             'produtosAtivosPorEstilista' => [
                 'labels' => $produtosAtivosPorEstilista->pluck('nome_estilista')->toArray(),
@@ -287,40 +287,91 @@ class DashboardController extends Controller
     }
 
     /**
-     * Exibe um gráfico de rosca (donut chart) dos produtos criados nos últimos 12 meses por estilista.
+     * Exibe um gráfico de Estilistas dos produtos criados por estilista no período selecionado.
      *
+     * @param Request $request
      * @return \Illuminate\View\View
      */
-    public function produtosPorEstilista()
+    public function produtosPorEstilista(Request $request)
     {
-        // Data de início (12 meses atrás)
-        $dataInicio = Carbon::now()->subMonths(12);
-        
-        // Buscar produtos dos últimos 12 meses agrupados por estilista
-        $produtosPorEstilista = Produto::select('estilistas.nome_estilista', DB::raw('count(*) as total'))
+        // Determinar o período com base na seleção do usuário
+        $periodo = $request->input('periodo', 'ultimos_12_meses');
+        $dataAtual = Carbon::now();
+        $titulo = '';
+
+        // Definir datas de início e fim com base no período selecionado
+        switch ($periodo) {
+            case 'ultimos_3_meses':
+                $dataInicio = $dataAtual->copy()->subMonths(3);
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Últimos 3 meses';
+                break;
+
+            case 'ultimos_6_meses':
+                $dataInicio = $dataAtual->copy()->subMonths(6);
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Últimos 6 meses';
+                break;
+
+            case 'ano_atual':
+                $dataInicio = Carbon::createFromDate($dataAtual->year, 1, 1)->startOfDay();
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Ano atual (' . $dataAtual->year . ')';
+                break;
+
+            case 'ano_anterior':
+                $dataInicio = Carbon::createFromDate($dataAtual->year - 1, 1, 1)->startOfDay();
+                $dataFim = Carbon::createFromDate($dataAtual->year - 1, 12, 31)->endOfDay();
+                $titulo = 'Ano anterior (' . ($dataAtual->year - 1) . ')';
+                break;
+
+            case 'personalizado':
+                $dataInicio = $request->filled('data_inicio')
+                    ? Carbon::createFromFormat('Y-m-d', $request->input('data_inicio'))->startOfDay()
+                    : $dataAtual->copy()->subMonths(12);
+
+                $dataFim = $request->filled('data_fim')
+                    ? Carbon::createFromFormat('Y-m-d', $request->input('data_fim'))->endOfDay()
+                    : $dataAtual->copy();
+
+                $titulo = 'Período personalizado';
+                break;
+
+            case 'ultimos_12_meses':
+            default:
+                $dataInicio = $dataAtual->copy()->subMonths(12);
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Últimos 12 meses';
+                break;
+        }
+
+        // Buscar produtos do período selecionado agrupados por estilista
+        $produtosPorEstilista = Produto::select('estilistas.id as estilista_id', 'estilistas.nome_estilista', DB::raw('count(*) as total'))
             ->join('estilistas', 'produtos.estilista_id', '=', 'estilistas.id')
             ->where('produtos.created_at', '>=', $dataInicio)
-            ->groupBy('estilistas.nome_estilista')
+            ->where('produtos.created_at', '<=', $dataFim)
+            ->groupBy('estilistas.id', 'estilistas.nome_estilista')
             ->orderByDesc('total')
             ->get();
-        
+
         // Separar os top 10 estilistas
         $topEstilistas = $produtosPorEstilista->take(10);
-        
+
         // Calcular o total de produtos dos estilistas restantes
         $outrosTotal = $produtosPorEstilista->skip(10)->sum('total');
-        
+
         // Criar a coleção final com os top 10 + outros
         $dadosGrafico = $topEstilistas->toArray();
-        
+
         // Adicionar a categoria "Outros" se houver estilistas além dos top 10
         if ($outrosTotal > 0) {
             $dadosGrafico[] = [
+                'estilista_id' => null, // Não há ID para "Outros"
                 'nome_estilista' => 'Outros',
                 'total' => $outrosTotal
             ];
         }
-        
+
         // Preparar dados para o gráfico
         $labels = array_column($dadosGrafico, 'nome_estilista');
         $data = array_column($dadosGrafico, 'total');
@@ -335,11 +386,12 @@ class DashboardController extends Controller
         
         // Período do relatório
         $periodoInicio = $dataInicio->format('d/m/Y');
-        $periodoFim = Carbon::now()->format('d/m/Y');
+        $periodoFim = $dataFim->format('d/m/Y');
         
-        return view('dashboard.produtos-por-estilista', compact('labels', 'data', 'cores', 'periodoInicio', 'periodoFim'));
+        // Passar os dados completos dos estilistas para a view
+        return view('dashboard.produtos-por-estilista', compact('labels', 'data', 'cores', 'periodoInicio', 'periodoFim', 'titulo', 'dadosGrafico'));
     }
-    
+
     /**
      * Exibe um resumo da média de atraso em dias por localização para movimentações não concluídas.
      *
@@ -350,14 +402,14 @@ class DashboardController extends Controller
         // Função para calcular dias úteis entre duas datas (excluindo sábados e domingos)
         $calcularDiasUteis = function($dataInicio, $dataFim) {
             if (!$dataInicio) return 0;
-            
+
             if (!$dataFim) {
                 $dataFim = now();
             }
-            
+
             $diasUteis = 0;
             $dataAtual = clone $dataInicio;
-            
+
             while ($dataAtual <= $dataFim) {
                 // 6 = sábado, 0 = domingo
                 $diaDaSemana = $dataAtual->dayOfWeek;
@@ -366,49 +418,49 @@ class DashboardController extends Controller
                 }
                 $dataAtual->addDay();
             }
-            
+
             return $diasUteis;
         };
-        
+
         // Buscar todas as movimentações não concluídas
         $movimentacoes = Movimentacao::with(['localizacao'])
             ->where('concluido', false)
             ->get();
-        
+
         // Agrupar por localização e calcular média de dias
         $localizacoes = $movimentacoes->groupBy('localizacao_id');
-        
+
         $mediaDiasPorLocalizacao = new Collection();
-        
+
         foreach ($localizacoes as $localizacaoId => $grupo) {
             $localizacao = $grupo->first()->localizacao;
-            
+
             if (!$localizacao) continue;
-            
+
             $totalDias = 0;
             $totalMovimentacoes = 0;
             $totalAtrasados = 0;
-            
+
             foreach ($grupo as $movimentacao) {
                 // Calcular dias úteis entre data de entrada e hoje (ou data de saída se existir)
                 $dataFim = $movimentacao->data_saida ?? now();
                 $diasUteis = $calcularDiasUteis($movimentacao->data_entrada, $dataFim);
-                
+
                 $totalDias += $diasUteis;
                 $totalMovimentacoes++;
-                
+
                 // Verificar se está atrasado em relação ao prazo do setor
                 if ($localizacao->prazo && $diasUteis > $localizacao->prazo) {
                     $totalAtrasados++;
                 }
             }
-            
+
             // Calcular média de dias
             $mediaDias = $totalMovimentacoes > 0 ? round($totalDias / $totalMovimentacoes, 1) : 0;
-            
+
             // Calcular percentual de atrasados
             $percentualAtrasados = $totalMovimentacoes > 0 ? round(($totalAtrasados / $totalMovimentacoes) * 100) : 0;
-            
+
             // Determinar status baseado no prazo do setor
             $status = 'normal';
             if ($localizacao->prazo) {
@@ -418,7 +470,7 @@ class DashboardController extends Controller
                     $status = 'atencao';
                 }
             }
-            
+
             $mediaDiasPorLocalizacao->push([
                 'localizacao' => $localizacao->nome_localizacao,
                 'localizacao_id' => $localizacao->id,
@@ -431,21 +483,21 @@ class DashboardController extends Controller
                 'ativo' => $localizacao->ativo
             ]);
         }
-        
+
         // Ordenar por status (crítico primeiro) e depois por média de dias (decrescente)
         $mediaDiasPorLocalizacao = $mediaDiasPorLocalizacao->sortBy([
             ['status', 'desc'],
             ['media_dias', 'desc']
         ])->values();
-        
+
         // Separar localizações ativas e inativas
         $localizacoesAtivas = $mediaDiasPorLocalizacao->where('ativo', true)->values();
         $localizacoesInativas = $mediaDiasPorLocalizacao->where('ativo', false)->values();
-        
+
         // Preparar dados para o gráfico
         $labels = $localizacoesAtivas->pluck('localizacao')->toArray();
         $data = $localizacoesAtivas->pluck('media_dias')->toArray();
-        
+
         // Gerar cores baseadas no status
         $cores = $localizacoesAtivas->map(function ($item) {
             switch ($item['status']) {
@@ -457,7 +509,7 @@ class DashboardController extends Controller
                     return 'rgb(34, 197, 94)'; // Verde
             }
         })->toArray();
-        
+
         return view('consultas.media-dias-atraso', compact('localizacoesAtivas', 'localizacoesInativas', 'labels', 'data', 'cores'));
     }
 }
