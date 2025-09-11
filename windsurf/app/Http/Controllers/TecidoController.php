@@ -39,8 +39,13 @@ class TecidoController extends Controller
             $query->where('referencia', 'like', '%' . $request->referencia . '%');
         }
 
-        if ($request->filled('data_cadastro')) {
-            $query->whereDate('data_cadastro', $request->data_cadastro);
+        // Filtro por período de data de cadastro
+        if ($request->filled('data_inicio')) {
+            $query->whereDate('data_cadastro', '>=', $request->data_inicio);
+        }
+        
+        if ($request->filled('data_fim')) {
+            $query->whereDate('data_cadastro', '<=', $request->data_fim);
         }
 
         if ($request->filled('ativo')) {

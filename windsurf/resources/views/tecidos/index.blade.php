@@ -49,8 +49,12 @@
                                 <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do tecido">
                             </div>
                             <div>
-                                <label for="data_cadastro" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
-                                <input type="date" name="data_cadastro" id="data_cadastro" value="{{ request('data_cadastro') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Início)</label>
+                                <input type="date" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Fim)</label>
+                                <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
                             <div>
                                 <label for="ativo" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
