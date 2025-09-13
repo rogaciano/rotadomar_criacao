@@ -130,4 +130,67 @@ class TecidoCorEstoque extends Model
         
         return $resultado;
     }
+    
+    /**
+     * Retorna os produtos que usam esta cor de tecido com necessidade maior que zero
+     * 
+     * @return \Illuminate\Support\Collection
+     */
+    public function getProdutosComNecessidadeAttribute()
+    {
+        $produtosComNecessidade = collect();
+        
+        if ($this->necessidade <= 0) {
+            return $produtosComNecessidade;
+        }
+        
+        // Parte 1: Produtos com variações de cores
+        $produtos = $this->tecido->produtos;
+        
+        foreach ($produtos as $produto) {
+            $produtoCor = $produto->cores()
+                ->where('cor', $this->cor)
+                ->first();
+            
+            if ($produtoCor && $produtoCor->quantidade > 0) {
+                $necessidadeProduto = $produtoCor->quantidade * $produto->pivot->consumo;
+                
+                if ($necessidadeProduto > 0) {
+                    $produtosComNecessidade->push([
+                        'id' => $produto->id,
+                        'referencia' => $produto->referencia,
+                        'descricao' => $produto->descricao,
+                        'necessidade' => $necessidadeProduto,
+                        'tipo' => 'variação'
+                    ]);
+                }
+            }
+            
+            // Parte 2: Produtos com combinações de cores
+            $combinacoes = $produto->combinacoes;
+            
+            foreach ($combinacoes as $combinacao) {
+                $componentes = $combinacao->componentes()
+                    ->where('tecido_id', $this->tecido_id)
+                    ->where('cor', $this->cor)
+                    ->get();
+                
+                foreach ($componentes as $componente) {
+                    $necessidadeCombinacao = $combinacao->quantidade_pretendida * $componente->consumo;
+                    
+                    if ($necessidadeCombinacao > 0) {
+                        $produtosComNecessidade->push([
+                            'id' => $produto->id,
+                            'referencia' => $produto->referencia,
+                            'descricao' => $produto->descricao . ' (' . $combinacao->descricao . ')',
+                            'necessidade' => $necessidadeCombinacao,
+                            'tipo' => 'combinação'
+                        ]);
+                    }
+                }
+            }
+        }
+        
+        return $produtosComNecessidade->unique('id');
+    }
 }

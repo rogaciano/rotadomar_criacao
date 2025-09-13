@@ -13,12 +13,12 @@
                     Atualizar Estoque
                 </a>
                 @endif
-                <a href="{{ route('tecidos.show', $tecido->id) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <button onclick="window.history.go(-1); return false;" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
                     Voltar
-                </a>
+                </button>
             </div>
         </div>
     </x-slot>
@@ -102,7 +102,9 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
                                                     <div class="h-4 w-4 rounded-full mr-2" style="background-color: {{ $estoqueCor->codigo_cor ?: '#ccc' }}"></div>
-                                                    <div class="text-sm font-medium text-gray-900">{{ $estoqueCor->cor }}</div>
+                                                    <a href="{{ route('tecidos.produtos-por-cor', ['tecidoId' => $tecido->id, 'corId' => $estoqueCor->id]) }}" class="text-sm font-medium text-blue-600 underline hover:text-blue-800">
+                                                        {{ $estoqueCor->cor }}
+                                                    </a>
                                                     <input type="hidden" name="cores[{{ $estoqueCor->id }}][cor]" value="{{ $estoqueCor->cor }}">
                                                 </div>
                                             </td>
@@ -194,4 +196,35 @@
             </div>
         </div>
     </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all dropdown buttons
+        const dropdownButtons = document.querySelectorAll('.dropdown button');
+        
+        // Add click event to each button
+        dropdownButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // Close all other dropdowns first
+                document.querySelectorAll('.dropdown-content').forEach(content => {
+                    if (content !== this.nextElementSibling) {
+                        content.classList.add('hidden');
+                    }
+                });
+                
+                // Toggle current dropdown
+                const dropdownContent = this.nextElementSibling;
+                dropdownContent.classList.toggle('hidden');
+            });
+        });
+        
+        // Close all dropdowns when clicking outside
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.dropdown-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+        });
+    });
+</script>
 </x-app-layout>

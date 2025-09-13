@@ -436,6 +436,86 @@ class TecidoController extends Controller
     }
     
     /**
+     * Exibe os produtos que usam uma cor específica de tecido
+     */
+    public function produtosPorCor($tecidoId, $corId)
+    {
+        // Autorização: leitura de tecidos
+        $user = auth()->user();
+        if (!$user || !$user->canRead('tecidos')) {
+            abort(403, 'Ação não autorizada.');
+        }
+        
+        $tecido = Tecido::findOrFail($tecidoId);
+        $estoqueCor = TecidoCorEstoque::findOrFail($corId);
+        
+        if ($estoqueCor->tecido_id != $tecido->id) {
+            abort(404, 'Cor não pertence a este tecido.');
+        }
+        
+        // Buscar produtos com variações de cores
+        $produtosVariacoes = [];
+        $produtos = $tecido->produtos;
+        
+        foreach ($produtos as $produto) {
+            $produtoCor = $produto->cores()
+                ->where('cor', $estoqueCor->cor)
+                ->first();
+            
+            if ($produtoCor && $produtoCor->quantidade > 0) {
+                $necessidadeProduto = $produtoCor->quantidade * $produto->pivot->consumo;
+                
+                if ($necessidadeProduto > 0) {
+                    $produtosVariacoes[] = [
+                        'id' => $produto->id,
+                        'referencia' => $produto->referencia,
+                        'descricao' => $produto->descricao,
+                        'necessidade' => $necessidadeProduto,
+                        'tipo' => 'variação'
+                    ];
+                }
+            }
+        }
+        
+        // Buscar produtos com combinações de cores
+        $produtosCombinacoes = [];
+        
+        foreach ($produtos as $produto) {
+            $combinacoes = $produto->combinacoes;
+            
+            foreach ($combinacoes as $combinacao) {
+                $componentes = $combinacao->componentes()
+                    ->where('tecido_id', $tecido->id)
+                    ->where('cor', $estoqueCor->cor)
+                    ->get();
+                
+                foreach ($componentes as $componente) {
+                    $necessidadeCombinacao = $combinacao->quantidade_pretendida * $componente->consumo;
+                    
+                    if ($necessidadeCombinacao > 0) {
+                        $produtosCombinacoes[] = [
+                            'id' => $produto->id,
+                            'referencia' => $produto->referencia,
+                            'descricao' => $produto->descricao . ' (' . $combinacao->descricao . ')',
+                            'necessidade' => $necessidadeCombinacao,
+                            'tipo' => 'combinação'
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Combinar os resultados
+        $produtosComNecessidade = array_merge($produtosVariacoes, $produtosCombinacoes);
+        
+        return view('tecidos.produtos-por-cor', [
+            'tecido' => $tecido,
+            'estoqueCor' => $estoqueCor,
+            'produtosComNecessidade' => $produtosComNecessidade
+        ]);
+    }
+    
+    /**
      * Salva as quantidades pretendidas para as cores selecionadas
      */
     public function salvarQuantidades(Request $request, $id)

@@ -119,7 +119,9 @@
                                                 @if($estoqueCor->cor_rgb)
                                                     <div class="h-4 w-4 rounded-full mr-3" style="background-color: {{ $estoqueCor->cor_rgb }}"></div>
                                                 @endif
-                                                {{ $estoqueCor->cor }}
+                                                <a href="{{ route('tecidos.produtos-por-cor', ['tecidoId' => $tecido->id, 'corId' => $estoqueCor->id]) }}" class="text-blue-600 underline hover:text-blue-800">
+                                                    {{ $estoqueCor->cor }}
+                                                </a>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $estoqueCor->codigo_cor ?: '-' }}</td>
