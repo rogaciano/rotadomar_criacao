@@ -11,6 +11,7 @@ use App\Http\Controllers\SituacaoController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProdutoAnexoController;
+use App\Http\Controllers\ProdutoCombinacaoController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
@@ -111,6 +112,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Routes para Anexos de Produtos
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
     Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');
+    
+    // Routes para Combinações de Produtos
+    Route::post('produtos/{produto}/combinacoes', [ProdutoCombinacaoController::class, 'store'])->name('produtos.combinacoes.store');
+    Route::put('produtos/combinacoes/{combinacao}', [ProdutoCombinacaoController::class, 'update'])->name('produtos.combinacoes.update');
+    Route::delete('produtos/combinacoes/{combinacao}', [ProdutoCombinacaoController::class, 'destroy'])->name('produtos.combinacoes.destroy');
+    Route::get('produtos/{produto}/combinacoes', [ProdutoCombinacaoController::class, 'getCombinacoes'])->name('produtos.combinacoes.get');
+    
+    // Routes para Componentes de Combinações
+    Route::post('combinacoes/{combinacao}/componentes', [ProdutoCombinacaoController::class, 'addComponente'])->name('combinacoes.componentes.add');
+    Route::put('combinacoes/componentes/{componente}', [ProdutoCombinacaoController::class, 'updateComponente'])->name('combinacoes.componentes.update');
+    Route::delete('combinacoes/componentes/{componente}', [ProdutoCombinacaoController::class, 'removeComponente'])->name('combinacoes.componentes.remove');
+    Route::get('tecidos/{tecido}/cores', [ProdutoCombinacaoController::class, 'getTecidoCores'])->name('tecidos.cores.get');
 
     // Routes para Movimentações
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([

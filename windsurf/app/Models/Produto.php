@@ -102,6 +102,14 @@ class Produto extends Model
     {
         return $this->cores()->sum('quantidade');
     }
+    
+    /**
+     * Relacionamento com as combinações de cores do produto
+     */
+    public function combinacoes()
+    {
+        return $this->hasMany(ProdutoCombinacao::class);
+    }
 
     /**
      * Retorna as cores disponíveis dos tecidos vinculados ao produto

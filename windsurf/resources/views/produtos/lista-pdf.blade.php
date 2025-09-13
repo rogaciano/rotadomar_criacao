@@ -97,7 +97,7 @@
                 <td>{{ $produto->marca->nome_marca ?? '-' }}</td>
                 <td>{{ $produto->grupoProduto->descricao ?? '-' }}</td>
                 <td>{{ $produto->status->descricao ?? '-' }}</td>
-                <td>{{ $produto->data_prevista_producao ? date('m/Y', strtotime($produto->data_prevista_producao)) : 'N/A' }}</td>
+                <td>{{ $produto->data_prevista_producao ? date('d/m/Y', strtotime($produto->data_prevista_producao)) : 'N/A' }}</td>
                 <td>{{ $produto->localizacao_atual ? $produto->localizacao_atual->nome_localizacao : 'Não localizado' }}</td>
                 <td class="text-center"><span class="{{ $produto->concluido_atual ? 'concluido' : 'nao-concluido' }}">{{ $produto->concluido_atual ? '✓' : '✗' }}</span></td>
             </tr>

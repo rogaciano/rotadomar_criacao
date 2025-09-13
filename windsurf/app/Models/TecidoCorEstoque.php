@@ -35,7 +35,7 @@ class TecidoCorEstoque extends Model
 
     /**
      * Calcula a necessidade total desta cor baseada nos produtos que usam o tecido
-     * Necessidade = Quantidade da cor no produto × Consumo do tecido
+     * Necessidade = (Quantidade da cor no produto × Consumo do tecido) + (Necessidade das combinações)
      * 
      * @return float
      */
@@ -43,6 +43,7 @@ class TecidoCorEstoque extends Model
     {
         $necessidade = 0;
         
+        // Parte 1: Necessidade das variações de cores
         // Buscar todos os produtos que usam este tecido
         $produtos = $this->tecido->produtos;
         
@@ -55,6 +56,23 @@ class TecidoCorEstoque extends Model
             if ($produtoCor) {
                 // Necessidade = Quantidade da cor no produto × Consumo do tecido
                 $necessidade += $produtoCor->quantidade * $produto->pivot->consumo;
+            }
+            
+            // Parte 2: Necessidade das combinações de cores
+            // Buscar todas as combinações do produto
+            $combinacoes = $produto->combinacoes;
+            
+            foreach ($combinacoes as $combinacao) {
+                // Buscar componentes da combinação que usam este tecido e esta cor
+                $componentes = $combinacao->componentes()
+                    ->where('tecido_id', $this->tecido_id)
+                    ->where('cor', $this->cor)
+                    ->get();
+                
+                foreach ($componentes as $componente) {
+                    // Necessidade da combinação = Quantidade pretendida da combinação × Consumo do componente
+                    $necessidade += $combinacao->quantidade_pretendida * $componente->consumo;
+                }
             }
         }
         

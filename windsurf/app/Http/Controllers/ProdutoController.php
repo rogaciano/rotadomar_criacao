@@ -329,7 +329,18 @@ class ProdutoController extends Controller
     public function show(string $id)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        $produto = Produto::withTrashed()->with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status'])->findOrFail($id);
+        $produto = Produto::withTrashed()->with([
+            'marca', 
+            'tecidos', 
+            'estilista', 
+            'grupoProduto', 
+            'status',
+            'combinacoes' => function($query) {
+                $query->with(['componentes' => function($q) {
+                    $q->with('tecido:id,descricao');
+                }]);
+            }
+        ])->findOrFail($id);
 
         // Carregar as movimentações relacionadas a este produto
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
