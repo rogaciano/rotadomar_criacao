@@ -102,6 +102,18 @@ class Produto extends Model
     {
         return $this->cores()->sum('quantidade');
     }
+
+    /**
+     * Retorna o mês e ano da data prevista de produção
+     */
+    public function getDataPrevistaProducaoMesAnoAttribute()
+    {
+        if (!$this->data_prevista_producao) {
+            return 'N/A';
+        }
+        
+        return $this->data_prevista_producao->format('m/Y');
+    }
     
     /**
      * Relacionamento com as combinações de cores do produto

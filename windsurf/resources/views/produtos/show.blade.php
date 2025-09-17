@@ -57,7 +57,7 @@
 
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Data Prevista para Produção</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_producao ? $produto->data_prevista_producao->format('d/m/Y') : 'N/A' }}</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_producao_mes_ano ? $produto->data_prevista_producao_mes_ano : 'N/A' }}</span>
                             </div>
 
                             <div>
@@ -296,7 +296,7 @@
                                                 </a>
                                             @endif
                                         </div>
-                                        
+
                                         <div class="mt-3">
                                             <h5 class="text-sm font-medium text-gray-700 mb-2">Componentes:</h5>
                                             @if($combinacao->componentes && $combinacao->componentes->count() > 0)
@@ -313,19 +313,19 @@
                                                                 </div>
                                                                 <div class="text-sm text-gray-700">Consumo: <span class="font-medium">{{ $componente->consumo }} m</span></div>
                                                             </div>
-                                                            
+
                                                             @if($componente->tecido)
                                                                 @php
                                                                     $estoqueCor = $componente->tecido->estoquesCores()
                                                                         ->where('cor', $componente->cor)
                                                                         ->first();
-                                                                    
+
                                                                     $estoque = $estoqueCor ? ($estoqueCor->estoque_atual ?? 0) : 0;
                                                                     $necessidade = $estoqueCor ? ($estoqueCor->necessidade ?? 0) : 0;
                                                                     $saldo = $estoque - $necessidade;
                                                                     $producaoPossivel = $saldo > 0 ? floor($saldo / ($componente->tecido->consumo_medio ?: 0.5)) : 0;
                                                                 @endphp
-                                                                
+
                                                                 <div class="mt-3 pt-3 border-t border-gray-200">
                                                                     <table class="w-full text-sm">
                                                                         <tr>
