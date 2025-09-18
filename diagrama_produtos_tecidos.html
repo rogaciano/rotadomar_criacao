@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Produtos e Tecidos - Rota do Mar</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .description {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Diagrama de Produtos e Tecidos - Rota do Mar</h1>
+        
+        <div class="description">
+            <h3>Descrição do Sistema</h3>
+            <p>Este diagrama mostra o relacionamento entre produtos e tecidos no sistema Rota do Mar. O sistema gerencia produtos de moda, seus tecidos, cores, combinações e movimentações.</p>
+            <p>Características principais:</p>
+            <ul>
+                <li>Produtos podem ter múltiplas cores e combinações de cores</li>
+                <li>Tecidos têm estoque por cor</li>
+                <li>O sistema calcula necessidades de tecido baseado nas cores dos produtos</li>
+                <li>Movimentações rastreiam a localização dos produtos no fluxo de produção</li>
+            </ul>
+        </div>
+        
+        <div class="controls">
+            <button onclick="zoomIn()">Aumentar Zoom</button>
+            <button onclick="zoomOut()">Diminuir Zoom</button>
+            <button onclick="resetZoom()">Resetar Zoom</button>
+        </div>
+        
+        <div class="mermaid" id="mermaidChart">
+classDiagram
+    %% Foco em Produtos e Tecidos
+    class Produto {
+        +string referencia
+        +string descricao
+        +date data_cadastro
+        +date data_prevista_producao
+        +int quantidade
+        +decimal preco_atacado
+        +decimal preco_varejo
+    }
+
+    class ProdutoCor {
+        +string cor
+        +string codigo_cor
+        +int quantidade
+    }
+
+    class ProdutoCombinacao {
+        +string descricao
+        +int quantidade_pretendida
+        +string observacoes
+    }
+
+    class ProdutoCombinacaoComponente {
+        +string cor
+        +string codigo_cor
+        +decimal consumo
+    }
+
+    class Tecido {
+        +string descricao
+        +string referencia
+        +date data_cadastro
+        +boolean ativo
+        +decimal quantidade_estoque
+        +getNecessidadeTotalAttribute()
+        +getTotalEstoquePorCoresAttribute()
+    }
+
+    class TecidoCorEstoque {
+        +string cor
+        +string codigo_cor
+        +decimal quantidade
+        +decimal quantidade_pretendida
+        +getNecessidadeAttribute()
+        +getSaldoAttribute()
+        +getProdutosPossiveisAttribute()
+    }
+
+    class Movimentacao {
+        +datetime data_entrada
+        +datetime data_saida
+        +datetime data_devolucao
+        +string observacao
+        +boolean concluido
+    }
+
+    class Localizacao {
+        +string nome
+        +int prazo
+    }
+
+    %% Relacionamentos
+    Produto "1" --> "*" ProdutoCor : tem
+    Produto "1" --> "*" ProdutoCombinacao : tem
+    Produto "*" --> "*" Tecido : usa com consumo
+    Produto "1" --> "*" Movimentacao : tem
+
+    ProdutoCombinacao "1" --> "*" ProdutoCombinacaoComponente : tem
+    ProdutoCombinacaoComponente "*" --> "1" Tecido : usa
+
+    Tecido "1" --> "*" TecidoCorEstoque : tem
+
+    Movimentacao "*" --> "1" Localizacao : está em
+        </div>
+    </div>
+
+    <script>
+        // Inicializa o Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true
+            }
+        });
+        
+        // Variáveis para controle de zoom
+        let currentZoom = 1;
+        const zoomFactor = 0.1;
+        const mermaidChart = document.getElementById('mermaidChart');
+        
+        // Funções de zoom
+        function zoomIn() {
+            currentZoom += zoomFactor;
+            applyZoom();
+        }
+        
+        function zoomOut() {
+            if (currentZoom > zoomFactor) {
+                currentZoom -= zoomFactor;
+                applyZoom();
+            }
+        }
+        
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+        
+        function applyZoom() {
+            mermaidChart.style.transform = `scale(${currentZoom})`;
+            mermaidChart.style.transformOrigin = 'top center';
+        }
+    </script>
+</body>
+</html>

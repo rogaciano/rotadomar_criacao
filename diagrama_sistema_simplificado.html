@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama Simplificado do Sistema Rota do Mar</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Diagrama Simplificado do Sistema Rota do Mar</h1>
+        
+        <div class="controls">
+            <button onclick="zoomIn()">Aumentar Zoom</button>
+            <button onclick="zoomOut()">Diminuir Zoom</button>
+            <button onclick="resetZoom()">Resetar Zoom</button>
+        </div>
+        
+        <div class="mermaid" id="mermaidChart">
+classDiagram
+    %% Principais entidades do sistema (versão simplificada)
+    class Produto
+    class ProdutoCor
+    class ProdutoCombinacao
+    class ProdutoCombinacaoComponente
+    class ProdutoAnexo
+    class Tecido
+    class TecidoCorEstoque
+    class Movimentacao
+    class User
+    class UserPermission
+    class Permission
+    class Group
+    class Localizacao
+    class Marca
+    class Estilista
+    class GrupoProduto
+    class Status
+    class Tipo
+    class Situacao
+    class UserFilter
+    class UserAccessSchedule
+
+    %% Relacionamentos
+    Produto "1" --> "*" ProdutoCor : tem
+    Produto "1" --> "*" ProdutoAnexo : tem
+    Produto "1" --> "*" ProdutoCombinacao : tem
+    Produto "*" --> "*" Tecido : usa
+    Produto "1" --> "*" Movimentacao : tem
+    Produto "*" --> "1" Marca : pertence
+    Produto "*" --> "1" Estilista : criado por
+    Produto "*" --> "1" GrupoProduto : pertence
+    Produto "*" --> "1" Status : tem
+
+    ProdutoCombinacao "1" --> "*" ProdutoCombinacaoComponente : tem
+    ProdutoCombinacaoComponente "*" --> "1" Tecido : usa
+
+    Tecido "1" --> "*" TecidoCorEstoque : tem
+
+    Movimentacao "*" --> "1" Localizacao : está em
+    Movimentacao "*" --> "1" Tipo : tem
+    Movimentacao "*" --> "1" Situacao : tem
+    Movimentacao "*" --> "1" Produto : pertence
+
+    User "*" --> "1" Localizacao : pertence
+    User "*" --> "*" Group : pertence
+    User "1" --> "*" UserPermission : tem
+    User "1" --> "*" UserFilter : tem
+    User "1" --> "1" UserAccessSchedule : tem
+
+    Group "*" --> "*" Permission : tem
+    UserPermission "*" --> "1" Permission : refere-se
+        </div>
+    </div>
+
+    <script>
+        // Inicializa o Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true
+            }
+        });
+        
+        // Variáveis para controle de zoom
+        let currentZoom = 1;
+        const zoomFactor = 0.1;
+        const mermaidChart = document.getElementById('mermaidChart');
+        
+        // Funções de zoom
+        function zoomIn() {
+            currentZoom += zoomFactor;
+            applyZoom();
+        }
+        
+        function zoomOut() {
+            if (currentZoom > zoomFactor) {
+                currentZoom -= zoomFactor;
+                applyZoom();
+            }
+        }
+        
+        function resetZoom() {
+            currentZoom = 1;
+            applyZoom();
+        }
+        
+        function applyZoom() {
+            mermaidChart.style.transform = `scale(${currentZoom})`;
+            mermaidChart.style.transformOrigin = 'top center';
+        }
+    </script>
+</body>
+</html>

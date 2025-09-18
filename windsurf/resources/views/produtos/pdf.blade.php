@@ -99,7 +99,7 @@
     <!-- Resto do código permanece igual -->
     <div class="container">
         <div class="header">
-            <div class="title">ROTA DO AMAR - DETALHES DO PRODUTO</div>
+            <div class="title">Rota do Mar - DETALHES DO PRODUTO</div>
             <div class="subtitle">{{ $produto->referencia }} - {{ $produto->descricao }}</div>
             <div>Data do relatório: {{ now()->format('d/m/Y H:i') }}</div>
         </div>
@@ -249,7 +249,7 @@
         </div>
 
         <div class="footer">
-            <p>ROTA DO AMAR - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
+            <p>Rota do Mar - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
         </div>
     </div>
 </body>

@@ -98,7 +98,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">ROTA DO AMAR - DETALHES DA MOVIMENTAÇÃO #{{ $movimentacao->id ?? 'N/A' }}</div>
+            <div class="title">Rota do Mar - DETALHES DA MOVIMENTAÇÃO #{{ $movimentacao->id ?? 'N/A' }}</div>
             <div class="subtitle">Data do relatório: {{ now()->format('d/m/Y H:i') }}</div>
         </div>
 
@@ -186,7 +186,7 @@
         @endif
 
         <div class="footer">
-            <p>ROTA DO AMAR - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
+            <p>Rota do Mar - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
         </div>
     </div>
 </body>

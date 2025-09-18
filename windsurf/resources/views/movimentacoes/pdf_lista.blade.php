@@ -79,7 +79,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">ROTA DO AMAR - LISTA DE MOVIMENTAÇÕES</div>
+            <div class="title">Rota do Mar - LISTA DE MOVIMENTAÇÕES</div>
             <div>Data do relatório: {{ now()->format('d/m/Y H:i') }}</div>
         </div>
 
@@ -210,7 +210,7 @@
         @endif
 
         <div class="footer">
-            <p>ROTA DO AMAR - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }} - Página <span class="page-number"></span></p>
+            <p>Rota do Mar - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }} - Página <span class="page-number"></span></p>
         </div>
     </div>
 </body>
