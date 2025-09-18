@@ -11,6 +11,7 @@ use App\Models\Group;
 use App\Models\Permission;
 use App\Models\UserPermission;
 use App\Models\UserFilter;
+use App\Models\UserAccessSchedule;
 
 class User extends Authenticatable
 {
@@ -246,5 +247,13 @@ class User extends Authenticatable
     public function clearFilters(string $pageType)
     {
         return UserFilter::clearFilters($this->id, $pageType);
+    }
+    
+    /**
+     * Get the access schedule associated with the user.
+     */
+    public function accessSchedule()
+    {
+        return $this->hasOne(UserAccessSchedule::class, 'user_id');
     }
 }

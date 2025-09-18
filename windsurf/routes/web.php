@@ -21,7 +21,7 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSchedule::class])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/dados-por-ano', [DashboardController::class, 'getDadosPorAno'])->name('dashboard.dados-por-ano');
@@ -46,6 +46,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Rotas para permissões específicas por usuário (granulares)
         Route::get('user-permissions/{user}/edit', [\App\Http\Controllers\UserPermissionController::class, 'edit'])->name('user-permissions.edit');
         Route::put('user-permissions/{user}', [\App\Http\Controllers\UserPermissionController::class, 'update'])->name('user-permissions.update');
+
+        // Rotas para horários de acesso do usuário
+        Route::get('user-access-schedules/{user}/edit', [\App\Http\Controllers\UserAccessScheduleController::class, 'edit'])->name('user-access-schedules.edit');
+        Route::put('user-access-schedules/{user}', [\App\Http\Controllers\UserAccessScheduleController::class, 'update'])->name('user-access-schedules.update');
 
         // ALIAS legados (compatibilidade com views antigas que usam underscore nos nomes das rotas)
         Route::get('user_permissions/{user}/edit', [\App\Http\Controllers\UserPermissionController::class, 'edit'])->name('user_permissions.edit');
