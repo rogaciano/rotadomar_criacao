@@ -150,6 +150,21 @@
                             </div>
 
                             <div>
+                                <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação</label>
+                                <select name="situacao_id" id="situacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todas</option>
+                                    @foreach($situacoes as $situacao)
+                                        <option value="{{ $situacao->id }}" {{ (($filters['situacao_id'] ?? '') == $situacao->id || (($filters['situacao'] ?? '') == $situacao->descricao)) ? 'selected' : '' }}>
+                                            {{ $situacao->descricao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @if(request('situacao'))
+                                    <input type="hidden" name="situacao" value="{{ request('situacao') }}">
+                                @endif
+                            </div>
+
+                            <div>
                                 <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Início)</label>
                                 <input type="date" name="data_inicio" id="data_inicio" value="{{ $filters['data_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                             </div>
@@ -220,6 +235,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Localização
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Situação
+                                    </th>
                                     <th scope="col" class="sticky right-0 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 shadow-md z-10">
                                         Ações
                                     </th>
@@ -270,6 +288,15 @@
                                                 </span>
                                             @else
                                                 <span class="text-gray-400 text-xs italic">Não localizado</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($produto->situacao_atual)
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                    {{ $produto->situacao_atual->descricao }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400 text-xs italic">Sem situação</span>
                                             @endif
                                         </td>
                                         <td class="sticky right-0 px-6 py-4 whitespace-nowrap text-right text-sm font-medium bg-white shadow-md z-10">

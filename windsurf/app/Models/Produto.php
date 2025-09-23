@@ -183,6 +183,29 @@ class Produto extends Model
     }
     
     /**
+     * Retorna a situação atual do produto baseada na última movimentação
+     */
+    public function getSituacaoAtualAttribute()
+    {
+        // Busca a última movimentação do produto ordenada pelo ID mais recente
+        $ultimaMovimentacao = $this->movimentacoes()
+            ->orderBy('id', 'desc')
+            ->with('situacao')
+            ->first();
+            
+        return $ultimaMovimentacao ? $ultimaMovimentacao->situacao : null;
+    }
+    
+    /**
+     * Relacionamento para a situação atual do produto
+     * Este relacionamento é usado para eager loading da situação atual
+     */
+    public function situacao_atual()
+    {
+        return $this->belongsTo(\App\Models\Situacao::class, 'situacao_atual_id');
+    }
+
+    /**
      * Configuração do registro de atividades
      */
     public function getActivitylogOptions(): LogOptions

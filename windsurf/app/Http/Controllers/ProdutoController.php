@@ -34,7 +34,7 @@ class ProdutoController extends Controller
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
             'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
             'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido',
-            'sort', 'direction', 'page'
+            'situacao_id', 'situacao', 'sort', 'direction', 'page'
         ];
         
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
@@ -54,7 +54,7 @@ class ProdutoController extends Controller
         // Usar os filtros da requisição ou os filtros salvos
         $filters = $request->all();
         
-        $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao']);
+        $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao', 'movimentacoes.situacao']);
 
         // Filtros
         if (!empty($filters['referencia'])) {
@@ -133,6 +133,28 @@ class ProdutoController extends Controller
             $query->whereIn('id', $subquery);
         }
         
+        // Filtro por situação (aceita ID ou nome)
+        $situacaoId = null;
+        
+        if (!empty($filters['situacao_id'])) {
+            $situacaoId = $filters['situacao_id'];
+        } elseif (!empty($filters['situacao'])) {
+            $situacaoId = \App\Models\Situacao::where('descricao', $filters['situacao'])->value('id');
+        }
+        
+        if ($situacaoId) {
+            // Obter IDs dos produtos cuja última movimentação está na situação selecionada
+            $subquery = \App\Models\Movimentacao::select('produto_id')
+                ->where('situacao_id', $situacaoId)
+                ->whereIn('id', function($q) {
+                    $q->select(\DB::raw('MAX(id)'))
+                      ->from('movimentacoes')
+                      ->groupBy('produto_id');
+                });
+                
+            $query->whereIn('id', $subquery);
+        }
+        
         // Filtro por status de conclusão (dropdown)
         $concluido = isset($filters['concluido']) ? $filters['concluido'] : null;
         if ($concluido !== null && $concluido !== '') {
@@ -183,13 +205,14 @@ class ProdutoController extends Controller
         $grupos = GrupoProduto::orderBy('descricao')->get();
         $statuses = Status::orderBy('descricao')->get();
         $localizacoes = \App\Models\Localizacao::orderBy('nome_localizacao')->get();
+        $situacoes = \App\Models\Situacao::where('ativo', true)->orderBy('descricao')->get();
         
         // Preservar os filtros na paginação
         $produtos->appends($filters);
 
         return view('produtos.index', compact(
             'produtos', 'marcas', 'tecidos', 'estilistas', 'grupos', 
-            'statuses', 'localizacoes', 'filters'
+            'statuses', 'localizacoes', 'situacoes', 'filters'
         ));
     }
 
@@ -807,7 +830,7 @@ class ProdutoController extends Controller
         $useSessionFilters = !$request->hasAny([
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
-            'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
+            'status', 'localizacao_id', 'localizacao', 'situacao_id', 'situacao', 'incluir_excluidos',
             'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
         ]) && $request->method() === 'GET' && !$request->ajax() && !$request->has('force_generate');
         
@@ -894,6 +917,28 @@ class ProdutoController extends Controller
                 $query->whereIn('id', $subquery);
             }
             
+            // Filtro por situação
+            $situacaoId = null;
+            
+            if (!empty($filters['situacao_id'])) {
+                $situacaoId = $filters['situacao_id'];
+            } elseif (!empty($filters['situacao'])) {
+                $situacaoId = \App\Models\Situacao::where('descricao', $filters['situacao'])->value('id');
+            }
+            
+            if ($situacaoId) {
+                // Obter IDs dos produtos cuja última movimentação está na situação selecionada
+                $subquery = \App\Models\Movimentacao::select('produto_id')
+                    ->where('situacao_id', $situacaoId)
+                    ->whereIn('id', function($q) {
+                        $q->select(\DB::raw('MAX(id)'))
+                          ->from('movimentacoes')
+                          ->groupBy('produto_id');
+                    });
+                    
+                $query->whereIn('id', $subquery);
+            }
+            
             // Filtro por status de conclusão
             $concluido = isset($filters['concluido']) ? $filters['concluido'] : null;
             if ($concluido !== null && $concluido !== '') {
@@ -947,19 +992,21 @@ class ProdutoController extends Controller
                 ->with(['marca', 'grupoProduto', 'status', 'estilista'])
                 ->get();
                 
-            // Now that we have the products, we can manually add the localizacao_atual and concluido_atual
+            // Now that we have the products, we can manually add the localizacao_atual, situacao_atual and concluido_atual
             foreach ($produtos as $produto) {
                 // Get the latest movimentacao for this product
                 $ultimaMovimentacao = \App\Models\Movimentacao::where('produto_id', $produto->id)
-                    ->with('localizacao')
+                    ->with(['localizacao', 'situacao'])
                     ->orderBy('id', 'desc')
                     ->first();
                     
                 if ($ultimaMovimentacao) {
                     $produto->localizacao_atual = $ultimaMovimentacao->localizacao;
+                    $produto->situacao_atual = $ultimaMovimentacao->situacao;
                     $produto->concluido_atual = $ultimaMovimentacao->concluido;
                 } else {
                     $produto->localizacao_atual = null;
+                    $produto->situacao_atual = null;
                     $produto->concluido_atual = null;
                 }
             }
