@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\MovimentacaoFilterController;
+use App\Models\Localizacao;
+use App\Models\Marca;
 use App\Models\Movimentacao;
 use App\Models\Produto;
-use App\Models\Localizacao;
-use App\Models\Tipo;
 use App\Models\Situacao;
 use App\Models\Status;
-use App\Models\Marca;
 use App\Models\Tecido;
-use Illuminate\Http\Request;
+use App\Models\Tipo;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class MovimentacaoController extends Controller
 {
@@ -34,12 +35,12 @@ class MovimentacaoController extends Controller
         if ($request->anyFilled([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
             'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
         ])) {
             $filterParams = $request->only([
                 'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
                 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-                'comprometido', 'concluido', 'sort', 'direction'
+                'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
             ]);
             
             auth()->user()->saveFilters('movimentacoes', $filterParams);
@@ -48,7 +49,7 @@ class MovimentacaoController extends Controller
         else if (!$request->hasAny([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
             'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
         ])) {
             $savedFilters = auth()->user()->getFilters('movimentacoes');
             
@@ -128,6 +129,11 @@ class MovimentacaoController extends Controller
         // Adicionar filtro para o campo concluido
         if ($request->filled('concluido')) {
             $query->where('concluido', $request->concluido);
+        }
+        
+        // Filtro por status de dias (Atrasados, Em Dia)
+        if ($request->filled('status_dias')) {
+            $query = MovimentacaoFilterController::applyStatusDiasFilter($query, $request->status_dias);
         }
 
         // Ordenação
@@ -486,6 +492,11 @@ class MovimentacaoController extends Controller
         // Adicionar filtro para o campo concluido
         if ($request->filled('concluido')) {
             $query->where('concluido', $request->concluido);
+        }
+        
+        // Filtro por status de dias (Atrasados, Em Dia)
+        if ($request->filled('status_dias')) {
+            $query = MovimentacaoFilterController::applyStatusDiasFilter($query, $request->status_dias);
         }
 
         // Ordenação

@@ -13,6 +13,7 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProdutoAnexoController;
 use App\Http\Controllers\ProdutoCombinacaoController;
 use App\Http\Controllers\MovimentacaoController;
+use App\Http\Controllers\MovimentacaoFilterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
@@ -137,6 +138,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::delete('movimentacoes/{movimentacao}/remover-anexo', [MovimentacaoController::class, 'removerAnexo'])->name('movimentacoes.remover-anexo');
     Route::get('movimentacoes/{movimentacao}/pdf', [MovimentacaoController::class, 'generatePdf'])->name('movimentacoes.pdf');
     Route::get('movimentacoes-lista-pdf', [MovimentacaoController::class, 'generateListPdf'])->name('movimentacoes.lista.pdf');
+    
+    // Filtro de Movimentações por Status de Dias
+    Route::get('movimentacoes/filtro/status-dias', [MovimentacaoFilterController::class, 'filtrarPorStatusDias'])->name('movimentacoes.filtro.status-dias');
 
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');
