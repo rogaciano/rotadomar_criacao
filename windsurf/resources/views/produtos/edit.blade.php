@@ -487,26 +487,35 @@
             }
         }
     }
-    // Function to delete attachment via AJAX
+    // Function to delete attachment
     function deleteAttachment(anexoId) {
         if (!confirm('Tem certeza que deseja excluir este anexo?')) {
             return;
         }
         
-        $.ajax({
-            url: '/produtos/anexos/' + anexoId,
-            type: 'DELETE',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                // Reload the page to show updated attachments
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Erro ao excluir anexo: ' + error);
-            }
-        });
+        // Criar um formulário temporário para enviar a requisição DELETE
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ url("produtos/anexos") }}/' + anexoId;
+        form.style.display = 'none';
+        
+        // Adicionar campo CSRF
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = '_token';
+        csrfField.value = '{{ csrf_token() }}';
+        form.appendChild(csrfField);
+        
+        // Adicionar campo METHOD spoofing para DELETE
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        form.appendChild(methodField);
+        
+        // Adicionar o formulário ao body e submeter
+        document.body.appendChild(form);
+        form.submit();
     }
 
     $(document).ready(function() {

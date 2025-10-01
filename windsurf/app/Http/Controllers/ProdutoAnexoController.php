@@ -225,7 +225,8 @@ class ProdutoAnexoController extends Controller
         // Excluir o registro do banco de dados
         $anexo->delete();
 
-        return redirect()->route('produtos.show', $produtoId)
+        // Redirecionar de volta para a página anterior (edit ou show)
+        return redirect()->back()
             ->with('success', 'Anexo excluído com sucesso!');
     }
 }
