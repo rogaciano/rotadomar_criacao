@@ -40,29 +40,54 @@
                     <!-- Filtros -->
                     <div class="mb-6 bg-gray-100 p-4 rounded-lg">
                         <form action="{{ route('tecidos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div class="md:col-span-1">
+                            <div class="md:col-span-2">
                                 <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Buscar por descrição</label>
                                 <input type="text" name="descricao" id="descricao" value="{{ request('descricao') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do tecido">
                             </div>
-                            <div class="md:col-span-1">
+                            <div class="md:col-span-2">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Buscar por referência</label>
                                 <input type="text" name="referencia" id="referencia" value="{{ request('referencia') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do tecido">
                             </div>
-                            <div>
-                                <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Início)</label>
-                                <input type="date" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            
+                            <div class="md:col-span-2 border-t pt-3 mt-2">
+                                <h3 class="font-medium text-gray-700 mb-2">Filtro por Data de Cadastro</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Início</label>
+                                        <input type="date" name="data_inicio" id="data_inicio" value="{{ request('data_inicio') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    </div>
+                                    <div>
+                                        <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Fim</label>
+                                        <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Fim)</label>
-                                <input type="date" name="data_fim" id="data_fim" value="{{ request('data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            
+                            <div class="md:col-span-2 border-t pt-3 mt-2">
+                                <h3 class="font-medium text-gray-700 mb-2">Filtro por Data de Atualização do Estoque</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="estoque_data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Início</label>
+                                        <input type="date" name="estoque_data_inicio" id="estoque_data_inicio" value="{{ request('estoque_data_inicio') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    </div>
+                                    <div>
+                                        <label for="estoque_data_fim" class="block text-sm font-medium text-gray-700 mb-1">Fim</label>
+                                        <input type="date" name="estoque_data_fim" id="estoque_data_fim" value="{{ request('estoque_data_fim') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label for="ativo" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <select name="ativo" id="ativo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
-                                    <option value="1" {{ request('ativo') === '1' ? 'selected' : '' }}>Ativo</option>
-                                    <option value="0" {{ request('ativo') === '0' ? 'selected' : '' }}>Inativo</option>
-                                </select>
+                            <div class="md:col-span-4 border-t pt-3 mt-2">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <div>
+                                        <label for="ativo" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                        <select name="ativo" id="ativo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            <option value="">Todos</option>
+                                            <option value="1" {{ request('ativo') === '1' ? 'selected' : '' }}>Ativo</option>
+                                            <option value="0" {{ request('ativo') === '0' ? 'selected' : '' }}>Inativo</option>
+                                        </select>
+                                    </div>
+                                    <div class="md:col-span-3"></div>
+                                </div>
                             </div>
                             <div class="md:col-span-4 flex justify-end space-x-2">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">

@@ -70,6 +70,12 @@ class MovimentacaoFilterController extends Controller
             abort(403, 'Acesso negado.');
         }
         
+        // Verificar se é uma requisição de limpeza de filtros
+        if ($request->has('limpar_filtros')) {
+            auth()->user()->clearFilters('movimentacoes');
+            return redirect()->route('movimentacoes.filtro.status-dias');
+        }
+        
         // Iniciar a query com os relacionamentos
         $query = Movimentacao::with(['produto', 'produto.marca', 'tipo', 'situacao', 'localizacao']);
         
@@ -196,6 +202,27 @@ class MovimentacaoFilterController extends Controller
         $status = Status::orderBy('descricao')->get();
         $marcas = Marca::orderBy('nome_marca')->get();
         $tecidos = Tecido::orderBy('descricao')->get();
+        
+        // Lista de campos de filtro válidos
+        $validFilters = [
+            'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 
+            'tecido_id', 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
+        ];
+        
+        // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
+        if ($request->anyFilled($validFilters)) {
+            $filterParams = $request->only($validFilters);
+            auth()->user()->saveFilters('movimentacoes', $filterParams);
+        } 
+        // Se não tem parâmetros na URL mas tem filtros salvos, redirecionar com os filtros salvos
+        else if (!$request->hasAny($validFilters) && !$request->ajax()) {
+            $savedFilters = auth()->user()->getFilters('movimentacoes');
+            
+            if (!empty($savedFilters)) {
+                return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters);
+            }
+        }
         
         $filters = $request->all();
         

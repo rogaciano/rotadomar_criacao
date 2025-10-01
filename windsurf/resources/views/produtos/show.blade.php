@@ -169,6 +169,15 @@
                      <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                          <h3 class="text-lg font-semibold text-gray-800 mb-4">Variações de Cores</h3>
 
+                         @php
+                            // Calcular totais para uso em toda a tabela
+                            $totalCores = collect($coresEnriquecidas)->sum('quantidade');
+                            $totalCombinacoes = $produto->combinacoes ? $produto->combinacoes->sum('quantidade_pretendida') : 0;
+                            $totalGeral = $totalCores + $totalCombinacoes;
+                            $quantidadeProduto = $produto->quantidade ?? 0;
+                            $isEqual = $totalGeral == $quantidadeProduto;
+                         @endphp
+                         
                          @if($produto->cores->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -224,21 +233,36 @@
                                      </tbody>
                                      <tfoot class="bg-gray-50">
                                         <tr>
-                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Geral:</td>
+                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Variações:</td>
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                                                {{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('estoque'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('necessidade'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('consumo_deste_produto'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ collect($coresEnriquecidas)->sum('saldo') >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ number_format(collect($coresEnriquecidas)->sum('saldo'), 2, ',', '.') }}
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Combinações:</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                                                {{ number_format($totalCombinacoes, 0, ',', '.') }}
+                                            </td>
+                                            <td colspan="5"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100">Total Geral:</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900 bg-gray-100">
                                                 <div class="flex items-center">
-                                                    <span class="mr-2">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</span>
-                                                    @php
-                                                        $totalCores = collect($coresEnriquecidas)->sum('quantidade');
-                                                        $quantidadeProduto = $produto->quantidade ?? 0;
-                                                        $isEqual = $totalCores == $quantidadeProduto;
-                                                    @endphp
+                                                    <span class="mr-2">{{ number_format($totalGeral, 0, ',', '.') }}</span>
                                                     @if($isEqual)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" title="Total geral (cores + combinações) está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
                                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                                         </svg>
                                                     @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor" title="Total das cores não está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor" title="Total geral (cores + combinações) não está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
                                                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                         </svg>
                                                     @endif
@@ -259,7 +283,13 @@
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                         </svg>
-                                                        <span>Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} | Diferença: {{ number_format(abs($totalCores - $quantidadeProduto), 0, ',', '.') }}</span>
+                                                        <span>
+                                                            Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} | 
+                                                            Variações de cores: {{ number_format($totalCores, 0, ',', '.') }} | 
+                                                            Combinações: {{ number_format($totalCombinacoes, 0, ',', '.') }} | 
+                                                            Total geral: {{ number_format($totalGeral, 0, ',', '.') }} | 
+                                                            Diferença: {{ number_format(abs($totalGeral - $quantidadeProduto), 0, ',', '.') }}
+                                                        </span>
                                                      </div>
                                                  </td>
                                              </tr>
@@ -320,10 +350,10 @@
                                                                         ->where('cor', $componente->cor)
                                                                         ->first();
 
-                                                                    $estoque = $estoqueCor ? ($estoqueCor->estoque_atual ?? 0) : 0;
+                                                                    $estoque = $estoqueCor ? ($estoqueCor->quantidade ?? 0) : 0;
                                                                     $necessidade = $estoqueCor ? ($estoqueCor->necessidade ?? 0) : 0;
                                                                     $saldo = $estoque - $necessidade;
-                                                                    $producaoPossivel = $saldo > 0 ? floor($saldo / ($componente->tecido->consumo_medio ?: 0.5)) : 0;
+                                                                    $producaoPossivel = ($saldo > 0 && $componente->consumo > 0) ? floor($saldo / $componente->consumo) : 0;
                                                                 @endphp
 
                                                                 <div class="mt-3 pt-3 border-t border-gray-200">

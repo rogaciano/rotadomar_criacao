@@ -28,7 +28,7 @@ class MovimentacaoController extends Controller
         // Verificar se é uma requisição de limpeza de filtros
         if ($request->has('limpar_filtros')) {
             auth()->user()->clearFilters('movimentacoes');
-            return redirect()->route('movimentacoes.index');
+            return redirect()->route('movimentacoes.filtro.status-dias');
         }
         
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
@@ -54,7 +54,7 @@ class MovimentacaoController extends Controller
             $savedFilters = auth()->user()->getFilters('movimentacoes');
             
             if (!empty($savedFilters)) {
-                return redirect()->route('movimentacoes.index', $savedFilters);
+                return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters);
             }
         }
 
@@ -283,7 +283,7 @@ class MovimentacaoController extends Controller
             // Usar os filtros salvos do usuário
             $savedFilters = auth()->user()->getFilters('movimentacoes');
             
-            return redirect()->route('movimentacoes.index', $savedFilters)
+            return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                     ->with('success', 'Movimentação criada com sucesso!');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Erro ao criar movimentação: ' . $e->getMessage());
@@ -367,7 +367,7 @@ class MovimentacaoController extends Controller
         // Usar os filtros salvos do usuário
         $savedFilters = auth()->user()->getFilters('movimentacoes');
         
-        return redirect()->route('movimentacoes.index', $savedFilters)
+        return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                 ->with('success', 'Movimentação atualizada com sucesso!');
     }
 
@@ -394,7 +394,7 @@ class MovimentacaoController extends Controller
             // Usar os filtros salvos do usuário
             $savedFilters = auth()->user()->getFilters('movimentacoes');
             
-            return redirect()->route('movimentacoes.index', $savedFilters)
+            return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                     ->with('success', 'Movimentação excluída com sucesso!');
         } catch (\Exception $e) {
             return back()->with('error', 'Erro ao excluir movimentação: ' . $e->getMessage());
@@ -572,7 +572,7 @@ class MovimentacaoController extends Controller
                 // Usar os filtros salvos do usuário
                 $savedFilters = auth()->user()->getFilters('movimentacoes');
                 
-                return redirect()->route('movimentacoes.index', $savedFilters)
+                return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                         ->with('success', 'Anexo removido com sucesso!');
             }
         }

@@ -47,6 +47,19 @@ class TecidoController extends Controller
         if ($request->filled('data_fim')) {
             $query->whereDate('data_cadastro', '<=', $request->data_fim);
         }
+        
+        // Filtro por período de data de atualização do estoque
+        if ($request->filled('estoque_data_inicio')) {
+            $query->whereHas('estoquesCores', function($q) use ($request) {
+                $q->whereDate('data_atualizacao', '>=', $request->estoque_data_inicio);
+            });
+        }
+        
+        if ($request->filled('estoque_data_fim')) {
+            $query->whereHas('estoquesCores', function($q) use ($request) {
+                $q->whereDate('data_atualizacao', '<=', $request->estoque_data_fim);
+            });
+        }
 
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
