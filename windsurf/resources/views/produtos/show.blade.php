@@ -352,6 +352,7 @@
 
                                                                     $estoque = $estoqueCor ? ($estoqueCor->quantidade ?? 0) : 0;
                                                                     $necessidade = $estoqueCor ? ($estoqueCor->necessidade ?? 0) : 0;
+                                                                    $necessidadeProduto = $combinacao->quantidade_pretendida * $componente->consumo;
                                                                     $saldo = $estoque - $necessidade;
                                                                     $producaoPossivel = ($saldo > 0 && $componente->consumo > 0) ? floor($saldo / $componente->consumo) : 0;
                                                                 @endphp
@@ -361,14 +362,19 @@
                                                                         <tr>
                                                                             <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Estoque:</span></td>
                                                                             <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium text-gray-900">{{ number_format($estoque, 2, ',', '.') }} m</span></td>
-                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Necessidade:</span></td>
+                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Necessidade Total:</span></td>
                                                                             <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium text-gray-900">{{ number_format($necessidade, 2, ',', '.') }} m</span></td>
                                                                         </tr>
                                                                         <tr>
+                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Necessidade do Produto:</span></td>
+                                                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium text-gray-900">{{ number_format($necessidadeProduto, 2, ',', '.') }} m</span></td>
                                                                             <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Saldo:</span></td>
                                                                             <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium {{ $saldo < 0 ? 'text-red-600' : 'text-green-600' }}">{{ number_format($saldo, 2, ',', '.') }} m</span></td>
+                                                                        </tr>
+                                                                        <tr>
                                                                             <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Produção possível:</span></td>
                                                                             <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium {{ $producaoPossivel <= 0 ? 'text-red-600' : 'text-green-600' }}">{{ $producaoPossivel }} unidades</span></td>
+                                                                            <td colspan="2"></td>
                                                                         </tr>
                                                                     </table>
                                                                 </div>
