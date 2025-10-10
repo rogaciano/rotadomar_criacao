@@ -79,21 +79,30 @@
                             </div>
 
                             <div>
+                                <label for="grupo_produto_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo de Produto</label>
+                                <select name="grupo_produto_id[]" id="grupo_produto_id" class="select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" multiple>
+                                    @foreach($grupoProdutos ?? [] as $grupo)
+                                        <option value="{{ $grupo->id }}" {{ in_array($grupo->id, (array)request('grupo_produto_id', [])) ? 'selected' : '' }}>
+                                            {{ $grupo->descricao }}{{ !$grupo->ativo ? ' (Inativo)' : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
                                 <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação</label>
-                                <select name="situacao_id" id="situacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todas</option>
+                                <select name="situacao_id[]" id="situacao_id" class="select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" multiple>
                                     @foreach($situacoes ?? [] as $situacao)
-                                        <option value="{{ $situacao->id }}" {{ request('situacao_id') == $situacao->id ? 'selected' : '' }}>{{ $situacao->descricao }}</option>
+                                        <option value="{{ $situacao->id }}" {{ in_array($situacao->id, (array)request('situacao_id', [])) ? 'selected' : '' }}>{{ $situacao->descricao }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                                <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todas</option>
+                                <select name="localizacao_id[]" id="localizacao_id" class="select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" multiple>
                                     @foreach($localizacoes ?? [] as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ request('localizacao_id') == $localizacao->id ? 'selected' : '' }}>
+                                        <option value="{{ $localizacao->id }}" {{ in_array($localizacao->id, (array)request('localizacao_id', [])) ? 'selected' : '' }}>
                                             {{ $localizacao->nome_localizacao }}{{ !$localizacao->ativo ? ' (Inativa)' : '' }}
                                         </option>
                                     @endforeach
@@ -159,10 +168,9 @@
 
                             <div>
                                 <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido</label>
-                                <select name="tecido_id" id="tecido_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
+                                <select name="tecido_id[]" id="tecido_id" class="select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" multiple>
                                     @foreach($tecidos ?? [] as $tecido)
-                                        <option value="{{ $tecido->id }}" {{ request('tecido_id') == $tecido->id ? 'selected' : '' }}>{{ $tecido->descricao }}</option>
+                                        <option value="{{ $tecido->id }}" {{ in_array($tecido->id, (array)request('tecido_id', [])) ? 'selected' : '' }}>{{ $tecido->descricao }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -749,16 +757,41 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Inicialização do JavaScript
 
-            // Inicializar Select2 no filtro de localização
-            $('#localizacao_id').select2({
-                placeholder: "Selecione uma localização",
-                allowClear: true
+            // Configuração padrão para Select2 multiselect
+            const select2Config = {
+                allowClear: true,
+                closeOnSelect: false,
+                width: '100%'
+            };
+            
+            // Inicializar Select2 multiselect nos filtros com placeholders personalizados
+            $('#grupo_produto_id').select2({
+                ...select2Config,
+                placeholder: "Selecione grupos de produto"
             });
             
-            // Inicializar Select2 no filtro de tecido
+            $('#localizacao_id').select2({
+                ...select2Config,
+                placeholder: "Selecione localizações"
+            });
+            
+            $('#situacao_id').select2({
+                ...select2Config,
+                placeholder: "Selecione situações"
+            });
+            
             $('#tecido_id').select2({
-                placeholder: "Selecione um tecido",
-                allowClear: true
+                ...select2Config,
+                placeholder: "Selecione tecidos"
+            });
+            
+            // Limpar o campo de busca após selecionar um item (comportamento melhorado)
+            $('.select2-multi').on('select2:select', function(e) {
+                // Limpar o texto de busca após a seleção
+                const $select = $(this);
+                setTimeout(function() {
+                    $select.data('select2').$container.find('.select2-search__field').val('');
+                }, 1);
             });
 
             // Ajustar estilo do Select2 para combinar com Tailwind
@@ -784,12 +817,7 @@
                 });
                 // Resetar Select2 explicitamente
                 if (typeof $ !== 'undefined') {
-                    if ($('#localizacao_id').length) {
-                        $('#localizacao_id').val(null).trigger('change');
-                    }
-                    if ($('#tecido_id').length) {
-                        $('#tecido_id').val(null).trigger('change');
-                    }
+                    $('.select2-multi').val(null).trigger('change');
                 }
             }
 

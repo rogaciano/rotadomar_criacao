@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\MovimentacaoFilterController;
+use App\Models\GrupoProduto;
 use App\Models\Localizacao;
 use App\Models\Marca;
 use App\Models\Movimentacao;
@@ -35,12 +36,12 @@ class MovimentacaoController extends Controller
         if ($request->anyFilled([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
             'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
         ])) {
             $filterParams = $request->only([
                 'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
                 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-                'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
+                'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
             ]);
             
             auth()->user()->saveFilters('movimentacoes', $filterParams);
@@ -49,7 +50,7 @@ class MovimentacaoController extends Controller
         else if (!$request->hasAny([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
             'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
         ])) {
             $savedFilters = auth()->user()->getFilters('movimentacoes');
             
@@ -84,6 +85,14 @@ class MovimentacaoController extends Controller
                 $q->where('marca_id', $request->marca_id);
             });
         }
+        
+        // Filtro por Grupo de Produto
+        if ($request->filled('grupo_produto_id')) {
+            $grupoProdutoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
+            $query->whereHas('produto', function($q) use ($grupoProdutoIds) {
+                $q->whereIn('grupo_id', $grupoProdutoIds);
+            });
+        }
 
         // Filtro por Status do produto
         if ($request->filled('status_id')) {
@@ -94,9 +103,10 @@ class MovimentacaoController extends Controller
         
         // Filtro por Tecido do produto
         if ($request->filled('tecido_id')) {
-            $query->whereHas('produto', function($q) use ($request) {
-                $q->whereHas('tecidos', function($tq) use ($request) {
-                    $tq->where('tecidos.id', $request->tecido_id);
+            $tecidoIds = is_array($request->tecido_id) ? $request->tecido_id : [$request->tecido_id];
+            $query->whereHas('produto', function($q) use ($tecidoIds) {
+                $q->whereHas('tecidos', function($tq) use ($tecidoIds) {
+                    $tq->whereIn('tecidos.id', $tecidoIds);
                 });
             });
         }
@@ -106,11 +116,13 @@ class MovimentacaoController extends Controller
         }
 
         if ($request->filled('situacao_id')) {
-            $query->where('situacao_id', $request->situacao_id);
+            $situacaoIds = is_array($request->situacao_id) ? $request->situacao_id : [$request->situacao_id];
+            $query->whereIn('situacao_id', $situacaoIds);
         }
 
         if ($request->filled('localizacao_id')) {
-            $query->where('localizacao_id', $request->localizacao_id);
+            $localizacaoIds = is_array($request->localizacao_id) ? $request->localizacao_id : [$request->localizacao_id];
+            $query->whereIn('localizacao_id', $localizacaoIds);
         }
 
         // Filtros de data
@@ -211,8 +223,11 @@ class MovimentacaoController extends Controller
         
         // Carregar tecidos para o filtro
         $tecidos = Tecido::where('ativo', true)->orderBy('descricao')->get();
+        
+        // Carregar grupos de produtos para o filtro (incluindo ativo = NULL)
+        $grupoProdutos = GrupoProduto::orderBy('descricao')->get();
 
-        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status', 'marcas', 'tecidos'));
+        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status', 'marcas', 'tecidos', 'grupoProdutos'));
     }
 
     /**
@@ -447,6 +462,14 @@ class MovimentacaoController extends Controller
                 $q->where('marca_id', $request->marca_id);
             });
         }
+        
+        // Filtro por Grupo de Produto
+        if ($request->filled('grupo_produto_id')) {
+            $grupoProdutoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
+            $query->whereHas('produto', function($q) use ($grupoProdutoIds) {
+                $q->whereIn('grupo_id', $grupoProdutoIds);
+            });
+        }
 
         // Filtro por Status do produto
         if ($request->filled('status_id')) {
@@ -457,9 +480,10 @@ class MovimentacaoController extends Controller
         
         // Filtro por Tecido do produto
         if ($request->filled('tecido_id')) {
-            $query->whereHas('produto', function($q) use ($request) {
-                $q->whereHas('tecidos', function($tq) use ($request) {
-                    $tq->where('tecidos.id', $request->tecido_id);
+            $tecidoIds = is_array($request->tecido_id) ? $request->tecido_id : [$request->tecido_id];
+            $query->whereHas('produto', function($q) use ($tecidoIds) {
+                $q->whereHas('tecidos', function($tq) use ($tecidoIds) {
+                    $tq->whereIn('tecidos.id', $tecidoIds);
                 });
             });
         }
@@ -469,11 +493,13 @@ class MovimentacaoController extends Controller
         }
 
         if ($request->filled('situacao_id')) {
-            $query->where('situacao_id', $request->situacao_id);
+            $situacaoIds = is_array($request->situacao_id) ? $request->situacao_id : [$request->situacao_id];
+            $query->whereIn('situacao_id', $situacaoIds);
         }
 
         if ($request->filled('localizacao_id')) {
-            $query->where('localizacao_id', $request->localizacao_id);
+            $localizacaoIds = is_array($request->localizacao_id) ? $request->localizacao_id : [$request->localizacao_id];
+            $query->whereIn('localizacao_id', $localizacaoIds);
         }
 
         // Filtros de data

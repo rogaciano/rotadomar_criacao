@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GrupoProduto;
 use App\Models\Localizacao;
 use App\Models\Marca;
 use App\Models\Movimentacao;
@@ -101,6 +102,14 @@ class MovimentacaoFilterController extends Controller
                 $q->where('marca_id', $request->marca_id);
             });
         }
+        
+        // Filtro por Grupo de Produto
+        if ($request->filled('grupo_produto_id')) {
+            $grupoProdutoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
+            $query->whereHas('produto', function($q) use ($grupoProdutoIds) {
+                $q->whereIn('grupo_id', $grupoProdutoIds);
+            });
+        }
 
         if ($request->filled('status_id')) {
             $query->whereHas('produto', function($q) use ($request) {
@@ -109,9 +118,10 @@ class MovimentacaoFilterController extends Controller
         }
         
         if ($request->filled('tecido_id')) {
-            $query->whereHas('produto', function($q) use ($request) {
-                $q->whereHas('tecidos', function($tq) use ($request) {
-                    $tq->where('tecidos.id', $request->tecido_id);
+            $tecidoIds = is_array($request->tecido_id) ? $request->tecido_id : [$request->tecido_id];
+            $query->whereHas('produto', function($q) use ($tecidoIds) {
+                $q->whereHas('tecidos', function($tq) use ($tecidoIds) {
+                    $tq->whereIn('tecidos.id', $tecidoIds);
                 });
             });
         }
@@ -121,11 +131,13 @@ class MovimentacaoFilterController extends Controller
         }
 
         if ($request->filled('situacao_id')) {
-            $query->where('situacao_id', $request->situacao_id);
+            $situacaoIds = is_array($request->situacao_id) ? $request->situacao_id : [$request->situacao_id];
+            $query->whereIn('situacao_id', $situacaoIds);
         }
 
         if ($request->filled('localizacao_id')) {
-            $query->where('localizacao_id', $request->localizacao_id);
+            $localizacaoIds = is_array($request->localizacao_id) ? $request->localizacao_id : [$request->localizacao_id];
+            $query->whereIn('localizacao_id', $localizacaoIds);
         }
 
         // Filtros de data
@@ -202,12 +214,13 @@ class MovimentacaoFilterController extends Controller
         $status = Status::orderBy('descricao')->get();
         $marcas = Marca::orderBy('nome_marca')->get();
         $tecidos = Tecido::orderBy('descricao')->get();
+        $grupoProdutos = GrupoProduto::orderBy('descricao')->get();
         
         // Lista de campos de filtro válidos
         $validFilters = [
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 
             'tecido_id', 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction', 'status_dias'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
         ];
         
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
@@ -228,7 +241,7 @@ class MovimentacaoFilterController extends Controller
         
         return view('movimentacoes.index', compact(
             'movimentacoes', 'situacoes', 'tipos', 'localizacoes', 
-            'status', 'marcas', 'tecidos', 'filters'
+            'status', 'marcas', 'tecidos', 'grupoProdutos', 'filters'
         ));
     }
 }
