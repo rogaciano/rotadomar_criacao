@@ -38,6 +38,18 @@
                                 </p>
                             </div>
 
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Prazo</p>
+                                <p class="mt-1 text-lg text-gray-900">
+                                    @if($situacao->prazo)
+                                        {{ $situacao->prazo }} {{ $situacao->prazo == 1 ? 'dia' : 'dias' }}
+                                        <span class="text-xs text-gray-500">(dias úteis)</span>
+                                    @else
+                                        <span class="text-gray-400">Não definido</span>
+                                    @endif
+                                </p>
+                            </div>
+
                             <div class="md:col-span-2">
                                 <p class="text-sm font-medium text-gray-500">Observações</p>
                                 <p class="mt-1 text-gray-900 whitespace-pre-line">{{ $situacao->observacoes ?? 'Nenhuma observação cadastrada.' }}</p>

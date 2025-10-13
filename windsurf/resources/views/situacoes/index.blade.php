@@ -73,6 +73,9 @@
                                         Status
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Prazo
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Criado em
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -93,6 +96,18 @@
                                             <span class="px-2 py-1 rounded-full text-xs {{ $situacao->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                 {{ $situacao->ativo ? 'Ativo' : 'Inativo' }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($situacao->prazo)
+                                                <span class="px-2 py-1 inline-flex items-center text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    {{ $situacao->prazo }} {{ $situacao->prazo == 1 ? 'dia' : 'dias' }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $situacao->created_at ? $situacao->created_at->format('d/m/Y H:i') : 'N/A' }}
@@ -138,7 +153,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="py-6 px-6 text-center text-gray-500">Nenhuma situação encontrada.</td>
+                                        <td colspan="6" class="py-6 px-6 text-center text-gray-500">Nenhuma situação encontrada.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

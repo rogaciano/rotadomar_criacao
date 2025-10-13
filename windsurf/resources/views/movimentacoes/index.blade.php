@@ -55,8 +55,36 @@
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <!-- Filtros -->
-                    <div class="mb-6 bg-gray-100 p-4 rounded-lg">
+                    
+                    <!-- Cabeçalho dos Filtros com Toggle -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800">Filtros</h3>
+                        <button type="button" id="toggle-filters-btn" class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <svg id="filter-icon-show" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                            <svg id="filter-icon-hide" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                            <span id="filter-toggle-text">Ocultar Filtros</span>
+                        </button>
+                    </div>
+
+                    <!-- Filtros Ativos (visível quando filtros estão ocultos) -->
+                    <div id="active-filters-summary" class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 hidden">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-blue-900 mb-2">Filtros Ativos:</p>
+                                <div id="active-filters-list" class="flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Filtros -->
+                    <div id="filters-container" class="mb-6 bg-gray-100 p-4 rounded-lg">
                         <form action="{{ route('movimentacoes.filtro.status-dias') }}" method="GET" id="filters-form" autocomplete="off" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-2">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
@@ -497,8 +525,13 @@
                                                         $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
                                                     }
 
-                                                    // Verificar se excede o prazo do setor
-                                                    if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                    // Verificar prazo: prioridade para situação, depois localização
+                                                    if ($movimentacao->situacao && $movimentacao->situacao->prazo) {
+                                                        // Situação tem prazo definido (prioridade)
+                                                        $prazoExcedido = $diasEntre > $movimentacao->situacao->prazo;
+                                                        $prazoSetor = $movimentacao->situacao->prazo;
+                                                    } elseif ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                        // Usa prazo da localização se situação não tiver
                                                         $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
                                                         $prazoSetor = $movimentacao->localizacao->prazo;
                                                     }
@@ -510,8 +543,8 @@
                                                     <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
                                                         {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
                                                     </span>
-                                                    @if($prazoExcedido && isset($prazoSetor))
-                                                        <div class="text-xs mt-1 text-red-600 font-medium">
+                                                    @if(isset($prazoSetor))
+                                                        <div class="text-xs mt-1 {{ $prazoExcedido ? 'text-red-600' : 'text-blue-600' }} font-medium">
                                                             (Prazo: {{ $prazoSetor }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
                                                         </div>
                                                     @endif
@@ -640,7 +673,13 @@
                                                         $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
                                                     }
 
-                                                    if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                    // Verificar prazo: prioridade para situação, depois localização
+                                                    if ($movimentacao->situacao && $movimentacao->situacao->prazo) {
+                                                        // Situação tem prazo definido (prioridade)
+                                                        $prazoExcedido = $diasEntre > $movimentacao->situacao->prazo;
+                                                        $prazoSetor = $movimentacao->situacao->prazo;
+                                                    } elseif ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                        // Usa prazo da localização se situação não tiver
                                                         $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
                                                         $prazoSetor = $movimentacao->localizacao->prazo;
                                                     }
@@ -651,7 +690,7 @@
                                                 <div class="text-sm {{ $prazoExcedido ? 'text-red-600 font-bold' : 'text-blue-600' }}">
                                                     {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
                                                     @if($prazoSetor)
-                                                        <span class="text-xs text-gray-500">({{ $prazoSetor }})</span>
+                                                        <span class="text-xs {{ $prazoExcedido ? 'text-red-500' : 'text-blue-500' }}">(Prazo: {{ $prazoSetor }})</span>
                                                     @endif
                                                 </div>
                                             @else
@@ -836,21 +875,144 @@
                     window.location.replace(url);
                 });
             }
-            const toggleButton = document.getElementById('toggle-filters');
-            const filterContainer = document.getElementById('filter-container');
+            // Sistema de Toggle de Filtros com Filtros Ativos
+            const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
+            const filtersContainer = document.getElementById('filters-container');
+            const activeFiltersSummary = document.getElementById('active-filters-summary');
+            const activeFiltersList = document.getElementById('active-filters-list');
+            const filterToggleText = document.getElementById('filter-toggle-text');
+            const filterIconShow = document.getElementById('filter-icon-show');
+            const filterIconHide = document.getElementById('filter-icon-hide');
 
-            // Inicialmente mostrar os filtros
-            // filterContainer.style.display = 'block';
+            // Mapeamento de nomes de filtros para labels amigáveis
+            const filterLabels = {
+                'referencia': 'Referência',
+                'produto': 'Produto',
+                'produto_id': 'Produto ID',
+                'tipo_id': 'Tipo',
+                'situacao_id': 'Situação',
+                'localizacao_id': 'Localização',
+                'marca_id': 'Marca',
+                'status_id': 'Status',
+                'tecido_id': 'Tecido',
+                'grupo_produto_id': 'Grupo de Produto',
+                'data_inicio': 'Data (De)',
+                'data_fim': 'Data (Até)',
+                'comprometido': 'Comprometido',
+                'concluido': 'Concluído',
+                'status_dias': 'Status de Dias'
+            };
 
-            if (toggleButton && filterContainer) {
-                toggleButton.addEventListener('click', function() {
-                    if (filterContainer.style.display === 'none') {
-                        filterContainer.style.display = 'block';
-                        toggleButton.textContent = 'Ocultar Filtros';
-                    } else {
-                        filterContainer.style.display = 'none';
-                        toggleButton.textContent = 'Mostrar Filtros';
+            // Função para obter o texto de um select pelo valor
+            function getSelectText(selectId, value) {
+                const select = document.getElementById(selectId);
+                if (!select) return value;
+                const option = select.querySelector(`option[value="${value}"]`);
+                return option ? option.textContent.trim() : value;
+            }
+
+            // Função para atualizar a lista de filtros ativos
+            function updateActiveFilters() {
+                const urlParams = new URLSearchParams(window.location.search);
+                activeFiltersList.innerHTML = '';
+                
+                let hasActiveFilters = false;
+                
+                urlParams.forEach((value, key) => {
+                    if (value && value !== '' && key !== 'page') {
+                        hasActiveFilters = true;
+                        let displayValue = value;
+                        
+                        // Formatar valor baseado no tipo de filtro
+                        if (key === 'comprometido' || key === 'concluido') {
+                            displayValue = value === '1' ? 'Sim' : 'Não';
+                        } else if (key === 'status_dias') {
+                            displayValue = value === 'atrasados' ? 'Atrasados' : (value === 'em_dia' ? 'Em Dia' : value);
+                        } else if (key.endsWith('_id') || key.endsWith('_id[]')) {
+                            // Lidar com arrays (multiselect)
+                            const cleanKey = key.replace('[]', '');
+                            if (Array.isArray(value)) {
+                                displayValue = value.map(v => getSelectText(cleanKey, v)).join(', ');
+                            } else {
+                                displayValue = getSelectText(cleanKey, value);
+                            }
+                        } else if (key.includes('data_')) {
+                            // Formatar datas
+                            try {
+                                const date = new Date(value + 'T00:00:00');
+                                displayValue = date.toLocaleDateString('pt-BR');
+                            } catch (e) {
+                                displayValue = value;
+                            }
+                        }
+                        
+                        const badge = document.createElement('span');
+                        badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+                        badge.innerHTML = `
+                            <span class="font-semibold mr-1">${filterLabels[key] || key}:</span>
+                            <span>${displayValue}</span>
+                        `;
+                        activeFiltersList.appendChild(badge);
                     }
+                });
+                
+                return hasActiveFilters;
+            }
+
+            // Função para alternar visibilidade dos filtros
+            function toggleFilters() {
+                const isHidden = filtersContainer.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // Mostrar filtros
+                    filtersContainer.classList.remove('hidden');
+                    activeFiltersSummary.classList.add('hidden');
+                    filterToggleText.textContent = 'Ocultar Filtros';
+                    filterIconShow.classList.remove('hidden');
+                    filterIconHide.classList.add('hidden');
+                    localStorage.setItem('movimentacoes_filters_visible', 'true');
+                } else {
+                    // Ocultar filtros
+                    filtersContainer.classList.add('hidden');
+                    const hasFilters = updateActiveFilters();
+                    if (hasFilters) {
+                        activeFiltersSummary.classList.remove('hidden');
+                    }
+                    filterToggleText.textContent = 'Mostrar Filtros';
+                    filterIconShow.classList.add('hidden');
+                    filterIconHide.classList.remove('hidden');
+                    localStorage.setItem('movimentacoes_filters_visible', 'false');
+                }
+            }
+
+            // Event listener para o botão de toggle
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', toggleFilters);
+            }
+
+            // Restaurar estado dos filtros do localStorage
+            const filtersVisible = localStorage.getItem('movimentacoes_filters_visible');
+            if (filtersVisible === 'false') {
+                // Ocultar filtros na carga da página
+                filtersContainer.classList.add('hidden');
+                const hasFilters = updateActiveFilters();
+                if (hasFilters) {
+                    activeFiltersSummary.classList.remove('hidden');
+                }
+                filterToggleText.textContent = 'Mostrar Filtros';
+                filterIconShow.classList.add('hidden');
+                filterIconHide.classList.remove('hidden');
+            }
+
+            // Atualizar filtros ativos na carga inicial
+            updateActiveFilters();
+
+            // Ao submeter o formulário de filtros, ocultar automaticamente
+            const filterForm = document.getElementById('filters-form');
+            if (filterForm) {
+                filterForm.addEventListener('submit', function(e) {
+                    // Marcar que os filtros devem estar ocultos após o submit
+                    localStorage.setItem('movimentacoes_filters_visible', 'false');
                 });
             }
 

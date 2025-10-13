@@ -33,8 +33,36 @@
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <!-- Filtros -->
-                    <div class="mb-6 bg-gray-100 p-4 rounded-lg">
+                    
+                    <!-- Cabeçalho dos Filtros com Toggle -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800">Filtros</h3>
+                        <button type="button" id="toggle-filters-btn" class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <svg id="filter-icon-show" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                            <svg id="filter-icon-hide" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                            <span id="filter-toggle-text">Ocultar Filtros</span>
+                        </button>
+                    </div>
+
+                    <!-- Filtros Ativos (visível quando filtros estão ocultos) -->
+                    <div id="active-filters-summary" class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 hidden">
+                        <div class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                            </svg>
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-blue-900 mb-2">Filtros Ativos:</p>
+                                <div id="active-filters-list" class="flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Filtros -->
+                    <div id="filters-container" class="mb-6 bg-gray-100 p-4 rounded-lg">
                         <form id="filter-form" action="{{ route('produtos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-1">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
@@ -164,26 +192,58 @@
                                 @endif
                             </div>
 
-                            <div>
-                                <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Início)</label>
-                                <input type="date" name="data_inicio" id="data_inicio" value="{{ $filters['data_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
+                            <!-- Seção de Filtros por Data -->
+                            <div class="md:col-span-4 border-t pt-4 mt-2">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">Filtro por Datas</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    
+                                    <!-- Data de Cadastro -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data de Cadastro</label>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <label for="data_inicio" class="block text-xs text-gray-600 mb-1">Início</label>
+                                                <input type="date" name="data_inicio" id="data_inicio" value="{{ $filters['data_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                            <div>
+                                                <label for="data_fim" class="block text-xs text-gray-600 mb-1">Fim</label>
+                                                <input type="date" name="data_fim" id="data_fim" value="{{ $filters['data_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div>
-                                <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro (Fim)</label>
-                                <input type="date" name="data_fim" id="data_fim" value="{{ $filters['data_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
+                                    <!-- Data Prevista Produção -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Prevista Produção</label>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <label for="data_prevista_inicio" class="block text-xs text-gray-600 mb-1">Início</label>
+                                                <input type="date" name="data_prevista_inicio" id="data_prevista_inicio" value="{{ $filters['data_prevista_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                            <div>
+                                                <label for="data_prevista_fim" class="block text-xs text-gray-600 mb-1">Fim</label>
+                                                <input type="date" name="data_prevista_fim" id="data_prevista_fim" value="{{ $filters['data_prevista_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div>
-                                <label for="data_prevista_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista Produção (Início)</label>
-                                <input type="date" name="data_prevista_inicio" id="data_prevista_inicio" value="{{ $filters['data_prevista_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            </div>
+                                    <!-- Data Prevista Facção -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Prevista Facção</label>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <label for="data_prevista_faccao_inicio" class="block text-xs text-gray-600 mb-1">Início</label>
+                                                <input type="date" name="data_prevista_faccao_inicio" id="data_prevista_faccao_inicio" value="{{ $filters['data_prevista_faccao_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                            <div>
+                                                <label for="data_prevista_faccao_fim" class="block text-xs text-gray-600 mb-1">Fim</label>
+                                                <input type="date" name="data_prevista_faccao_fim" id="data_prevista_faccao_fim" value="{{ $filters['data_prevista_faccao_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div>
-                                <label for="data_prevista_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista Produção (Fim)</label>
-                                <input type="date" name="data_prevista_fim" id="data_prevista_fim" value="{{ $filters['data_prevista_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </div>
                             </div>
-
 
                             <div class="md:col-span-4 flex justify-end space-x-2">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -452,19 +512,136 @@
                 });
             }
 
-            const toggleButton = document.getElementById('toggle-filters');
-            const filterContainer = document.getElementById('filter-container');
+            // Sistema de Toggle de Filtros com Filtros Ativos
+            const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
+            const filtersContainer = document.getElementById('filters-container');
+            const activeFiltersSummary = document.getElementById('active-filters-summary');
+            const activeFiltersList = document.getElementById('active-filters-list');
+            const filterToggleText = document.getElementById('filter-toggle-text');
+            const filterIconShow = document.getElementById('filter-icon-show');
+            const filterIconHide = document.getElementById('filter-icon-hide');
 
-            // Only add event listener if the toggle button exists
-            if (toggleButton && filterContainer) {
-                toggleButton.addEventListener('click', function() {
-                    if (filterContainer.style.display === 'none') {
-                        filterContainer.style.display = 'block';
-                        toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>';
-                    } else {
-                        filterContainer.style.display = 'none';
-                        toggleButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>';
+            // Mapeamento de nomes de filtros para labels amigáveis
+            const filterLabels = {
+                'referencia': 'Referência',
+                'descricao': 'Descrição',
+                'concluido': 'Status',
+                'incluir_excluidos': 'Incluir Excluídos',
+                'marca_id': 'Marca',
+                'tecido_id': 'Tecido',
+                'estilista_id': 'Estilista',
+                'grupo_id': 'Grupo',
+                'status_id': 'Status',
+                'localizacao_id': 'Localização',
+                'situacao_id': 'Situação',
+                'data_inicio': 'Data Cadastro (De)',
+                'data_fim': 'Data Cadastro (Até)',
+                'data_prevista_inicio': 'Data Prev. Produção (De)',
+                'data_prevista_fim': 'Data Prev. Produção (Até)',
+                'data_prevista_faccao_inicio': 'Data Prev. Facção (De)',
+                'data_prevista_faccao_fim': 'Data Prev. Facção (Até)'
+            };
+
+            // Função para obter o texto de um select pelo valor
+            function getSelectText(selectId, value) {
+                const select = document.getElementById(selectId);
+                if (!select) return value;
+                const option = select.querySelector(`option[value="${value}"]`);
+                return option ? option.textContent.trim() : value;
+            }
+
+            // Função para atualizar a lista de filtros ativos
+            function updateActiveFilters() {
+                const filters = @json($filters ?? []);
+                activeFiltersList.innerHTML = '';
+                
+                let hasActiveFilters = false;
+                
+                Object.keys(filters).forEach(key => {
+                    const value = filters[key];
+                    if (value && value !== '' && key !== 'page') {
+                        hasActiveFilters = true;
+                        let displayValue = value;
+                        
+                        // Formatar valor baseado no tipo de filtro
+                        if (key === 'concluido') {
+                            displayValue = value === '1' ? 'Concluídos' : 'Não Concluídos';
+                        } else if (key === 'incluir_excluidos') {
+                            displayValue = 'Sim';
+                        } else if (key.endsWith('_id')) {
+                            displayValue = getSelectText(key, value);
+                        } else if (key.includes('data_')) {
+                            // Formatar datas
+                            const date = new Date(value + 'T00:00:00');
+                            displayValue = date.toLocaleDateString('pt-BR');
+                        }
+                        
+                        const badge = document.createElement('span');
+                        badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+                        badge.innerHTML = `
+                            <span class="font-semibold mr-1">${filterLabels[key] || key}:</span>
+                            <span>${displayValue}</span>
+                        `;
+                        activeFiltersList.appendChild(badge);
                     }
+                });
+                
+                return hasActiveFilters;
+            }
+
+            // Função para alternar visibilidade dos filtros
+            function toggleFilters() {
+                const isHidden = filtersContainer.classList.contains('hidden');
+                
+                if (isHidden) {
+                    // Mostrar filtros
+                    filtersContainer.classList.remove('hidden');
+                    activeFiltersSummary.classList.add('hidden');
+                    filterToggleText.textContent = 'Ocultar Filtros';
+                    filterIconShow.classList.remove('hidden');
+                    filterIconHide.classList.add('hidden');
+                    localStorage.setItem('produtos_filters_visible', 'true');
+                } else {
+                    // Ocultar filtros
+                    filtersContainer.classList.add('hidden');
+                    const hasFilters = updateActiveFilters();
+                    if (hasFilters) {
+                        activeFiltersSummary.classList.remove('hidden');
+                    }
+                    filterToggleText.textContent = 'Mostrar Filtros';
+                    filterIconShow.classList.add('hidden');
+                    filterIconHide.classList.remove('hidden');
+                    localStorage.setItem('produtos_filters_visible', 'false');
+                }
+            }
+
+            // Event listener para o botão de toggle
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', toggleFilters);
+            }
+
+            // Restaurar estado dos filtros do localStorage
+            const filtersVisible = localStorage.getItem('produtos_filters_visible');
+            if (filtersVisible === 'false') {
+                // Ocultar filtros na carga da página
+                filtersContainer.classList.add('hidden');
+                const hasFilters = updateActiveFilters();
+                if (hasFilters) {
+                    activeFiltersSummary.classList.remove('hidden');
+                }
+                filterToggleText.textContent = 'Mostrar Filtros';
+                filterIconShow.classList.add('hidden');
+                filterIconHide.classList.remove('hidden');
+            }
+
+            // Atualizar filtros ativos na carga inicial
+            updateActiveFilters();
+
+            // Ao submeter o formulário de filtros, ocultar automaticamente
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Marcar que os filtros devem estar ocultos após o submit
+                    localStorage.setItem('produtos_filters_visible', 'false');
                 });
             }
         });

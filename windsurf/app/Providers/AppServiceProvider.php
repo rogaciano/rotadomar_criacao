@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use App\Models\Produto;
+use App\Observers\ProdutoObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
             Gate::before(fn ($user, $ability) => true);
         }
 
-        //
+        // Registrar Observer de Produto
+        Produto::observe(ProdutoObserver::class);
     }
 }

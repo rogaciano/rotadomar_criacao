@@ -6,6 +6,7 @@ use App\Http\Controllers\EstilistaController;
 use App\Http\Controllers\MarcaController;
 use App\Http\Controllers\GrupoProdutoController;
 use App\Http\Controllers\LocalizacaoController;
+use App\Http\Controllers\LocalizacaoCapacidadeMensalController;
 use App\Http\Controllers\TipoController;
 use App\Http\Controllers\SituacaoController;
 use App\Http\Controllers\StatusController;
@@ -94,6 +95,12 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
 
     // Routes para Localização
     Route::resource('localizacoes', LocalizacaoController::class);
+
+    // Routes para Capacidade Mensal das Localizações
+    Route::get('localizacao-capacidade/dashboard', [LocalizacaoCapacidadeMensalController::class, 'dashboard'])->name('localizacao-capacidade.dashboard');
+    Route::post('localizacao-capacidade/sugerir-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'sugerirRedistribuicao'])->name('localizacao-capacidade.sugerir-redistribuicao');
+    Route::post('localizacao-capacidade/aplicar-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'aplicarRedistribuicao'])->name('localizacao-capacidade.aplicar-redistribuicao');
+    Route::resource('localizacao-capacidade', LocalizacaoCapacidadeMensalController::class);
 
     // Routes para Tipos
     Route::resource('tipos', TipoController::class);

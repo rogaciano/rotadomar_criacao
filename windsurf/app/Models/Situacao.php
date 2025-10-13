@@ -15,11 +15,13 @@ class Situacao extends Model
     protected $fillable = [
         'descricao',
         'ativo',
+        'prazo',
         'observacoes'
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
+        'prazo' => 'integer',
         'observacoes' => 'string'
     ];
 

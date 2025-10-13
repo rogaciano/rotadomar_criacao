@@ -60,6 +60,7 @@ class LocalizacaoController extends Controller
         $validated = $request->validate([
             'nome_localizacao' => 'required|string|max:255',
             'prazo' => 'nullable|integer|min:0',
+            'capacidade' => 'nullable|integer|min:0',
             'ativo' => 'sometimes|boolean',
         ]);
         
@@ -119,6 +120,7 @@ class LocalizacaoController extends Controller
         $validated = $request->validate([
             'nome_localizacao' => 'required|string|max:255',
             'prazo' => 'nullable|integer|min:0',
+            'capacidade' => 'nullable|integer|min:0',
             'ativo' => 'sometimes|boolean',
         ]);
         

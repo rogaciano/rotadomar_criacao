@@ -17,11 +17,13 @@ class Localizacao extends Model
         'nome_localizacao',
         'ativo',
         'prazo',
+        'capacidade',
         'observacoes'
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
+        'capacidade' => 'integer',
         'observacoes' => 'string'
     ];
 

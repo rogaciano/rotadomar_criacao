@@ -31,6 +31,15 @@
                                 @enderror
                             </div>
 
+                            <!-- Capacidade -->
+                            <div>
+                                <label for="capacidade" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Capacidade') }}</label>
+                                <input id="capacidade" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" type="number" name="capacidade" value="{{ old('capacidade') }}" min="0" />
+                                @error('capacidade')
+                                    <span class="text-red-600 text-sm mt-2">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             <!-- Status -->
                             <div class="flex items-center mt-8">
                                 <input id="ativo" name="ativo" type="checkbox" value="1" {{ old('ativo', true) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">

@@ -69,6 +69,12 @@
                                 <input type="date" name="data_prevista_producao" id="data_prevista_producao" value="{{ old('data_prevista_producao', $produto->data_prevista_producao ? $produto->data_prevista_producao->format('Y-m-d') : '') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             </div>
 
+                            <!-- Data Prevista para Facção -->
+                            <div>
+                                <label for="data_prevista_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Facção</label>
+                                <input type="date" name="data_prevista_faccao" id="data_prevista_faccao" value="{{ old('data_prevista_faccao', $produto->data_prevista_faccao ? $produto->data_prevista_faccao->format('Y-m-d') : '') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            </div>
+
                             <!-- Marca -->
                             <div>
                                 <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
@@ -139,6 +145,19 @@
                                 </select>
                             </div>
 
+                            <!-- Localização Prevista -->
+                            <div>
+                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização Prevista</label>
+                                <select name="localizacao_id" id="localizacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700 bg-white">
+                                    <option value="">Selecione uma localização</option>
+                                    @foreach($localizacoes as $localizacao)
+                                        <option value="{{ $localizacao->id }}" {{ old('localizacao_id', $produto->localizacao_id) == $localizacao->id ? 'selected' : '' }} class="text-gray-700">
+                                            {{ $localizacao->nome_localizacao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Localização prevista para onde o produto será encaminhado na produção</p>
+                            </div>
 
                             <!-- Anexos Flexíveis -->
                             <div class="col-span-1 md:col-span-2">

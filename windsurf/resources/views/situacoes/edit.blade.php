@@ -28,6 +28,15 @@
                     </div>
                     
                     <div class="mb-4">
+                        <label for="prazo" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Prazo (dias)') }}</label>
+                        <input id="prazo" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" type="number" name="prazo" value="{{ old('prazo', $situacao->prazo) }}" min="0" />
+                        <p class="text-xs text-gray-500 mt-1">Prazo em dias úteis. Se definido, tem prioridade sobre o prazo da localização.</p>
+                        @error('prazo')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <div class="mb-4">
                         <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Observações') }}</label>
                         <textarea id="observacoes" name="observacoes" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ old('observacoes', $situacao->observacoes) }}</textarea>
                         @error('observacoes')

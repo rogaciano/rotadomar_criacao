@@ -61,6 +61,11 @@
                             </div>
 
                             <div>
+                                <span class="block text-sm font-medium text-gray-500">Data Prevista para Facção</span>
+                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_faccao ? $produto->data_prevista_faccao->format('d/m/Y') : 'N/A' }}</span>
+                            </div>
+
+                            <div>
                                 <span class="block text-sm font-medium text-gray-500">Marca</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
                             </div>
@@ -86,6 +91,19 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                         {{ $produto->status ? $produto->status->descricao : 'N/A' }}
                                     </span>
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="block text-sm font-medium text-gray-500">Localização Prevista</span>
+                                <span class="block mt-1">
+                                    @if($produto->localizacao)
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                            {{ $produto->localizacao->nome_localizacao }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 text-sm italic">Não definida</span>
+                                    @endif
                                 </span>
                             </div>
 

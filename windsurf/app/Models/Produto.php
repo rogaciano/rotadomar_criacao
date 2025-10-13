@@ -17,6 +17,7 @@ class Produto extends Model
         'descricao',
         'data_cadastro',
         'data_prevista_producao',
+        'data_prevista_faccao',
         'marca_id',
         'quantidade',
         'estilista_id',
@@ -24,6 +25,7 @@ class Produto extends Model
         'preco_atacado',
         'preco_varejo',
         'status_id',
+        'localizacao_id',
         'anexo_ficha_producao',
         'anexo_catalogo_vendas'
     ];
@@ -31,6 +33,7 @@ class Produto extends Model
     protected $casts = [
         'data_cadastro' => 'date',
         'data_prevista_producao' => 'date',
+        'data_prevista_faccao' => 'date',
         'preco_atacado' => 'decimal:2',
         'preco_varejo' => 'decimal:2',
         'quantidade' => 'integer'
@@ -72,6 +75,11 @@ class Produto extends Model
     public function status()
     {
         return $this->belongsTo(Status::class);
+    }
+
+    public function localizacao()
+    {
+        return $this->belongsTo(\App\Models\Localizacao::class);
     }
 
     public function movimentacoes()

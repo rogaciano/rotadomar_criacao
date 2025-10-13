@@ -196,6 +196,16 @@ class ProdutoController extends Controller
             $query->whereDate('data_prevista_producao', '<=', $filters['data_prevista_fim']);
         }
 
+        // Filtro por data prevista de facção (início)
+        if (!empty($filters['data_prevista_faccao_inicio'])) {
+            $query->whereDate('data_prevista_faccao', '>=', $filters['data_prevista_faccao_inicio']);
+        }
+
+        // Filtro por data prevista de facção (fim)
+        if (!empty($filters['data_prevista_faccao_fim'])) {
+            $query->whereDate('data_prevista_faccao', '<=', $filters['data_prevista_faccao_fim']);
+        }
+
         $produtos = $query->orderBy('referencia')->paginate(10);
 
         // Buscar dados para os selects de filtro
@@ -228,8 +238,9 @@ class ProdutoController extends Controller
         $estilistas = Estilista::where('ativo', true)->orderBy('nome_estilista')->get();
         $grupos = GrupoProduto::where('ativo', true)->orderBy('descricao')->get();
         $statuses = Status::where('ativo', true)->orderBy('descricao')->get();
+        $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
 
-        return view('produtos.create', compact('marcas', 'tecidos', 'estilistas', 'grupos', 'statuses'));
+        return view('produtos.create', compact('marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes'));
     }
 
     /**
@@ -258,6 +269,9 @@ class ProdutoController extends Controller
         $validator = Validator::make($request->all(), [
             'referencia' => 'required|string|max:50|unique:produtos,referencia',
             'descricao' => 'required|string|max:255',
+            'data_cadastro' => 'nullable|date',
+            'data_prevista_producao' => 'nullable|date',
+            'data_prevista_faccao' => 'nullable|date',
             'marca_id' => 'required|exists:marcas,id',
             'tecidos' => 'required|array|min:1',
             'tecidos.*.tecido_id' => 'required|exists:tecidos,id',
@@ -358,6 +372,7 @@ class ProdutoController extends Controller
             'estilista', 
             'grupoProduto', 
             'status',
+            'localizacao',
             'combinacoes' => function($query) {
                 $query->with(['componentes' => function($q) {
                     $q->with('tecido:id,descricao');
@@ -434,8 +449,9 @@ class ProdutoController extends Controller
         $estilistas = Estilista::where('ativo', true)->orderBy('nome_estilista')->get();
         $grupos = GrupoProduto::where('ativo', true)->orderBy('descricao')->get();
         $statuses = Status::where('ativo', true)->orderBy('descricao')->get();
+        $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
 
-        return view('produtos.edit', compact('produto', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses'));
+        return view('produtos.edit', compact('produto', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes'));
     }
 
     /**
@@ -470,6 +486,9 @@ class ProdutoController extends Controller
         // Custom validation rules
         $rules = [
             'descricao' => 'required|string|max:255',
+            'data_cadastro' => 'nullable|date',
+            'data_prevista_producao' => 'nullable|date',
+            'data_prevista_faccao' => 'nullable|date',
             'marca_id' => 'required|exists:marcas,id',
             'tecidos' => 'required|array|min:1',
             'tecidos.*.tecido_id' => 'required|exists:tecidos,id',
@@ -976,6 +995,15 @@ class ProdutoController extends Controller
 
             if (!empty($filters['data_prevista_fim'])) {
                 $query->whereDate('data_prevista_producao', '<=', $filters['data_prevista_fim']);
+            }
+            
+            // Filtro por data prevista de facção
+            if (!empty($filters['data_prevista_faccao_inicio'])) {
+                $query->whereDate('data_prevista_faccao', '>=', $filters['data_prevista_faccao_inicio']);
+            }
+
+            if (!empty($filters['data_prevista_faccao_fim'])) {
+                $query->whereDate('data_prevista_faccao', '<=', $filters['data_prevista_faccao_fim']);
             }
             
             // Skip the count check and proceed directly to PDF generation
