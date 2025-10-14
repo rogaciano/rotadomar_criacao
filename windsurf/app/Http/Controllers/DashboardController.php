@@ -230,9 +230,9 @@ class DashboardController extends Controller
                 $previsto = $capacidadeMensal ? $capacidadeMensal->getProdutosPrevistos() : 0;
                 
                 $dadosPorMes[] = [
-                    'capacidade' => $capacidade,
-                    'previsto' => $previsto,
-                    'saldo' => $capacidade - $previsto,
+                    'capacidade' => (int) $capacidade,
+                    'previsto' => (int) $previsto,
+                    'saldo' => (int) ($capacidade - $previsto),
                     'percentual' => $capacidade > 0 ? round(($previsto / $capacidade) * 100, 1) : 0
                 ];
             }

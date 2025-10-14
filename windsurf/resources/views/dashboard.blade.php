@@ -255,14 +255,67 @@
                         Capacidade de Localizações - Próximos 3 Meses
                     </h3>
                     <p class="text-sm text-gray-500 mt-1">
-                        Duas colunas por mês: <strong class="text-blue-600">Capacidade</strong> (esquerda, tons frios) e <strong class="text-orange-600">Previsto</strong> (direita, tons quentes), cada uma empilhada por localização
+                        Comparação entre <strong class="text-blue-600">Capacidade Total</strong> e <strong class="text-orange-600">Previsto Total</strong> de todas as localizações
                         <span class="text-xs text-gray-400 ml-2">({{ count($capacidadeLocalizacoes) }} localização(ões))</span>
+                    </p>
+                    <p class="text-xs text-purple-600 mt-2 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                        </svg>
+                        <strong>Clique em um mês</strong> para ver detalhamento por localização
                     </p>
                 </div>
                 <div class="p-6" style="height: 400px;">
-                    <canvas id="capacidadeLocalizacoesChart"></canvas>
+                    <canvas id="capacidadeLocalizacoesChart" style="cursor: pointer;"></canvas>
                 </div>
             </div>
+
+            <!-- Modal de Detalhamento por Mês -->
+            <div id="modalDetalhamentoMes" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b">
+                        <h3 class="text-xl font-semibold text-gray-900" id="modalTitulo">Detalhamento - Mês</h3>
+                        <button onclick="fecharModalDetalhamento()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Capacidade</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Previsto</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ocupação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaDetalhamento" class="bg-white divide-y divide-gray-200">
+                                    <!-- Conteúdo será preenchido via JavaScript -->
+                                </tbody>
+                                <tfoot class="bg-gray-100 font-semibold">
+                                    <tr>
+                                        <td class="px-6 py-3 text-left text-sm text-gray-900">Total</td>
+                                        <td id="totalCapacidade" class="px-6 py-3 text-right text-sm text-gray-900"></td>
+                                        <td id="totalPrevisto" class="px-6 py-3 text-right text-sm text-gray-900"></td>
+                                        <td id="totalSaldo" class="px-6 py-3 text-right text-sm text-gray-900"></td>
+                                        <td id="totalOcupacao" class="px-6 py-3 text-right text-sm text-gray-900"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button onclick="fecharModalDetalhamento()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             @elseif(isset($capacidadeLocalizacoes))
             <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                 <div class="flex items-center">
@@ -601,73 +654,44 @@
                 const capacidadeDados = @json($capacidadeLocalizacoes);
                 const mesesLabelsCapacidade = @json(array_column($mesesCapacidade, 'label'));
 
-                // Cores para Capacidade (tons frios/claros)
-                const coresCapacidade = [
-                    { bg: 'rgba(59, 130, 246, 0.8)', border: 'rgba(59, 130, 246, 1)' },      // Azul
-                    { bg: 'rgba(16, 185, 129, 0.8)', border: 'rgba(16, 185, 129, 1)' },     // Verde
-                    { bg: 'rgba(139, 92, 246, 0.8)', border: 'rgba(139, 92, 246, 1)' },     // Roxo
-                    { bg: 'rgba(6, 182, 212, 0.8)', border: 'rgba(6, 182, 212, 1)' },       // Ciano
-                    { bg: 'rgba(20, 184, 166, 0.8)', border: 'rgba(20, 184, 166, 1)' },     // Teal
-                    { bg: 'rgba(14, 165, 233, 0.8)', border: 'rgba(14, 165, 233, 1)' },     // Azul Céu
-                    { bg: 'rgba(34, 197, 94, 0.8)', border: 'rgba(34, 197, 94, 1)' },       // Verde Lima
-                    { bg: 'rgba(168, 85, 247, 0.8)', border: 'rgba(168, 85, 247, 1)' },     // Violeta
-                    { bg: 'rgba(56, 189, 248, 0.8)', border: 'rgba(56, 189, 248, 1)' },     // Azul Claro
-                    { bg: 'rgba(45, 212, 191, 0.8)', border: 'rgba(45, 212, 191, 1)' }      // Turquesa
-                ];
+                // Calcular totais por mês
+                const totalCapacidadePorMes = Array(mesesLabelsCapacidade.length).fill(0);
+                const totalPrevistoPorMes = Array(mesesLabelsCapacidade.length).fill(0);
 
-                // Cores para Previsto (tons quentes/escuros)
-                const coresPrevisto = [
-                    { bg: 'rgba(249, 115, 22, 0.8)', border: 'rgba(249, 115, 22, 1)' },     // Laranja
-                    { bg: 'rgba(239, 68, 68, 0.8)', border: 'rgba(239, 68, 68, 1)' },       // Vermelho
-                    { bg: 'rgba(234, 179, 8, 0.8)', border: 'rgba(234, 179, 8, 1)' },       // Amarelo
-                    { bg: 'rgba(251, 146, 60, 0.8)', border: 'rgba(251, 146, 60, 1)' },     // Laranja Claro
-                    { bg: 'rgba(236, 72, 153, 0.8)', border: 'rgba(236, 72, 153, 1)' },     // Rosa
-                    { bg: 'rgba(220, 38, 38, 0.8)', border: 'rgba(220, 38, 38, 1)' },       // Vermelho Escuro
-                    { bg: 'rgba(217, 119, 6, 0.8)', border: 'rgba(217, 119, 6, 1)' },       // Âmbar
-                    { bg: 'rgba(244, 63, 94, 0.8)', border: 'rgba(244, 63, 94, 1)' },       // Rosa Forte
-                    { bg: 'rgba(251, 191, 36, 0.8)', border: 'rgba(251, 191, 36, 1)' },     // Amarelo Claro
-                    { bg: 'rgba(219, 39, 119, 0.8)', border: 'rgba(219, 39, 119, 1)' }      // Pink
-                ];
-
-                // Preparar datasets - Capacidade empilhada em uma coluna
-                const datasetsCapacidade = [];
-
-                capacidadeDados.forEach((loc, index) => {
-                    const cor = coresCapacidade[index % coresCapacidade.length];
-
-                    // Dataset de Capacidade (todas empilhadas na mesma coluna "Capacidade")
-                    datasetsCapacidade.push({
-                        label: loc.nome,
-                        data: loc.dados.map(d => d.capacidade),
-                        backgroundColor: cor.bg,
-                        borderColor: cor.border,
-                        borderWidth: 1,
-                        stack: 'Capacidade',
-                        tipo: 'capacidade'
+                capacidadeDados.forEach(loc => {
+                    loc.dados.forEach((dado, index) => {
+                        // Garantir conversão para número inteiro
+                        const capacidade = parseInt(dado.capacidade) || 0;
+                        const previsto = parseInt(dado.previsto) || 0;
+                        
+                        totalCapacidadePorMes[index] += capacidade;
+                        totalPrevistoPorMes[index] += previsto;
                     });
                 });
 
-                // Dataset de Previsto (todas empilhadas na mesma coluna "Previsto")
-                capacidadeDados.forEach((loc, index) => {
-                    const cor = coresPrevisto[index % coresPrevisto.length];
-
-                    datasetsCapacidade.push({
-                        label: loc.nome,
-                        data: loc.dados.map(d => d.previsto),
-                        backgroundColor: cor.bg,
-                        borderColor: cor.border,
-                        borderWidth: 1,
-                        stack: 'Previsto',
-                        tipo: 'previsto'
-                    });
-                });
+                // Preparar datasets com os totais
+                const datasets = [{
+                    label: 'Capacidade Total',
+                    data: totalCapacidadePorMes,
+                    backgroundColor: '#3B82F6',
+                    borderColor: '#2563EB',
+                    borderWidth: 1,
+                    tipo: 'capacidade'
+                }, {
+                    label: 'Previsto Total',
+                    data: totalPrevistoPorMes,
+                    backgroundColor: '#F97316',
+                    borderColor: '#EA580C',
+                    borderWidth: 1,
+                    tipo: 'previsto'
+                }];
 
                 try {
                     const capacidadeLocalizacoesChart = new Chart(capacidadeLocalizacoesCtx.getContext('2d'), {
                         type: 'bar',
                         data: {
                             labels: mesesLabelsCapacidade,
-                            datasets: datasetsCapacidade
+                            datasets: datasets
                         },
                         options: {
                             responsive: true,
@@ -682,62 +706,76 @@
                                     grid: {
                                         display: false
                                     },
-                                    categoryPercentage: 0.95,
-                                    barPercentage: 1.0
+                                    ticks: {
+                                        font: {
+                                            size: 11
+                                        }
+                                    },
+                                    categoryPercentage: 0.8,
+                                    barPercentage: 0.9
                                 },
                                 y: {
-                                    stacked: true,
+                                    stacked: false,
                                     beginAtZero: true,
                                     ticks: {
-                                        precision: 0
+                                        precision: 0,
+                                        callback: function(value) {
+                                            return value.toLocaleString('pt-BR');
+                                        }
                                     },
                                     title: {
                                         display: true,
-                                        text: 'Quantidade de Produtos'
+                                        text: 'Quantidade de Produtos',
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
                                     }
+                                }
+                            },
+                            onClick: (event, activeElements) => {
+                                if (activeElements.length > 0) {
+                                    const index = activeElements[0].index;
+                                    const mesLabel = mesesLabelsCapacidade[index];
+                                    abrirModalDetalhamento(index, mesLabel);
                                 }
                             },
                             plugins: {
                                 legend: {
-                                    display: false
+                                    display: true,
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            size: 12
+                                        },
+                                        padding: 15,
+                                        usePointStyle: true
+                                    }
                                 },
                                 tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
                                     callbacks: {
                                         title: function(context) {
-                                            // Mostra o mês
+                                            // Mostra o mês no título do tooltip
                                             return context[0].label;
                                         },
                                         label: function(context) {
-                                            const label = context.dataset.label || '';
+                                            let label = context.dataset.label || '';
                                             const value = context.parsed.y;
-                                            const tipo = context.dataset.tipo === 'capacidade' ? 'Capacidade' : 'Previsto';
-                                            return label + ' (' + tipo + '): ' + value + ' produtos';
+                                            return `${label}: ${value}`;
                                         },
-                                        afterLabel: function(context) {
-                                            // Mostrar a diferença na coluna de Previsto
-                                            if (context.dataset.tipo === 'previsto') {
-                                                const locIndex = context.datasetIndex - capacidadeDados.length;
-                                                const mesIndex = context.dataIndex;
-                                                const capacidade = capacidadeDados[locIndex].dados[mesIndex].capacidade;
-                                                const previsto = capacidadeDados[locIndex].dados[mesIndex].previsto;
-                                                const saldo = capacidade - previsto;
-                                                const percentual = capacidade > 0 ? ((previsto / capacidade) * 100).toFixed(1) : 0;
-                                                return 'Saldo: ' + saldo + ' | Ocupação: ' + percentual + '%';
-                                            }
-                                            return '';
-                                        },
-                                        footer: function(context) {
-                                            // Calcular total do stack
-                                            const stack = context[0].dataset.stack;
-                                            let total = 0;
-
-                                            context[0].chart.data.datasets.forEach((dataset, index) => {
-                                                if (dataset.stack === stack) {
-                                                    total += dataset.data[context[0].dataIndex] || 0;
-                                                }
-                                            });
-
-                                            return '─────────────\nTotal ' + stack + ': ' + total + ' produtos';
+                                        footer: function(tooltipItems) {
+                                            const capacidade = tooltipItems.find(item => item.dataset.tipo === 'capacidade')?.parsed.y || 0;
+                                            const previsto = tooltipItems.find(item => item.dataset.tipo === 'previsto')?.parsed.y || 0;
+                                            
+                                            const saldo = capacidade - previsto;
+                                            const ocupacao = capacidade > 0 ? ((previsto / capacidade) * 100).toFixed(1) : 0;
+                                            
+                                            return `\nSaldo: ${saldo} | Ocupação: ${ocupacao}%`;
                                         }
                                     }
                                 }
@@ -749,6 +787,115 @@
                 }
             }
             @endif
+
+            // Funções globais para o modal de detalhamento
+            window.abrirModalDetalhamento = function(mesIndex, mesLabel) {
+                @if(isset($capacidadeLocalizacoes) && count($capacidadeLocalizacoes) > 0)
+                const dados = @json($capacidadeLocalizacoes);
+                const modal = document.getElementById('modalDetalhamentoMes');
+                const titulo = document.getElementById('modalTitulo');
+                const tbody = document.getElementById('tabelaDetalhamento');
+                
+                // Atualizar título
+                titulo.textContent = `Detalhamento - ${mesLabel}`;
+                
+                // Limpar tabela
+                tbody.innerHTML = '';
+                
+                // Totais
+                let totalCap = 0;
+                let totalPrev = 0;
+                let totalSaldo = 0;
+                
+                // Preencher tabela com dados de cada localização
+                dados.forEach(loc => {
+                    const dadoMes = loc.dados[mesIndex];
+                    const capacidade = parseInt(dadoMes.capacidade) || 0;
+                    const previsto = parseInt(dadoMes.previsto) || 0;
+                    const saldo = capacidade - previsto;
+                    const ocupacao = capacidade > 0 ? ((previsto / capacidade) * 100).toFixed(1) : 0;
+                    
+                    totalCap += capacidade;
+                    totalPrev += previsto;
+                    totalSaldo += saldo;
+                    
+                    const saldoClass = saldo >= 0 ? 'text-green-600' : 'text-red-600';
+                    const ocupacaoClass = ocupacao > 100 ? 'text-red-600 font-semibold' : (ocupacao > 80 ? 'text-yellow-600' : 'text-green-600');
+                    
+                    const row = `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                ${loc.nome}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                ${capacidade.toLocaleString('pt-BR')}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                                ${previsto.toLocaleString('pt-BR')}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm ${saldoClass} text-right font-medium">
+                                ${saldo.toLocaleString('pt-BR')}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm ${ocupacaoClass} text-right font-medium">
+                                ${ocupacao}%
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+                
+                // Atualizar totais
+                const totalOcupacao = totalCap > 0 ? ((totalPrev / totalCap) * 100).toFixed(1) : 0;
+                const totalSaldoClass = totalSaldo >= 0 ? 'text-green-600' : 'text-red-600';
+                const totalOcupacaoClass = totalOcupacao > 100 ? 'text-red-600' : (totalOcupacao > 80 ? 'text-yellow-600' : 'text-green-600');
+                
+                document.getElementById('totalCapacidade').textContent = totalCap.toLocaleString('pt-BR');
+                document.getElementById('totalPrevisto').textContent = totalPrev.toLocaleString('pt-BR');
+                document.getElementById('totalSaldo').innerHTML = `<span class="${totalSaldoClass} font-bold">${totalSaldo.toLocaleString('pt-BR')}</span>`;
+                document.getElementById('totalOcupacao').innerHTML = `<span class="${totalOcupacaoClass} font-bold">${totalOcupacao}%</span>`;
+                
+                // Mostrar modal
+                modal.classList.remove('hidden');
+                @endif
+            }
+            
+            window.fecharModalDetalhamento = function() {
+                console.log('Fechando modal...');
+                const modal = document.getElementById('modalDetalhamentoMes');
+                if (modal) {
+                    modal.classList.add('hidden');
+                    console.log('Modal fechado!');
+                } else {
+                    console.error('Modal não encontrado!');
+                }
+            }
+            
+            // Confirmar que as funções estão disponíveis
+            console.log('Funções do modal registradas:', {
+                fechar: typeof window.fecharModalDetalhamento,
+                abrir: typeof window.abrirModalDetalhamento
+            });
+            
+            // Configurar eventos do modal (fechar ao clicar fora ou pressionar ESC)
+            setTimeout(function() {
+                const modal = document.getElementById('modalDetalhamentoMes');
+                if (modal) {
+                    // Fechar ao clicar no backdrop
+                    modal.addEventListener('click', function(e) {
+                        if (e.target === this) {
+                            window.fecharModalDetalhamento();
+                        }
+                    });
+                }
+                
+                // Fechar ao pressionar ESC
+                document.addEventListener('keydown', function(e) {
+                    const modal = document.getElementById('modalDetalhamentoMes');
+                    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                        window.fecharModalDetalhamento();
+                    }
+                });
+            }, 100);
 
             // Adicionar evento de clique ao botão de filtrar
             document.getElementById('btnFiltrarAno').addEventListener('click', function() {
