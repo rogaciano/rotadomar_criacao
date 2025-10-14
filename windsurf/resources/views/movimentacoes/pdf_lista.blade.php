@@ -84,6 +84,7 @@
         </div>
 
         <!-- Resumo dos filtros aplicados -->
+        @isset($request)
         <div class="filters-summary">
             <div style="font-weight: bold; margin-bottom: 5px;">Filtros aplicados:</div>
             @php
@@ -99,44 +100,28 @@
 
             @if($request->filled('produto_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Produto:</span>
-                    @php
-                        $produtoSelecionado = $produtos->firstWhere('id', $request->produto_id);
-                    @endphp
-                    {{ $produtoSelecionado ? $produtoSelecionado->referencia . ' - ' . $produtoSelecionado->descricao : 'N/A' }}
+                    <span class="filter-label">Produto ID:</span> {{ $request->produto_id }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
 
             @if($request->filled('tipo_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Tipo:</span>
-                    @php
-                        $tipoSelecionado = $tipos->firstWhere('id', $request->tipo_id);
-                    @endphp
-                    {{ $tipoSelecionado ? $tipoSelecionado->descricao : 'N/A' }}
+                    <span class="filter-label">Tipo ID:</span> {{ $request->tipo_id }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
 
             @if($request->filled('situacao_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Situação:</span>
-                    @php
-                        $situacaoSelecionada = $situacoes->firstWhere('id', $request->situacao_id);
-                    @endphp
-                    {{ $situacaoSelecionada ? $situacaoSelecionada->descricao : 'N/A' }}
+                    <span class="filter-label">Situação ID:</span> {{ $request->situacao_id }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
 
             @if($request->filled('localizacao_id'))
                 <div class="filter-item">
-                    <span class="filter-label">Localização:</span>
-                    @php
-                        $localizacaoSelecionada = $localizacoes->firstWhere('id', $request->localizacao_id);
-                    @endphp
-                    {{ $localizacaoSelecionada ? $localizacaoSelecionada->nome_localizacao : 'N/A' }}
+                    <span class="filter-label">Localização ID:</span> {{ $request->localizacao_id }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
@@ -165,10 +150,11 @@
                 </div>
             @endif
         </div>
+        @endisset
 
         <!-- Total de registros -->
         <div style="margin-bottom: 10px; font-weight: bold;">
-            Total de registros: {{ $totalRegistros }}
+            Total de registros: {{ count($movimentacoes) }}
         </div>
 
         <!-- Tabela de movimentações -->

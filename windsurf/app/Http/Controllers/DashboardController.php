@@ -173,6 +173,77 @@ class DashboardController extends Controller
             }
         }
 
+        // Dados de Capacidade das Localizações (3 meses: atual + 2 futuros)
+        $mesAtual = Carbon::now()->month;
+        $anoAtual = Carbon::now()->year;
+        
+        $capacidadeLocalizacoes = [];
+        $mesesCapacidade = [];
+        
+        // Gerar os 3 meses (atual + 2 futuros)
+        for ($i = 0; $i < 3; $i++) {
+            $data = Carbon::now()->copy()->addMonths($i);
+            $mesesCapacidade[] = [
+                'mes' => $data->month,
+                'ano' => $data->year,
+                'label' => ucfirst($data->locale('pt_BR')->translatedFormat('F/Y'))
+            ];
+        }
+        
+        // Buscar localizações que possuem capacidade mensal cadastrada nos próximos 3 meses
+        $localizacoesComCapacidade = \App\Models\LocalizacaoCapacidadeMensal::where(function($query) use ($mesesCapacidade) {
+                foreach ($mesesCapacidade as $mesData) {
+                    $query->orWhere(function($q) use ($mesData) {
+                        $q->where('mes', $mesData['mes'])
+                          ->where('ano', $mesData['ano']);
+                    });
+                }
+            })
+            ->where('capacidade', '>', 0)
+            ->distinct()
+            ->pluck('localizacao_id')
+            ->unique()
+            ->toArray();
+        
+        // Se não encontrou localizações com capacidade mensal, retornar vazio
+        if (empty($localizacoesComCapacidade)) {
+            $localizacoes = collect();
+        } else {
+            $localizacoes = \App\Models\Localizacao::where('ativo', true)
+                ->whereIn('id', $localizacoesComCapacidade)
+                ->orderBy('nome_localizacao')
+                ->get();
+        }
+        
+        foreach ($localizacoes as $localizacao) {
+            $dadosPorMes = [];
+            
+            foreach ($mesesCapacidade as $mesData) {
+                // Buscar capacidade mensal
+                $capacidadeMensal = \App\Models\LocalizacaoCapacidadeMensal::where('localizacao_id', $localizacao->id)
+                    ->where('mes', $mesData['mes'])
+                    ->where('ano', $mesData['ano'])
+                    ->first();
+                
+                // Usar apenas capacidade mensal cadastrada
+                $capacidade = $capacidadeMensal ? $capacidadeMensal->capacidade : 0;
+                $previsto = $capacidadeMensal ? $capacidadeMensal->getProdutosPrevistos() : 0;
+                
+                $dadosPorMes[] = [
+                    'capacidade' => $capacidade,
+                    'previsto' => $previsto,
+                    'saldo' => $capacidade - $previsto,
+                    'percentual' => $capacidade > 0 ? round(($previsto / $capacidade) * 100, 1) : 0
+                ];
+            }
+            
+            $capacidadeLocalizacoes[] = [
+                'nome' => $localizacao->nome_localizacao,
+                'nome_reduzido' => $localizacao->nome_reduzido,
+                'dados' => $dadosPorMes
+            ];
+        }
+
         return view('dashboard', compact(
             'totalProdutos',
             'totalMovimentacoes',
@@ -192,7 +263,9 @@ class DashboardController extends Controller
             'produtosAtivosPorEstilista',
             'produtosAtivosPorMes',
             'mesesLabels',
-            'produtosDoSetor'
+            'produtosDoSetor',
+            'capacidadeLocalizacoes',
+            'mesesCapacidade'
         ));
     }
 

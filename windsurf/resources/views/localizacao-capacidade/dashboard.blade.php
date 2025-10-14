@@ -16,6 +16,14 @@
                     </svg>
                     Nova Capacidade
                 </a>
+                
+                <button onclick="openGerarCapacidadesModal()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    Gerar Capacidades do Mês
+                </button>
+                
                 <a href="{{ route('localizacao-capacidade.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -316,6 +324,73 @@
                 <div class="text-center py-4">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                     <p class="mt-2 text-gray-600">Carregando sugestões...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Gerar Capacidades -->
+    <div id="modalGerarCapacidades" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center pb-3 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">Gerar Capacidades do Mês</h3>
+                <button onclick="fecharModalGerarCapacidades()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Esta ação criará registros de capacidade mensal para <strong>todas as localizações ativas</strong> que possuem capacidade maior que zero, usando o valor padrão cadastrado na localização.
+                    </p>
+                </div>
+
+                <div>
+                    <label for="mesGerar" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
+                    <select id="mesGerar" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        @php
+                            $mesesNomes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                            $mesAtual = date('n');
+                        @endphp
+                        @foreach(range(1, 12) as $m)
+                            <option value="{{ $m }}" {{ $m == $mesAtual ? 'selected' : '' }}>
+                                {{ $mesesNomes[$m] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="anoGerar" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+                    <select id="anoGerar" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        @php $anoAtual = date('Y'); @endphp
+                        @foreach(range($anoAtual - 1, $anoAtual + 2) as $a)
+                            <option value="{{ $a }}" {{ $a == $anoAtual ? 'selected' : '' }}>
+                                {{ $a }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p class="text-xs text-yellow-800">
+                        <strong>Atenção:</strong> Registros já existentes para o mesmo mês/ano não serão duplicados.
+                    </p>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-4 border-t">
+                    <button onclick="fecharModalGerarCapacidades()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                        Cancelar
+                    </button>
+                    <button id="btnGerarCapacidades" onclick="gerarCapacidades()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        Gerar Capacidades
+                    </button>
                 </div>
             </div>
         </div>
@@ -635,6 +710,63 @@
         document.getElementById('modalRedistribuicao')?.addEventListener('click', function(e) {
             if (e.target === this) {
                 fecharModalRedistribuicao();
+            }
+        });
+
+        // Modal de Gerar Capacidades
+        function openGerarCapacidadesModal() {
+            document.getElementById('modalGerarCapacidades').classList.remove('hidden');
+        }
+
+        function fecharModalGerarCapacidades() {
+            document.getElementById('modalGerarCapacidades').classList.add('hidden');
+        }
+
+        function gerarCapacidades() {
+            const mes = document.getElementById('mesGerar').value;
+            const ano = document.getElementById('anoGerar').value;
+            
+            if (!mes || !ano) {
+                alert('Por favor, selecione mês e ano');
+                return;
+            }
+
+            const btn = document.getElementById('btnGerarCapacidades');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin h-4 w-4 mr-2 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Gerando...';
+
+            fetch('{{ route("localizacao-capacidade.gerar-mes") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ mes, ano })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    fecharModalGerarCapacidades();
+                    location.reload();
+                } else {
+                    alert(data.message || 'Erro ao gerar capacidades');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao gerar capacidades');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = 'Gerar Capacidades';
+            });
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modalGerarCapacidades')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModalGerarCapacidades();
             }
         });
     </script>

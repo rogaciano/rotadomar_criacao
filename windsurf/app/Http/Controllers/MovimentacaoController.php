@@ -569,7 +569,7 @@ class MovimentacaoController extends Controller
 
         $movimentacoes = $query->get();
 
-        $pdf = PDF::loadView('movimentacoes.pdf_list', compact('movimentacoes'));
+        $pdf = PDF::loadView('movimentacoes.pdf_lista', compact('movimentacoes', 'request'));
         return $pdf->stream('lista_movimentacoes.pdf');
     }
 

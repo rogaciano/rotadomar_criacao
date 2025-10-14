@@ -242,7 +242,44 @@
                     </div>
                 </div>
             </div>
-            <!-- Filtro de Ano -->
+
+            <!-- Gráfico de Capacidade das Localizações -->
+            @if(isset($capacidadeLocalizacoes) && count($capacidadeLocalizacoes) > 0)
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+                <div class="p-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Capacidade de Localizações - Próximos 3 Meses
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Duas colunas por mês: <strong class="text-blue-600">Capacidade</strong> (esquerda, tons frios) e <strong class="text-orange-600">Previsto</strong> (direita, tons quentes), cada uma empilhada por localização
+                        <span class="text-xs text-gray-400 ml-2">({{ count($capacidadeLocalizacoes) }} localização(ões))</span>
+                    </p>
+                </div>
+                <div class="p-6" style="height: 400px;">
+                    <canvas id="capacidadeLocalizacoesChart"></canvas>
+                </div>
+            </div>
+            @elseif(isset($capacidadeLocalizacoes))
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-yellow-800">Nenhuma localização com capacidade encontrada</p>
+                        <p class="text-xs text-yellow-600 mt-1">
+                            Configure localizações ativas com capacidade > 0 para visualizar o gráfico
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+           <!-- Filtro de Ano -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6 p-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-800">Filtrar Dados por Ano</h3>
@@ -263,6 +300,7 @@
                     </div>
                 </div>
             </div>
+
 
             <!-- Gráficos -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -554,6 +592,163 @@
                     }
                 }
             });
+
+            // Gráfico de Capacidade das Localizações
+            @if(isset($capacidadeLocalizacoes) && count($capacidadeLocalizacoes) > 0)
+            const capacidadeLocalizacoesCtx = document.getElementById('capacidadeLocalizacoesChart');
+            if (capacidadeLocalizacoesCtx) {
+                // Preparar dados do PHP
+                const capacidadeDados = @json($capacidadeLocalizacoes);
+                const mesesLabelsCapacidade = @json(array_column($mesesCapacidade, 'label'));
+
+                // Cores para Capacidade (tons frios/claros)
+                const coresCapacidade = [
+                    { bg: 'rgba(59, 130, 246, 0.8)', border: 'rgba(59, 130, 246, 1)' },      // Azul
+                    { bg: 'rgba(16, 185, 129, 0.8)', border: 'rgba(16, 185, 129, 1)' },     // Verde
+                    { bg: 'rgba(139, 92, 246, 0.8)', border: 'rgba(139, 92, 246, 1)' },     // Roxo
+                    { bg: 'rgba(6, 182, 212, 0.8)', border: 'rgba(6, 182, 212, 1)' },       // Ciano
+                    { bg: 'rgba(20, 184, 166, 0.8)', border: 'rgba(20, 184, 166, 1)' },     // Teal
+                    { bg: 'rgba(14, 165, 233, 0.8)', border: 'rgba(14, 165, 233, 1)' },     // Azul Céu
+                    { bg: 'rgba(34, 197, 94, 0.8)', border: 'rgba(34, 197, 94, 1)' },       // Verde Lima
+                    { bg: 'rgba(168, 85, 247, 0.8)', border: 'rgba(168, 85, 247, 1)' },     // Violeta
+                    { bg: 'rgba(56, 189, 248, 0.8)', border: 'rgba(56, 189, 248, 1)' },     // Azul Claro
+                    { bg: 'rgba(45, 212, 191, 0.8)', border: 'rgba(45, 212, 191, 1)' }      // Turquesa
+                ];
+
+                // Cores para Previsto (tons quentes/escuros)
+                const coresPrevisto = [
+                    { bg: 'rgba(249, 115, 22, 0.8)', border: 'rgba(249, 115, 22, 1)' },     // Laranja
+                    { bg: 'rgba(239, 68, 68, 0.8)', border: 'rgba(239, 68, 68, 1)' },       // Vermelho
+                    { bg: 'rgba(234, 179, 8, 0.8)', border: 'rgba(234, 179, 8, 1)' },       // Amarelo
+                    { bg: 'rgba(251, 146, 60, 0.8)', border: 'rgba(251, 146, 60, 1)' },     // Laranja Claro
+                    { bg: 'rgba(236, 72, 153, 0.8)', border: 'rgba(236, 72, 153, 1)' },     // Rosa
+                    { bg: 'rgba(220, 38, 38, 0.8)', border: 'rgba(220, 38, 38, 1)' },       // Vermelho Escuro
+                    { bg: 'rgba(217, 119, 6, 0.8)', border: 'rgba(217, 119, 6, 1)' },       // Âmbar
+                    { bg: 'rgba(244, 63, 94, 0.8)', border: 'rgba(244, 63, 94, 1)' },       // Rosa Forte
+                    { bg: 'rgba(251, 191, 36, 0.8)', border: 'rgba(251, 191, 36, 1)' },     // Amarelo Claro
+                    { bg: 'rgba(219, 39, 119, 0.8)', border: 'rgba(219, 39, 119, 1)' }      // Pink
+                ];
+
+                // Preparar datasets - Capacidade empilhada em uma coluna
+                const datasetsCapacidade = [];
+
+                capacidadeDados.forEach((loc, index) => {
+                    const cor = coresCapacidade[index % coresCapacidade.length];
+
+                    // Dataset de Capacidade (todas empilhadas na mesma coluna "Capacidade")
+                    datasetsCapacidade.push({
+                        label: loc.nome,
+                        data: loc.dados.map(d => d.capacidade),
+                        backgroundColor: cor.bg,
+                        borderColor: cor.border,
+                        borderWidth: 1,
+                        stack: 'Capacidade',
+                        tipo: 'capacidade'
+                    });
+                });
+
+                // Dataset de Previsto (todas empilhadas na mesma coluna "Previsto")
+                capacidadeDados.forEach((loc, index) => {
+                    const cor = coresPrevisto[index % coresPrevisto.length];
+
+                    datasetsCapacidade.push({
+                        label: loc.nome,
+                        data: loc.dados.map(d => d.previsto),
+                        backgroundColor: cor.bg,
+                        borderColor: cor.border,
+                        borderWidth: 1,
+                        stack: 'Previsto',
+                        tipo: 'previsto'
+                    });
+                });
+
+                try {
+                    const capacidadeLocalizacoesChart = new Chart(capacidadeLocalizacoesCtx.getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: mesesLabelsCapacidade,
+                            datasets: datasetsCapacidade
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            scales: {
+                                x: {
+                                    stacked: false,
+                                    grid: {
+                                        display: false
+                                    },
+                                    categoryPercentage: 0.95,
+                                    barPercentage: 1.0
+                                },
+                                y: {
+                                    stacked: true,
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Quantidade de Produtos'
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        title: function(context) {
+                                            // Mostra o mês
+                                            return context[0].label;
+                                        },
+                                        label: function(context) {
+                                            const label = context.dataset.label || '';
+                                            const value = context.parsed.y;
+                                            const tipo = context.dataset.tipo === 'capacidade' ? 'Capacidade' : 'Previsto';
+                                            return label + ' (' + tipo + '): ' + value + ' produtos';
+                                        },
+                                        afterLabel: function(context) {
+                                            // Mostrar a diferença na coluna de Previsto
+                                            if (context.dataset.tipo === 'previsto') {
+                                                const locIndex = context.datasetIndex - capacidadeDados.length;
+                                                const mesIndex = context.dataIndex;
+                                                const capacidade = capacidadeDados[locIndex].dados[mesIndex].capacidade;
+                                                const previsto = capacidadeDados[locIndex].dados[mesIndex].previsto;
+                                                const saldo = capacidade - previsto;
+                                                const percentual = capacidade > 0 ? ((previsto / capacidade) * 100).toFixed(1) : 0;
+                                                return 'Saldo: ' + saldo + ' | Ocupação: ' + percentual + '%';
+                                            }
+                                            return '';
+                                        },
+                                        footer: function(context) {
+                                            // Calcular total do stack
+                                            const stack = context[0].dataset.stack;
+                                            let total = 0;
+
+                                            context[0].chart.data.datasets.forEach((dataset, index) => {
+                                                if (dataset.stack === stack) {
+                                                    total += dataset.data[context[0].dataIndex] || 0;
+                                                }
+                                            });
+
+                                            return '─────────────\nTotal ' + stack + ': ' + total + ' produtos';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Erro ao criar gráfico de capacidade:', error);
+                }
+            }
+            @endif
 
             // Adicionar evento de clique ao botão de filtrar
             document.getElementById('btnFiltrarAno').addEventListener('click', function() {

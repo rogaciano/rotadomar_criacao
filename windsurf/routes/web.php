@@ -94,12 +94,15 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::resource('grupo_produtos', GrupoProdutoController::class);
 
     // Routes para Localização
+    Route::get('localizacoes/pdf/gerar', [LocalizacaoController::class, 'gerarPdf'])->name('localizacoes.pdf');
+    Route::put('localizacoes/{id}/restore', [LocalizacaoController::class, 'restore'])->name('localizacoes.restore');
     Route::resource('localizacoes', LocalizacaoController::class);
 
     // Routes para Capacidade Mensal das Localizações
     Route::get('localizacao-capacidade/dashboard', [LocalizacaoCapacidadeMensalController::class, 'dashboard'])->name('localizacao-capacidade.dashboard');
     Route::post('localizacao-capacidade/sugerir-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'sugerirRedistribuicao'])->name('localizacao-capacidade.sugerir-redistribuicao');
     Route::post('localizacao-capacidade/aplicar-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'aplicarRedistribuicao'])->name('localizacao-capacidade.aplicar-redistribuicao');
+    Route::post('localizacao-capacidade/gerar-mes', [LocalizacaoCapacidadeMensalController::class, 'gerarCapacidadesMes'])->name('localizacao-capacidade.gerar-mes');
     Route::resource('localizacao-capacidade', LocalizacaoCapacidadeMensalController::class);
 
     // Routes para Tipos

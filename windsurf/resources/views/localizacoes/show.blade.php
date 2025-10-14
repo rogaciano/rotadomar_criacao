@@ -47,6 +47,21 @@
                                 </div>
                                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt class="text-sm font-medium text-gray-500">
+                                        Nome Reduzido
+                                        <span class="text-xs text-gray-400">(para gráficos)</span>
+                                    </dt>
+                                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                        @if($localizacao->nome_reduzido)
+                                            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded text-sm">
+                                                {{ $localizacao->nome_reduzido }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400 text-sm">Não informado</span>
+                                        @endif
+                                    </dd>
+                                </div>
+                                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                    <dt class="text-sm font-medium text-gray-500">
                                         Prazo (dias)
                                     </dt>
                                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">

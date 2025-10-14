@@ -505,4 +505,95 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Gerar capacidades mensais baseadas no padrão das localizações
+     */
+    public function gerarCapacidadesMes(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'mes' => 'required|integer|min:1|max:12',
+            'ano' => 'required|integer|min:2020|max:2100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dados inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $mes = $request->mes;
+            $ano = $request->ano;
+
+            // Buscar localizações ativas com capacidade > 0
+            $localizacoes = Localizacao::where('ativo', true)
+                ->where('capacidade', '>', 0)
+                ->get();
+
+            if ($localizacoes->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nenhuma localização ativa com capacidade encontrada.'
+                ]);
+            }
+
+            $criados = 0;
+            $jaExistentes = 0;
+            $erros = [];
+
+            foreach ($localizacoes as $localizacao) {
+                // Verificar se já existe registro para este mês/ano
+                $existe = LocalizacaoCapacidadeMensal::where('localizacao_id', $localizacao->id)
+                    ->where('mes', $mes)
+                    ->where('ano', $ano)
+                    ->exists();
+
+                if ($existe) {
+                    $jaExistentes++;
+                    continue;
+                }
+
+                try {
+                    LocalizacaoCapacidadeMensal::create([
+                        'localizacao_id' => $localizacao->id,
+                        'mes' => $mes,
+                        'ano' => $ano,
+                        'capacidade' => $localizacao->capacidade
+                    ]);
+                    $criados++;
+                } catch (\Exception $e) {
+                    $erros[] = "Erro ao criar capacidade para {$localizacao->nome_localizacao}: " . $e->getMessage();
+                }
+            }
+
+            $mesesNomes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            $mensagem = "Capacidades geradas para {$mesesNomes[$mes]}/{$ano}: ";
+            $mensagem .= "{$criados} criada(s)";
+            
+            if ($jaExistentes > 0) {
+                $mensagem .= ", {$jaExistentes} já existente(s)";
+            }
+            
+            if (!empty($erros)) {
+                $mensagem .= ". Alguns erros ocorreram.";
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $mensagem,
+                'criados' => $criados,
+                'ja_existentes' => $jaExistentes,
+                'erros' => $erros
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao gerar capacidades: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

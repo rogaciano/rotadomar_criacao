@@ -34,6 +34,11 @@ class LocalizacaoController extends Controller
             $query->where('ativo', 1);
         }
         
+        // Filtro de capacidade maior que zero
+        if ($request->filled('capacidade_maior_zero')) {
+            $query->where('capacidade', '>', 0);
+        }
+        
         // Incluir excluídos se solicitado
         if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
@@ -95,10 +100,55 @@ class LocalizacaoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         $localizacao = \App\Models\Localizacao::withTrashed()->findOrFail($id);
-        return view('localizacoes.show', compact('localizacao'));
+        
+        // Filtros de período
+        $mesAtual = now()->month;
+        $anoAtual = now()->year;
+        $mostrarTodos = $request->has('mostrar_todos') && $request->mostrar_todos == '1';
+        
+        // Buscar capacidades mensais desta localização
+        $query = \App\Models\LocalizacaoCapacidadeMensal::where('localizacao_id', $id);
+        
+        if (!$mostrarTodos) {
+            // Filtrar para mês atual e futuros
+            $query->where(function($q) use ($anoAtual, $mesAtual) {
+                $q->where('ano', '>', $anoAtual)
+                  ->orWhere(function($q2) use ($anoAtual, $mesAtual) {
+                      $q2->where('ano', $anoAtual)
+                         ->where('mes', '>=', $mesAtual);
+                  });
+            });
+        }
+        
+        $capacidades = $query->orderBy('ano', 'asc')
+            ->orderBy('mes', 'asc')
+            ->get();
+        
+        // Enriquecer capacidades com dados calculados
+        $resumoMensal = $capacidades->map(function($capacidade) {
+            // Buscar alocações para este período
+            $alocacoes = \App\Models\ProdutoAlocacaoMensal::where('localizacao_id', $capacidade->localizacao_id)
+                ->where('mes', $capacidade->mes)
+                ->where('ano', $capacidade->ano)
+                ->with(['produto.marca', 'produto.grupoProduto', 'produto.status'])
+                ->orderBy('created_at')
+                ->get();
+            
+            return [
+                'capacidade' => $capacidade,
+                'produtos_previstos' => $capacidade->getProdutosPrevistos(),
+                'saldo' => $capacidade->getSaldo(),
+                'percentual' => $capacidade->getPercentualOcupacao(),
+                'acima_capacidade' => $capacidade->isAcimaDaCapacidade(),
+                'alocacoes' => $alocacoes,
+                'total_alocacoes' => $alocacoes->count()
+            ];
+        });
+        
+        return view('localizacoes.show', compact('localizacao', 'resumoMensal', 'mostrarTodos'));
     }
 
     /**
@@ -181,5 +231,61 @@ class LocalizacaoController extends Controller
                 ->with('error', 'Ocorreu um erro ao tentar excluir a localização: ' . $e->getMessage())
                 ->with('error_type', 'database_error');
         }
+    }
+
+    /**
+     * Gera PDF da listagem de localizações
+     */
+    public function gerarPdf(Request $request)
+    {
+        $query = \App\Models\Localizacao::query();
+
+        // Aplicar os mesmos filtros do index
+        if ($request->filled('nome_localizacao')) {
+            $query->where('nome_localizacao', 'like', '%' . $request->nome_localizacao . '%');
+        }
+
+        if ($request->filled('prazo')) {
+            $query->where('prazo', $request->prazo);
+        }
+
+        if ($request->has('ativo')) {
+            if ($request->ativo === 'todos') {
+                // Não aplica filtro
+            } else if ($request->ativo !== '') {
+                $query->where('ativo', $request->ativo);
+            }
+        } else {
+            $query->where('ativo', 1);
+        }
+        
+        // Filtro de capacidade maior que zero
+        if ($request->filled('capacidade_maior_zero')) {
+            $query->where('capacidade', '>', 0);
+        }
+        
+        if ($request->filled('incluir_excluidos')) {
+            $query->withTrashed();
+        }
+
+        $localizacoes = $query->orderBy('nome_localizacao')->get();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('localizacoes.pdf_lista', compact('localizacoes'));
+        
+        $pdf->setPaper('a4', 'portrait');
+        
+        return $pdf->stream('localizacoes_' . now()->format('Y-m-d_H-i-s') . '.pdf');
+    }
+
+    /**
+     * Restaura uma localização excluída
+     */
+    public function restore(string $id)
+    {
+        $localizacao = \App\Models\Localizacao::withTrashed()->findOrFail($id);
+        $localizacao->restore();
+        
+        return redirect()->route('localizacoes.index')
+            ->with('success', 'Localização restaurada com sucesso!');
     }
 }

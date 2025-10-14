@@ -55,7 +55,7 @@
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    
+
                     <!-- Cabeçalho dos Filtros com Toggle -->
                     <div class="mb-4 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-800">Filtros</h3>
@@ -406,7 +406,19 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
                                             @if($movimentacao->produto)
-                                                <div>{{ $movimentacao->produto->referencia }}</div>
+                                                <div>
+                                                    <span>{{ $movimentacao->produto->referencia }}</span>
+                                                    @if($movimentacao->produto->data_prevista_producao)
+                                                        <span class="text-blue-600 text-[10px] font-semibold ml-2">
+                                                            Dt.Prod: {{ $movimentacao->produto->data_prevista_producao->format('m/Y') }}
+                                                        </span>
+                                                    @endif
+                                                    @if($movimentacao->produto->data_prevista_faccao)
+                                                        <span class="text-purple-600 text-[10px] font-semibold ml-2">
+                                                            Dt.Fac: {{ $movimentacao->produto->data_prevista_faccao->format('m/Y') }}
+                                                        </span>
+                                                    @endif
+                                                </div>
                                                 <div class="text-gray-500 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
                                                     {{ Str::limit($movimentacao->produto->descricao, 25, '...') }}
                                                 </div>
@@ -613,7 +625,17 @@
                                         <div class="flex justify-between items-center">
                                             <div class="font-medium text-gray-900">
                                                 @if($movimentacao->produto)
-                                                    {{ $movimentacao->produto->referencia }}
+                                                    <div>{{ $movimentacao->produto->referencia }}</div>
+                                                    @if($movimentacao->produto->data_prevista_producao)
+                                                        <div class="text-blue-600 text-xs font-semibold">
+                                                            Prod: {{ $movimentacao->produto->data_prevista_producao->format('d/m/Y') }}
+                                                        </div>
+                                                    @endif
+                                                    @if($movimentacao->produto->data_prevista_faccao)
+                                                        <div class="text-purple-600 text-xs font-semibold">
+                                                            Fac: {{ $movimentacao->produto->data_prevista_faccao->format('d/m/Y') }}
+                                                        </div>
+                                                    @endif
                                                 @else
                                                     <span class="text-red-500">Produto não encontrado</span>
                                                 @endif
@@ -802,28 +824,28 @@
                 closeOnSelect: false,
                 width: '100%'
             };
-            
+
             // Inicializar Select2 multiselect nos filtros com placeholders personalizados
             $('#grupo_produto_id').select2({
                 ...select2Config,
                 placeholder: "Selecione grupos de produto"
             });
-            
+
             $('#localizacao_id').select2({
                 ...select2Config,
                 placeholder: "Selecione localizações"
             });
-            
+
             $('#situacao_id').select2({
                 ...select2Config,
                 placeholder: "Selecione situações"
             });
-            
+
             $('#tecido_id').select2({
                 ...select2Config,
                 placeholder: "Selecione tecidos"
             });
-            
+
             // Limpar o campo de busca após selecionar um item (comportamento melhorado)
             $('.select2-multi').on('select2:select', function(e) {
                 // Limpar o texto de busca após a seleção
@@ -915,14 +937,14 @@
             function updateActiveFilters() {
                 const urlParams = new URLSearchParams(window.location.search);
                 activeFiltersList.innerHTML = '';
-                
+
                 let hasActiveFilters = false;
-                
+
                 urlParams.forEach((value, key) => {
                     if (value && value !== '' && key !== 'page') {
                         hasActiveFilters = true;
                         let displayValue = value;
-                        
+
                         // Formatar valor baseado no tipo de filtro
                         if (key === 'comprometido' || key === 'concluido') {
                             displayValue = value === '1' ? 'Sim' : 'Não';
@@ -945,7 +967,7 @@
                                 displayValue = value;
                             }
                         }
-                        
+
                         const badge = document.createElement('span');
                         badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
                         badge.innerHTML = `
@@ -955,14 +977,14 @@
                         activeFiltersList.appendChild(badge);
                     }
                 });
-                
+
                 return hasActiveFilters;
             }
 
             // Função para alternar visibilidade dos filtros
             function toggleFilters() {
                 const isHidden = filtersContainer.classList.contains('hidden');
-                
+
                 if (isHidden) {
                     // Mostrar filtros
                     filtersContainer.classList.remove('hidden');

@@ -15,6 +15,7 @@ class Localizacao extends Model
 
     protected $fillable = [
         'nome_localizacao',
+        'nome_reduzido',
         'ativo',
         'prazo',
         'capacidade',

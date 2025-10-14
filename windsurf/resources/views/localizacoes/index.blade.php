@@ -15,6 +15,13 @@
                     </svg>
                     Adicionar Localização
                 </a>
+                
+                <a href="{{ route('localizacoes.pdf', request()->query()) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Imprimir PDF
+                </a>
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -42,10 +49,16 @@
                             </div>
 
                             <div>
-                                <label for="incluir_excluidos" class="block text-sm font-medium text-gray-700 mb-1">Incluir excluídos</label>
-                                <div class="flex items-center mt-2">
-                                    <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ request('incluir_excluidos') ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                                    <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Mostrar registros excluídos</label>
+                                <label for="incluir_excluidos" class="block text-sm font-medium text-gray-700 mb-1">Opções</label>
+                                <div class="flex flex-col space-y-2 mt-2">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ request('incluir_excluidos') ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                        <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Incluir excluídos</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="capacidade_maior_zero" id="capacidade_maior_zero" value="1" {{ request('capacidade_maior_zero') ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                        <label for="capacidade_maior_zero" class="ml-2 block text-sm text-gray-700">Capacidade > 0</label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -70,6 +83,7 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome Reduzido</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prazo (dias)</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacidade</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -85,6 +99,11 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             {{ $localizacao->nome_localizacao }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <span class="text-xs {{ $localizacao->nome_reduzido ? 'bg-blue-50 text-blue-700 px-2 py-1 rounded' : 'text-gray-400' }}">
+                                                {{ $localizacao->nome_reduzido ?? '-' }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $localizacao->prazo !== null ? $localizacao->prazo : 'N/A' }}

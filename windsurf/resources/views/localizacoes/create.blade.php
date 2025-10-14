@@ -22,6 +22,18 @@
                                 @enderror
                             </div>
 
+                            <!-- Nome Reduzido -->
+                            <div>
+                                <label for="nome_reduzido" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ __('Nome Reduzido') }}
+                                    <span class="text-xs text-gray-500">(máx. 20 caracteres, para gráficos)</span>
+                                </label>
+                                <input id="nome_reduzido" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" type="text" name="nome_reduzido" value="{{ old('nome_reduzido') }}" maxlength="20" />
+                                @error('nome_reduzido')
+                                    <span class="text-red-600 text-sm mt-2">{{ $message }}</span>
+                                @enderror
+                            </div>
+
                             <!-- Prazo -->
                             <div>
                                 <label for="prazo" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Prazo (em dias)') }}</label>
