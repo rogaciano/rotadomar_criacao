@@ -30,6 +30,20 @@
                     </svg>
                     Ver Listagem
                 </a>
+                
+                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano]) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Gerar PDF
+                </a>
+                
+                <button onclick="abrirHistoricoRedistribuicoes()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Histórico de Redistribuições
+                </button>
             </div>
 
             <!-- Filtros -->
@@ -251,6 +265,7 @@
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Grupo</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Observações</th>
                                                                 <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Quantidade</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data Prevista</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -267,6 +282,23 @@
                                                                     <td class="px-3 py-2 text-sm text-gray-700">{{ $produto->descricao }}</td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">{{ $produto->marca->nome_marca ?? 'N/A' }}</td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</td>
+                                                                    <td class="px-3 py-2 text-sm text-gray-600">
+                                                                        @php
+                                                                            // Carregar observações diretamente
+                                                                            $obs = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
+                                                                        @endphp
+                                                                        @if($obs->count() > 0)
+                                                                            <div class="max-w-xs">
+                                                                                @foreach($obs as $observacao)
+                                                                                    <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                                                        {{ Str::limit($observacao->observacao, 60) }}
+                                                                                    </div>
+                                                                                @endforeach
+                                                                            </div>
+                                                                        @else
+                                                                            <span class="text-gray-400 italic text-xs">-</span>
+                                                                        @endif
+                                                                    </td>
                                                                     <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900">
                                                                         {{ number_format($produto->quantidade_alocada ?? $produto->quantidade, 0, ',', '.') }}
                                                                     </td>
@@ -769,6 +801,190 @@
                 fecharModalGerarCapacidades();
             }
         });
+
+        // ===== HISTÓRICO DE REDISTRIBUIÇÕES =====
+        function abrirHistoricoRedistribuicoes() {
+            document.getElementById('modalHistoricoRedistribuicoes').style.display = 'flex';
+            carregarHistoricoRedistribuicoes();
+        }
+
+        function fecharHistoricoRedistribuicoes() {
+            document.getElementById('modalHistoricoRedistribuicoes').style.display = 'none';
+        }
+
+        function carregarHistoricoRedistribuicoes() {
+            const mes = {{ $mes }};
+            const ano = {{ $ano }};
+            const tbody = document.getElementById('historicoRedistribuicoesBody');
+            const loading = document.getElementById('historicoLoading');
+            const empty = document.getElementById('historicoEmpty');
+
+            tbody.innerHTML = '';
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+
+            fetch(`{{ route('localizacao-capacidade.historico-redistribuicoes') }}?mes=${mes}&ano=${ano}`)
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    
+                    if (data.success && data.historico.length > 0) {
+                        data.historico.forEach(item => {
+                            const row = document.createElement('tr');
+                            row.className = 'hover:bg-gray-50';
+                            
+                            const mesOrigem = String(item.mes_origem).padStart(2, '0');
+                            const mesDestino = String(item.mes_destino).padStart(2, '0');
+                            
+                            row.innerHTML = `
+                                <td class="px-4 py-3 text-sm text-gray-900">${item.produto?.referencia || 'N/A'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">${item.produto?.descricao || 'N/A'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">
+                                    ${item.localizacao_origem?.nome_localizacao || 'N/A'}<br>
+                                    <span class="text-xs text-gray-500">${mesOrigem}/${item.ano_origem}</span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-600">
+                                    ${item.localizacao_destino?.nome_localizacao || 'N/A'}<br>
+                                    <span class="text-xs text-gray-500">${mesDestino}/${item.ano_destino}</span>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-center font-semibold text-gray-900">${item.quantidade}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600">${item.usuario?.name || 'Sistema'}</td>
+                                <td class="px-4 py-3 text-sm text-gray-500">${new Date(item.created_at).toLocaleString('pt-BR')}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="reverterRedistribuicao(${item.id}, '${item.produto?.referencia}')" 
+                                            class="inline-flex items-center px-3 py-1 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                        </svg>
+                                        Reverter
+                                    </button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    } else {
+                        empty.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    loading.style.display = 'none';
+                    empty.style.display = 'block';
+                    empty.querySelector('p').textContent = 'Erro ao carregar histórico';
+                });
+        }
+
+        function reverterRedistribuicao(historicoId, produtoRef) {
+            if (!confirm(`Deseja reverter a redistribuição do produto ${produtoRef}?\n\nIsso irá desfazer a redistribuição e restaurar a alocação original.`)) {
+                return;
+            }
+
+            fetch('{{ route("localizacao-capacidade.reverter-redistribuicao") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    historico_id: historicoId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    carregarHistoricoRedistribuicoes(); // Recarregar histórico
+                    // Recarregar página após 1 segundo para atualizar o dashboard
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    alert(data.message || 'Erro ao reverter redistribuição');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao reverter redistribuição');
+            });
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('modalHistoricoRedistribuicoes')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharHistoricoRedistribuicoes();
+            }
+        });
     </script>
+    
+    <!-- Modal Histórico de Redistribuições -->
+    <div id="modalHistoricoRedistribuicoes" style="display:none;" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4">
+            <!-- Header -->
+            <div class="bg-purple-600 px-6 py-4 rounded-t-lg">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Histórico de Redistribuições
+                    </h3>
+                    <button onclick="fecharHistoricoRedistribuicoes()" class="text-white hover:text-gray-200">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <strong>📋 Histórico do período:</strong> Aqui você pode visualizar todas as redistribuições realizadas neste período e revertê-las se necessário.
+                    </p>
+                </div>
+
+                <!-- Loading -->
+                <div id="historicoLoading" class="text-center py-8" style="display:none;">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    <p class="mt-2 text-gray-600">Carregando histórico...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="historicoEmpty" class="text-center py-8" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="text-gray-500 font-medium">Nenhuma redistribuição encontrada para este período</p>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referência</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Origem</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destino</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historicoRedistribuicoesBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 px-6 py-4 rounded-b-lg flex justify-end">
+                <button onclick="fecharHistoricoRedistribuicoes()" class="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
     @endpush
 </x-app-layout>

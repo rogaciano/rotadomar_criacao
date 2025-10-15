@@ -373,6 +373,7 @@ class ProdutoController extends Controller
             'grupoProduto', 
             'status',
             'localizacao',
+            'observacoes',
             'combinacoes' => function($query) {
                 $query->with(['componentes' => function($q) {
                     $q->with('tecido:id,descricao');
@@ -384,6 +385,12 @@ class ProdutoController extends Controller
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
             ->with(['localizacao', 'tipo', 'situacao'])
             ->orderBy('data_entrada', 'asc')
+            ->get();
+            
+        // Carregar observações diretamente (workaround)
+        $observacoes = \App\Models\ProdutoObservacao::where('produto_id', $id)
+            ->with('usuario')
+            ->orderBy('created_at', 'desc')
             ->get();
             
         // Enriquecer as cores do produto com informações de estoque
@@ -432,7 +439,7 @@ class ProdutoController extends Controller
             $coresEnriquecidas->push($corInfo);
         }
 
-        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas'));
+        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes'));
     }
 
     /**

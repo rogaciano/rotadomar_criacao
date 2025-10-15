@@ -533,6 +533,47 @@
                     </div>
                     @endif
 
+                    <!-- Modal Nova Observação -->
+                    <div id="modal-nova-observacao" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+                            <div class="flex justify-between items-center mb-4 pb-3 border-b">
+                                <h3 class="text-xl font-semibold text-gray-900">Nova Observação</h3>
+                                <button onclick="fecharModalObservacao()" class="text-gray-400 hover:text-gray-600">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <form id="form-observacao" onsubmit="salvarObservacao(event)">
+                                @csrf
+                                <input type="hidden" name="produto_id" value="{{ $produto->id }}">
+                                
+                                <div class="mb-4">
+                                    <label for="observacao" class="block text-sm font-medium text-gray-700 mb-2">Observação *</label>
+                                    <textarea 
+                                        id="observacao" 
+                                        name="observacao" 
+                                        rows="6" 
+                                        required 
+                                        maxlength="5000"
+                                        class="shadow-sm focus:ring-purple-500 focus:border-purple-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                        placeholder="Digite sua observação aqui..."
+                                    ></textarea>
+                                    <p class="mt-1 text-xs text-gray-500">Máximo de 5000 caracteres</p>
+                                </div>
+
+                                <div class="flex justify-end space-x-3 mt-5">
+                                    <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        Salvar Observação
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
                     <!-- Carrossel de Imagens das Movimentações -->
                     @php
                         $movimentacoesComAnexo = $movimentacoes->filter(function($mov) {
@@ -588,6 +629,62 @@
                         </div>
                     </div>
                     @endif
+
+                    <!-- Observações -->
+                    <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Observações</h3>
+                            @if(auth()->user()->canUpdate('produtos'))
+                                <button type="button" onclick="abrirModalObservacao()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    Nova Observação
+                                </button>
+                            @endif
+                        </div>
+
+                        @php
+                            // Garantir que $observacoes existe
+                            if (!isset($observacoes)) {
+                                $observacoes = $produto->observacoes ?? collect();
+                            }
+                        @endphp
+
+                        @if($observacoes && $observacoes->count() > 0)
+                            <div class="space-y-3">
+                                @foreach($observacoes as $obs)
+                                    <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                        <div class="flex justify-between items-start">
+                                            <div class="flex-1">
+                                                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $obs->observacao }}</p>
+                                                <div class="mt-2 flex items-center text-xs text-gray-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span class="font-medium">{{ $obs->usuario ? $obs->usuario->name : 'Sistema' }}</span>
+                                                    <span class="mx-2">•</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    <span>{{ $obs->created_at->format('d/m/Y H:i') }}</span>
+                                                </div>
+                                            </div>
+                                            @if(auth()->user()->canUpdate('produtos'))
+                                                <button onclick="removerObservacao({{ $obs->id }})" class="ml-4 text-red-600 hover:text-red-800" title="Remover observação">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-gray-400 italic">Nenhuma observação registrada para este produto</p>
+                        @endif
+                    </div>
 
                     <!-- Movimentações -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -861,5 +958,107 @@
                 });
             });
         });
+    </script>
+
+    <script>
+        // Funções para o modal de observações
+        function abrirModalObservacao() {
+            document.getElementById('modal-nova-observacao').classList.remove('hidden');
+            document.getElementById('observacao').focus();
+        }
+
+        function fecharModalObservacao() {
+            document.getElementById('modal-nova-observacao').classList.add('hidden');
+            document.getElementById('form-observacao').reset();
+        }
+
+        // Fechar modal ao clicar fora ou pressionar ESC
+        document.getElementById('modal-nova-observacao')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModalObservacao();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('modal-nova-observacao');
+                if (modal && !modal.classList.contains('hidden')) {
+                    fecharModalObservacao();
+                }
+            }
+        });
+
+        // Salvar observação
+        async function salvarObservacao(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            
+            submitButton.disabled = true;
+            submitButton.textContent = 'Salvando...';
+
+            try {
+                const response = await fetch('{{ route("produtos.observacoes.store") }}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Mostrar mensagem de sucesso
+                    alert('Observação adicionada com sucesso!');
+                    
+                    // Recarregar a página para mostrar a nova observação
+                    window.location.reload();
+                } else {
+                    alert('Erro ao salvar observação: ' + (data.message || 'Erro desconhecido'));
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao salvar observação. Por favor, tente novamente.');
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            }
+        }
+
+        // Remover observação
+        async function removerObservacao(id) {
+            if (!confirm('Tem certeza que deseja remover esta observação?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/produtos/observacoes/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Observação removida com sucesso!');
+                    window.location.reload();
+                } else {
+                    alert('Erro ao remover observação: ' + (data.message || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao remover observação. Por favor, tente novamente.');
+            }
+        }
     </script>
 </x-app-layout>

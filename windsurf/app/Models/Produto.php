@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Models\ProdutoObservacao;
 
 class Produto extends Model
 {
@@ -93,6 +94,15 @@ class Produto extends Model
     public function anexos()
     {
         return $this->hasMany(ProdutoAnexo::class);
+    }
+
+    /**
+     * Relacionamento com as observações do produto
+     */
+    public function observacoes()
+    {
+        return $this->hasMany(ProdutoObservacao::class, 'produto_id', 'id')
+                    ->orderBy('created_at', 'desc');
     }
 
     /**

@@ -107,6 +107,9 @@
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Grupo
                                         </th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Observações
+                                        </th>
                                         <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Quantidade
                                         </th>
@@ -131,6 +134,45 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $produto->grupoProduto->descricao ?? 'N/A' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-600">
+                                                @php
+                                                    // Debug específico para produto 060021
+                                                    $debugInfo = '';
+                                                    if ($produto->referencia == '060021') {
+                                                        $debugInfo .= "ID: {$produto->id} | ";
+                                                        $debugInfo .= "Rel carregado: " . (isset($produto->observacoes) ? 'SIM' : 'NÃO') . " | ";
+                                                        if (isset($produto->observacoes)) {
+                                                            $debugInfo .= "Count rel: {$produto->observacoes->count()} | ";
+                                                        }
+                                                    }
+                                                    
+                                                    // Tentar carregar diretamente
+                                                    $obsDirecta = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
+                                                    
+                                                    if ($produto->referencia == '060021') {
+                                                        $debugInfo .= "Count direto: {$obsDirecta->count()}";
+                                                    }
+                                                    
+                                                    // Usar a query direta sempre
+                                                    $produto->setRelation('observacoes', $obsDirecta);
+                                                @endphp
+                                                
+                                                @if($produto->referencia == '060021')
+                                                    <div class="text-xs text-red-600 mb-1">DEBUG: {{ $debugInfo }}</div>
+                                                @endif
+                                                
+                                                @if($produto->observacoes && $produto->observacoes->count() > 0)
+                                                    <div class="max-w-xs">
+                                                        @foreach($produto->observacoes as $obs)
+                                                            <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                                {{ Str::limit($obs->observacao, 80) }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <span class="text-gray-400 italic text-xs">-</span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-gray-900">
                                                 {{ number_format($produto->quantidade, 0, ',', '.') }}

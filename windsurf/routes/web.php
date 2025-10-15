@@ -12,6 +12,7 @@ use App\Http\Controllers\SituacaoController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProdutoAnexoController;
+use App\Http\Controllers\ProdutoObservacaoController;
 use App\Http\Controllers\ProdutoCombinacaoController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\MovimentacaoFilterController;
@@ -100,8 +101,11 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
 
     // Routes para Capacidade Mensal das Localizações
     Route::get('localizacao-capacidade/dashboard', [LocalizacaoCapacidadeMensalController::class, 'dashboard'])->name('localizacao-capacidade.dashboard');
+    Route::get('localizacao-capacidade/relatorio-pdf', [LocalizacaoCapacidadeMensalController::class, 'gerarRelatorioPDF'])->name('localizacao-capacidade.relatorio-pdf');
+    Route::get('localizacao-capacidade/historico-redistribuicoes', [LocalizacaoCapacidadeMensalController::class, 'historicoRedistribuicoes'])->name('localizacao-capacidade.historico-redistribuicoes');
     Route::post('localizacao-capacidade/sugerir-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'sugerirRedistribuicao'])->name('localizacao-capacidade.sugerir-redistribuicao');
     Route::post('localizacao-capacidade/aplicar-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'aplicarRedistribuicao'])->name('localizacao-capacidade.aplicar-redistribuicao');
+    Route::post('localizacao-capacidade/reverter-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'reverterRedistribuicao'])->name('localizacao-capacidade.reverter-redistribuicao');
     Route::post('localizacao-capacidade/gerar-mes', [LocalizacaoCapacidadeMensalController::class, 'gerarCapacidadesMes'])->name('localizacao-capacidade.gerar-mes');
     Route::resource('localizacao-capacidade', LocalizacaoCapacidadeMensalController::class);
 
@@ -128,6 +132,10 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Routes para Anexos de Produtos
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
     Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');
+    
+    // Routes para Observações de Produtos
+    Route::post('produtos/observacoes', [ProdutoObservacaoController::class, 'store'])->name('produtos.observacoes.store');
+    Route::delete('produtos/observacoes/{observacao}', [ProdutoObservacaoController::class, 'destroy'])->name('produtos.observacoes.destroy');
     
     // Routes para Combinações de Produtos
     Route::post('produtos/{produto}/combinacoes', [ProdutoCombinacaoController::class, 'store'])->name('produtos.combinacoes.store');
