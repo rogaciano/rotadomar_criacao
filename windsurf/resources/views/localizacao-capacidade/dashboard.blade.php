@@ -284,14 +284,40 @@
                                                                     <td class="px-3 py-2 text-sm text-gray-600">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">
                                                                         @php
-                                                                            // Carregar observações diretamente
+                                                                            // Carregar observações do produto
                                                                             $obs = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
+                                                                            
+                                                                            // Carregar observações das localizações (ordem de produção)
+                                                                            $obsLocalizacoes = $produto->localizacoes()
+                                                                                ->where(function($q) {
+                                                                                    $q->whereNotNull('ordem_producao')
+                                                                                      ->orWhereNotNull('produto_localizacao.observacao');
+                                                                                })
+                                                                                ->get();
+                                                                            
+                                                                            $temObservacoes = $obs->count() > 0 || $obsLocalizacoes->count() > 0;
                                                                         @endphp
-                                                                        @if($obs->count() > 0)
+                                                                        @if($temObservacoes)
                                                                             <div class="max-w-xs">
+                                                                                {{-- Observações do Produto --}}
                                                                                 @foreach($obs as $observacao)
-                                                                                    <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                                                    <div class="mb-1 text-xs {{ !$loop->last || $obsLocalizacoes->count() > 0 ? 'border-b border-gray-200 pb-1' : '' }}">
                                                                                         {{ Str::limit($observacao->observacao, 60) }}
+                                                                                    </div>
+                                                                                @endforeach
+                                                                                
+                                                                                {{-- Observações das Localizações (Ordem de Produção) --}}
+                                                                                @foreach($obsLocalizacoes as $loc)
+                                                                                    <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                                                        @if($loc->pivot->ordem_producao)
+                                                                                            <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                                        @endif
+                                                                                        @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
+                                                                                            <span class="text-gray-500"> - </span>
+                                                                                        @endif
+                                                                                        @if($loc->pivot->observacao)
+                                                                                            <span class="text-gray-600">{{ Str::limit($loc->pivot->observacao, 50) }}</span>
+                                                                                        @endif
                                                                                     </div>
                                                                                 @endforeach
                                                                             </div>

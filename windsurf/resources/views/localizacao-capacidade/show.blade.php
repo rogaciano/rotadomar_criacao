@@ -162,11 +162,38 @@
                                                     <div class="text-xs text-red-600 mb-1">DEBUG: {{ $debugInfo }}</div>
                                                 @endif
                                                 
-                                                @if($produto->observacoes && $produto->observacoes->count() > 0)
+                                                @php
+                                                    // Buscar observações das localizações (ordem de produção)
+                                                    $obsLocalizacoes = $produto->localizacoes->filter(function($loc) {
+                                                        return $loc->pivot->ordem_producao || $loc->pivot->observacao;
+                                                    });
+                                                    
+                                                    $temObservacoes = ($produto->observacoes && $produto->observacoes->count() > 0) || $obsLocalizacoes->count() > 0;
+                                                @endphp
+                                                
+                                                @if($temObservacoes)
                                                     <div class="max-w-xs">
-                                                        @foreach($produto->observacoes as $obs)
+                                                        {{-- Observações do Produto --}}
+                                                        @if($produto->observacoes && $produto->observacoes->count() > 0)
+                                                            @foreach($produto->observacoes as $obs)
+                                                                <div class="mb-1 text-xs {{ !$loop->last || $obsLocalizacoes->count() > 0 ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                                    {{ Str::limit($obs->observacao, 80) }}
+                                                                </div>
+                                                            @endforeach
+                                                        @endif
+                                                        
+                                                        {{-- Observações das Localizações (Ordem de Produção) --}}
+                                                        @foreach($obsLocalizacoes as $loc)
                                                             <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
-                                                                {{ Str::limit($obs->observacao, 80) }}
+                                                                @if($loc->pivot->ordem_producao)
+                                                                    <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                @endif
+                                                                @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
+                                                                    <span class="text-gray-500"> - </span>
+                                                                @endif
+                                                                @if($loc->pivot->observacao)
+                                                                    <span class="text-gray-600">{{ Str::limit($loc->pivot->observacao, 60) }}</span>
+                                                                @endif
                                                             </div>
                                                         @endforeach
                                                     </div>
