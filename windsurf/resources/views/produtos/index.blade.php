@@ -227,21 +227,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Data Prevista Facção -->
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Prevista Facção</label>
-                                        <div class="space-y-2">
-                                            <div>
-                                                <label for="data_prevista_faccao_inicio" class="block text-xs text-gray-600 mb-1">Início</label>
-                                                <input type="date" name="data_prevista_faccao_inicio" id="data_prevista_faccao_inicio" value="{{ $filters['data_prevista_faccao_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                            </div>
-                                            <div>
-                                                <label for="data_prevista_faccao_fim" class="block text-xs text-gray-600 mb-1">Fim</label>
-                                                <input type="date" name="data_prevista_faccao_fim" id="data_prevista_faccao_fim" value="{{ $filters['data_prevista_faccao_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                            </div>
-                                        </div>
-                                    </div>
-
                                 </div>
                             </div>
 
@@ -537,9 +522,7 @@
                 'data_inicio': 'Data Cadastro (De)',
                 'data_fim': 'Data Cadastro (Até)',
                 'data_prevista_inicio': 'Data Prev. Produção (De)',
-                'data_prevista_fim': 'Data Prev. Produção (Até)',
-                'data_prevista_faccao_inicio': 'Data Prev. Facção (De)',
-                'data_prevista_faccao_fim': 'Data Prev. Facção (Até)'
+                'data_prevista_fim': 'Data Prev. Produção (Até)'
             };
 
             // Função para obter o texto de um select pelo valor

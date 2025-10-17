@@ -303,7 +303,21 @@
                                                                         {{ number_format($produto->quantidade_alocada ?? $produto->quantidade, 0, ',', '.') }}
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">
-                                                                        {{ $produto->data_prevista_faccao ? $produto->data_prevista_faccao->format('d/m/Y') : 'N/A' }}
+                                                                        @php
+                                                                            // Buscar primeira data prevista das localizações
+                                                                            $primeiraData = $produto->localizacoes()
+                                                                                ->whereNotNull('data_prevista_faccao')
+                                                                                ->orderBy('data_prevista_faccao', 'asc')
+                                                                                ->first();
+                                                                        @endphp
+                                                                        @if($primeiraData && $primeiraData->pivot->data_prevista_faccao)
+                                                                            {{ is_string($primeiraData->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('d/m/Y') : $primeiraData->pivot->data_prevista_faccao->format('d/m/Y') }}
+                                                                            @if($produto->localizacoes()->whereNotNull('data_prevista_faccao')->count() > 1)
+                                                                                <span class="text-xs text-gray-400">(+{{ $produto->localizacoes()->whereNotNull('data_prevista_faccao')->count() - 1 }})</span>
+                                                                            @endif
+                                                                        @else
+                                                                            <span class="text-gray-400">N/A</span>
+                                                                        @endif
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm">
                                                                         @if($produto->status)

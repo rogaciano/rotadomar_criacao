@@ -12,7 +12,9 @@ class ProdutoObserver
      */
     public function created(Produto $produto): void
     {
-        $this->criarAlocacaoInicial($produto);
+        // DESABILITADO: A lógica de alocação agora é baseada em produto_localizacao
+        // As alocações são criadas quando uma localização é adicionada ao produto
+        // via ProdutoLocalizacaoController
     }
 
     /**
@@ -20,58 +22,28 @@ class ProdutoObserver
      */
     public function updated(Produto $produto): void
     {
-        // Se mudou a data prevista de facção ou localização, atualiza alocação
-        if ($produto->isDirty(['data_prevista_faccao', 'localizacao_id', 'quantidade'])) {
-            $this->atualizarAlocacao($produto);
-        }
+        // DESABILITADO: O campo data_prevista_faccao foi movido para produto_localizacao
+        // A lógica de alocação agora é gerenciada via ProdutoLocalizacao
     }
 
     /**
      * Criar alocação inicial ao criar produto
+     * @deprecated - Lógica movida para produto_localizacao
      */
     private function criarAlocacaoInicial(Produto $produto)
     {
-        if ($produto->data_prevista_faccao && $produto->localizacao_id && $produto->quantidade > 0) {
-            ProdutoAlocacaoMensal::create([
-                'produto_id' => $produto->id,
-                'localizacao_id' => $produto->localizacao_id,
-                'mes' => $produto->data_prevista_faccao->month,
-                'ano' => $produto->data_prevista_faccao->year,
-                'quantidade' => $produto->quantidade,
-                'tipo' => 'original',
-                'usuario_id' => auth()->id(),
-                'observacoes' => 'Alocação inicial do produto'
-            ]);
-        }
+        // DESABILITADO: Campo data_prevista_faccao não existe mais em produtos
+        // Alocações são criadas via produto_localizacao
     }
 
     /**
      * Atualizar alocação ao atualizar produto
+     * @deprecated - Lógica movida para produto_localizacao
      */
     private function atualizarAlocacao(Produto $produto)
     {
-        if (!$produto->data_prevista_faccao || !$produto->localizacao_id) {
-            return;
-        }
-
-        // Buscar alocação original (tipo = 'original')
-        $alocacaoOriginal = ProdutoAlocacaoMensal::where('produto_id', $produto->id)
-            ->where('tipo', 'original')
-            ->first();
-
-        if ($alocacaoOriginal) {
-            // Atualizar alocação existente
-            $alocacaoOriginal->update([
-                'localizacao_id' => $produto->localizacao_id,
-                'mes' => $produto->data_prevista_faccao->month,
-                'ano' => $produto->data_prevista_faccao->year,
-                'quantidade' => $produto->quantidade,
-                'observacoes' => 'Atualizado em ' . now()->format('d/m/Y H:i')
-            ]);
-        } else {
-            // Criar nova alocação se não existir
-            $this->criarAlocacaoInicial($produto);
-        }
+        // DESABILITADO: Campo data_prevista_faccao não existe mais em produtos
+        // Alocações são gerenciadas via produto_localizacao
     }
 
     /**

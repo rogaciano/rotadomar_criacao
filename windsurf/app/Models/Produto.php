@@ -18,7 +18,6 @@ class Produto extends Model
         'descricao',
         'data_cadastro',
         'data_prevista_producao',
-        'data_prevista_faccao',
         'marca_id',
         'quantidade',
         'estilista_id',
@@ -34,7 +33,6 @@ class Produto extends Model
     protected $casts = [
         'data_cadastro' => 'date',
         'data_prevista_producao' => 'date',
-        'data_prevista_faccao' => 'date',
         'preco_atacado' => 'decimal:2',
         'preco_varejo' => 'decimal:2',
         'quantidade' => 'integer'
@@ -81,6 +79,15 @@ class Produto extends Model
     public function localizacao()
     {
         return $this->belongsTo(\App\Models\Localizacao::class);
+    }
+
+    // Relacionamento plural para todas as localizações
+    public function localizacoes()
+    {
+        return $this->belongsToMany(Localizacao::class, 'produto_localizacao')
+                    ->withPivot('id', 'quantidade', 'data_prevista_faccao', 'ordem_producao', 'observacao')
+                    ->withTimestamps()
+                    ->using(ProdutoLocalizacao::class);
     }
 
     public function movimentacoes()

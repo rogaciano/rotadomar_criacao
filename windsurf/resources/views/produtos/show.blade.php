@@ -61,11 +61,6 @@
                             </div>
 
                             <div>
-                                <span class="block text-sm font-medium text-gray-500">Data Prevista para Facção</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_faccao ? $produto->data_prevista_faccao->format('d/m/Y') : 'N/A' }}</span>
-                            </div>
-
-                            <div>
                                 <span class="block text-sm font-medium text-gray-500">Marca</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
                             </div>
@@ -91,19 +86,6 @@
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                         {{ $produto->status ? $produto->status->descricao : 'N/A' }}
                                     </span>
-                                </span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Localização Prevista</span>
-                                <span class="block mt-1">
-                                    @if($produto->localizacao)
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                                            {{ $produto->localizacao->nome_localizacao }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400 text-sm italic">Não definida</span>
-                                    @endif
                                 </span>
                             </div>
 
@@ -181,6 +163,185 @@
                                 @else
                                     <span class="text-gray-400 italic">Nenhum tecido associado a este produto</span>
                                 @endif
+                    </div>
+
+                    <!-- Localizações -->
+                    <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Localizações do Produto</h3>
+                            @if(auth()->user()->canUpdate('produtos'))
+                                <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                    </svg>
+                                    Adicionar Localização
+                                </button>
+                            @endif
+                        </div>
+
+                        @php
+                            $totalLocalizacoes = $produto->localizacoes->sum('pivot.quantidade');
+                            $quantidadeProduto = $produto->quantidade ?? 0;
+                            $divergencia = $totalLocalizacoes - $quantidadeProduto;
+                        @endphp
+
+                        @if($produto->localizacoes->count() > 0 && $divergencia != 0)
+                            <div class="mb-4 rounded-md p-4 {{ $divergencia > 0 ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-red-50 border-l-4 border-red-400' }}">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 {{ $divergencia > 0 ? 'text-yellow-400' : 'text-red-400' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm {{ $divergencia > 0 ? 'text-yellow-800' : 'text-red-800' }}">
+                                            <strong>Atenção:</strong> 
+                                            @if($divergencia > 0)
+                                                O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) está 
+                                                <strong>{{ number_format(abs($divergencia), 0, ',', '.') }} unidade(s) acima</strong> 
+                                                da quantidade pretendida do produto (<strong>{{ number_format($quantidadeProduto, 0, ',', '.') }}</strong>).
+                                            @else
+                                                O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) está 
+                                                <strong>{{ number_format(abs($divergencia), 0, ',', '.') }} unidade(s) abaixo</strong> 
+                                                da quantidade pretendida do produto (<strong>{{ number_format($quantidadeProduto, 0, ',', '.') }}</strong>).
+                                            @endif
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($produto->localizacoes->count() > 0 && $divergencia == 0)
+                            <div class="mb-4 rounded-md bg-green-50 border-l-4 border-green-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-green-800">
+                                            <strong>Perfeito!</strong> O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) 
+                                            está de acordo com a quantidade pretendida do produto.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if($produto->localizacoes->count() > 0)
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordem Produção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mês/Ano</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Prev. Facção</th>
+                                            @if(auth()->user()->canUpdate('produtos'))
+                                                <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                            @endif
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        @foreach($produto->localizacoes as $localizacao)
+                                            <tr>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                        {{ $localizacao->nome_localizacao }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                        {{ $localizacao->pivot->ordem_producao ?? 'N/A' }}
+                                                    </span>
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 font-medium">
+                                                    @if($localizacao->pivot->data_prevista_faccao)
+                                                        {{ is_string($localizacao->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_prevista_faccao)->format('m/Y') : $localizacao->pivot->data_prevista_faccao->format('m/Y') }}
+                                                    @else
+                                                        <span class="text-gray-400 italic">Sem data</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($localizacao->pivot->quantidade, 0, ',', '.') }}</td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                    @if($localizacao->pivot->data_prevista_faccao)
+                                                        {{ is_string($localizacao->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_prevista_faccao)->format('d/m/Y') : $localizacao->pivot->data_prevista_faccao->format('d/m/Y') }}
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </td>
+                                                @if(auth()->user()->canUpdate('produtos'))
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm space-x-3">
+                                                        @php
+                                                            $dataFaccao = '';
+                                                            if($localizacao->pivot->data_prevista_faccao) {
+                                                                $dataFaccao = is_string($localizacao->pivot->data_prevista_faccao) 
+                                                                    ? $localizacao->pivot->data_prevista_faccao 
+                                                                    : $localizacao->pivot->data_prevista_faccao->format('Y-m-d');
+                                                            }
+                                                        @endphp
+                                                        <button type="button" 
+                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, '{{ $localizacao->nome_localizacao }}', {{ $localizacao->pivot->quantidade }}, '{{ $dataFaccao }}', '{{ $localizacao->pivot->ordem_producao ?? '' }}', '{{ addslashes($localizacao->pivot->observacao ?? '') }}')" 
+                                                            class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                                            Editar
+                                                        </button>
+                                                        <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta localização?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                                Remover
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="bg-gray-50">
+                                        <tr class="border-t-2 border-gray-300">
+                                            <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Total nas Localizações:</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia != 0 ? ($divergencia > 0 ? 'text-yellow-700' : 'text-red-700') : 'text-green-700' }}">
+                                                {{ number_format($totalLocalizacoes, 0, ',', '.') }}
+                                            </td>
+                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '3' : '2' }}" class="px-4 py-2"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Quantidade Pretendida:</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
+                                                {{ number_format($quantidadeProduto, 0, ',', '.') }}
+                                            </td>
+                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '3' : '2' }}" class="px-4 py-2"></td>
+                                        </tr>
+                                        @if($divergencia != 0)
+                                            <tr class="bg-gray-100">
+                                                <td colspan="3" class="px-4 py-2 text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-800' : 'text-red-800' }}">
+                                                    Diferença:
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-700' : 'text-red-700' }}">
+                                                    {{ $divergencia > 0 ? '+' : '' }}{{ number_format($divergencia, 0, ',', '.') }}
+                                                </td>
+                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '3' : '2' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
+                                                    {{ $divergencia > 0 ? 'Excedente' : 'Faltante' }}
+                                                </td>
+                                            </tr>
+                                        @else
+                                            <tr class="bg-green-50">
+                                                <td colspan="3" class="px-4 py-2 text-sm font-bold text-green-800">
+                                                    Status:
+                                                </td>
+                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
+                                                    ✓ Confere
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    </tfoot>
+                                </table>
+                            </div>
+                        @else
+                            <div class="text-center py-4 text-gray-500 italic">
+                                Nenhuma localização associada. Clique em "Adicionar Localização" para incluir.
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Variações de Cores -->
@@ -531,6 +692,166 @@
                             </div>
                         </div>
                     </div>
+                    @endif
+
+                    <!-- Modal para adicionar localização -->
+                    @if(auth()->user()->canUpdate('produtos'))
+                    <div id="modal-adicionar-localizacao" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
+                        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                            <!-- Overlay de fundo -->
+                            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                            </div>
+
+                            <!-- Centralização vertical -->
+                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                            <!-- Modal propriamente dito -->
+                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                <div class="px-6 py-4 border-b border-gray-200">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-lg font-medium text-gray-900">Adicionar Localização</h3>
+                                        <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.add('hidden')" class="text-gray-400 hover:text-gray-500">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form action="{{ route('produtos.localizacoes.store', $produto->id) }}" method="POST">
+                                    @csrf
+                                    <div class="px-6 py-4">
+                                        <div class="mb-4">
+                                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização *</label>
+                                            <select name="localizacao_id" id="localizacao_id" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                                <option value="">Selecione uma localização</option>
+                                                @foreach(\App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get() as $loc)
+                                                    <option value="{{ $loc->id }}">{{ $loc->nome_localizacao }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="ordem_producao" class="block text-sm font-medium text-gray-700 mb-1">Ordem de Produção *</label>
+                                            <input type="text" name="ordem_producao" id="ordem_producao" maxlength="30" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                            <p class="mt-1 text-sm text-gray-500">Número/código da ordem de produção</p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade *</label>
+                                            <input type="number" name="quantidade" id="quantidade" min="1" step="1" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                            <p class="mt-1 text-sm text-gray-500">Informe a quantidade do produto nesta localização</p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="data_prevista_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Facção</label>
+                                            <input type="date" name="data_prevista_faccao" id="data_prevista_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
+                                        </div>
+                                        <div>
+                                            <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
+                                            <textarea name="observacao" id="observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"></textarea>
+                                            <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
+                                        </div>
+                                    </div>
+                                    <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
+                                        <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.add('hidden')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 mr-2">
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                                            Salvar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Modal para editar localização -->
+                    @if(auth()->user()->canUpdate('produtos'))
+                    <div id="modal-editar-localizacao" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
+                        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                            <!-- Overlay de fundo -->
+                            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                            </div>
+
+                            <!-- Centralização vertical -->
+                            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                            <!-- Modal propriamente dito -->
+                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                <div class="px-6 py-4 border-b border-gray-200">
+                                    <div class="flex justify-between items-center">
+                                        <h3 class="text-lg font-medium text-gray-900">Editar Localização</h3>
+                                        <button type="button" onclick="fecharModalEditarLocalizacao()" class="text-gray-400 hover:text-gray-500">
+                                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <form id="form-editar-localizacao" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="px-6 py-4">
+                                        <div class="mb-4">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
+                                            <p id="edit-localizacao-nome" class="text-sm text-gray-900 font-semibold bg-purple-50 px-3 py-2 rounded"></p>
+                                            <input type="hidden" id="edit-localizacao-id" name="localizacao_id">
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="edit-ordem-producao" class="block text-sm font-medium text-gray-700 mb-1">Ordem de Produção *</label>
+                                            <input type="text" name="ordem_producao" id="edit-ordem-producao" maxlength="30" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                                            <p class="mt-1 text-sm text-gray-500">Número/código da ordem de produção</p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="edit-quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade *</label>
+                                            <input type="number" name="quantidade" id="edit-quantidade" min="1" step="1" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                                            <p class="mt-1 text-sm text-gray-500">Informe a quantidade do produto nesta localização</p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="edit-data-prevista-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Facção</label>
+                                            <input type="date" name="data_prevista_faccao" id="edit-data-prevista-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
+                                        </div>
+                                        <div>
+                                            <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
+                                            <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                                            <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
+                                        </div>
+                                    </div>
+                                    <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
+                                        <button type="button" onclick="fecharModalEditarLocalizacao()" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2">
+                                            Cancelar
+                                        </button>
+                                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                            Atualizar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao) {
+                            document.getElementById('edit-localizacao-id').value = localizacaoId;
+                            document.getElementById('edit-localizacao-nome').textContent = nomeLocalizacao;
+                            document.getElementById('edit-ordem-producao').value = ordemProducao || '';
+                            document.getElementById('edit-quantidade').value = quantidade;
+                            document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
+                            document.getElementById('edit-observacao').value = observacao || '';
+                            
+                            // Atualizar action do formulário com o ID do registro produto_localizacao
+                            const form = document.getElementById('form-editar-localizacao');
+                            form.action = "{{ route('produtos.localizacoes.update', [$produto->id, ':produtoLocalizacaoId']) }}".replace(':produtoLocalizacaoId', produtoLocalizacaoId);
+                            
+                            document.getElementById('modal-editar-localizacao').classList.remove('hidden');
+                        }
+
+                        function fecharModalEditarLocalizacao() {
+                            document.getElementById('modal-editar-localizacao').classList.add('hidden');
+                        }
+                    </script>
                     @endif
 
                     <!-- Modal Nova Observação -->

@@ -139,34 +139,6 @@
                                 </select>
                             </div>
 
-                            <!-- Data Prevista para Facção -->
-                            <div>
-                                <label for="data_prevista_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Facção</label>
-                                <input type="date" name="data_prevista_faccao" id="data_prevista_faccao" value="{{ old('data_prevista_faccao', $produto->data_prevista_faccao ? $produto->data_prevista_faccao->format('Y-m-d') : '') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                            </div>
-
-                            <!-- Localização Prevista / Facção -->
-                            <div class="border-l-4 border-purple-500 pl-3">
-                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    Facção Prevista (Localização)
-                                </label>
-                                <select name="localizacao_id" id="localizacao_id" class="block mt-1 w-full border-gray-300 focus:border-purple-500 focus:ring-purple-500 rounded-md shadow-sm text-gray-700 bg-purple-50">
-                                    <option value="">Selecione a facção/localização prevista</option>
-                                    @foreach($localizacoes as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ old('localizacao_id', $produto->localizacao_id) == $localizacao->id ? 'selected' : '' }} class="text-gray-700">
-                                            {{ $localizacao->nome_localizacao }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <p class="text-xs text-purple-600 mt-1">
-                                    <strong>💡 Dica:</strong> Indique para qual facção/localização este produto será encaminhado na produção
-                                </p>
-                            </div>
-
                             <!-- Anexos Flexíveis -->
                             <div class="col-span-1 md:col-span-2">
                                 <div class="flex justify-between items-center mb-3">

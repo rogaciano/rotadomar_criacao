@@ -178,7 +178,18 @@
                                                 {{ number_format($produto->quantidade, 0, ',', '.') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $produto->data_prevista_faccao ? $produto->data_prevista_faccao->format('d/m/Y') : 'N/A' }}
+                                                @php
+                                                    // Buscar primeira data prevista das localizações
+                                                    $primeiraData = $produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->sortBy('pivot.data_prevista_faccao')->first();
+                                                @endphp
+                                                @if($primeiraData && $primeiraData->pivot->data_prevista_faccao)
+                                                    {{ is_string($primeiraData->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('d/m/Y') : $primeiraData->pivot->data_prevista_faccao->format('d/m/Y') }}
+                                                    @if($produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->count() > 1)
+                                                        <span class="text-xs text-gray-400">(+{{ $produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->count() - 1 }})</span>
+                                                    @endif
+                                                @else
+                                                    <span class="text-gray-400">N/A</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

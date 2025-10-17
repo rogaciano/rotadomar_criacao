@@ -27,31 +27,29 @@ class PopularAlocacoesMensais extends Command
      */
     public function handle()
     {
-        $this->info('🚀 Iniciando população de alocações mensais...');
+        $this->info('🚀 Iniciando população de alocações mensais via produto_localizacao...');
         
-        // Buscar TODOS os produtos com localização e quantidade
+        // Buscar TODOS os registros de produto_localizacao com data prevista
         try {
-            $produtos = Produto::all()
-                ->filter(function($produto) {
-                    return $produto->localizacao_id && $produto->quantidade > 0;
-                });
+            $produtoLocalizacoes = \App\Models\ProdutoLocalizacao::whereNotNull('data_prevista_faccao')
+                ->where('quantidade', '>', 0)
+                ->get();
         } catch (\Exception $e) {
-            $this->error("Erro ao buscar produtos: " . $e->getMessage());
+            $this->error("Erro ao buscar produto_localizacao: " . $e->getMessage());
             return Command::FAILURE;
         }
 
-        $this->info("📦 Encontrados {$produtos->count()} produtos para processar");
+        $this->info("📦 Encontrados {$produtoLocalizacoes->count()} registros para processar");
         
         $criados = 0;
         $pulados = 0;
 
-        $bar = $this->output->createProgressBar($produtos->count());
+        $bar = $this->output->createProgressBar($produtoLocalizacoes->count());
         $bar->start();
 
-        foreach ($produtos as $produto) {
-            // Verificar se já existe alocação
-            $alocacaoExistente = ProdutoAlocacaoMensal::where('produto_id', $produto->id)
-                ->where('tipo', 'original')
+        foreach ($produtoLocalizacoes as $pl) {
+            // Verificar se já existe alocação para este produto_localizacao
+            $alocacaoExistente = ProdutoAlocacaoMensal::where('produto_localizacao_id', $pl->id)
                 ->exists();
 
             if ($alocacaoExistente) {
@@ -60,32 +58,31 @@ class PopularAlocacoesMensais extends Command
                 continue;
             }
 
-            // Definir mês/ano - usar data_prevista_faccao se existir, senão usar mês atual
-            $mes = now()->month;
-            $ano = now()->year;
-            
             try {
-                if ($produto->data_prevista_faccao) {
-                    $mes = $produto->data_prevista_faccao->month;
-                    $ano = $produto->data_prevista_faccao->year;
-                }
+                // Converter data para Carbon se for string
+                $dataFaccao = is_string($pl->data_prevista_faccao) 
+                    ? \Carbon\Carbon::parse($pl->data_prevista_faccao)
+                    : $pl->data_prevista_faccao;
+                
+                // Criar alocação
+                ProdutoAlocacaoMensal::create([
+                    'produto_id' => $pl->produto_id,
+                    'produto_localizacao_id' => $pl->id,
+                    'localizacao_id' => $pl->localizacao_id,
+                    'mes' => $dataFaccao->month,
+                    'ano' => $dataFaccao->year,
+                    'quantidade' => $pl->quantidade,
+                    'tipo' => 'original',
+                    'ordem_producao' => $pl->ordem_producao,
+                    'usuario_id' => 1, // ID do primeiro usuário admin
+                    'observacoes' => $pl->observacao ?? 'Alocação inicial criada automaticamente via produto_localizacao'
+                ]);
+
+                $criados++;
             } catch (\Exception $e) {
-                // Se não tem data_prevista_faccao, usa mês atual
+                $this->error("Erro ao processar produto_localizacao ID {$pl->id}: " . $e->getMessage());
             }
             
-            // Criar alocação
-            ProdutoAlocacaoMensal::create([
-                'produto_id' => $produto->id,
-                'localizacao_id' => $produto->localizacao_id,
-                'mes' => $mes,
-                'ano' => $ano,
-                'quantidade' => $produto->quantidade,
-                'tipo' => 'original',
-                'usuario_id' => 1, // ID do primeiro usuário admin
-                'observacoes' => 'Alocação inicial criada automaticamente'
-            ]);
-
-            $criados++;
             $bar->advance();
         }
 
@@ -94,7 +91,7 @@ class PopularAlocacoesMensais extends Command
 
         $this->info("✅ Processo concluído!");
         $this->info("📊 Alocações criadas: {$criados}");
-        $this->info("⏭️  Produtos pulados (já tinham alocação): {$pulados}");
+        $this->info("⏭️  Registros pulados (já tinham alocação): {$pulados}");
 
         return Command::SUCCESS;
     }

@@ -12,6 +12,7 @@ use App\Http\Controllers\SituacaoController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\ProdutoAnexoController;
+use App\Http\Controllers\ProdutoLocalizacaoController;
 use App\Http\Controllers\ProdutoObservacaoController;
 use App\Http\Controllers\ProdutoCombinacaoController;
 use App\Http\Controllers\MovimentacaoController;
@@ -132,6 +133,11 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Routes para Anexos de Produtos
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
     Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');
+    
+    // Routes para Localizações de Produtos
+    Route::post('produtos/{produto}/localizacoes', [ProdutoLocalizacaoController::class, 'store'])->name('produtos.localizacoes.store');
+    Route::put('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'update'])->name('produtos.localizacoes.update');
+    Route::delete('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'destroy'])->name('produtos.localizacoes.destroy');
     
     // Routes para Observações de Produtos
     Route::post('produtos/observacoes', [ProdutoObservacaoController::class, 'store'])->name('produtos.observacoes.store');
