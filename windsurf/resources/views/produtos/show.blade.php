@@ -13,6 +13,14 @@
                         Editar
                     </a>
                 @endif
+                @if(!$produto->trashed() && auth()->user()->canCreate('produtos') && $produto->podeSerReprogramado())
+                    <button onclick="document.getElementById('modal-reprogramar').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-orange-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-600 active:bg-orange-600 focus:outline-none focus:border-orange-600 focus:ring focus:ring-orange-300 disabled:opacity-25 transition mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                        </svg>
+                        Reprogramar
+                    </button>
+                @endif
                 @if(auth()->user()->canRead('produtos'))
                     <a href="{{ route('produtos.pdf', $produto->id) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-300 disabled:opacity-25 transition mr-2" target="_blank">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -42,7 +50,19 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div>
                                 <span class="block text-sm font-medium text-gray-500">Referência</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->referencia }}</span>
+                                <span class="block mt-1 text-sm text-gray-900">
+                                    {{ $produto->referencia }}
+                                    @if($produto->isReprogramacao())
+                                        <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800" title="Este produto é uma reprogramação">
+                                            📋 Reprogramação #{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}
+                                        </span>
+                                    @endif
+                                    @if(!$produto->isReprogramacao() && $produto->reprogramacoes()->count() > 0)
+                                        <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800" title="Este produto possui reprogramações">
+                                            🔄 {{ $produto->reprogramacoes()->count() }} {{ $produto->reprogramacoes()->count() == 1 ? 'reprogramação' : 'reprogramações' }}
+                                        </span>
+                                    @endif
+                                </span>
                             </div>
 
                             <div>
@@ -1028,6 +1048,92 @@
                         }
                         @endphp
 
+                        <!-- Seção de Reprogramações -->
+                        @if($produto->isReprogramacao() || $produto->reprogramacoes()->count() > 0)
+                            <div class="bg-white shadow-sm sm:rounded-lg p-6 mb-6">
+                                @if($produto->isReprogramacao())
+                                    <!-- Este produto É uma reprogramação -->
+                                    <div class="flex items-center mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                        </svg>
+                                        <h3 class="text-lg font-semibold text-gray-800">Produto Original</h3>
+                                    </div>
+                                    <div class="bg-orange-50 border-l-4 border-orange-400 p-4 rounded">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3 flex-1">
+                                                <p class="text-sm text-orange-700">
+                                                    Este produto é a <strong>reprogramação #{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}</strong> de:
+                                                </p>
+                                                <div class="mt-2">
+                                                    <a href="{{ route('produtos.show', $produto->produtoOriginal->id) }}" 
+                                                       class="inline-flex items-center px-4 py-2 bg-white border border-orange-300 rounded-md font-semibold text-sm text-orange-700 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        {{ $produto->produtoOriginal->referencia }} - {{ $produto->produtoOriginal->descricao }}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- Este produto TEM reprogramações -->
+                                    <div class="flex items-center mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                                        </svg>
+                                        <h3 class="text-lg font-semibold text-gray-800">Reprogramações deste Produto</h3>
+                                        <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            {{ $produto->reprogramacoes()->count() }}
+                                        </span>
+                                    </div>
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                        <div class="space-y-3">
+                                            @foreach($produto->reprogramacoes as $reprogramacao)
+                                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200 hover:shadow-md transition">
+                                                    <div class="flex items-center space-x-3">
+                                                        <div class="flex-shrink-0">
+                                                            <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600 font-bold">
+                                                                #{{ str_pad($reprogramacao->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}
+                                                            </span>
+                                                        </div>
+                                                        <div>
+                                                            <p class="text-sm font-semibold text-gray-900">{{ $reprogramacao->referencia }}</p>
+                                                            <p class="text-xs text-gray-500">
+                                                                Criado em {{ $reprogramacao->data_cadastro->format('d/m/Y') }}
+                                                                @if($reprogramacao->status)
+                                                                    • <span class="px-2 py-0.5 rounded-full text-xs {{ $reprogramacao->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                                                        {{ $reprogramacao->status->descricao }}
+                                                                    </span>
+                                                                @endif
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <a href="{{ route('produtos.show', $reprogramacao->id) }}" 
+                                                           class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            Ver Detalhes
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-800">Movimentações</h3>
                             <a href="{{ route('movimentacoes.create', ['produto_id' => $produto->id]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
@@ -1180,6 +1286,86 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Reprogramação -->
+    <div id="modal-reprogramar" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="relative p-4 border shadow-lg rounded-md bg-white" style="width: 400px; max-width: 90vw;">
+            <div class="mt-1">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-semibold text-gray-900">Reprogramar Produto</h3>
+                    <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="text-gray-400 hover:text-gray-500">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mt-2 px-2 py-2">
+                    <div class="bg-orange-50 border-l-4 border-orange-400 p-2 mb-3">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-orange-700">
+                                    <strong>Atenção!</strong> Será criado um novo produto baseado em:
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2 space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="font-medium text-gray-700">Original:</span>
+                            <span class="text-gray-900 font-semibold">{{ $produto->referencia }}</span>
+                        </div>
+                        @php
+                            $ultimaReprogramacao = $produto->reprogramacoes()->max('numero_reprogramacao') ?? 0;
+                            $proximoNumero = $ultimaReprogramacao + 1;
+                            $novaReferencia = $produto->referencia . '-' . str_pad($proximoNumero, 2, '0', STR_PAD_LEFT);
+                        @endphp
+                        <div class="flex justify-between text-xs">
+                            <span class="font-medium text-gray-700">Nova:</span>
+                            <span class="text-green-600 font-bold">{{ $novaReferencia }}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
+                        <p class="text-xs text-blue-800 mb-1 font-semibold">✔️ Será copiado:</p>
+                        <ul class="text-xs text-blue-700 space-y-0.5 ml-3">
+                            <li>• Dados, tecidos, observações, anexos, cores</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded p-2 mb-2">
+                        <p class="text-xs text-red-800 mb-1 font-semibold">❌ NÃO será copiado:</p>
+                        <ul class="text-xs text-red-700 space-y-0.5 ml-3">
+                            <li>• Localizações e movimentações</li>
+                        </ul>
+                    </div>
+
+                    <p class="text-xs text-gray-600 mb-2">
+                        <strong>Obs:</strong> Produto reprogramado <strong class="text-red-600">não</strong> pode ser reprogramado novamente.
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 px-2 py-2 bg-gray-50 rounded-b">
+                    <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300">
+                        Cancelar
+                    </button>
+                    <form action="{{ route('produtos.reprogramar', $produto->id) }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600">
+                            Confirmar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script para o carrossel -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

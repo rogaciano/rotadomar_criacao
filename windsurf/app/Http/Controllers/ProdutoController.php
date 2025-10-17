@@ -1039,4 +1039,134 @@ class ProdutoController extends Controller
             return back()->with('error', 'Ocorreu um erro ao gerar o PDF. Por favor, tente novamente ou entre em contato com o suporte.');
         }
     }
+
+    /**
+     * Reprogramar um produto (criar cópia sem movimentações e localizações)
+     */
+    public function reprogramar(Request $request, $id)
+    {
+        if (!auth()->user()->canCreate('produtos')) { abort(403); }
+
+        try {
+            \DB::beginTransaction();
+
+            // Buscar produto original
+            $produtoOriginal = Produto::with(['tecidos', 'observacoes', 'anexos', 'cores', 'combinacoes'])
+                ->findOrFail($id);
+
+            // Verificar se o produto pode ser reprogramado
+            if (!$produtoOriginal->podeSerReprogramado()) {
+                return back()->with('error', 'Este produto já é uma reprogramação e não pode ser reprogramado novamente.');
+            }
+
+            // Calcular próximo número de reprogramação
+            $ultimaReprogramacao = Produto::where('produto_original_id', $produtoOriginal->id)
+                ->max('numero_reprogramacao');
+            
+            $numeroReprogramacao = ($ultimaReprogramacao ?? 0) + 1;
+
+            // Verificar limite de reprogramações
+            if ($numeroReprogramacao > 99) {
+                return back()->with('error', 'Limite máximo de 99 reprogramações atingido.');
+            }
+
+            // Nova referência com sufixo
+            $novaReferencia = $produtoOriginal->referencia . '-' . str_pad($numeroReprogramacao, 2, '0', STR_PAD_LEFT);
+
+            // Verificar se referência já existe
+            if (Produto::where('referencia', $novaReferencia)->exists()) {
+                return back()->with('error', 'Já existe um produto com a referência ' . $novaReferencia);
+            }
+
+            // Criar novo produto
+            $novoProduto = $produtoOriginal->replicate();
+            $novoProduto->referencia = $novaReferencia;
+            $novoProduto->produto_original_id = $produtoOriginal->id;
+            $novoProduto->numero_reprogramacao = $numeroReprogramacao;
+            $novoProduto->data_cadastro = now();
+            $novoProduto->save();
+
+            // Copiar tecidos
+            if ($produtoOriginal->tecidos && $produtoOriginal->tecidos->count() > 0) {
+                foreach ($produtoOriginal->tecidos as $tecido) {
+                    $novoProduto->tecidos()->attach($tecido->id, [
+                        'consumo' => $tecido->pivot->consumo
+                    ]);
+                }
+            }
+
+            // Copiar observações + adicionar observação automática
+            if ($produtoOriginal->observacoes && $produtoOriginal->observacoes->count() > 0) {
+                foreach ($produtoOriginal->observacoes as $obs) {
+                    $novoProduto->observacoes()->create([
+                        'observacao' => $obs->observacao,
+                        'usuario_id' => $obs->usuario_id
+                    ]);
+                }
+            }
+
+            // Adicionar observação de reprogramação
+            $novoProduto->observacoes()->create([
+                'observacao' => "Reprogramado de {$produtoOriginal->referencia} em " . now()->format('d/m/Y H:i'),
+                'usuario_id' => auth()->id()
+            ]);
+
+            // Copiar anexos
+            if ($produtoOriginal->anexos && $produtoOriginal->anexos->count() > 0) {
+                foreach ($produtoOriginal->anexos as $anexo) {
+                    // Copiar arquivo se existir
+                    if ($anexo->caminho_arquivo && Storage::exists($anexo->caminho_arquivo)) {
+                        $novoPath = str_replace(
+                            $produtoOriginal->id . '/',
+                            $novoProduto->id . '/',
+                            $anexo->caminho_arquivo
+                        );
+                        Storage::copy($anexo->caminho_arquivo, $novoPath);
+                        
+                        $novoProduto->anexos()->create([
+                            'nome_arquivo' => $anexo->nome_arquivo,
+                            'caminho_arquivo' => $novoPath,
+                            'tipo_anexo' => $anexo->tipo_anexo,
+                            'descricao' => $anexo->descricao,
+                            'usuario_id' => auth()->id()
+                        ]);
+                    }
+                }
+            }
+
+            // Copiar cores
+            if ($produtoOriginal->cores && $produtoOriginal->cores->count() > 0) {
+                foreach ($produtoOriginal->cores as $cor) {
+                    $novoProduto->cores()->create([
+                        'cor' => $cor->cor,
+                        'quantidade' => $cor->quantidade
+                    ]);
+                }
+            }
+
+            // Copiar combinações
+            if ($produtoOriginal->combinacoes && $produtoOriginal->combinacoes->count() > 0) {
+                foreach ($produtoOriginal->combinacoes as $combinacao) {
+                    $novoProduto->combinacoes()->create([
+                        'cor1' => $combinacao->cor1,
+                        'cor2' => $combinacao->cor2,
+                        'cor3' => $combinacao->cor3,
+                        'cor4' => $combinacao->cor4,
+                        'cor5' => $combinacao->cor5,
+                        'quantidade' => $combinacao->quantidade
+                    ]);
+                }
+            }
+
+            \DB::commit();
+
+            return redirect()->route('produtos.show', $novoProduto->id)
+                ->with('success', "Produto {$novaReferencia} reprogramado com sucesso!");
+
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('Erro ao reprogramar produto: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao reprogramar produto: ' . $e->getMessage());
+        }
+    }
 }

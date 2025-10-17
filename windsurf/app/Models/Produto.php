@@ -27,7 +27,9 @@ class Produto extends Model
         'status_id',
         'localizacao_id',
         'anexo_ficha_producao',
-        'anexo_catalogo_vendas'
+        'anexo_catalogo_vendas',
+        'produto_original_id',
+        'numero_reprogramacao'
     ];
 
     protected $casts = [
@@ -35,7 +37,9 @@ class Produto extends Model
         'data_prevista_producao' => 'date',
         'preco_atacado' => 'decimal:2',
         'preco_varejo' => 'decimal:2',
-        'quantidade' => 'integer'
+        'quantidade' => 'integer',
+        'produto_original_id' => 'integer',
+        'numero_reprogramacao' => 'integer'
     ];
 
     // Relacionamentos
@@ -118,6 +122,39 @@ class Produto extends Model
     public function cores()
     {
         return $this->hasMany(ProdutoCor::class);
+    }
+
+    /**
+     * Relacionamento com o produto original (quando este é uma reprogramação)
+     */
+    public function produtoOriginal()
+    {
+        return $this->belongsTo(Produto::class, 'produto_original_id');
+    }
+
+    /**
+     * Relacionamento com as reprogramações deste produto
+     */
+    public function reprogramacoes()
+    {
+        return $this->hasMany(Produto::class, 'produto_original_id')
+                    ->orderBy('numero_reprogramacao', 'asc');
+    }
+
+    /**
+     * Verifica se este produto é uma reprogramação
+     */
+    public function isReprogramacao()
+    {
+        return !is_null($this->produto_original_id);
+    }
+
+    /**
+     * Verifica se este produto pode ser reprogramado
+     */
+    public function podeSerReprogramado()
+    {
+        return is_null($this->produto_original_id);
     }
 
     /**

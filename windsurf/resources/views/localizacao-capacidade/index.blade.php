@@ -109,6 +109,9 @@
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Ocupação
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Observações
+                                    </th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Ações
                                     </th>
@@ -157,6 +160,15 @@
                                                 </span>
                                             </div>
                                         </td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">
+                                            @if($capacidade->observacoes)
+                                                <div class="max-w-xs">
+                                                    <span class="text-xs">{{ Str::limit($capacidade->observacoes, 80) }}</span>
+                                                </div>
+                                            @else
+                                                <span class="text-gray-400 italic text-xs">-</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex item-center justify-end space-x-1">
                                                 <a href="{{ route('localizacao-capacidade.show', $capacidade->id) }}" class="text-blue-600 hover:text-blue-900 bg-transparent p-1 rounded-full hover:bg-blue-100 transition-all" title="Visualizar">
@@ -186,7 +198,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="py-6 px-6 text-center text-gray-500">Nenhuma capacidade cadastrada.</td>
+                                        <td colspan="8" class="py-6 px-6 text-center text-gray-500">Nenhuma capacidade cadastrada.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

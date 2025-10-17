@@ -129,6 +129,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('produtos/get-available-colors', [ProdutoController::class, 'getAvailableColors'])->name('produtos.get-available-colors');
     Route::get('produtos-inconsistencias', [ProdutoController::class, 'inconsistencias'])->name('produtos.inconsistencias');
     Route::get('produtos-lista-pdf', [ProdutoController::class, 'generateListPdf'])->name('produtos.lista.pdf');
+    Route::post('produtos/{id}/reprogramar', [ProdutoController::class, 'reprogramar'])->name('produtos.reprogramar');
 
     // Routes para Anexos de Produtos
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
