@@ -225,7 +225,19 @@
                                 <tr>
                                     <td class="font-semibold">{{ $produto->referencia }}</td>
                                     <td>{{ $produto->descricao }}</td>
-                                    <td>{{ $produto->marca->nome_marca ?? 'N/A' }}</td>
+                                    <td>
+                                        @if($produto->marca)
+                                            @if($produto->marca->cor_fundo && $produto->marca->cor_fonte)
+                                                <span style="background-color: {{ $produto->marca->cor_fundo }}; color: {{ $produto->marca->cor_fonte }}; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap;">
+                                                    {{ $produto->marca->nome_marca }}
+                                                </span>
+                                            @else
+                                                {{ $produto->marca->nome_marca }}
+                                            @endif
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
                                     <td>{{ $produto->grupoProduto->descricao ?? 'N/A' }}</td>
                                     <td>
                                         @php

@@ -51,6 +51,7 @@ class StatusController extends Controller
             'descricao' => 'required|string|max:255|unique:status,descricao',
             'observacoes' => 'nullable|string',
             'ativo' => 'boolean',
+            'calc_necessidade' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -59,10 +60,13 @@ class StatusController extends Controller
                 ->withInput();
         }
 
-        // Garantir que ativo seja false se não estiver presente
+        // Garantir que ativo e calc_necessidade sejam false se não estiverem presentes
         $data = $request->all();
         if (!isset($data['ativo'])) {
             $data['ativo'] = false;
+        }
+        if (!isset($data['calc_necessidade'])) {
+            $data['calc_necessidade'] = false;
         }
 
         Status::create($data);
@@ -100,6 +104,7 @@ class StatusController extends Controller
             'descricao' => 'required|string|max:255|unique:status,descricao,' . $id,
             'observacoes' => 'nullable|string',
             'ativo' => 'boolean',
+            'calc_necessidade' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -108,10 +113,13 @@ class StatusController extends Controller
                 ->withInput();
         }
 
-        // Garantir que ativo seja false se não estiver presente
+        // Garantir que ativo e calc_necessidade sejam false se não estiverem presentes
         $data = $request->all();
         if (!isset($data['ativo'])) {
             $data['ativo'] = false;
+        }
+        if (!isset($data['calc_necessidade'])) {
+            $data['calc_necessidade'] = false;
         }
 
         $status->update($data);

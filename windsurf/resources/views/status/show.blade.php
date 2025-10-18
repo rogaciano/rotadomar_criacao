@@ -61,6 +61,21 @@
                             </div>
 
                             <div>
+                                <span class="block text-sm font-medium text-gray-500">Calcular Necessidade</span>
+                                <span class="block mt-1">
+                                    @if ($status->calc_necessidade)
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            Sim
+                                        </span>
+                                    @else
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Não
+                                        </span>
+                                    @endif
+                                </span>
+                            </div>
+
+                            <div>
                                 <span class="block text-sm font-medium text-gray-500">Criado em</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $status->created_at ? $status->created_at->format('d/m/Y H:i') : 'N/A' }}</span>
                             </div>

@@ -142,16 +142,44 @@ class ProdutoLocalizacaoObserver
     private function removerAlocacaoMensal(ProdutoLocalizacao $produtoLocalizacao)
     {
         try {
-            // Buscar e deletar alocação vinculada
-            $alocacao = ProdutoAlocacaoMensal::where('produto_localizacao_id', $produtoLocalizacao->id)
-                ->first();
+            // Buscar por produto_localizacao_id (método preferencial)
+            $alocacoes = ProdutoAlocacaoMensal::where('produto_localizacao_id', $produtoLocalizacao->id)->get();
+            
+            // Se não encontrou, buscar por produto_id + localizacao_id + ordem_producao (fallback para registros antigos)
+            if ($alocacoes->isEmpty() && $produtoLocalizacao->data_prevista_faccao) {
+                $dataFaccao = is_string($produtoLocalizacao->data_prevista_faccao) 
+                    ? \Carbon\Carbon::parse($produtoLocalizacao->data_prevista_faccao)
+                    : $produtoLocalizacao->data_prevista_faccao;
+                
+                $alocacoes = ProdutoAlocacaoMensal::where('produto_id', $produtoLocalizacao->produto_id)
+                    ->where('localizacao_id', $produtoLocalizacao->localizacao_id)
+                    ->where('mes', $dataFaccao->month)
+                    ->where('ano', $dataFaccao->year)
+                    ->where(function($q) use ($produtoLocalizacao) {
+                        $q->whereNull('produto_localizacao_id')
+                          ->orWhere('ordem_producao', $produtoLocalizacao->ordem_producao);
+                    })
+                    ->get();
+            }
 
-            if ($alocacao) {
+            // Deletar todas as alocações encontradas
+            $removidas = 0;
+            foreach($alocacoes as $alocacao) {
                 $alocacao->delete();
+                $removidas++;
                 
                 Log::info("Alocação mensal removida", [
                     'produto_localizacao_id' => $produtoLocalizacao->id,
-                    'alocacao_id' => $alocacao->id
+                    'alocacao_id' => $alocacao->id,
+                    'metodo' => $alocacao->produto_localizacao_id ? 'pivot_id' : 'fallback'
+                ]);
+            }
+            
+            if ($removidas == 0) {
+                Log::warning("Nenhuma alocação mensal encontrada para remover", [
+                    'produto_localizacao_id' => $produtoLocalizacao->id,
+                    'produto_id' => $produtoLocalizacao->produto_id,
+                    'localizacao_id' => $produtoLocalizacao->localizacao_id
                 ]);
             }
         } catch (\Exception $e) {

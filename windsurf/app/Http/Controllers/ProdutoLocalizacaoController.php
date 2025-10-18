@@ -111,7 +111,21 @@ class ProdutoLocalizacaoController extends Controller
             ->where('produto_id', $produtoId)
             ->firstOrFail();
 
+        // Guardar ordem de produção para log
+        $ordemProducao = $produtoLocalizacao->ordem_producao;
+        $localizacaoId = $produtoLocalizacao->localizacao_id;
+        
+        // Deletar o registro (isso vai disparar o Observer automaticamente)
         $produtoLocalizacao->delete();
+        
+        // Log para debug
+        \Log::info("Localização removida do produto", [
+            'produto_id' => $produtoId,
+            'localizacao_id' => $localizacaoId,
+            'ordem_producao' => $ordemProducao,
+            'pivot_id' => $produtoLocalizacaoId,
+            'user_id' => auth()->id()
+        ]);
 
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização removida com sucesso!');

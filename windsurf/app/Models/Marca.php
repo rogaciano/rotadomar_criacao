@@ -14,6 +14,8 @@ class Marca extends Model
     protected $fillable = [
         'nome_marca',
         'logo_path',
+        'cor_fundo',
+        'cor_fonte',
         'ativo',
         'suporte_marca'
     ];

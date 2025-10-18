@@ -49,6 +49,8 @@ class MarcaController extends Controller
             'nome_marca' => 'required|string|max:255|unique:marcas,nome_marca',
             'ativo' => 'boolean',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cor_fundo' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'cor_fonte' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
         if ($validator->fails()) {
@@ -89,6 +91,8 @@ class MarcaController extends Controller
         $marca = new Marca();
         $marca->nome_marca = $data['nome_marca'];
         $marca->ativo = isset($data['ativo']) ? $data['ativo'] : false;
+        $marca->cor_fundo = $data['cor_fundo'] ?? null;
+        $marca->cor_fonte = $data['cor_fonte'] ?? null;
         
         // Atribuir o caminho da logo explicitamente
         if (isset($data['logo_path'])) {
@@ -147,6 +151,8 @@ class MarcaController extends Controller
             'nome_marca' => 'required|string|max:255|unique:marcas,nome_marca,' . $marca->id,
             'ativo' => 'boolean',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cor_fundo' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'cor_fonte' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
         ]);
 
         if ($validator->fails()) {
@@ -196,6 +202,8 @@ class MarcaController extends Controller
         // Atualizar os dados da marca diretamente
         $marca->nome_marca = $data['nome_marca'];
         $marca->ativo = isset($data['ativo']) ? $data['ativo'] : false;
+        $marca->cor_fundo = $data['cor_fundo'] ?? null;
+        $marca->cor_fonte = $data['cor_fonte'] ?? null;
         
         // Atribuir o caminho da logo explicitamente
         if (isset($data['logo_path'])) {

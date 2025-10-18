@@ -413,11 +413,6 @@
                                                             Dt.Prod: {{ $movimentacao->produto->data_prevista_producao->format('m/Y') }}
                                                         </span>
                                                     @endif
-                                                    @if($movimentacao->produto->data_prevista_faccao)
-                                                        <span class="text-purple-600 text-[10px] font-semibold ml-2">
-                                                            Dt.Fac: {{ $movimentacao->produto->data_prevista_faccao->format('m/Y') }}
-                                                        </span>
-                                                    @endif
                                                 </div>
                                                 <div class="text-gray-500 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
                                                     {{ Str::limit($movimentacao->produto->descricao, 25, '...') }}
@@ -629,11 +624,6 @@
                                                     @if($movimentacao->produto->data_prevista_producao)
                                                         <div class="text-blue-600 text-xs font-semibold">
                                                             Prod: {{ $movimentacao->produto->data_prevista_producao->format('d/m/Y') }}
-                                                        </div>
-                                                    @endif
-                                                    @if($movimentacao->produto->data_prevista_faccao)
-                                                        <div class="text-purple-600 text-xs font-semibold">
-                                                            Fac: {{ $movimentacao->produto->data_prevista_faccao->format('d/m/Y') }}
                                                         </div>
                                                     @endif
                                                 @else

@@ -72,6 +72,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Calc. Necessidade
+                                    </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Criado em
                                     </th>
@@ -93,6 +96,15 @@
                                             <span class="px-2 py-1 rounded-full text-xs {{ $statusItem->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                 {{ $statusItem->ativo ? 'Ativo' : 'Inativo' }}
                                             </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                            @if($statusItem->calc_necessidade)
+                                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 font-semibold">
+                                                    ✓ Sim
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400">—</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $statusItem->created_at ? $statusItem->created_at->format('d/m/Y H:i') : 'N/A' }}

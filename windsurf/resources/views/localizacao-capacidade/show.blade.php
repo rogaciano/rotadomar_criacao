@@ -129,8 +129,20 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $produto->descricao }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $produto->marca->nome_marca ?? 'N/A' }}
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                @if($produto->marca)
+                                                    @if($produto->marca->cor_fundo && $produto->marca->cor_fonte)
+                                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ $produto->marca->cor_fundo }}; color: {{ $produto->marca->cor_fonte }};">
+                                                            {{ $produto->marca->nome_marca }}
+                                                        </span>
+                                                    @else
+                                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                                            {{ $produto->marca->nome_marca }}
+                                                        </span>
+                                                    @endif
+                                                @else
+                                                    <span class="text-gray-400 italic">N/A</span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $produto->grupoProduto->descricao ?? 'N/A' }}

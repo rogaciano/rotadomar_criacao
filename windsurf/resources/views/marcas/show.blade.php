@@ -74,6 +74,32 @@
                                                 {{ $marca->logo_path ? 'Disponível' : 'Não disponível' }}
                                             </span>
                                         </div>
+
+                                        @if($marca->cor_fundo && $marca->cor_fonte)
+                                        <div class="mt-4 pt-4 border-t border-gray-200">
+                                            <div class="flex items-start">
+                                                <span class="text-sm font-medium text-gray-500 w-32">Cores da Marca:</span>
+                                                <div class="flex-1 space-y-2">
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="text-xs text-gray-500 w-16">Fundo:</span>
+                                                        <div class="w-8 h-8 rounded border-2 border-gray-300" style="background-color: {{ $marca->cor_fundo }};"></div>
+                                                        <span class="text-xs font-mono text-gray-600">{{ $marca->cor_fundo }}</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="text-xs text-gray-500 w-16">Fonte:</span>
+                                                        <div class="w-8 h-8 rounded border-2 border-gray-300" style="background-color: {{ $marca->cor_fonte }};"></div>
+                                                        <span class="text-xs font-mono text-gray-600">{{ $marca->cor_fonte }}</span>
+                                                    </div>
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="text-xs text-gray-500 w-16">Preview:</span>
+                                                        <span class="px-4 py-2 inline-flex text-sm font-semibold rounded-full shadow" style="background-color: {{ $marca->cor_fundo }}; color: {{ $marca->cor_fonte }};">
+                                                            {{ $marca->nome_marca }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

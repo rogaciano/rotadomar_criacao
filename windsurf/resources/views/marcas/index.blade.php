@@ -92,7 +92,15 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $marca->nome_marca }}
+                                            @if($marca->cor_fundo && $marca->cor_fonte)
+                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ $marca->cor_fundo }}; color: {{ $marca->cor_fonte }};">
+                                                    {{ $marca->nome_marca }}
+                                                </span>
+                                            @else
+                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                                    {{ $marca->nome_marca }}
+                                                </span>
+                                            @endif
                                         </td>
                                         <!-- Célula de Data de Cadastro removida -->
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

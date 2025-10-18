@@ -54,6 +54,18 @@
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input id="calc_necessidade" name="calc_necessidade" type="checkbox" value="1" {{ old('calc_necessidade') == '1' ? 'checked' : '' }} class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="calc_necessidade" class="font-medium text-gray-700">Calcular Necessidade</label>
+                                    <p class="text-gray-500">Define se produtos com este status devem ter a necessidade de tecido calculada</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex justify-end">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 Salvar Status

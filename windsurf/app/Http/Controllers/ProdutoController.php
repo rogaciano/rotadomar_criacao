@@ -355,6 +355,8 @@ class ProdutoController extends Controller
     public function show(string $id)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
+        
+        // Buscar produto sem cache, garantindo dados frescos
         $produto = Produto::withTrashed()->with([
             'marca', 
             'tecidos', 
@@ -362,7 +364,6 @@ class ProdutoController extends Controller
             'grupoProduto', 
             'status',
             'localizacao',
-            'localizacoes',
             'observacoes',
             'combinacoes' => function($query) {
                 $query->with(['componentes' => function($q) {
@@ -370,6 +371,9 @@ class ProdutoController extends Controller
                 }]);
             }
         ])->findOrFail($id);
+        
+        // Recarregar localizações de forma fresca (sem cache)
+        $produto->load('localizacoes');
 
         // Carregar as movimentações relacionadas a este produto
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)

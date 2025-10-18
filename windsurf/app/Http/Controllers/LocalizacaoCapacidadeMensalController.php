@@ -127,7 +127,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             $produto = $alocacao->produto;
             if ($produto) {
                 $produto->quantidade = $alocacao->quantidade;
-                $produto->data_prevista_faccao = null; // Usar mês/ano da alocação
+                // data_prevista_faccao agora está em produto_localizacao (pode ter múltiplas datas)
             }
             return $produto;
         })->filter();

@@ -38,6 +38,30 @@
                                 <x-input-error :messages="$errors->get('logo')" class="mt-2" />
                             </div>
 
+                            <!-- Cor de Fundo -->
+                            <div>
+                                <x-input-label for="cor_fundo" :value="__('Cor de Fundo')" />
+                                <div class="flex items-center gap-3 mt-1">
+                                    <input id="cor_fundo" type="color" name="cor_fundo" value="{{ old('cor_fundo', '#6366F1') }}" class="h-10 w-20 border border-gray-300 rounded cursor-pointer" />
+                                    <input type="text" id="cor_fundo_text" value="{{ old('cor_fundo', '#6366F1') }}" class="block w-28 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#6366F1" />
+                                    <span class="px-3 py-2 rounded text-white font-semibold text-sm" id="preview_fundo" style="background-color: {{ old('cor_fundo', '#6366F1') }};">Preview</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">Cor para fundo dos badges da marca</p>
+                                <x-input-error :messages="$errors->get('cor_fundo')" class="mt-2" />
+                            </div>
+
+                            <!-- Cor da Fonte -->
+                            <div>
+                                <x-input-label for="cor_fonte" :value="__('Cor da Fonte')" />
+                                <div class="flex items-center gap-3 mt-1">
+                                    <input id="cor_fonte" type="color" name="cor_fonte" value="{{ old('cor_fonte', '#FFFFFF') }}" class="h-10 w-20 border border-gray-300 rounded cursor-pointer" />
+                                    <input type="text" id="cor_fonte_text" value="{{ old('cor_fonte', '#FFFFFF') }}" class="block w-28 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#FFFFFF" />
+                                    <span class="px-3 py-2 rounded font-semibold text-sm border" id="preview_fonte" style="color: {{ old('cor_fonte', '#FFFFFF') }}; background-color: {{ old('cor_fundo', '#6366F1') }};">Preview</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">Cor do texto sobre o fundo</p>
+                                <x-input-error :messages="$errors->get('cor_fonte')" class="mt-2" />
+                            </div>
+
                             <!-- Status -->
                             <div>
                                 <x-input-label for="ativo" :value="__('Status')" />
@@ -59,4 +83,44 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        // Sincronizar color picker com campo de texto
+        const corFundo = document.getElementById('cor_fundo');
+        const corFundoText = document.getElementById('cor_fundo_text');
+        const corFonte = document.getElementById('cor_fonte');
+        const corFonteText = document.getElementById('cor_fonte_text');
+        const previewFundo = document.getElementById('preview_fundo');
+        const previewFonte = document.getElementById('preview_fonte');
+
+        // Cor de Fundo
+        corFundo.addEventListener('input', function() {
+            corFundoText.value = this.value.toUpperCase();
+            previewFundo.style.backgroundColor = this.value;
+            previewFonte.style.backgroundColor = this.value;
+        });
+
+        corFundoText.addEventListener('input', function() {
+            if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                corFundo.value = this.value;
+                previewFundo.style.backgroundColor = this.value;
+                previewFonte.style.backgroundColor = this.value;
+            }
+        });
+
+        // Cor da Fonte
+        corFonte.addEventListener('input', function() {
+            corFonteText.value = this.value.toUpperCase();
+            previewFonte.style.color = this.value;
+        });
+
+        corFonteText.addEventListener('input', function() {
+            if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+                corFonte.value = this.value;
+                previewFonte.style.color = this.value;
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>
