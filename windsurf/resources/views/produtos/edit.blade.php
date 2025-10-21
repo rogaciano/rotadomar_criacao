@@ -139,6 +139,20 @@
                                 </select>
                             </div>
 
+                            <!-- Número de Reprogramação (só aparece se for reprogramação) -->
+                            @if($produto->isReprogramacao())
+                            <div>
+                                <label for="numero_reprogramacao" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Número de Reprogramação
+                                    <span class="text-xs text-gray-500">(para sistemas antigos)</span>
+                                </label>
+                                <input type="number" name="numero_reprogramacao" id="numero_reprogramacao" value="{{ old('numero_reprogramacao', $produto->numero_reprogramacao) }}" min="1" max="99" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Campo para ajuste manual quando reprogramações foram iniciadas em sistemas antigos
+                                </p>
+                            </div>
+                            @endif
+
                             <!-- Anexos Flexíveis -->
                             <div class="col-span-1 md:col-span-2">
                                 <div class="flex justify-between items-center mb-3">

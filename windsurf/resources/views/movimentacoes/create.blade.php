@@ -36,6 +36,28 @@
                             <input type="hidden" name="redirect_to_produto" value="{{ $produto_id }}">
                         @endif
 
+                        @if(isset($produto_selecionado))
+                            <div class="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-blue-700">
+                                            <strong>Produto pré-selecionado:</strong> {{ $produto_selecionado->referencia }} - {{ $produto_selecionado->descricao }}
+                                        </p>
+                                        @if(!$produto_selecionado->podeMovimentar())
+                                            <p class="mt-2 text-sm text-red-700 font-semibold">
+                                                ⚠️ ATENÇÃO: Este produto não pode ter movimentações. Apenas o último produto de uma reprogramação pode ser movimentado.
+                                            </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Produto -->
                             <div>
@@ -48,9 +70,6 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                @if(isset($produto_selecionado))
-                                    <p class="mt-1 text-sm text-green-600">Produto pré-selecionado da página de detalhes.</p>
-                                @endif
                             </div>
 
                             <!-- Localização -->
@@ -82,7 +101,7 @@
                             <!-- Situação -->
                             <div>
                                 <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação</label>
-                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma situação</option>
                                     @foreach($situacoes as $situacao)
                                         <option value="{{ $situacao->id }}" {{ old('situacao_id') == $situacao->id ? 'selected' : '' }}>

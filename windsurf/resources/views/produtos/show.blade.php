@@ -1264,7 +1264,7 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                    <a href="{{ route('movimentacoes.show', $movimentacao->id) }}" class="text-blue-600 hover:text-blue-900" title="Visualizar movimentação">
+                                                    <a href="{{ route('movimentacoes.show', ['movimentacao' => $movimentacao->id, 'back_url' => route('produtos.show', $produto->id)]) }}" class="text-blue-600 hover:text-blue-900" title="Visualizar movimentação">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
@@ -1327,9 +1327,28 @@
                             $novaReferencia = $produto->referencia . '-' . str_pad($proximoNumero, 2, '0', STR_PAD_LEFT);
                         @endphp
                         <div class="flex justify-between text-xs">
-                            <span class="font-medium text-gray-700">Nova:</span>
-                            <span class="text-green-600 font-bold">{{ $novaReferencia }}</span>
+                            <span class="font-medium text-gray-700">Nova (sugerida):</span>
+                            <span class="text-green-600 font-bold" id="preview-referencia">{{ $novaReferencia }}</span>
                         </div>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded p-2 mb-3">
+                        <label for="numero_reprogramacao_manual" class="block text-xs font-semibold text-yellow-800 mb-1">
+                            Número de Reprogramação (opcional)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="numero_reprogramacao_manual" 
+                            name="numero_reprogramacao_manual" 
+                            min="1" 
+                            max="99" 
+                            placeholder="{{ $proximoNumero }}"
+                            class="w-full text-xs border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 rounded-md shadow-sm"
+                            onkeyup="atualizarPreviewReferencia('{{ $produto->referencia }}', {{ $proximoNumero }})"
+                        >
+                        <p class="text-xs text-yellow-700 mt-1">
+                            Deixe em branco para usar o número sugerido ({{ $proximoNumero }}). Use este campo apenas para reprogramações iniciadas em sistemas antigos.
+                        </p>
                     </div>
 
                     <div class="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
@@ -1355,9 +1374,10 @@
                     <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300">
                         Cancelar
                     </button>
-                    <form action="{{ route('produtos.reprogramar', $produto->id) }}" method="POST" class="inline">
+                    <form id="form-reprogramar" action="{{ route('produtos.reprogramar', $produto->id) }}" method="POST" class="inline">
                         @csrf
-                        <button type="submit" class="px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600">
+                        <input type="hidden" name="numero_reprogramacao" id="numero_reprogramacao_hidden">
+                        <button type="submit" onclick="capturarNumeroReprogramacao()" class="px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600">
                             Confirmar
                         </button>
                     </form>
@@ -1566,6 +1586,38 @@
                 console.error('Erro:', error);
                 alert('Erro ao remover observação. Por favor, tente novamente.');
             }
+        }
+    </script>
+
+    <script>
+        // Função para atualizar o preview da referência ao digitar número de reprogramação
+        function atualizarPreviewReferencia(referenciaBase, numeroSugerido) {
+            const inputNumero = document.getElementById('numero_reprogramacao_manual');
+            const previewElement = document.getElementById('preview-referencia');
+            
+            let numero = parseInt(inputNumero.value);
+            
+            // Se não digitou nada ou número inválido, usar o sugerido
+            if (!numero || numero < 1 || numero > 99) {
+                numero = numeroSugerido;
+            }
+            
+            const numeroFormatado = numero.toString().padStart(2, '0');
+            const novaReferencia = referenciaBase + '-' + numeroFormatado;
+            
+            previewElement.textContent = novaReferencia;
+        }
+
+        // Função para capturar o número antes de enviar o formulário
+        function capturarNumeroReprogramacao() {
+            const inputNumero = document.getElementById('numero_reprogramacao_manual');
+            const hiddenInput = document.getElementById('numero_reprogramacao_hidden');
+            
+            // Se o usuário digitou um número, usar esse valor
+            if (inputNumero.value && parseInt(inputNumero.value) > 0) {
+                hiddenInput.value = inputNumero.value;
+            }
+            // Caso contrário, o campo oculto fica vazio e o backend usa o cálculo automático
         }
     </script>
 </x-app-layout>

@@ -7,7 +7,7 @@
 
     <div class="py-12 bg-gray-900">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
+
             <!-- Botões de ação -->
             <div class="flex flex-wrap gap-2 mb-4">
                 <a href="{{ route('localizacao-capacidade.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -16,28 +16,28 @@
                     </svg>
                     Nova Capacidade
                 </a>
-                
+
                 <button onclick="openGerarCapacidadesModal()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                     </svg>
                     Gerar Capacidades do Mês
                 </button>
-                
+
                 <a href="{{ route('localizacao-capacidade.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
                     Ver Listagem
                 </a>
-                
+
                 <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano]) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Gerar PDF
                 </a>
-                
+
                 <button onclick="abrirHistoricoRedistribuicoes()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -176,14 +176,14 @@
                                         </h4>
                                         <div class="flex items-center gap-2">
                                             @if($dado['acima_capacidade'])
-                                                <button 
+                                                <!-- <button
                                                     onclick="abrirModalRedistribuicao({{ $dado['localizacao']->id }}, {{ $mes}}, {{ $ano }})"
                                                     class="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-semibold rounded-md transition-colors">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                                     </svg>
                                                     Redistribuir
-                                                </button>
+                                                </button> -->
                                                 <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full">
                                                     ACIMA DA CAPACIDADE
                                                 </span>
@@ -300,7 +300,7 @@
                                                                         @php
                                                                             // Carregar observações do produto
                                                                             $obs = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
-                                                                            
+
                                                                             // Carregar observações das localizações (ordem de produção)
                                                                             $obsLocalizacoes = $produto->localizacoes()
                                                                                 ->where(function($q) {
@@ -308,7 +308,7 @@
                                                                                       ->orWhereNotNull('produto_localizacao.observacao');
                                                                                 })
                                                                                 ->get();
-                                                                            
+
                                                                             $temObservacoes = $obs->count() > 0 || $obsLocalizacoes->count() > 0;
                                                                         @endphp
                                                                         @if($temObservacoes)
@@ -319,7 +319,7 @@
                                                                                         {{ Str::limit($observacao->observacao, 60) }}
                                                                                     </div>
                                                                                 @endforeach
-                                                                                
+
                                                                                 {{-- Observações das Localizações (Ordem de Produção) --}}
                                                                                 @foreach($obsLocalizacoes as $loc)
                                                                                     <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
@@ -486,7 +486,7 @@
     <script>
         function abrirModalRedistribuicao(localizacaoId, mes, ano) {
             document.getElementById('modalRedistribuicao').classList.remove('hidden');
-            
+
             // Buscar sugestões
             fetch('{{ route('localizacao-capacidade.sugerir-redistribuicao') }}', {
                 method: 'POST',
@@ -508,7 +508,7 @@
             })
             .then(data => {
                 console.log('Dados recebidos:', data); // Debug
-                
+
                 if (data.message) {
                     document.getElementById('conteudoModal').innerHTML = `
                         <div class="text-center py-8">
@@ -544,7 +544,7 @@
                 if (error.message) {
                     mensagem = error.message;
                 }
-                
+
                 document.getElementById('conteudoModal').innerHTML = `
                     <div class="text-center py-8">
                         <svg class="mx-auto h-12 w-12 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -570,9 +570,9 @@
         }
 
         function mostrarSugestoesRedistribuicao(data) {
-            const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+            const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            
+
             // Verificar se há alocações
             if (!data.alocacoes || data.alocacoes.length === 0) {
                 document.getElementById('conteudoModal').innerHTML = `
@@ -590,7 +590,7 @@
                 `;
                 return;
             }
-            
+
             let html = `
                 <div class="space-y-4">
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -611,8 +611,8 @@
                                 <div>
                                     <span class="text-blue-700">Quantidade total:</span>
                                     <span class="font-bold">${data.quantidade_selecionada} produtos</span>
-                                    ${data.quantidade_selecionada > data.excedente ? 
-                                        `<span class="text-xs text-yellow-600">(${data.quantidade_selecionada - data.excedente} a mais que o excedente)</span>` 
+                                    ${data.quantidade_selecionada > data.excedente ?
+                                        `<span class="text-xs text-yellow-600">(${data.quantidade_selecionada - data.excedente} a mais que o excedente)</span>`
                                         : ''}
                                 </div>
                                 <div>
@@ -626,7 +626,7 @@
             if (data.capacidade_destino) {
                 const saldoDestino = data.capacidade_destino.capacidade - data.capacidade_destino.produtos_previstos;
                 const corSaldo = saldoDestino >= data.quantidade_selecionada ? 'text-green-600' : 'text-red-600';
-                
+
                 html += `
                     <div class="mt-2 text-sm">
                         <span class="text-blue-700">Capacidade destino:</span>
@@ -642,16 +642,16 @@
             }
 
             html += `</div>`;
-            
+
             // Verificar se há alocações que serão divididas
             const alocacoesDivididas = data.alocacoes.filter(a => a.tipo === 'parcial');
-            
+
             if (alocacoesDivididas.length > 0) {
                 html += `
                     <div class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
                         <strong class="text-blue-900">ℹ️ Divisão de Alocações:</strong>
                         <p class="text-blue-800 mt-1">
-                            ${alocacoesDivididas.length} alocação(ões) será(ão) dividida(s) para mover exatamente 
+                            ${alocacoesDivididas.length} alocação(ões) será(ão) dividida(s) para mover exatamente
                             a quantidade necessária (${data.excedente.toLocaleString()} produtos).
                             Uma nova alocação será criada para o mês de destino.
                         </p>
@@ -679,7 +679,7 @@
             data.alocacoes.forEach(alocacao => {
                 const isParcial = alocacao.tipo === 'parcial';
                 const quantidadeFicar = alocacao.quantidade - alocacao.quantidade_mover;
-                
+
                 html += `
                     <tr class="hover:bg-gray-50 ${isParcial ? 'bg-yellow-50' : ''}">
                         <td class="px-3 py-2 text-sm font-medium">
@@ -713,7 +713,7 @@
                         <button onclick="fecharModalRedistribuicao()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
                             Cancelar
                         </button>
-                        <button onclick="aplicarRedistribuicao(${JSON.stringify(data).replace(/"/g, '&quot;')})" 
+                        <button onclick="aplicarRedistribuicao(${JSON.stringify(data).replace(/"/g, '&quot;')})"
                                 class="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700">
                             Aplicar Redistribuição
                         </button>
@@ -811,7 +811,7 @@
         function gerarCapacidades() {
             const mes = document.getElementById('mesGerar').value;
             const ano = document.getElementById('anoGerar').value;
-            
+
             if (!mes || !ano) {
                 alert('Por favor, selecione mês e ano');
                 return;
@@ -881,15 +881,15 @@
                 .then(response => response.json())
                 .then(data => {
                     loading.style.display = 'none';
-                    
+
                     if (data.success && data.historico.length > 0) {
                         data.historico.forEach(item => {
                             const row = document.createElement('tr');
                             row.className = 'hover:bg-gray-50';
-                            
+
                             const mesOrigem = String(item.mes_origem).padStart(2, '0');
                             const mesDestino = String(item.mes_destino).padStart(2, '0');
-                            
+
                             row.innerHTML = `
                                 <td class="px-4 py-3 text-sm text-gray-900">${item.produto?.referencia || 'N/A'}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">${item.produto?.descricao || 'N/A'}</td>
@@ -905,7 +905,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-600">${item.usuario?.name || 'Sistema'}</td>
                                 <td class="px-4 py-3 text-sm text-gray-500">${new Date(item.created_at).toLocaleString('pt-BR')}</td>
                                 <td class="px-4 py-3 text-center">
-                                    <button onclick="reverterRedistribuicao(${item.id}, '${item.produto?.referencia}')" 
+                                    <button onclick="reverterRedistribuicao(${item.id}, '${item.produto?.referencia}')"
                                             class="inline-flex items-center px-3 py-1 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -967,7 +967,7 @@
             }
         });
     </script>
-    
+
     <!-- Modal Histórico de Redistribuições -->
     <div id="modalHistoricoRedistribuicoes" style="display:none;" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-6xl mx-4">

@@ -498,6 +498,7 @@ class ProdutoController extends Controller
             'status_id' => 'required|exists:status,id',
             'ficha_producao' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'catalogo_vendas' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'numero_reprogramacao' => 'nullable|integer|min:1|max:99',
         ];
 
         // Handle referencia validation separately
@@ -1063,15 +1064,34 @@ class ProdutoController extends Controller
                 return back()->with('error', 'Este produto já é uma reprogramação e não pode ser reprogramado novamente.');
             }
 
-            // Calcular próximo número de reprogramação
-            $ultimaReprogramacao = Produto::where('produto_original_id', $produtoOriginal->id)
-                ->max('numero_reprogramacao');
-            
-            $numeroReprogramacao = ($ultimaReprogramacao ?? 0) + 1;
+            // Verificar se foi fornecido um número de reprogramação manual
+            if ($request->has('numero_reprogramacao') && !empty($request->numero_reprogramacao)) {
+                $numeroReprogramacao = (int) $request->numero_reprogramacao;
+                
+                // Validar range
+                if ($numeroReprogramacao < 1 || $numeroReprogramacao > 99) {
+                    return back()->with('error', 'O número de reprogramação deve estar entre 1 e 99.');
+                }
+                
+                // Verificar se já existe uma reprogramação com esse número
+                $reprogramacaoExistente = Produto::where('produto_original_id', $produtoOriginal->id)
+                    ->where('numero_reprogramacao', $numeroReprogramacao)
+                    ->exists();
+                
+                if ($reprogramacaoExistente) {
+                    return back()->with('error', "Já existe uma reprogramação com o número {$numeroReprogramacao} para este produto.");
+                }
+            } else {
+                // Calcular próximo número de reprogramação automaticamente
+                $ultimaReprogramacao = Produto::where('produto_original_id', $produtoOriginal->id)
+                    ->max('numero_reprogramacao');
+                
+                $numeroReprogramacao = ($ultimaReprogramacao ?? 0) + 1;
 
-            // Verificar limite de reprogramações
-            if ($numeroReprogramacao > 99) {
-                return back()->with('error', 'Limite máximo de 99 reprogramações atingido.');
+                // Verificar limite de reprogramações
+                if ($numeroReprogramacao > 99) {
+                    return back()->with('error', 'Limite máximo de 99 reprogramações atingido.');
+                }
             }
 
             // Nova referência com sufixo

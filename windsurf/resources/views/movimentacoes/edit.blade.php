@@ -61,7 +61,7 @@
                             <!-- Situação -->
                             <div>
                                 <x-label for="situacao_id" value="{{ __('Situação') }}" />
-                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma situação</option>
                                     @foreach($situacoes as $situacao)
                                         <option value="{{ $situacao->id }}" {{ old('situacao_id', $movimentacao->situacao_id) == $situacao->id ? 'selected' : '' }}>

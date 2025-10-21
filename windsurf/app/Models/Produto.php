@@ -158,6 +158,39 @@ class Produto extends Model
     }
 
     /**
+     * Verifica se este produto é a última reprogramação de uma sequência
+     */
+    public function isUltimaReprogramacao()
+    {
+        if (!$this->produto_original_id) {
+            return false;
+        }
+
+        // Buscar a maior reprogramação do produto original
+        $ultimaReprogramacao = Produto::where('produto_original_id', $this->produto_original_id)
+            ->max('numero_reprogramacao');
+
+        return $this->numero_reprogramacao == $ultimaReprogramacao;
+    }
+
+    /**
+     * Verifica se este produto pode ter movimentações
+     * Produtos origem podem ter movimentação se não tiverem reprogramações
+     * Produtos reprogramados só podem ter movimentação se forem a última reprogramação
+     */
+    public function podeMovimentar()
+    {
+        // Se não é reprogramação (produto original)
+        if (!$this->isReprogramacao()) {
+            // Verifica se não tem reprogramações
+            return $this->reprogramacoes()->count() == 0;
+        }
+
+        // Se é reprogramação, verifica se é a última
+        return $this->isUltimaReprogramacao();
+    }
+
+    /**
      * Retorna a quantidade total do produto baseada na soma das quantidades por cor
      */
     public function getQuantidadeTotalPorCoresAttribute()
