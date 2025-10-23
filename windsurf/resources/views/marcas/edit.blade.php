@@ -79,6 +79,24 @@
 
 
                         </div>
+
+                        <!-- Preview da Marca -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Preview da Marca</h3>
+                            <div class="bg-gray-50 rounded-lg p-6">
+                                <p class="text-sm text-gray-600 mb-3">Veja como a marca ficará nos produtos:</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span id="marca_preview" class="inline-flex items-center px-4 py-2 rounded-md font-bold text-lg shadow-sm transition-all" style="background-color: {{ old('cor_fundo', $marca->cor_fundo ?? '#6366F1') }}; color: {{ old('cor_fonte', $marca->cor_fonte ?? '#FFFFFF') }};">
+                                        <span id="marca_preview_text">{{ old('nome_marca', $marca->nome_marca) }}</span>
+                                    </span>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-md font-semibold text-sm shadow-sm" id="marca_preview_small" style="background-color: {{ old('cor_fundo', $marca->cor_fundo ?? '#6366F1') }}; color: {{ old('cor_fonte', $marca->cor_fonte ?? '#FFFFFF') }};">
+                                        <span id="marca_preview_small_text">{{ old('nome_marca', $marca->nome_marca) }}</span>
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">O preview é atualizado automaticamente conforme você digita</p>
+                            </div>
+                        </div>
+
                         <div class="flex justify-end">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,12 +120,26 @@
         const corFonteText = document.getElementById('cor_fonte_text');
         const previewFundo = document.getElementById('preview_fundo');
         const previewFonte = document.getElementById('preview_fonte');
+        const nomeMarca = document.getElementById('nome_marca');
+        const marcaPreview = document.getElementById('marca_preview');
+        const marcaPreviewSmall = document.getElementById('marca_preview_small');
+        const marcaPreviewText = document.getElementById('marca_preview_text');
+        const marcaPreviewSmallText = document.getElementById('marca_preview_small_text');
+
+        // Atualizar preview da marca
+        function atualizarPreviewMarca() {
+            const nome = nomeMarca.value || 'Nome da Marca';
+            marcaPreviewText.textContent = nome;
+            marcaPreviewSmallText.textContent = nome;
+        }
 
         // Cor de Fundo
         corFundo.addEventListener('input', function() {
             corFundoText.value = this.value.toUpperCase();
             previewFundo.style.backgroundColor = this.value;
             previewFonte.style.backgroundColor = this.value;
+            marcaPreview.style.backgroundColor = this.value;
+            marcaPreviewSmall.style.backgroundColor = this.value;
         });
 
         corFundoText.addEventListener('input', function() {
@@ -115,6 +147,8 @@
                 corFundo.value = this.value;
                 previewFundo.style.backgroundColor = this.value;
                 previewFonte.style.backgroundColor = this.value;
+                marcaPreview.style.backgroundColor = this.value;
+                marcaPreviewSmall.style.backgroundColor = this.value;
             }
         });
 
@@ -122,14 +156,21 @@
         corFonte.addEventListener('input', function() {
             corFonteText.value = this.value.toUpperCase();
             previewFonte.style.color = this.value;
+            marcaPreview.style.color = this.value;
+            marcaPreviewSmall.style.color = this.value;
         });
 
         corFonteText.addEventListener('input', function() {
             if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
                 corFonte.value = this.value;
                 previewFonte.style.color = this.value;
+                marcaPreview.style.color = this.value;
+                marcaPreviewSmall.style.color = this.value;
             }
         });
+
+        // Nome da Marca
+        nomeMarca.addEventListener('input', atualizarPreviewMarca);
     </script>
     @endpush
 </x-app-layout>

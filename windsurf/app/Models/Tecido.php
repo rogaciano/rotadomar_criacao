@@ -34,8 +34,20 @@ class Tecido extends Model
                     ->withTimestamps();
     }
     
+    // Relacionamento com produtos que calculam necessidade (status.calc_necessidade = 1)
+    public function produtosComNecessidade()
+    {
+        return $this->belongsToMany(Produto::class, 'produto_tecido')
+                    ->withPivot('consumo')
+                    ->withTimestamps()
+                    ->whereHas('status', function($query) {
+                        $query->where('calc_necessidade', 1);
+                    });
+    }
+    
     /**
      * Calcula a necessidade total do tecido com base no consumo planejado de todos os produtos
+     * Considera apenas produtos cujo status tenha calc_necessidade = 1
      * 
      * @return float
      */
@@ -43,7 +55,8 @@ class Tecido extends Model
     {
         $total = 0;
         
-        foreach ($this->produtos as $produto) {
+        // Usar produtosComNecessidade para filtrar apenas produtos com calc_necessidade = 1
+        foreach ($this->produtosComNecessidade as $produto) {
             $total += $produto->quantidade * $produto->pivot->consumo;
         }
         

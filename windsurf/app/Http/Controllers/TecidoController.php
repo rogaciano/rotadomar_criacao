@@ -462,13 +462,9 @@ class TecidoController extends Controller
         $tecido = Tecido::findOrFail($tecidoId);
         $estoqueCor = TecidoCorEstoque::findOrFail($corId);
         
-        if ($estoqueCor->tecido_id != $tecido->id) {
-            abort(404, 'Cor não pertence a este tecido.');
-        }
-        
-        // Buscar produtos com variações de cores
+        // Buscar produtos com variações de cor (apenas produtos com status.calc_necessidade = 1)
         $produtosVariacoes = [];
-        $produtos = $tecido->produtos;
+        $produtos = $tecido->produtosComNecessidade;
         
         foreach ($produtos as $produto) {
             $produtoCor = $produto->cores()
