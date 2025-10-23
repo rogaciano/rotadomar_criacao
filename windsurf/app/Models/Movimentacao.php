@@ -71,17 +71,17 @@ class Movimentacao extends Model
 
     public function localizacao()
     {
-        return $this->belongsTo(Localizacao::class);
+        return $this->belongsTo(Localizacao::class)->withTrashed();
     }
 
     public function tipo()
     {
-        return $this->belongsTo(Tipo::class);
+        return $this->belongsTo(Tipo::class)->withTrashed();
     }
 
     public function situacao()
     {
-        return $this->belongsTo(Situacao::class);
+        return $this->belongsTo(Situacao::class)->withTrashed();
     }
 
     /**

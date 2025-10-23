@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\View;
 use App\Models\Produto;
 use App\Models\ProdutoLocalizacao;
 use App\Observers\ProdutoObserver;
 use App\Observers\ProdutoLocalizacaoObserver;
+use App\Http\View\Composers\NotificationComposer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,5 +36,8 @@ class AppServiceProvider extends ServiceProvider
         
         // Registrar Observer de ProdutoLocalizacao para gerenciar alocações mensais
         ProdutoLocalizacao::observe(ProdutoLocalizacaoObserver::class);
+        
+        // Registrar View Composer para notificações de movimentações
+        View::composer('layouts.navigation', NotificationComposer::class);
     }
 }

@@ -7,7 +7,7 @@
                 {{ __('Detalhes da Movimentação') }}
             </h2>
             <div class="flex space-x-2">
-                <a href="{{ route('movimentacoes.edit', ['movimentacao' => $movimentacao->id]) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('movimentacoes.edit', ['movimentacao' => $movimentacao->id]) }}{{ request('back_url') ? '?back_url=' . urlencode(request('back_url')) : '' }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     Editar
                 </a>
                 <a href="{{ route('movimentacoes.pdf', ['movimentacao' => $movimentacao->id]) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150" target="_blank">

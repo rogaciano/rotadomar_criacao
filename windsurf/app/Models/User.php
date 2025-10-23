@@ -256,4 +256,69 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserAccessSchedule::class, 'user_id');
     }
+    
+    /**
+     * Obter contagem de movimentações pendentes (não concluídas) para a localização do usuário
+     *
+     * @return int
+     */
+    public function getMovimentacoesPendentesCount()
+    {
+        if (!$this->localizacao_id) {
+            return 0;
+        }
+        
+        return \App\Models\Movimentacao::where('localizacao_id', $this->localizacao_id)
+            ->where('concluido', false)
+            ->whereNull('data_saida')
+            ->count();
+    }
+    
+    /**
+     * Obter contagem de movimentações atrasadas para a localização do usuário
+     *
+     * @return int
+     */
+    public function getMovimentacoesAtrasadasCount()
+    {
+        if (!$this->localizacao_id || !$this->localizacao) {
+            return 0;
+        }
+        
+        // Se a localização não tem prazo definido, não há movimentações atrasadas
+        if (!$this->localizacao->prazo) {
+            return 0;
+        }
+        
+        // Buscar movimentações pendentes e calcular dias úteis
+        $movimentacoes = \App\Models\Movimentacao::where('localizacao_id', $this->localizacao_id)
+            ->where('concluido', false)
+            ->whereNull('data_saida')
+            ->get();
+        
+        // Contar apenas as que estão atrasadas considerando dias úteis
+        return $movimentacoes->filter(function ($movimentacao) {
+            $diasUteis = \App\Helpers\MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada);
+            return $diasUteis > $this->localizacao->prazo;
+        })->count();
+    }
+    
+    /**
+     * Obter movimentações pendentes completas para a localização do usuário
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getMovimentacoesPendentes()
+    {
+        if (!$this->localizacao_id) {
+            return collect();
+        }
+        
+        return \App\Models\Movimentacao::with(['produto', 'tipo', 'situacao', 'localizacao'])
+            ->where('localizacao_id', $this->localizacao_id)
+            ->where('concluido', false)
+            ->whereNull('data_saida')
+            ->orderByRaw('DATEDIFF(NOW(), data_entrada) DESC')
+            ->get();
+    }
 }

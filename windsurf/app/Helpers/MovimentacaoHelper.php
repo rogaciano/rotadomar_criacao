@@ -85,6 +85,8 @@ class MovimentacaoHelper
         }
         
         // Filtro por status de dias (Atrasados, Em Dia)
+        // NOTA: Os filtros usam DATEDIFF (dias corridos) por performance no banco de dados.
+        // A exibição na view usa calcularDiasUteis() para mostrar dias úteis (excluindo fins de semana).
         if (!empty($filters['status_dias'])) {
             $statusDias = $filters['status_dias'];
             
@@ -160,5 +162,37 @@ class MovimentacaoHelper
         }
         
         return $query;
+    }
+
+    /**
+     * Calcula dias úteis entre duas datas (excluindo sábados e domingos)
+     *
+     * @param \Carbon\Carbon $dataInicio Data de início
+     * @param \Carbon\Carbon|null $dataFim Data fim (se null, usa data atual)
+     * @return int|null Número de dias úteis
+     */
+    public static function calcularDiasUteis($dataInicio, $dataFim = null)
+    {
+        if (!$dataInicio) {
+            return null;
+        }
+
+        if (!$dataFim) {
+            $dataFim = now();
+        }
+
+        $diasUteis = 0;
+        $dataAtual = clone $dataInicio;
+
+        while ($dataAtual <= $dataFim) {
+            // 6 = sábado, 0 = domingo
+            $diaDaSemana = $dataAtual->dayOfWeek;
+            if ($diaDaSemana != 0 && $diaDaSemana != 6) {
+                $diasUteis++;
+            }
+            $dataAtual->addDay();
+        }
+
+        return $diasUteis;
     }
 }

@@ -266,7 +266,8 @@
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Grupo</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Observações</th>
-                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase">Quantidade</th>
+                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade alocada para esta localização">Qtd Alocada</th>
+                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto">Qtd Total</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data Prevista</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                                             </tr>
@@ -339,8 +340,11 @@
                                                                             <span class="text-gray-400 italic text-xs">-</span>
                                                                         @endif
                                                                     </td>
-                                                                    <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900">
-                                                                        {{ number_format($produto->quantidade_alocada ?? $produto->quantidade, 0, ',', '.') }}
+                                                                    <td class="px-3 py-2 text-sm text-center font-semibold text-blue-700" title="Quantidade alocada para esta localização">
+                                                                        {{ number_format($produto->quantidade_alocada ?? 0, 0, ',', '.') }}
+                                                                    </td>
+                                                                    <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900" title="Quantidade total do produto">
+                                                                        {{ number_format($produto->quantidade ?? 0, 0, ',', '.') }}
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">
                                                                         @php

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\MovimentacaoHelper;
 use App\Http\Controllers\MovimentacaoFilterController;
 use App\Models\GrupoProduto;
 use App\Models\Localizacao;
@@ -17,6 +18,58 @@ use Illuminate\Http\Request;
 
 class MovimentacaoController extends Controller
 {
+    /**
+     * Exibir movimentações pendentes da localização do usuário logado
+     */
+    public function minhasMovimentacoes()
+    {
+        if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
+        
+        $user = auth()->user();
+        
+        // Verificar se o usuário tem uma localização atribuída
+        if (!$user->localizacao_id) {
+            return view('movimentacoes.minhas', [
+                'movimentacoes' => collect(),
+                'localizacao' => null,
+                'totalPendentes' => 0,
+                'totalAtrasadas' => 0,
+            ]);
+        }
+        
+        // Carregar localização do usuário
+        $user->load('localizacao');
+        $localizacao = $user->localizacao;
+        
+        // Obter todas as movimentações pendentes
+        $movimentacoes = $user->getMovimentacoesPendentes();
+        
+        // Calcular dias e status de atraso para cada movimentação
+        $movimentacoes->each(function ($movimentacao) use ($localizacao) {
+            // Usar dias úteis ao invés de dias corridos
+            $movimentacao->dias_decorridos = MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada);
+            
+            if ($localizacao->prazo) {
+                $movimentacao->esta_atrasado = $movimentacao->dias_decorridos > $localizacao->prazo;
+                $movimentacao->dias_restantes = (int) ($localizacao->prazo - $movimentacao->dias_decorridos);
+            } else {
+                $movimentacao->esta_atrasado = false;
+                $movimentacao->dias_restantes = null;
+            }
+        });
+        
+        // Ordenar por dias decorridos (mais atrasadas primeiro)
+        $movimentacoes = $movimentacoes->sortByDesc('dias_decorridos');
+        
+        // Contar totais
+        $totalPendentes = $movimentacoes->count();
+        $totalAtrasadas = $movimentacoes->where('esta_atrasado', true)->count();
+        
+        return view('movimentacoes.minhas', compact('movimentacoes', 'localizacao', 'totalPendentes', 'totalAtrasadas'));
+    }
+    
     /**
      * Display a listing of the resource.
      */
@@ -343,19 +396,20 @@ class MovimentacaoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Movimentacao $movimentacao)
+    public function show(Request $request, Movimentacao $movimentacao)
     {
         if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
 
-        return view('movimentacoes.show', compact('movimentacao'));
+        $backUrl = $request->query('back_url');
+        return view('movimentacoes.show', compact('movimentacao', 'backUrl'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Movimentacao $movimentacao)
+    public function edit(Request $request, Movimentacao $movimentacao)
     {
         if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
             abort(403, 'Acesso negado.');
@@ -365,8 +419,9 @@ class MovimentacaoController extends Controller
         $situacoes = Situacao::orderBy('descricao')->get();
         $tipos = Tipo::orderBy('descricao')->get();
         $localizacoes = Localizacao::orderBy('nome_localizacao')->get();
+        $backUrl = $request->query('back_url');
 
-        return view('movimentacoes.edit', compact('movimentacao', 'produtos', 'situacoes', 'tipos', 'localizacoes'));
+        return view('movimentacoes.edit', compact('movimentacao', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'backUrl'));
     }
 
     /**
@@ -437,6 +492,12 @@ class MovimentacaoController extends Controller
         $validated['concluido'] = $request->has('concluido');
 
         $movimentacao->update($validated);
+
+        // Verificar se existe back_url para retornar à página de origem
+        if ($request->has('back_url') && $request->back_url) {
+            return redirect($request->back_url)
+                    ->with('success', 'Movimentação atualizada com sucesso!');
+        }
 
         // Usar os filtros salvos do usuário
         $savedFilters = auth()->user()->getFilters('movimentacoes');

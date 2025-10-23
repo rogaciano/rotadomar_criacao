@@ -548,11 +548,11 @@
                                             @if($diasEntre !== null)
                                                 <div class="text-center">
                                                     <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
-                                                        {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                                        {{ number_format($diasEntre, 0, ',', '.') }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
                                                     </span>
                                                     @if(isset($prazoSetor))
                                                         <div class="text-xs mt-1 {{ $prazoExcedido ? 'text-red-600' : 'text-blue-600' }} font-medium">
-                                                            (Prazo: {{ $prazoSetor }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
+                                                            (Prazo: {{ number_format($prazoSetor, 0, ',', '.') }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
                                                         </div>
                                                     @endif
                                                 </div>

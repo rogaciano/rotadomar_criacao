@@ -157,6 +157,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('tecidos/{tecido}/cores', [ProdutoCombinacaoController::class, 'getTecidoCores'])->name('tecidos.cores.get');
 
     // Routes para Movimentações
+    Route::get('movimentacoes/minhas', [MovimentacaoController::class, 'minhasMovimentacoes'])->name('movimentacoes.minhas');
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([
         'movimentacoes' => 'movimentacao'
     ]);

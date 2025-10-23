@@ -14,11 +14,13 @@ class ProdutoAlocacaoMensal extends Model
 
     protected $fillable = [
         'produto_id',
+        'produto_localizacao_id',
         'localizacao_id',
         'mes',
         'ano',
         'quantidade',
         'tipo',
+        'ordem_producao',
         'observacoes',
         'usuario_id'
     ];
@@ -43,6 +45,11 @@ class ProdutoAlocacaoMensal extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function produtoLocalizacao()
+    {
+        return $this->belongsTo(ProdutoLocalizacao::class);
     }
 
     // Scopes
