@@ -270,6 +270,24 @@
 
         <!-- Tabela de movimentações -->
         @if(count($movimentacoes) > 0)
+            @php
+                // Função para calcular dias úteis (mesma do index) - declarada fora do loop
+                function calcularDiasUteisPDF($dataInicio, $dataFim) {
+                    if (!$dataInicio) return null;
+                    if (!$dataFim) $dataFim = now();
+                    
+                    $diasUteis = 0;
+                    $dataAtual = clone $dataInicio;
+                    
+                    while ($dataAtual <= $dataFim) {
+                        if ($dataAtual->dayOfWeek != 0 && $dataAtual->dayOfWeek != 6) {
+                            $diasUteis++;
+                        }
+                        $dataAtual->addDay();
+                    }
+                    return $diasUteis;
+                }
+            @endphp
             <table>
                 <thead>
                     <tr>
@@ -286,24 +304,31 @@
                         <th width="7%" class="text-center">Dt. Devolução</th>
                         <th width="5%" class="text-center">Comp.</th>
                         <th width="14%">Observação</th>
-                        <th width="5%" class="text-center">Dias</th>
-                        <th width="6%" class="text-center">Ações</th>
+                        <th width="11%" class="text-center">Dias</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($movimentacoes as $movimentacao)
                         @php
-                            // Calcular dias úteis
-                            $diasUteis = null;
+                            // Calcular dias úteis como no index
+                            $diasEntre = null;
+                            $prazoExcedido = false;
+                            $prazoSetor = null;
+
                             if ($movimentacao->data_entrada) {
-                                $dataFim = $movimentacao->data_saida ?: now();
-                                $diasUteis = 0;
-                                $dataAtual = clone $movimentacao->data_entrada;
-                                while ($dataAtual <= $dataFim) {
-                                    if ($dataAtual->dayOfWeek != 0 && $dataAtual->dayOfWeek != 6) {
-                                        $diasUteis++;
-                                    }
-                                    $dataAtual->addDay();
+                                if ($movimentacao->data_saida) {
+                                    $diasEntre = calcularDiasUteisPDF($movimentacao->data_entrada, $movimentacao->data_saida);
+                                } else {
+                                    $diasEntre = calcularDiasUteisPDF($movimentacao->data_entrada, now());
+                                }
+
+                                // Verificar prazo: prioridade para situação, depois localização
+                                if ($movimentacao->situacao && $movimentacao->situacao->prazo) {
+                                    $prazoExcedido = $diasEntre > $movimentacao->situacao->prazo;
+                                    $prazoSetor = $movimentacao->situacao->prazo;
+                                } elseif ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                    $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
+                                    $prazoSetor = $movimentacao->localizacao->prazo;
                                 }
                             }
                         @endphp
@@ -336,33 +361,19 @@
                             <td class="text-center">{{ $movimentacao->comprometido ? 'Sim' : 'Não' }}</td>
                             <td>{{ Str::limit($movimentacao->observacao, 25, '...') ?: '-' }}</td>
                             <td class="text-center">
-                                @if($movimentacao->data_entrada)
-                                    @php
-                                        $dataFim = $movimentacao->data_saida ?: now();
-                                        $diasCorridos = $dataFim->diffInDays($movimentacao->data_entrada);
-                                    @endphp
-                                    {{ $diasCorridos }}
+                                @if($diasEntre !== null)
+                                    <div>
+                                        <span class="status-badge {{ $prazoExcedido ? 'status-pendente' : 'status-concluido' }}">
+                                            {{ number_format($diasEntre, 0, ',', '.') }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                        </span>
+                                        @if(isset($prazoSetor))
+                                            <div style="font-size: 6px; {{ $prazoExcedido ? 'color: #991B1B;' : 'color: #065F46;' }} font-weight: bold; margin-top: 2px;">
+                                                (Prazo: {{ number_format($prazoSetor, 0, ',', '.') }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
+                                            </div>
+                                        @endif
+                                    </div>
                                 @else
-                                    -
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                @if($movimentacao->anexo)
-                                    <span class="text-blue-600">✓</span>
-                                @endif
-                                @if($movimentacao->data_saida && $movimentacao->data_entrada)
-                                    @php
-                                        $diasCorridos = $movimentacao->data_saida->diffInDays($movimentacao->data_entrada);
-                                        $statusDias = '';
-                                        if ($diasCorridos > 30) {
-                                            $statusDias = '🔴';
-                                        } elseif ($diasCorridos > 20) {
-                                            $statusDias = '🟡';
-                                        } else {
-                                            $statusDias = '🟢';
-                                        }
-                                    @endphp
-                                    {{ $statusDias }}
+                                    <span style="color: #6B7280;">-</span>
                                 @endif
                             </td>
                         </tr>

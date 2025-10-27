@@ -152,6 +152,30 @@
             font-size: 8px;
             color: #4B5563;
             line-height: 1.3;
+            margin-bottom: 2px;
+        }
+        
+        .qtd-alocada {
+            display: inline-block;
+            background-color: #DBEAFE;
+            color: #1E40AF;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        .alocacao-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .alocacao-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
         
         .no-produtos {
@@ -213,59 +237,164 @@
 
             @if($dado['produtos']->count() > 0)
                 <div class="produtos-section">
-                    <div class="produtos-title">Produtos Previstos ({{ $dado['produtos']->count() }})</div>
+                    @php
+                        // Agrupar produtos por referência + descrição + marca + grupo + qtd total + data + status
+                        $produtosAgrupados = $dado['produtos']->groupBy(function($produto) {
+                            $primeiraData = $produto->localizacoes()
+                                ->whereNotNull('data_prevista_faccao')
+                                ->orderBy('data_prevista_faccao', 'asc')
+                                ->first();
+                            
+                            $dataFormatada = 'N/A';
+                            if ($primeiraData && $primeiraData->pivot->data_prevista_faccao) {
+                                $dataFormatada = is_string($primeiraData->pivot->data_prevista_faccao) 
+                                    ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('Y-m-d')
+                                    : $primeiraData->pivot->data_prevista_faccao->format('Y-m-d');
+                            }
+                            
+                            return $produto->id . '|' . 
+                                   $produto->referencia . '|' . 
+                                   $produto->descricao . '|' . 
+                                   ($produto->marca ? $produto->marca->id : 'sem_marca') . '|' . 
+                                   ($produto->grupoProduto ? $produto->grupoProduto->id : 'sem_grupo') . '|' . 
+                                   $produto->quantidade . '|' . 
+                                   $dataFormatada . '|' . 
+                                   ($produto->status ? $produto->status->id : 'sem_status');
+                        });
+                    @endphp
+                    <div class="produtos-title">Produtos Previstos ({{ $produtosAgrupados->count() }} produtos, {{ $dado['produtos']->count() }} alocações)</div>
                     <table>
                         <thead>
                             <tr>
                                 <th style="width: 8%;">Ref</th>
-                                <th style="width: 18%;">Descrição</th>
-                                <th style="width: 12%;">Marca</th>
-                                <th style="width: 15%;">Grupo</th>
-                                <th style="width: 27%;">Observações</th>
-                                <th style="width: 10%;" class="text-center">Qtd</th>
-                                <th style="width: 10%;">Status</th>
+                                <th style="width: 16%;">Descrição</th>
+                                <th style="width: 11%;">Marca</th>
+                                <th style="width: 11%;">Grupo</th>
+                                <th style="width: 28%;">Observações</th>
+                                <th style="width: 10%;" class="text-center">Qtd Alocada</th>
+                                <th style="width: 8%;" class="text-center">Qtd Total</th>
+                                <th style="width: 8%;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($dado['produtos'] as $produto)
+                            @foreach($produtosAgrupados as $chave => $produtosGrupo)
+                                @php
+                                    $produtoPrincipal = $produtosGrupo->first();
+                                @endphp
                                 <tr>
-                                    <td class="font-semibold">{{ $produto->referencia }}</td>
-                                    <td>{{ $produto->descricao }}</td>
+                                    <td class="font-semibold">{{ $produtoPrincipal->referencia }}</td>
+                                    <td>{{ $produtoPrincipal->descricao }}</td>
                                     <td>
-                                        @if($produto->marca)
-                                            @if($produto->marca->cor_fundo && $produto->marca->cor_fonte)
-                                                <span style="background-color: {{ $produto->marca->cor_fundo }}; color: {{ $produto->marca->cor_fonte }}; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; white-space: nowrap;">
-                                                    {{ $produto->marca->nome_marca }}
+                                        @if($produtoPrincipal->marca)
+                                            @if($produtoPrincipal->marca->cor_fundo && $produtoPrincipal->marca->cor_fonte)
+                                                <span style="background-color: {{ $produtoPrincipal->marca->cor_fundo }}; color: {{ $produtoPrincipal->marca->cor_fonte }}; padding: 2px 8px; border-radius: 12px; font-size: 8px; font-weight: 600; white-space: nowrap; display: inline-block;">
+                                                    {{ $produtoPrincipal->marca->nome_marca }}
                                                 </span>
                                             @else
-                                                {{ $produto->marca->nome_marca }}
+                                                {{ $produtoPrincipal->marca->nome_marca }}
                                             @endif
                                         @else
                                             N/A
                                         @endif
                                     </td>
-                                    <td>{{ $produto->grupoProduto->descricao ?? 'N/A' }}</td>
+                                    <td>{{ $produtoPrincipal->grupoProduto->descricao ?? 'N/A' }}</td>
                                     <td>
                                         @php
-                                            $obs = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
+                                            // Carregar observações do produto (apenas uma vez)
+                                            $obs = \App\Models\ProdutoObservacao::where('produto_id', $produtoPrincipal->id)->get();
+
+                                            // Carregar todas as observações das localizações de todas as alocações
+                                            $todasObsLocalizacoes = collect();
+                                            foreach($produtosGrupo as $produto) {
+                                                $obsLoc = $produto->localizacoes()
+                                                    ->where(function($q) {
+                                                        $q->whereNotNull('ordem_producao')
+                                                          ->orWhereNotNull('produto_localizacao.observacao');
+                                                    })
+                                                    ->get();
+                                                $todasObsLocalizacoes = $todasObsLocalizacoes->merge($obsLoc);
+                                            }
+                                            
+                                            // Remover duplicatas baseado em ordem_producao + observacao
+                                            $todasObsLocalizacoes = $todasObsLocalizacoes->unique(function($loc) {
+                                                return $loc->pivot->ordem_producao . '|' . $loc->pivot->observacao;
+                                            });
+
+                                            $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                         @endphp
+                                        
+                                        {{-- Observações do Produto (apenas uma vez) --}}
                                         @if($obs->count() > 0)
                                             @foreach($obs as $observacao)
+                                                @php
+                                                    // Processar observações (suporta HTML do Quill e tags customizadas)
+                                                    $obsTexto = $observacao->observacao;
+                                                    
+                                                    // Se não contém tags HTML do Quill, processar tags customizadas
+                                                    if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
+                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
+                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
+                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
+                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                    }
+                                                    
+                                                    $obsTexto = Str::limit($obsTexto, 100);
+                                                @endphp
                                                 <div class="observacao">
-                                                    {{ Str::limit($observacao->observacao, 120) }}
+                                                    {!! $obsTexto !!}
                                                 </div>
-                                                @if(!$loop->last)
-                                                    <hr style="margin: 2px 0; border: none; border-top: 1px solid #E5E7EB;">
-                                                @endif
                                             @endforeach
-                                        @else
-                                            -
+                                        @endif
+
+                                        {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
+                                        @if($todasObsLocalizacoes->count() > 0)
+                                            @foreach($todasObsLocalizacoes as $loc)
+                                                <div class="observacao">
+                                                    @if($loc->pivot->ordem_producao)
+                                                        <strong style="color: #1E40AF;">OP: {{ $loc->pivot->ordem_producao }}</strong>
+                                                    @endif
+                                                    @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
+                                                        <span> - </span>
+                                                    @endif
+                                                    @if($loc->pivot->observacao)
+                                                        @php
+                                                            // Processar tags de cor nas observações
+                                                            $obsTexto = $loc->pivot->observacao;
+                                                            $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = Str::limit($obsTexto, 80);
+                                                        @endphp
+                                                        {!! $obsTexto !!}
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        @endif
+                                        
+                                        @if(!$temObservacoes)
+                                            <div class="observacao" style="color: #9CA3AF; font-style: italic;">-</div>
                                         @endif
                                     </td>
-                                    <td class="text-center font-semibold">
-                                        {{ number_format($produto->quantidade_alocada ?? $produto->quantidade, 0, ',', '.') }}
+                                    <td class="text-center">
+                                        @foreach($produtosGrupo as $produto)
+                                            <div class="alocacao-item">
+                                                <span class="qtd-alocada">
+                                                    {{ number_format($produto->quantidade_alocada ?? 0, 0, ',', '.') }}
+                                                </span>
+                                            </div>
+                                        @endforeach
                                     </td>
-                                    <td>{{ $produto->status->descricao ?? 'N/A' }}</td>
+                                    <td class="text-center font-semibold">
+                                        {{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}
+                                    </td>
+                                    <td>{{ $produtoPrincipal->status->descricao ?? 'N/A' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

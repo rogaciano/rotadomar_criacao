@@ -891,20 +891,23 @@
                                 
                                 <div class="mb-4">
                                     <label for="observacao" class="block text-sm font-medium text-gray-700 mb-2">Observação *</label>
+                                    
+                                    <!-- Editor Quill -->
+                                    <div id="editor-container" style="height: 150px; background: white; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
                                     <textarea 
                                         id="observacao" 
                                         name="observacao" 
-                                        rows="6" 
-                                        required 
-                                        maxlength="5000"
-                                        class="shadow-sm focus:ring-purple-500 focus:border-purple-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                                        placeholder="Digite sua observação aqui..."
+                                        style="display: none;"
                                     ></textarea>
-                                    <p class="mt-1 text-xs text-gray-500">Máximo de 5000 caracteres</p>
+                                    
+                                    <div class="mt-2 text-xs text-gray-500">
+                                        <p>💡 Use a barra de ferramentas acima para formatar o texto com cores, negrito, etc.</p>
+                                        <p class="mt-1 text-gray-400">Máximo de 1000 caracteres</p>
+                                    </div>
                                 </div>
-
-                                <div class="flex justify-end space-x-3 mt-5">
-                                    <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                
+                                <div class="flex justify-end space-x-2">
+                                    <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                                         Cancelar
                                     </button>
                                     <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -998,7 +1001,7 @@
                                     <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1">
-                                                <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $obs->observacao }}</p>
+                                                <div class="text-sm text-gray-700 prose prose-sm max-w-none">{!! $obs->observacao !!}</div>
                                                 <div class="mt-2 flex items-center text-xs text-gray-500">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
@@ -1488,14 +1491,44 @@
     </script>
 
     <script>
+        // Variável global para o editor Quill
+        let quillEditor = null;
+
         // Funções para o modal de observações
         function abrirModalObservacao() {
             document.getElementById('modal-nova-observacao').classList.remove('hidden');
-            document.getElementById('observacao').focus();
+            
+            // Inicializar Quill apenas uma vez
+            if (!quillEditor) {
+                quillEditor = new Quill('#editor-container', {
+                    theme: 'snow',
+                    placeholder: 'Digite sua observação aqui...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{ 'color': ['#DC2626', '#2563EB', '#16A34A', '#CA8A04', '#EA580C', '#9333EA', '#DB2777', '#000000'] }],
+                            [{ 'background': ['#FEE2E2', '#DBEAFE', '#D1FAE5', '#FEF3C7', '#FFEDD5', '#F3E8FF', '#FCE7F3', '#FFFFFF'] }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                // Sincronizar conteúdo do editor com o textarea oculto
+                quillEditor.on('text-change', function() {
+                    const html = quillEditor.root.innerHTML;
+                    document.getElementById('observacao').value = html;
+                });
+            } else {
+                // Limpar o editor se já existe
+                quillEditor.setText('');
+            }
         }
 
         function fecharModalObservacao() {
             document.getElementById('modal-nova-observacao').classList.add('hidden');
+            if (quillEditor) {
+                quillEditor.setText('');
+            }
             document.getElementById('form-observacao').reset();
         }
 
@@ -1519,10 +1552,37 @@
         async function salvarObservacao(event) {
             event.preventDefault();
             
+            console.log('Função salvarObservacao chamada');
+            
+            // Sincronizar conteúdo do Quill com o textarea antes de enviar
+            if (quillEditor) {
+                const html = quillEditor.root.innerHTML;
+                document.getElementById('observacao').value = html;
+                console.log('HTML do Quill:', html);
+            }
+            
             const form = event.target;
-            const formData = new FormData(form);
             const submitButton = form.querySelector('button[type="submit"]');
             const originalText = submitButton.textContent;
+            
+            // Validar se há conteúdo
+            const observacaoValue = document.getElementById('observacao').value;
+            const textoLimpo = quillEditor ? quillEditor.getText().trim() : observacaoValue.trim();
+            
+            console.log('Valor do textarea:', observacaoValue);
+            console.log('Texto limpo:', textoLimpo);
+            console.log('Produto ID:', document.querySelector('input[name="produto_id"]').value);
+            
+            // Criar FormData manualmente para garantir que os dados estão corretos
+            const formData = new FormData();
+            formData.append('produto_id', document.querySelector('input[name="produto_id"]').value);
+            formData.append('observacao', observacaoValue);
+            formData.append('_token', '{{ csrf_token() }}');
+            
+            if (!textoLimpo || textoLimpo === '') {
+                alert('Por favor, digite uma observação.');
+                return;
+            }
             
             submitButton.disabled = true;
             submitButton.textContent = 'Salvando...';
@@ -1539,14 +1599,27 @@
 
                 const data = await response.json();
 
-                if (data.success) {
+                console.log('Resposta do servidor:', data);
+
+                if (response.ok && data.success) {
                     // Mostrar mensagem de sucesso
                     alert('Observação adicionada com sucesso!');
                     
                     // Recarregar a página para mostrar a nova observação
                     window.location.reload();
                 } else {
-                    alert('Erro ao salvar observação: ' + (data.message || 'Erro desconhecido'));
+                    // Mostrar erro de validação ou outro erro
+                    let errorMessage = 'Erro ao salvar observação.';
+                    
+                    if (data.message) {
+                        errorMessage = data.message;
+                    } else if (data.errors) {
+                        // Erros de validação do Laravel
+                        const errors = Object.values(data.errors).flat();
+                        errorMessage = errors.join('\n');
+                    }
+                    
+                    alert(errorMessage);
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
                 }
@@ -1620,4 +1693,14 @@
             // Caso contrário, o campo oculto fica vazio e o backend usa o cálculo automático
         }
     </script>
+
+    @push('styles')
+    <!-- Quill.js CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    @endpush
+
+    @push('scripts')
+    <!-- Quill.js JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    @endpush
 </x-app-layout>

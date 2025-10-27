@@ -14,6 +14,13 @@ class ProdutoObservacaoController extends Controller
      */
     public function store(Request $request)
     {
+        // Log para debug
+        \Log::info('ProdutoObservacao store chamado', [
+            'produto_id' => $request->produto_id,
+            'observacao' => $request->observacao,
+            'observacao_length' => strlen($request->observacao ?? ''),
+        ]);
+
         // Verificar permissão
         if (!Auth::user()->canUpdate('produtos')) {
             abort(403, 'Você não tem permissão para adicionar observações.');
@@ -29,18 +36,42 @@ class ProdutoObservacaoController extends Controller
             'observacao.max' => 'A observação não pode ter mais de 5000 caracteres.',
         ]);
 
+        // Validar se há conteúdo real (não apenas HTML vazio do Quill)
+        $observacao = $request->observacao;
+        $textoLimpo = trim(strip_tags($observacao));
+        
+        if (empty($textoLimpo) || $observacao === '<p><br></p>') {
+            return response()->json([
+                'success' => false,
+                'message' => 'A observação não pode estar vazia.'
+            ], 422);
+        }
+
         try {
-            ProdutoObservacao::create([
+            \Log::info('Tentando criar observação', [
+                'produto_id' => $request->produto_id,
+                'usuario_id' => Auth::id(),
+                'observacao_preview' => substr($request->observacao, 0, 100),
+            ]);
+
+            $observacaoModel = ProdutoObservacao::create([
                 'produto_id' => $request->produto_id,
                 'observacao' => $request->observacao,
                 'usuario_id' => Auth::id(),
             ]);
+
+            \Log::info('Observação criada com sucesso', ['id' => $observacaoModel->id]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Observação adicionada com sucesso!'
             ]);
         } catch (\Exception $e) {
+            \Log::error('Erro ao criar observação', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao adicionar observação: ' . $e->getMessage()

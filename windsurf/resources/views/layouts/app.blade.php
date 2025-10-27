@@ -16,6 +16,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        
+        <!-- Styles personalizados -->
+        @stack('styles')
     </head>
     <body class="font-sans antialiased">
         <!-- Loading Overlay for Specific Routes -->

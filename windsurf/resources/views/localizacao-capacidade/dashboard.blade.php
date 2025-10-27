@@ -285,100 +285,176 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody class="bg-white divide-y divide-gray-200">
-                                                            @foreach($dado['produtos'] as $produto)
+                                                            @php
+                                                                // Agrupar produtos por referência + descrição + marca + grupo + qtd total + data + status
+                                                                $produtosAgrupados = $dado['produtos']->groupBy(function($produto) {
+                                                                    $primeiraData = $produto->localizacoes()
+                                                                        ->whereNotNull('data_prevista_faccao')
+                                                                        ->orderBy('data_prevista_faccao', 'asc')
+                                                                        ->first();
+                                                                    
+                                                                    $dataFormatada = 'N/A';
+                                                                    if ($primeiraData && $primeiraData->pivot->data_prevista_faccao) {
+                                                                        $dataFormatada = is_string($primeiraData->pivot->data_prevista_faccao) 
+                                                                            ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('Y-m-d')
+                                                                            : $primeiraData->pivot->data_prevista_faccao->format('Y-m-d');
+                                                                    }
+                                                                    
+                                                                    return $produto->id . '|' . 
+                                                                           $produto->referencia . '|' . 
+                                                                           $produto->descricao . '|' . 
+                                                                           ($produto->marca ? $produto->marca->id : 'sem_marca') . '|' . 
+                                                                           ($produto->grupoProduto ? $produto->grupoProduto->id : 'sem_grupo') . '|' . 
+                                                                           $produto->quantidade . '|' . 
+                                                                           $dataFormatada . '|' . 
+                                                                           ($produto->status ? $produto->status->id : 'sem_status');
+                                                                });
+                                                            @endphp
+                                                            
+                                                            @foreach($produtosAgrupados as $chave => $produtosGrupo)
+                                                                @php
+                                                                    $produtoPrincipal = $produtosGrupo->first();
+                                                                @endphp
                                                                 <tr class="hover:bg-gray-50">
                                                                     <td class="px-3 py-2 text-sm font-medium text-gray-900">
-                                                                        <a href="{{ route('produtos.show', $produto->id) }}" class="text-blue-600 hover:text-blue-900 hover:underline" target="_blank">
-                                                                            {{ $produto->referencia }}
+                                                                        <a href="{{ route('produtos.show', $produtoPrincipal->id) }}" class="text-blue-600 hover:text-blue-900 hover:underline" target="_blank">
+                                                                            {{ $produtoPrincipal->referencia }}
                                                                         </a>
                                                                     </td>
-                                                                    <td class="px-3 py-2 text-sm text-gray-700">{{ $produto->descricao }}</td>
+                                                                    <td class="px-3 py-2 text-sm text-gray-700">{{ $produtoPrincipal->descricao }}</td>
                                                                     <td class="px-3 py-2 text-sm">
-                                                                        @if($produto->marca)
-                                                                            @if($produto->marca->cor_fundo && $produto->marca->cor_fonte)
-                                                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ $produto->marca->cor_fundo }}; color: {{ $produto->marca->cor_fonte }};">
-                                                                                    {{ $produto->marca->nome_marca }}
+                                                                        @if($produtoPrincipal->marca)
+                                                                            @if($produtoPrincipal->marca->cor_fundo && $produtoPrincipal->marca->cor_fonte)
+                                                                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ $produtoPrincipal->marca->cor_fundo }}; color: {{ $produtoPrincipal->marca->cor_fonte }};">
+                                                                                    {{ $produtoPrincipal->marca->nome_marca }}
                                                                                 </span>
                                                                             @else
                                                                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                                                                    {{ $produto->marca->nome_marca }}
+                                                                                    {{ $produtoPrincipal->marca->nome_marca }}
                                                                                 </span>
                                                                             @endif
                                                                         @else
                                                                             <span class="text-gray-400 italic">N/A</span>
                                                                         @endif
                                                                     </td>
-                                                                    <td class="px-3 py-2 text-sm text-gray-600">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</td>
+                                                                    <td class="px-3 py-2 text-sm text-gray-600">{{ $produtoPrincipal->grupoProduto->descricao ?? 'N/A' }}</td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">
                                                                         @php
-                                                                            // Carregar observações do produto
-                                                                            $obs = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
+                                                                            // Carregar observações do produto (apenas uma vez)
+                                                                            $obs = \App\Models\ProdutoObservacao::where('produto_id', $produtoPrincipal->id)->get();
 
-                                                                            // Carregar observações das localizações (ordem de produção)
-                                                                            $obsLocalizacoes = $produto->localizacoes()
-                                                                                ->where(function($q) {
-                                                                                    $q->whereNotNull('ordem_producao')
-                                                                                      ->orWhereNotNull('produto_localizacao.observacao');
-                                                                                })
-                                                                                ->get();
+                                                                            // Carregar todas as observações das localizações de todas as alocações
+                                                                            $todasObsLocalizacoes = collect();
+                                                                            foreach($produtosGrupo as $produto) {
+                                                                                $obsLoc = $produto->localizacoes()
+                                                                                    ->where(function($q) {
+                                                                                        $q->whereNotNull('ordem_producao')
+                                                                                          ->orWhereNotNull('produto_localizacao.observacao');
+                                                                                    })
+                                                                                    ->get();
+                                                                                $todasObsLocalizacoes = $todasObsLocalizacoes->merge($obsLoc);
+                                                                            }
+                                                                            
+                                                                            // Remover duplicatas baseado em ordem_producao + observacao
+                                                                            $todasObsLocalizacoes = $todasObsLocalizacoes->unique(function($loc) {
+                                                                                return $loc->pivot->ordem_producao . '|' . $loc->pivot->observacao;
+                                                                            });
 
-                                                                            $temObservacoes = $obs->count() > 0 || $obsLocalizacoes->count() > 0;
+                                                                            $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                                                         @endphp
-                                                                        @if($temObservacoes)
-                                                                            <div class="max-w-xs">
-                                                                                {{-- Observações do Produto --}}
-                                                                                @foreach($obs as $observacao)
-                                                                                    <div class="mb-1 text-xs {{ !$loop->last || $obsLocalizacoes->count() > 0 ? 'border-b border-gray-200 pb-1' : '' }}">
-                                                                                        {{ Str::limit($observacao->observacao, 60) }}
-                                                                                    </div>
-                                                                                @endforeach
+                                                                        
+                                                                        {{-- Observações do Produto (apenas uma vez) --}}
+                                                                        @if($obs->count() > 0)
+                                                                            @foreach($obs as $observacao)
+                                                                                @php
+                                                                                    // Processar observações (suporta HTML do Quill e tags customizadas)
+                                                                                    $obsTexto = $observacao->observacao;
+                                                                                    
+                                                                                    // Se não contém tags HTML do Quill, processar tags customizadas
+                                                                                    if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
+                                                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                    }
+                                                                                    
+                                                                                    $obsTexto = Str::limit($obsTexto, 120);
+                                                                                @endphp
+                                                                                <div class="text-xs text-gray-700 mb-1">
+                                                                                    {!! $obsTexto !!}
+                                                                                </div>
+                                                                            @endforeach
+                                                                        @endif
 
-                                                                                {{-- Observações das Localizações (Ordem de Produção) --}}
-                                                                                @foreach($obsLocalizacoes as $loc)
-                                                                                    <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
-                                                                                        @if($loc->pivot->ordem_producao)
-                                                                                            <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
-                                                                                        @endif
-                                                                                        @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
-                                                                                            <span class="text-gray-500"> - </span>
-                                                                                        @endif
-                                                                                        @if($loc->pivot->observacao)
-                                                                                            <span class="text-gray-600">{{ Str::limit($loc->pivot->observacao, 50) }}</span>
-                                                                                        @endif
-                                                                                    </div>
-                                                                                @endforeach
-                                                                            </div>
-                                                                        @else
-                                                                            <span class="text-gray-400 italic text-xs">-</span>
+                                                                        {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
+                                                                        @if($todasObsLocalizacoes->count() > 0)
+                                                                            @foreach($todasObsLocalizacoes as $loc)
+                                                                                <div class="text-xs text-gray-700 mb-1">
+                                                                                    @if($loc->pivot->ordem_producao)
+                                                                                        <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                                    @endif
+                                                                                    @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
+                                                                                        <span class="text-gray-500"> - </span>
+                                                                                    @endif
+                                                                                    @if($loc->pivot->observacao)
+                                                                                        @php
+                                                                                            // Processar tags de cor nas observações
+                                                                                            $obsTexto = $loc->pivot->observacao;
+                                                                                            $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                            $obsTexto = Str::limit($obsTexto, 80);
+                                                                                        @endphp
+                                                                                        <span class="text-gray-600">{!! $obsTexto !!}</span>
+                                                                                    @endif
+                                                                                </div>
+                                                                            @endforeach
+                                                                        @endif
+                                                                        
+                                                                        @if(!$temObservacoes)
+                                                                            <div class="text-xs text-gray-400 italic">-</div>
                                                                         @endif
                                                                     </td>
-                                                                    <td class="px-3 py-2 text-sm text-center font-semibold text-blue-700" title="Quantidade alocada para esta localização">
-                                                                        {{ number_format($produto->quantidade_alocada ?? 0, 0, ',', '.') }}
+                                                                    <td class="px-3 py-2 text-sm text-center">
+                                                                        @foreach($produtosGrupo as $produto)
+                                                                            <div class="mb-2 pb-2 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                                                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
+                                                                                    {{ number_format($produto->quantidade_alocada ?? 0, 0, ',', '.') }}
+                                                                                </span>
+                                                                            </div>
+                                                                        @endforeach
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900" title="Quantidade total do produto">
-                                                                        {{ number_format($produto->quantidade ?? 0, 0, ',', '.') }}
+                                                                        {{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-gray-600">
                                                                         @php
                                                                             // Buscar primeira data prevista das localizações
-                                                                            $primeiraData = $produto->localizacoes()
+                                                                            $primeiraData = $produtoPrincipal->localizacoes()
                                                                                 ->whereNotNull('data_prevista_faccao')
                                                                                 ->orderBy('data_prevista_faccao', 'asc')
                                                                                 ->first();
                                                                         @endphp
                                                                         @if($primeiraData && $primeiraData->pivot->data_prevista_faccao)
                                                                             {{ is_string($primeiraData->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('d/m/Y') : $primeiraData->pivot->data_prevista_faccao->format('d/m/Y') }}
-                                                                            @if($produto->localizacoes()->whereNotNull('data_prevista_faccao')->count() > 1)
-                                                                                <span class="text-xs text-gray-400">(+{{ $produto->localizacoes()->whereNotNull('data_prevista_faccao')->count() - 1 }})</span>
+                                                                            @if($produtoPrincipal->localizacoes()->whereNotNull('data_prevista_faccao')->count() > 1)
+                                                                                <span class="text-xs text-gray-400">(+{{ $produtoPrincipal->localizacoes()->whereNotNull('data_prevista_faccao')->count() - 1 }})</span>
                                                                             @endif
                                                                         @else
                                                                             <span class="text-gray-400">N/A</span>
                                                                         @endif
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm">
-                                                                        @if($produto->status)
-                                                                            <span class="px-2 py-1 text-xs rounded-full {{ $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                                                                {{ $produto->status->descricao }}
+                                                                        @if($produtoPrincipal->status)
+                                                                            <span class="px-2 py-1 text-xs rounded-full {{ $produtoPrincipal->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                                                                {{ $produtoPrincipal->status->descricao }}
                                                                             </span>
                                                                         @else
                                                                             <span class="text-gray-400">N/A</span>
