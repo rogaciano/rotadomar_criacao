@@ -301,7 +301,7 @@
                                                             }
                                                         @endphp
                                                         <button type="button" 
-                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, '{{ $localizacao->nome_localizacao }}', {{ $localizacao->pivot->quantidade }}, '{{ $dataFaccao }}', '{{ $localizacao->pivot->ordem_producao ?? '' }}', '{{ addslashes($localizacao->pivot->observacao ?? '') }}')" 
+                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }})" 
                                                             class="text-indigo-600 hover:text-indigo-800 text-sm">
                                                             Editar
                                                         </button>
@@ -854,18 +854,36 @@
 
                     <script>
                         function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao) {
-                            document.getElementById('edit-localizacao-id').value = localizacaoId;
-                            document.getElementById('edit-localizacao-nome').textContent = nomeLocalizacao;
-                            document.getElementById('edit-ordem-producao').value = ordemProducao || '';
-                            document.getElementById('edit-quantidade').value = quantidade;
-                            document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
-                            document.getElementById('edit-observacao').value = observacao || '';
-                            
-                            // Atualizar action do formulário com o ID do registro produto_localizacao
-                            const form = document.getElementById('form-editar-localizacao');
-                            form.action = "{{ route('produtos.localizacoes.update', [$produto->id, ':produtoLocalizacaoId']) }}".replace(':produtoLocalizacaoId', produtoLocalizacaoId);
-                            
-                            document.getElementById('modal-editar-localizacao').classList.remove('hidden');
+                            try {
+                                console.log('Abrindo modal para editar localização:', {
+                                    produtoLocalizacaoId,
+                                    localizacaoId,
+                                    nomeLocalizacao,
+                                    quantidade,
+                                    dataFaccao,
+                                    ordemProducao,
+                                    observacao
+                                });
+                                
+                                document.getElementById('edit-localizacao-id').value = localizacaoId;
+                                document.getElementById('edit-localizacao-nome').textContent = nomeLocalizacao;
+                                document.getElementById('edit-ordem-producao').value = ordemProducao || '';
+                                document.getElementById('edit-quantidade').value = quantidade;
+                                document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
+                                document.getElementById('edit-observacao').value = observacao || '';
+                                
+                                // Atualizar action do formulário com o ID do registro produto_localizacao
+                                const form = document.getElementById('form-editar-localizacao');
+                                const currentRoute = "{{ route('produtos.localizacoes.update', [$produto->id, 'PLACEHOLDER']) }}";
+                                form.action = currentRoute.replace('PLACEHOLDER', produtoLocalizacaoId);
+                                
+                                console.log('Action do formulário:', form.action);
+                                
+                                document.getElementById('modal-editar-localizacao').classList.remove('hidden');
+                            } catch (error) {
+                                console.error('Erro ao abrir modal de edição:', error);
+                                alert('Erro ao abrir formulário de edição. Por favor, recarregue a página e tente novamente.');
+                            }
                         }
 
                         function fecharModalEditarLocalizacao() {

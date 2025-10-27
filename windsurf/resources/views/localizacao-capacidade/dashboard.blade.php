@@ -273,15 +273,14 @@
                                                     <table class="min-w-full divide-y divide-gray-200">
                                                         <thead class="bg-gray-50">
                                                             <tr>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Referência</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descrição</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Grupo</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Observações</th>
-                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade alocada para esta localização">Qtd Alocada</th>
-                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto">Qtd Total</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Data Prevista</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Referência</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 18%;">Descrição</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 12%;">Marca</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 12%;">Grupo</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 36%;">Observações</th>
+                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto" style="width: 8%;">Qtd Total</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Data Prevista</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 6%;">Status</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody class="bg-white divide-y divide-gray-200">
@@ -391,45 +390,60 @@
 
                                                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                                                         @if($todasObsLocalizacoes->count() > 0)
-                                                                            @foreach($todasObsLocalizacoes as $loc)
-                                                                                <div class="text-xs text-gray-700 mb-1">
-                                                                                    @if($loc->pivot->ordem_producao)
-                                                                                        <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
-                                                                                    @endif
-                                                                                    @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
-                                                                                        <span class="text-gray-500"> - </span>
-                                                                                    @endif
-                                                                                    @if($loc->pivot->observacao)
-                                                                                        @php
-                                                                                            // Processar tags de cor nas observações
-                                                                                            $obsTexto = $loc->pivot->observacao;
-                                                                                            $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                            $obsTexto = Str::limit($obsTexto, 80);
-                                                                                        @endphp
-                                                                                        <span class="text-gray-600">{!! $obsTexto !!}</span>
-                                                                                    @endif
-                                                                                </div>
-                                                                            @endforeach
+                                                                            <table class="w-full border-collapse">
+                                                                                @foreach($todasObsLocalizacoes as $loc)
+                                                                                    @php
+                                                                                        // Buscar a quantidade alocada para esta ordem de produção
+                                                                                        $qtdAlocada = 0;
+                                                                                        foreach($produtosGrupo as $produto) {
+                                                                                            $localizacaoAtual = $produto->localizacoes()
+                                                                                                ->where('ordem_producao', $loc->pivot->ordem_producao)
+                                                                                                ->first();
+                                                                                            if ($localizacaoAtual) {
+                                                                                                $qtdAlocada = $localizacaoAtual->pivot->quantidade ?? 0;
+                                                                                                break;
+                                                                                            }
+                                                                                        }
+                                                                                    @endphp
+                                                                                    <tr class="{{ !$loop->last ? 'border-b border-gray-200' : '' }}">
+                                                                                        <td class="py-1 pr-2 align-top" style="width: 70%;">
+                                                                                            <div class="text-xs text-gray-700">
+                                                                                                @if($loc->pivot->ordem_producao)
+                                                                                                    <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                                                @endif
+                                                                                                @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
+                                                                                                    <span class="text-gray-500"> - </span>
+                                                                                                @endif
+                                                                                                @if($loc->pivot->observacao)
+                                                                                                    @php
+                                                                                                        // Processar tags de cor nas observações
+                                                                                                        $obsTexto = $loc->pivot->observacao;
+                                                                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTexto = Str::limit($obsTexto, 80);
+                                                                                                    @endphp
+                                                                                                    <span class="text-gray-600">{!! $obsTexto !!}</span>
+                                                                                                @endif
+                                                                                            </div>
+                                                                                        </td>
+                                                                                        <td class="py-1 pl-2 text-right align-top" style="width: 30%;">
+                                                                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
+                                                                                                {{ number_format($qtdAlocada, 0, ',', '.') }}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                            </table>
                                                                         @endif
                                                                         
                                                                         @if(!$temObservacoes)
                                                                             <div class="text-xs text-gray-400 italic">-</div>
                                                                         @endif
-                                                                    </td>
-                                                                    <td class="px-3 py-2 text-sm text-center">
-                                                                        @foreach($produtosGrupo as $produto)
-                                                                            <div class="mb-2 pb-2 {{ !$loop->last ? 'border-b border-gray-200' : '' }}">
-                                                                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
-                                                                                    {{ number_format($produto->quantidade_alocada ?? 0, 0, ',', '.') }}
-                                                                                </span>
-                                                                            </div>
-                                                                        @endforeach
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900" title="Quantidade total do produto">
                                                                         {{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}
