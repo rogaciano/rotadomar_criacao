@@ -43,7 +43,7 @@
                 @endif
                 <!-- Botão para gerar PDF da lista -->
                 @if(auth()->user() && auth()->user()->canRead('movimentacoes'))
-                <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['status_dias' => request('status_dias')])) }}" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['status_dias' => request('status_dias')])) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -235,7 +235,7 @@
                     <p class="font-medium">{{ session('warning') }}</p>
                     <div class="mt-2 flex items-center">
                         <p>Deseja continuar mesmo assim?</p>
-                        <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['confirmar_pdf' => 1])) }}"
+                        <a href="{{ route('movimentacoes.lista.pdf', array_merge(request()->query(), ['confirmar_pdf' => 1])) }}" target="_blank"
                            class="ml-4 bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-3 rounded text-xs">
                             Sim, gerar PDF com {{ session('pdf_count') }} registros
                         </a>

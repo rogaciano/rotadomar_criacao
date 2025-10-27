@@ -5,53 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Movimentações</title>
     <style>
+        @page {
+            margin: 12mm;
+            size: A4 landscape;
+        }
+        
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 10px;
-            font-size: 12px;
+            padding: 8px;
+            font-size: 9px;
         }
         .container {
             width: 100%;
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ccc;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3B82F6;
             padding-bottom: 10px;
         }
         .title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             margin-bottom: 5px;
+            color: #1F2937;
         }
         .subtitle {
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #6B7280;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-size: 8px;
         }
         table, th, td {
             border: 1px solid #ddd;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #F3F4F6;
             text-align: left;
-            padding: 5px;
-            font-size: 11px;
+            padding: 4px 3px;
+            font-size: 8px;
+            font-weight: bold;
+            color: #374151;
         }
         td {
-            padding: 4px;
-            font-size: 10px;
+            padding: 3px;
+            font-size: 7px;
+            vertical-align: top;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .status-badge {
+            padding: 1px 2px;
+            border-radius: 2px;
+            font-size: 6px;
+            font-weight: bold;
+        }
+        .status-concluido {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        .status-pendente {
+            background-color: #FEE2E2;
+            color: #991B1B;
         }
         .filters-summary {
             margin-bottom: 15px;
             padding: 8px;
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
+            background-color: #F8FAFC;
+            border: 1px solid #E2E8F0;
             border-radius: 4px;
         }
         .filter-item {
@@ -62,17 +93,33 @@
         .filter-label {
             font-weight: bold;
             margin-right: 5px;
+            color: #374151;
         }
         .footer {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: center;
-            font-size: 10px;
-            color: #666;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+            font-size: 9px;
+            color: #6B7280;
+            border-top: 1px solid #E5E7EB;
+            padding-top: 8px;
         }
         .page-number:after {
             content: counter(page);
+        }
+        .no-data {
+            text-align: center;
+            padding: 20px;
+            color: #6B7280;
+            font-style: italic;
+        }
+        .total-registros {
+            margin-bottom: 10px;
+            padding: 6px;
+            background-color: #EFF6FF;
+            border: 1px solid #DBEAFE;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #1E40AF;
         }
     </style>
 </head>
@@ -80,13 +127,13 @@
     <div class="container">
         <div class="header">
             <div class="title">Rota do Mar - LISTA DE MOVIMENTAÇÕES</div>
-            <div>Data do relatório: {{ now()->format('d/m/Y H:i') }}</div>
+            <div class="subtitle">Data do relatório: {{ now()->format('d/m/Y H:i') }}</div>
         </div>
 
         <!-- Resumo dos filtros aplicados -->
         @isset($request)
         <div class="filters-summary">
-            <div style="font-weight: bold; margin-bottom: 5px;">Filtros aplicados:</div>
+            <div style="font-weight: bold; margin-bottom: 5px; color: #1F2937;">Filtros aplicados:</div>
             @php
                 $hasFilters = false;
             @endphp
@@ -98,30 +145,102 @@
                 @php $hasFilters = true; @endphp
             @endif
 
-            @if($request->filled('produto_id'))
+            @if($request->filled('produto'))
                 <div class="filter-item">
-                    <span class="filter-label">Produto ID:</span> {{ $request->produto_id }}
+                    <span class="filter-label">Produto:</span> {{ $request->produto }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
 
             @if($request->filled('tipo_id'))
+                @php
+                    $tipos = \App\Models\Tipo::pluck('descricao', 'id');
+                    $tipoNome = $tipos[$request->tipo_id] ?? 'N/A';
+                @endphp
                 <div class="filter-item">
-                    <span class="filter-label">Tipo ID:</span> {{ $request->tipo_id }}
+                    <span class="filter-label">Tipo:</span> {{ $tipoNome }}
+                </div>
+                @php $hasFilters = true; @endphp
+            @endif
+
+            @if($request->filled('grupo_produto_id'))
+                @php
+                    $grupoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
+                    $grupos = \App\Models\GrupoProduto::whereIn('id', $grupoIds)->pluck('descricao');
+                    $gruposNomes = $grupos->implode(', ');
+                @endphp
+                <div class="filter-item">
+                    <span class="filter-label">Grupo(s):</span> {{ $gruposNomes }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
 
             @if($request->filled('situacao_id'))
+                @php
+                    $situacaoIds = is_array($request->situacao_id) ? $request->situacao_id : [$request->situacao_id];
+                    $situacoes = \App\Models\Situacao::whereIn('id', $situacaoIds)->pluck('descricao');
+                    $situacoesNomes = $situacoes->implode(', ');
+                @endphp
                 <div class="filter-item">
-                    <span class="filter-label">Situação ID:</span> {{ $request->situacao_id }}
+                    <span class="filter-label">Situação(ões):</span> {{ $situacoesNomes }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
 
             @if($request->filled('localizacao_id'))
+                @php
+                    $localizacaoIds = is_array($request->localizacao_id) ? $request->localizacao_id : [$request->localizacao_id];
+                    $localizacoes = \App\Models\Localizacao::whereIn('id', $localizacaoIds)->pluck('nome_localizacao');
+                    $localizacoesNomes = $localizacoes->implode(', ');
+                @endphp
                 <div class="filter-item">
-                    <span class="filter-label">Localização ID:</span> {{ $request->localizacao_id }}
+                    <span class="filter-label">Localização(ões):</span> {{ $localizacoesNomes }}
+                </div>
+                @php $hasFilters = true; @endphp
+            @endif
+
+            @if($request->filled('marca_id'))
+                @php
+                    $marcas = \App\Models\Marca::pluck('nome_marca', 'id');
+                    $marcaNome = $marcas[$request->marca_id] ?? 'N/A';
+                @endphp
+                <div class="filter-item">
+                    <span class="filter-label">Marca:</span> {{ $marcaNome }}
+                </div>
+                @php $hasFilters = true; @endphp
+            @endif
+
+            @if($request->filled('status_id'))
+                @php
+                    $statuses = \App\Models\Status::pluck('descricao', 'id');
+                    $statusNome = $statuses[$request->status_id] ?? 'N/A';
+                @endphp
+                <div class="filter-item">
+                    <span class="filter-label">Status:</span> {{ $statusNome }}
+                </div>
+                @php $hasFilters = true; @endphp
+            @endif
+
+            @if($request->filled('comprometido'))
+                <div class="filter-item">
+                    <span class="filter-label">Comprometido:</span>
+                    {{ $request->comprometido == 1 ? 'Sim' : 'Não' }}
+                </div>
+                @php $hasFilters = true; @endphp
+            @endif
+
+            @if($request->filled('concluido'))
+                <div class="filter-item">
+                    <span class="filter-label">Status Conclusão:</span>
+                    {{ $request->concluido == '1' ? 'Concluídas' : ($request->concluido == '0' ? 'Não Concluídas' : 'Todas') }}
+                </div>
+                @php $hasFilters = true; @endphp
+            @endif
+
+            @if($request->filled('status_dias'))
+                <div class="filter-item">
+                    <span class="filter-label">Status de Dias:</span>
+                    {{ $request->status_dias == 'atrasados' ? 'Atrasados' : ($request->status_dias == 'em_dia' ? 'Em Dia' : 'Todos') }}
                 </div>
                 @php $hasFilters = true; @endphp
             @endif
@@ -136,24 +255,16 @@
                 @php $hasFilters = true; @endphp
             @endif
 
-            @if($request->filled('comprometido'))
-                <div class="filter-item">
-                    <span class="filter-label">Comprometido:</span>
-                    {{ $request->comprometido == 1 ? 'Sim' : 'Não' }}
-                </div>
-                @php $hasFilters = true; @endphp
-            @endif
-
             @if(!$hasFilters)
                 <div class="filter-item">
-                    Nenhum filtro aplicado
+                    <span style="color: #6B7280; font-style: italic;">Nenhum filtro aplicado</span>
                 </div>
             @endif
         </div>
         @endisset
 
         <!-- Total de registros -->
-        <div style="margin-bottom: 10px; font-weight: bold;">
+        <div class="total-registros">
             Total de registros: {{ count($movimentacoes) }}
         </div>
 
@@ -162,35 +273,104 @@
             <table>
                 <thead>
                     <tr>
-                        <th width="5%">ID</th>
-                        <th width="10%">Referência</th>
-                        <th width="10%">Produto</th>
-                        <th width="10%">Data Entrada</th>
-                        <th width="10%">Data Conclusão</th>
-                        <th width="15%">Localização</th>
-                        <th width="10%">Tipo</th>
-                        <th width="10%">Situação</th>
-                        <th width="20%">Observação</th>
+                        <th width="3%" class="text-center">ID</th>
+                        <th width="7%">Referência</th>
+                        <th width="11%">Produto</th>
+                        <th width="7%">Status</th>
+                        <th width="5%" class="text-center">Concl.</th>
+                        <th width="9%">Localização</th>
+                        <th width="7%">Tipo</th>
+                        <th width="7%">Situação</th>
+                        <th width="7%" class="text-center">Dt. Entrada</th>
+                        <th width="7%" class="text-center">Dt. Conclusão</th>
+                        <th width="7%" class="text-center">Dt. Devolução</th>
+                        <th width="5%" class="text-center">Comp.</th>
+                        <th width="14%">Observação</th>
+                        <th width="5%" class="text-center">Dias</th>
+                        <th width="6%" class="text-center">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($movimentacoes as $movimentacao)
+                        @php
+                            // Calcular dias úteis
+                            $diasUteis = null;
+                            if ($movimentacao->data_entrada) {
+                                $dataFim = $movimentacao->data_saida ?: now();
+                                $diasUteis = 0;
+                                $dataAtual = clone $movimentacao->data_entrada;
+                                while ($dataAtual <= $dataFim) {
+                                    if ($dataAtual->dayOfWeek != 0 && $dataAtual->dayOfWeek != 6) {
+                                        $diasUteis++;
+                                    }
+                                    $dataAtual->addDay();
+                                }
+                            }
+                        @endphp
                         <tr>
-                            <td>{{ $movimentacao->id }}</td>
+                            <td class="text-center">{{ $movimentacao->id }}</td>
                             <td>{{ $movimentacao->produto->referencia ?? 'N/A' }}</td>
-                            <td>{{ Str::limit($movimentacao->produto->descricao ?? 'N/A', 20) }}</td>
-                            <td>{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y H:i') : 'N/A' }}</td>
-                            <td>{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y H:i') : '-' }}</td>
+                            <td>{{ Str::limit($movimentacao->produto->descricao ?? 'N/A', 25) }}</td>
+                            <td>
+                                @if($movimentacao->produto && $movimentacao->produto->status)
+                                    <span class="status-badge {{ $movimentacao->produto->status->descricao == 'Ativo' ? 'status-concluido' : 'status-pendente' }}">
+                                        {{ $movimentacao->produto->status->descricao }}
+                                    </span>
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if($movimentacao->data_saida)
+                                    <span class="status-badge status-concluido">Sim</span>
+                                @else
+                                    <span class="status-badge status-pendente">Não</span>
+                                @endif
+                            </td>
                             <td>{{ $movimentacao->localizacao->nome_localizacao ?? 'N/A' }}</td>
                             <td>{{ $movimentacao->tipo->descricao ?? 'N/A' }}</td>
                             <td>{{ $movimentacao->situacao->descricao ?? 'N/A' }}</td>
-                            <td>{{ Str::limit($movimentacao->observacao, 40, '...') ?: '-' }}</td>
+                            <td class="text-center">{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}</td>
+                            <td class="text-center">{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : '-' }}</td>
+                            <td class="text-center">{{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y') : '-' }}</td>
+                            <td class="text-center">{{ $movimentacao->comprometido ? 'Sim' : 'Não' }}</td>
+                            <td>{{ Str::limit($movimentacao->observacao, 25, '...') ?: '-' }}</td>
+                            <td class="text-center">
+                                @if($movimentacao->data_entrada)
+                                    @php
+                                        $dataFim = $movimentacao->data_saida ?: now();
+                                        $diasCorridos = $dataFim->diffInDays($movimentacao->data_entrada);
+                                    @endphp
+                                    {{ $diasCorridos }}
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if($movimentacao->anexo)
+                                    <span class="text-blue-600">✓</span>
+                                @endif
+                                @if($movimentacao->data_saida && $movimentacao->data_entrada)
+                                    @php
+                                        $diasCorridos = $movimentacao->data_saida->diffInDays($movimentacao->data_entrada);
+                                        $statusDias = '';
+                                        if ($diasCorridos > 30) {
+                                            $statusDias = '🔴';
+                                        } elseif ($diasCorridos > 20) {
+                                            $statusDias = '🟡';
+                                        } else {
+                                            $statusDias = '🟢';
+                                        }
+                                    @endphp
+                                    {{ $statusDias }}
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         @else
-            <div>
+            <div class="no-data">
                 Nenhuma movimentação encontrada com os filtros aplicados.
             </div>
         @endif

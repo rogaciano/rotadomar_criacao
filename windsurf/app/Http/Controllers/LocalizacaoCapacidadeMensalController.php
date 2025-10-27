@@ -262,11 +262,14 @@ class LocalizacaoCapacidadeMensalController extends Controller
             $produtos = $alocacoes->map(function($alocacao) {
                 $produto = $alocacao->produto;
                 if ($produto) {
-                    $produto->quantidade_alocada = $alocacao->quantidade;
-                    $produto->alocacao_id = $alocacao->id;
-                    $produto->tipo_alocacao = $alocacao->tipo;
+                    // Criar uma cópia do produto para evitar referências compartilhadas
+                    $produtoCopia = clone $produto;
+                    $produtoCopia->quantidade_alocada = $alocacao->quantidade;
+                    $produtoCopia->alocacao_id = $alocacao->id;
+                    $produtoCopia->tipo_alocacao = $alocacao->tipo;
+                    return $produtoCopia;
                 }
-                return $produto;
+                return null;
             })->filter(); // Remove nulls
 
             return [
@@ -744,11 +747,14 @@ class LocalizacaoCapacidadeMensalController extends Controller
             $produtos = $alocacoes->map(function($alocacao) {
                 $produto = $alocacao->produto;
                 if ($produto) {
-                    $produto->quantidade_alocada = $alocacao->quantidade;
-                    $produto->alocacao_id = $alocacao->id;
-                    $produto->tipo_alocacao = $alocacao->tipo;
+                    // Criar uma cópia do produto para evitar referências compartilhadas
+                    $produtoCopia = clone $produto;
+                    $produtoCopia->quantidade_alocada = $alocacao->quantidade;
+                    $produtoCopia->alocacao_id = $alocacao->id;
+                    $produtoCopia->tipo_alocacao = $alocacao->tipo;
+                    return $produtoCopia;
                 }
-                return $produto;
+                return null;
             })->filter();
 
             return [
