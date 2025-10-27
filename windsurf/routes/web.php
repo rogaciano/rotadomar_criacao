@@ -103,6 +103,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Routes para Capacidade Mensal das Localizações
     Route::get('localizacao-capacidade/dashboard', [LocalizacaoCapacidadeMensalController::class, 'dashboard'])->name('localizacao-capacidade.dashboard');
     Route::get('localizacao-capacidade/relatorio-pdf', [LocalizacaoCapacidadeMensalController::class, 'gerarRelatorioPDF'])->name('localizacao-capacidade.relatorio-pdf');
+    Route::get('localizacao-capacidade/listagem-pdf', [LocalizacaoCapacidadeMensalController::class, 'gerarPDFListagem'])->name('localizacao-capacidade.listagem-pdf');
     Route::get('localizacao-capacidade/historico-redistribuicoes', [LocalizacaoCapacidadeMensalController::class, 'historicoRedistribuicoes'])->name('localizacao-capacidade.historico-redistribuicoes');
     Route::post('localizacao-capacidade/sugerir-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'sugerirRedistribuicao'])->name('localizacao-capacidade.sugerir-redistribuicao');
     Route::post('localizacao-capacidade/aplicar-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'aplicarRedistribuicao'])->name('localizacao-capacidade.aplicar-redistribuicao');

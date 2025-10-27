@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         ProdutoLocalizacao::observe(ProdutoLocalizacaoObserver::class);
         
         // Registrar View Composer para notificações de movimentações
-        View::composer('layouts.navigation', NotificationComposer::class);
+        // DESABILITADO - Sistema de notificações muito pesado
+        // View::composer('layouts.navigation', NotificationComposer::class);
     }
 }

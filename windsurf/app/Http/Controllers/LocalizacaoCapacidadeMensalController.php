@@ -234,12 +234,19 @@ class LocalizacaoCapacidadeMensalController extends Controller
         // Mês e ano padrão (atual)
         $mes = $request->filled('mes') ? $request->mes : now()->month;
         $ano = $request->filled('ano') ? $request->ano : now()->year;
+        $localizacaoId = $request->filled('localizacao_id') ? $request->localizacao_id : null;
 
         // Buscar capacidades do período
-        $capacidades = LocalizacaoCapacidadeMensal::with('localizacao')
+        $query = LocalizacaoCapacidadeMensal::with('localizacao')
             ->where('mes', $mes)
-            ->where('ano', $ano)
-            ->get();
+            ->where('ano', $ano);
+            
+        // Aplicar filtro de localização se selecionado
+        if ($localizacaoId) {
+            $query->where('localizacao_id', $localizacaoId);
+        }
+        
+        $capacidades = $query->get();
 
         // Adicionar informações de produtos previstos
         $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano) {
@@ -278,7 +285,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->orderBy('nome_localizacao')
             ->get();
 
-        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes'));
+        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId'));
     }
 
     /**
@@ -709,12 +716,19 @@ class LocalizacaoCapacidadeMensalController extends Controller
     {
         $mes = $request->filled('mes') ? $request->mes : now()->month;
         $ano = $request->filled('ano') ? $request->ano : now()->year;
+        $localizacaoId = $request->filled('localizacao_id') ? $request->localizacao_id : null;
 
         // Buscar capacidades do período
-        $capacidades = LocalizacaoCapacidadeMensal::with('localizacao')
+        $query = LocalizacaoCapacidadeMensal::with('localizacao')
             ->where('mes', $mes)
-            ->where('ano', $ano)
-            ->get();
+            ->where('ano', $ano);
+            
+        // Aplicar filtro de localização se selecionado
+        if ($localizacaoId) {
+            $query->where('localizacao_id', $localizacaoId);
+        }
+        
+        $capacidades = $query->get();
 
         // Adicionar informações de produtos previstos
         $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano) {
@@ -758,6 +772,52 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         $pdf = \PDF::loadView('localizacao-capacidade.relatorio-pdf', compact('dadosDashboard', 'mes', 'ano', 'mesNome'));
         
-        return $pdf->download("Relatorio_Capacidade_{$mesNome}_{$ano}.pdf");
+        return $pdf->stream("Relatorio_Capacidade_{$mesNome}_{$ano}.pdf");
+    }
+
+    /**
+     * Gerar PDF da listagem de capacidades mensais
+     */
+    public function gerarPDFListagem(Request $request)
+    {
+        $query = LocalizacaoCapacidadeMensal::with('localizacao');
+
+        // Aplicar filtros
+        if ($request->filled('localizacao_id')) {
+            $query->where('localizacao_id', $request->localizacao_id);
+        }
+
+        if ($request->filled('mes')) {
+            $query->where('mes', $request->mes);
+        }
+
+        if ($request->filled('ano')) {
+            $query->where('ano', $request->ano);
+        }
+
+        $capacidades = $query->orderBy('ano', 'desc')
+            ->orderBy('mes', 'desc')
+            ->orderBy('localizacao_id')
+            ->get();
+
+        // Carregar localizações para exibir nomes nos filtros
+        $localizacoes = Localizacao::where('ativo', true)
+            ->orderBy('nome_localizacao')
+            ->get();
+
+        // Preparar dados dos filtros para exibição no PDF
+        $filtros = [
+            'localizacao' => $request->filled('localizacao_id') 
+                ? $localizacoes->firstWhere('id', $request->localizacao_id)->nome_localizacao ?? 'N/A'
+                : 'Todas',
+            'mes' => $request->filled('mes') 
+                ? ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][$request->mes]
+                : 'Todos',
+            'ano' => $request->filled('ano') ? $request->ano : 'Todos'
+        ];
+
+        $pdf = \PDF::loadView('localizacao-capacidade.listagem-pdf', compact('capacidades', 'filtros'));
+        
+        return $pdf->stream("Listagem_Capacidades_Mensais_" . now()->format('d_m_Y_H_i') . ".pdf");
     }
 }

@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Capacidade - {{ $mesNome }}/{{ $ano }}</title>
     <style>
+        @page {
+            margin: 15mm;
+            size: A4 landscape;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -15,14 +20,15 @@
             font-family: Arial, sans-serif;
             font-size: 10px;
             color: #333;
-            padding: 20px;
+            margin: 0;
+            padding: 10px;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #3B82F6;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
         
         .header h1 {
