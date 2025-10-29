@@ -257,6 +257,7 @@
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mês/Ano</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Prev. Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Concluído</th>
                                             @if(auth()->user()->canUpdate('produtos'))
                                                 <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                             @endif
@@ -290,6 +291,15 @@
                                                         N/A
                                                     @endif
                                                 </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-center">
+                                                    @if($localizacao->pivot->concluido == 1)
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 inline-block" viewBox="0 0 20 20" fill="currentColor" title="Concluído">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    @else
+                                                        <span class="text-gray-400">-</span>
+                                                    @endif
+                                                </td>
                                                 @if(auth()->user()->canUpdate('produtos'))
                                                     <td class="px-4 py-2 whitespace-nowrap text-sm space-x-3">
                                                         @php
@@ -301,7 +311,7 @@
                                                             }
                                                         @endphp
                                                         <button type="button" 
-                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }})" 
+                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }})" 
                                                             class="text-indigo-600 hover:text-indigo-800 text-sm">
                                                             Editar
                                                         </button>
@@ -323,14 +333,14 @@
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia != 0 ? ($divergencia > 0 ? 'text-yellow-700' : 'text-red-700') : 'text-green-700' }}">
                                                 {{ number_format($totalLocalizacoes, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '3' : '2' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Quantidade Pretendida:</td>
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                                                 {{ number_format($quantidadeProduto, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '3' : '2' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2"></td>
                                         </tr>
                                         @if($divergencia != 0)
                                             <tr class="bg-gray-100">
@@ -340,7 +350,7 @@
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-700' : 'text-red-700' }}">
                                                     {{ $divergencia > 0 ? '+' : '' }}{{ number_format($divergencia, 0, ',', '.') }}
                                                 </td>
-                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '3' : '2' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
+                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
                                                     {{ $divergencia > 0 ? 'Excedente' : 'Faltante' }}
                                                 </td>
                                             </tr>
@@ -833,10 +843,17 @@
                                             <input type="date" name="data_prevista_faccao" id="edit-data-prevista-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                             <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
                                         </div>
-                                        <div>
+                                        <div class="mb-4">
                                             <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
                                             <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
                                             <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
+                                        </div>
+                                        <div>
+                                            <label class="flex items-center">
+                                                <input type="checkbox" name="concluido" id="edit-concluido" value="1" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                                                <span class="ml-2 text-sm font-medium text-gray-700">Concluído</span>
+                                            </label>
+                                            <p class="mt-1 text-sm text-gray-500">Marque se esta ordem de produção foi concluída</p>
                                         </div>
                                     </div>
                                     <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
@@ -853,7 +870,7 @@
                     </div>
 
                     <script>
-                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao) {
+                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido) {
                             try {
                                 console.log('Abrindo modal para editar localização:', {
                                     produtoLocalizacaoId,
@@ -862,7 +879,8 @@
                                     quantidade,
                                     dataFaccao,
                                     ordemProducao,
-                                    observacao
+                                    observacao,
+                                    concluido
                                 });
                                 
                                 document.getElementById('edit-localizacao-id').value = localizacaoId;
@@ -871,6 +889,7 @@
                                 document.getElementById('edit-quantidade').value = quantidade;
                                 document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
+                                document.getElementById('edit-concluido').checked = concluido == 1;
                                 
                                 // Atualizar action do formulário com o ID do registro produto_localizacao
                                 const form = document.getElementById('form-editar-localizacao');

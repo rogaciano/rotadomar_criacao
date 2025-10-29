@@ -383,6 +383,9 @@
                                                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                                                         @if($todasObsLocalizacoes->count() > 0)
                                                                             <table class="w-full border-collapse">
+                                                                                @php
+                                                                                    $totalQuantidades = 0;
+                                                                                @endphp
                                                                                 @foreach($todasObsLocalizacoes as $loc)
                                                                                     @php
                                                                                         // Buscar a quantidade alocada para esta ordem de produção
@@ -396,6 +399,7 @@
                                                                                                 break;
                                                                                             }
                                                                                         }
+                                                                                        $totalQuantidades += $qtdAlocada;
                                                                                     @endphp
                                                                                     <tr class="{{ !$loop->last ? 'border-b border-gray-200' : '' }}">
                                                                                         <td class="py-1 pr-2 align-top" style="width: 70%;">
@@ -424,12 +428,33 @@
                                                                                             </div>
                                                                                         </td>
                                                                                         <td class="py-1 pl-2 text-right align-top" style="width: 30%;">
-                                                                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
-                                                                                                {{ number_format($qtdAlocada, 0, ',', '.') }}
-                                                                                            </span>
+                                                                                            <div class="inline-flex items-center gap-1 justify-end">
+                                                                                                @if($loc->pivot->concluido == 1)
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor" title="Concluído">
+                                                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                                                                    </svg>
+                                                                                                @endif
+                                                                                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
+                                                                                                    {{ number_format($qtdAlocada, 0, ',', '.') }}
+                                                                                                </span>
+                                                                                            </div>
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endforeach
+                                                                                
+                                                                                {{-- Linha de Total quando houver mais de 1 item --}}
+                                                                                @if($todasObsLocalizacoes->count() > 1)
+                                                                                    <tr class="border-t-2 border-gray-300 bg-gray-50">
+                                                                                        <td class="py-2 pr-2 text-right" style="width: 70%;">
+                                                                                            <span class="text-xs font-bold text-gray-800">TOTAL:</span>
+                                                                                        </td>
+                                                                                        <td class="py-2 pl-2 text-right" style="width: 30%;">
+                                                                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-600 text-white">
+                                                                                                {{ number_format($totalQuantidades, 0, ',', '.') }}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endif
                                                                             </table>
                                                                         @endif
                                                                         

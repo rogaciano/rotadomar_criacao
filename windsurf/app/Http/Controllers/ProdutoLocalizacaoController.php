@@ -22,7 +22,8 @@ class ProdutoLocalizacaoController extends Controller
             'quantidade' => 'required|integer|min:1',
             'data_prevista_faccao' => 'nullable|date',
             'ordem_producao' => 'required|string|max:30',
-            'observacao' => 'nullable|string|max:255'
+            'observacao' => 'nullable|string|max:255',
+            'concluido' => 'nullable|boolean'
         ]);
 
         $produto = Produto::findOrFail($produtoId);
@@ -45,7 +46,8 @@ class ProdutoLocalizacaoController extends Controller
             'quantidade' => $request->quantidade,
             'data_prevista_faccao' => $request->data_prevista_faccao,
             'ordem_producao' => $request->ordem_producao,
-            'observacao' => $request->observacao
+            'observacao' => $request->observacao,
+            'concluido' => $request->has('concluido') ? 1 : 0
         ]);
 
         return redirect()->route('produtos.show', $produtoId)
@@ -65,7 +67,8 @@ class ProdutoLocalizacaoController extends Controller
             'quantidade' => 'required|integer|min:1',
             'data_prevista_faccao' => 'nullable|date',
             'ordem_producao' => 'required|string|max:30',
-            'observacao' => 'nullable|string|max:255'
+            'observacao' => 'nullable|string|max:255',
+            'concluido' => 'nullable|boolean'
         ]);
 
         // Buscar o registro na tabela pivot pelo ID
@@ -90,7 +93,8 @@ class ProdutoLocalizacaoController extends Controller
             'quantidade' => $request->quantidade,
             'data_prevista_faccao' => $request->data_prevista_faccao,
             'ordem_producao' => $request->ordem_producao,
-            'observacao' => $request->observacao
+            'observacao' => $request->observacao,
+            'concluido' => $request->has('concluido') ? 1 : 0
         ]);
 
         return redirect()->route('produtos.show', $produtoId)

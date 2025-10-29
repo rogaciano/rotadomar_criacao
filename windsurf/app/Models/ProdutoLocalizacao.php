@@ -20,12 +20,14 @@ class ProdutoLocalizacao extends Pivot
         'quantidade',
         'data_prevista_faccao',
         'ordem_producao',
-        'observacao'
+        'observacao',
+        'concluido'
     ];
 
     protected $casts = [
         'quantidade' => 'integer',
-        'data_prevista_faccao' => 'date'
+        'data_prevista_faccao' => 'date',
+        'concluido' => 'integer'
     ];
 
     /**

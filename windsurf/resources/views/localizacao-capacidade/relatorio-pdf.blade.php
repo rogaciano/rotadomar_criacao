@@ -166,6 +166,28 @@
             margin-top: 4px;
         }
         
+        .check-icon {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #059669;
+            border-radius: 50%;
+            margin-right: 4px;
+            position: relative;
+            vertical-align: middle;
+        }
+        
+        .check-icon::after {
+            content: '✓';
+            color: white;
+            font-size: 8px;
+            font-weight: bold;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
         .alocacao-item {
             margin-bottom: 8px;
             padding-bottom: 8px;
@@ -383,6 +405,9 @@
                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                         @if($todasObsLocalizacoes->count() > 0)
                                             <table class="obs-table">
+                                                @php
+                                                    $totalQuantidades = 0;
+                                                @endphp
                                                 @foreach($todasObsLocalizacoes as $loc)
                                                     @php
                                                         // Buscar a quantidade alocada para esta ordem de produção
@@ -396,6 +421,7 @@
                                                                 break;
                                                             }
                                                         }
+                                                        $totalQuantidades += $qtdAlocada;
                                                     @endphp
                                                     <tr>
                                                         <td class="obs-info">
@@ -424,10 +450,27 @@
                                                             </div>
                                                         </td>
                                                         <td class="obs-qtd">
+                                                            @if($loc->pivot->concluido == 1)
+                                                                <span class="check-icon"></span>
+                                                            @endif
                                                             <span class="qtd-alocada">{{ number_format($qtdAlocada, 0, ',', '.') }}</span>
                                                         </td>
                                                     </tr>
                                                 @endforeach
+                                                
+                                                {{-- Linha de Total quando houver mais de 1 item --}}
+                                                @if($todasObsLocalizacoes->count() > 1)
+                                                    <tr style="border-top: 2px solid #6B7280; background-color: #F9FAFB;">
+                                                        <td class="obs-info" style="text-align: right; padding: 6px 8px;">
+                                                            <strong style="font-size: 8px; color: #1F2937;">TOTAL:</strong>
+                                                        </td>
+                                                        <td class="obs-qtd" style="padding: 6px 8px;">
+                                                            <span style="display: inline-block; background-color: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 700;">
+                                                                {{ number_format($totalQuantidades, 0, ',', '.') }}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                @endif
                                             </table>
                                         @endif
                                         

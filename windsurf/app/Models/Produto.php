@@ -89,7 +89,7 @@ class Produto extends Model
     public function localizacoes()
     {
         return $this->belongsToMany(Localizacao::class, 'produto_localizacao')
-                    ->withPivot('id', 'quantidade', 'data_prevista_faccao', 'ordem_producao', 'observacao')
+                    ->withPivot('id', 'quantidade', 'data_prevista_faccao', 'ordem_producao', 'observacao', 'concluido')
                     ->withTimestamps()
                     ->using(ProdutoLocalizacao::class);
     }
