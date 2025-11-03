@@ -690,6 +690,9 @@
             $('#componente-cor').val('').prop('disabled', true);
             $('#componente-consumo').val('1');
             
+            // Atualizar lista de tecidos disponíveis com base nos tecidos atualmente selecionados
+            atualizarTecidosDisponiveis(componenteId);
+            
             // Se for edição, carregar dados do componente
             if (componenteId) {
                 const combinacao = combinacoes.find(c => c.id == combinacaoId);
@@ -713,6 +716,46 @@
             // Exibir modal
             $('#modal-componente').removeClass('hidden');
             document.getElementById('modal-componente').style.display = 'block';
+        }
+        
+        // Função para atualizar a lista de tecidos disponíveis no modal de componente
+        function atualizarTecidosDisponiveis(componenteId = null) {
+            const tecidosDisponiveis = [];
+            
+            // Percorrer todos os selects de tecido na página
+            $('.tecido-select').each(function() {
+                const tecidoId = $(this).val();
+                const tecidoText = $(this).find('option:selected').text();
+                
+                if (tecidoId && tecidoId !== '' && tecidoText && tecidoText !== 'Selecione um tecido') {
+                    // Verificar se já não está na lista
+                    if (!tecidosDisponiveis.find(t => t.id === tecidoId)) {
+                        tecidosDisponiveis.push({
+                            id: tecidoId,
+                            text: tecidoText
+                        });
+                    }
+                }
+            });
+            
+            // Atualizar o select de tecidos no modal
+            const selectTecido = $('#componente-tecido');
+            const tecidoAtualSelecionado = selectTecido.val();
+            
+            // Limpar e reconstruir as opções
+            selectTecido.html('<option value="">Selecione um tecido</option>');
+            
+            tecidosDisponiveis.forEach(function(tecido) {
+                const option = $('<option></option>')
+                    .attr('value', tecido.id)
+                    .text(tecido.text);
+                selectTecido.append(option);
+            });
+            
+            // Se estava editando, manter o tecido selecionado
+            if (tecidoAtualSelecionado && componenteId) {
+                selectTecido.val(tecidoAtualSelecionado);
+            }
         }
         
         // Função para carregar cores de um tecido
