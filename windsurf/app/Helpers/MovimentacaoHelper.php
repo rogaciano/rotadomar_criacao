@@ -89,32 +89,18 @@ class MovimentacaoHelper
         // A exibição na view usa calcularDiasUteis() para mostrar dias úteis (excluindo fins de semana).
         if (!empty($filters['status_dias'])) {
             $statusDias = $filters['status_dias'];
-            
+
+            // Expressões SQL para dias úteis e prazo prioritário
+            $bdaysNaoConcluidas = "(5 * (DATEDIFF(DATE(NOW()), DATE(data_entrada)) DIV 7) + GREATEST(LEAST(WEEKDAY(DATE(NOW())), 4) - LEAST(WEEKDAY(DATE(data_entrada)), 4), 0))";
+            $prazoPrioritario = "COALESCE((SELECT prazo FROM situacoes WHERE situacoes.id = movimentacoes.situacao_id), (SELECT prazo FROM localizacoes WHERE localizacoes.id = movimentacoes.localizacao_id))";
+
             if ($statusDias === 'atrasados') {
-                // Subconsulta para obter movimentações atrasadas
-                $query->whereHas('localizacao', function($q) {
-                    // Localizações com prazo definido
-                    $q->whereNotNull('prazo');
-                })
-                ->where(function($q) {
-                    $q->whereNull('data_saida') // Ainda não concluídas
-                      ->whereRaw('DATEDIFF(NOW(), data_entrada) > (SELECT prazo FROM localizacoes WHERE localizacoes.id = movimentacoes.localizacao_id)');
-                });
-            } 
-            elseif ($statusDias === 'em_dia') {
-                // Subconsulta para obter movimentações em dia
-                $query->where(function($q) {
-                    $q->whereNotNull('data_saida') // Já concluídas
-                      ->orWhere(function($sq) {
-                          $sq->whereNull('data_saida') // Não concluídas mas dentro do prazo
-                             ->whereHas('localizacao', function($lq) {
-                                 $lq->whereNotNull('prazo');
-                             })
-                             ->whereRaw('DATEDIFF(NOW(), data_entrada) <= (SELECT prazo FROM localizacoes WHERE localizacoes.id = movimentacoes.localizacao_id)');
-                      })
-                      ->orWhereHas('localizacao', function($lq) {
-                          $lq->whereNull('prazo'); // Localizações sem prazo definido
-                      });
+                $query->whereNull('data_saida')
+                      ->whereRaw("$bdaysNaoConcluidas > $prazoPrioritario");
+            } elseif ($statusDias === 'em_dia') {
+                $query->where(function($q) use ($bdaysNaoConcluidas, $prazoPrioritario) {
+                    $q->whereNotNull('data_saida')
+                      ->orWhereRaw("$bdaysNaoConcluidas <= COALESCE($prazoPrioritario, 999999)");
                 });
             }
         }

@@ -119,11 +119,11 @@
 
                             <!-- Data Conclusão -->
                             <div>
-                                <label for="data_saida" class="block text-sm font-medium text-gray-700 mb-1">Data de Saída (opcional)</label>
+                                <label for="data_saida" class="block text-sm font-medium text-gray-700 mb-1">Data de Conclusão</label>
                                 <input type="datetime-local" name="data_saida" id="data_saida" value="{{ old('data_saida') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             </div>
                             <div>
-                                <label for="data_devolucao" class="block text-sm font-medium text-gray-700 mb-1">Data de Devolução (opcional)</label>
+                                <label for="data_devolucao" class="block text-sm font-medium text-gray-700 mb-1">Data de Devolução </label>
                                 <input type="datetime-local" name="data_devolucao" id="data_devolucao" value="{{ old('data_devolucao') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             </div>
 

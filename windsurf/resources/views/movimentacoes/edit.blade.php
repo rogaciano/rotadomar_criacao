@@ -81,13 +81,13 @@
 
                             <!-- Data Conclusão -->
                             <div>
-                                <x-label for="data_saida" value="{{ __('Data de Saída (opcional)') }}" />
+                                <x-label for="data_saida" value="{{ __('Data de Conclusão') }}" />
                                 <x-input id="data_saida" class="block mt-1 w-full" type="datetime-local" name="data_saida" :value="old('data_saida', $movimentacao->data_saida ? $movimentacao->data_saida->format('Y-m-d\TH:i') : null)" />
                                 <x-input-error :messages="$errors->get('data_saida')" class="mt-2" />
                             </div>
                             <!-- Data Devolução -->
                             <div>
-                                <x-label for="data_devolucao" value="{{ __('Data de Devolução (opcional)') }}" />
+                                <x-label for="data_devolucao" value="{{ __('Data de Devolução') }}" />
                                 <x-input id="data_devolucao" class="block mt-1 w-full" type="datetime-local" name="data_devolucao" :value="old('data_devolucao', $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('Y-m-d\TH:i') : null)" />
                                 <x-input-error :messages="$errors->get('data_devolucao')" class="mt-2" />
                             </div>

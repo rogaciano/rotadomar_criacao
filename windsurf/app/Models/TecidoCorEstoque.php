@@ -44,8 +44,8 @@ class TecidoCorEstoque extends Model
         $necessidade = 0;
         
         // Parte 1: Necessidade das variações de cores
-        // Buscar todos os produtos que usam este tecido
-        $produtos = $this->tecido->produtos;
+        // Considerar apenas produtos cujo status possui calc_necessidade = 1
+        $produtos = $this->tecido->produtosComNecessidade;
         
         foreach ($produtos as $produto) {
             // Buscar se o produto tem esta cor específica
@@ -103,8 +103,8 @@ class TecidoCorEstoque extends Model
             return $resultado;
         }
         
-        // Buscar todos os produtos que usam este tecido
-        $produtos = $this->tecido->produtos;
+        // Considerar apenas produtos cujo status possui calc_necessidade = 1
+        $produtos = $this->tecido->produtosComNecessidade;
         
         foreach ($produtos as $produto) {
             // Buscar se o produto tem esta cor específica
@@ -144,8 +144,8 @@ class TecidoCorEstoque extends Model
             return $produtosComNecessidade;
         }
         
-        // Parte 1: Produtos com variações de cores
-        $produtos = $this->tecido->produtos;
+        // Parte 1: Produtos com variações de cores (apenas com calc_necessidade = 1)
+        $produtos = $this->tecido->produtosComNecessidade;
         
         foreach ($produtos as $produto) {
             $produtoCor = $produto->cores()

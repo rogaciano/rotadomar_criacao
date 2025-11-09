@@ -28,31 +28,20 @@ class MovimentacaoFilterController extends Controller
             return $query;
         }
         
+        // Expressão SQL para calcular DIAS ÚTEIS entre data_entrada e agora (para não concluídas)
+        $bdaysNaoConcluidas = "(5 * (DATEDIFF(DATE(NOW()), DATE(data_entrada)) DIV 7) + GREATEST(LEAST(WEEKDAY(DATE(NOW())), 4) - LEAST(WEEKDAY(DATE(data_entrada)), 4), 0))";
+        // Prazo com prioridade: situação > localização
+        $prazoPrioritario = "COALESCE((SELECT prazo FROM situacoes WHERE situacoes.id = movimentacoes.situacao_id), (SELECT prazo FROM localizacoes WHERE localizacoes.id = movimentacoes.localizacao_id))";
+
         if ($statusDias === 'atrasados') {
-            // Subconsulta para obter movimentações atrasadas
-            return $query->whereHas('localizacao', function($q) {
-                // Localizações com prazo definido
-                $q->whereNotNull('prazo');
-            })
-            ->where(function($q) {
-                $q->whereNull('data_saida') // Ainda não concluídas
-                  ->whereRaw('DATEDIFF(NOW(), data_entrada) > (SELECT prazo FROM localizacoes WHERE localizacoes.id = movimentacoes.localizacao_id)');
-            });
-        } 
-        elseif ($statusDias === 'em_dia') {
-            // Subconsulta para obter movimentações em dia
-            return $query->where(function($q) {
-                $q->whereNotNull('data_saida') // Já concluídas
-                  ->orWhere(function($sq) {
-                      $sq->whereNull('data_saida') // Não concluídas mas dentro do prazo
-                         ->whereHas('localizacao', function($lq) {
-                             $lq->whereNotNull('prazo');
-                         })
-                         ->whereRaw('DATEDIFF(NOW(), data_entrada) <= (SELECT prazo FROM localizacoes WHERE localizacoes.id = movimentacoes.localizacao_id)');
-                  })
-                  ->orWhereHas('localizacao', function($lq) {
-                      $lq->whereNull('prazo'); // Localizações sem prazo definido
-                  });
+            // Não concluídas e dias úteis excedendo o prazo
+            return $query->whereNull('data_saida')
+                         ->whereRaw("$bdaysNaoConcluidas > $prazoPrioritario");
+        } elseif ($statusDias === 'em_dia') {
+            // Concluídas OU não concluídas e dentro do prazo (ou sem prazo definido)
+            return $query->where(function($q) use ($bdaysNaoConcluidas, $prazoPrioritario) {
+                $q->whereNotNull('data_saida')
+                  ->orWhereRaw("$bdaysNaoConcluidas <= COALESCE($prazoPrioritario, 999999)");
             });
         }
         
