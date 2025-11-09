@@ -63,6 +63,7 @@ class Movimentacao extends Model
         return \Illuminate\Support\Facades\Storage::url($this->anexo);
     }
 
+
     // Relacionamentos
     public function produto()
     {

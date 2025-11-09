@@ -171,6 +171,54 @@
                 'padding': '6px 4px',
                 'border-color': '#d1d5db'
             });
+
+            // Validação: não permitir marcar como concluído sem data de devolução
+            function validarConcluido() {
+                const dataDevolucao = $('#data_devolucao').val();
+                const checkboxConcluido = $('#concluido');
+                
+                if (checkboxConcluido.is(':checked') && (!dataDevolucao || dataDevolucao.trim() === '')) {
+                    alert('Para marcar como concluído, é necessário preencher a Data de Devolução.');
+                    checkboxConcluido.prop('checked', false);
+                    return false;
+                }
+                return true;
+            }
+
+            // Auto-marcar concluído quando data de devolução for preenchida
+            function autoMarcarConcluido() {
+                const dataDevolucao = $('#data_devolucao').val();
+                const checkboxConcluido = $('#concluido');
+                
+                if (dataDevolucao && dataDevolucao.trim() !== '') {
+                    // Se data de devolução foi preenchida, marcar como concluído
+                    checkboxConcluido.prop('checked', true);
+                }
+            }
+
+            // Evento no campo data de devolução
+            $('#data_devolucao').on('change', autoMarcarConcluido);
+            $('#data_devolucao').on('input', autoMarcarConcluido);
+
+            // Evento no checkbox concluído
+            $('#concluido').on('change', function() {
+                if ($(this).is(':checked')) {
+                    validarConcluido();
+                }
+            });
+
+            // Validação no submit do formulário
+            $('form').on('submit', function(e) {
+                if (!validarConcluido()) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Verificar no carregamento da página se já tem data de devolução preenchida
+            setTimeout(function() {
+                autoMarcarConcluido();
+            }, 100);
         });
 
         function confirmarRemocao() {

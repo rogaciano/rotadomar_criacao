@@ -348,6 +348,11 @@ class MovimentacaoController extends Controller
             'anexo.max' => 'O anexo não pode ser maior que 10MB.',
         ]);
 
+        // Validação customizada: não permitir concluído sem data de devolução
+        if ($request->has('concluido') && empty($validated['data_devolucao'])) {
+            return back()->withInput()->with('error', 'Para marcar como concluído, é necessário preencher a Data de Devolução.');
+        }
+
         // Verificar se o produto pode ter movimentações
         $produto = Produto::findOrFail($validated['produto_id']);
         if (!$produto->podeMovimentar()) {
@@ -365,7 +370,8 @@ class MovimentacaoController extends Controller
             $movimentacao->data_devolucao = $validated['data_devolucao'] ?? null;
             $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
-            $movimentacao->concluido = $request->has('concluido'); // Checkbox marcado = true, não marcado = false
+            
+            $movimentacao->concluido = $request->has('concluido');
 
             // Upload de anexo se existir
             if ($request->hasFile('anexo')) {
@@ -462,6 +468,11 @@ class MovimentacaoController extends Controller
             'anexo.mimes' => 'O anexo deve ser uma imagem (jpg, jpeg ou png).',
             'anexo.max' => 'O anexo não pode ser maior que 10MB.',
         ]);
+
+        // Validação customizada: não permitir concluído sem data de devolução
+        if ($request->has('concluido') && empty($validated['data_devolucao'])) {
+            return back()->withInput()->with('error', 'Para marcar como concluído, é necessário preencher a Data de Devolução.');
+        }
 
         // Verificar se o produto pode ter movimentações
         $produto = Produto::findOrFail($validated['produto_id']);
