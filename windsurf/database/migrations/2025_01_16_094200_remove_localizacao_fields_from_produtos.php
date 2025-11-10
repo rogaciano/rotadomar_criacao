@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -15,15 +16,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('produtos', function (Blueprint $table) {
-            // Remover a foreign key constraint primeiro (se existir)
-            try {
-                $table->dropForeign(['localizacao_id']);
-            } catch (\Exception $e) {
-                // Foreign key pode não existir, continuar normalmente
+            // Verificar se a coluna existe antes de tentar remover
+            if (Schema::hasColumn('produtos', 'localizacao_id')) {
+                // Tentar remover a foreign key constraint primeiro (se existir)
+                $foreignKeys = DB::select("
+                    SELECT CONSTRAINT_NAME 
+                    FROM information_schema.KEY_COLUMN_USAGE 
+                    WHERE TABLE_SCHEMA = DATABASE() 
+                    AND TABLE_NAME = 'produtos' 
+                    AND COLUMN_NAME = 'localizacao_id' 
+                    AND REFERENCED_TABLE_NAME IS NOT NULL
+                ");
+                
+                foreach ($foreignKeys as $fk) {
+                    try {
+                        DB::statement("ALTER TABLE produtos DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}");
+                    } catch (\Exception $e) {
+                        // Continuar se não conseguir remover
+                    }
+                }
+                
+                // Remover as colunas
+                $table->dropColumn(['localizacao_id']);
             }
             
-            // Remover as colunas
-            $table->dropColumn(['localizacao_id', 'data_prevista_faccao']);
+            if (Schema::hasColumn('produtos', 'data_prevista_faccao')) {
+                $table->dropColumn(['data_prevista_faccao']);
+            }
         });
     }
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\ProdutoObservacaoController;
 use App\Http\Controllers\ProdutoCombinacaoController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\MovimentacaoFilterController;
+use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
@@ -169,6 +170,12 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     
     // Filtro de Movimentações por Status de Dias
     Route::get('movimentacoes/filtro/status-dias', [MovimentacaoFilterController::class, 'filtrarPorStatusDias'])->name('movimentacoes.filtro.status-dias');
+
+    // Routes para Notificações
+    Route::get('notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
+    Route::get('notificacoes/{id}/visualizar', [NotificacaoController::class, 'visualizar'])->name('notificacoes.visualizar');
+    Route::get('api/notificacoes/nao-visualizadas', [NotificacaoController::class, 'naoVisualizadas'])->name('api.notificacoes.nao-visualizadas');
+    Route::post('api/notificacoes/marcar-todas-visualizadas', [NotificacaoController::class, 'marcarTodasComoVisualizadas'])->name('api.notificacoes.marcar-todas-visualizadas');
 
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');

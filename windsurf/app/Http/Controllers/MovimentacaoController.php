@@ -13,6 +13,7 @@ use App\Models\Situacao;
 use App\Models\Status;
 use App\Models\Tecido;
 use App\Models\Tipo;
+use App\Services\NotificacaoService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -383,6 +384,10 @@ class MovimentacaoController extends Controller
 
             $movimentacao->save();
 
+            // Criar notificação para nova movimentação
+            $notificacaoService = new NotificacaoService();
+            $notificacaoService->criarNotificacaoNovaMovimentacao($movimentacao);
+
             // Verificar se deve redirecionar de volta para o show do produto
             if ($request->has('redirect_to_produto') && $request->redirect_to_produto) {
                 return redirect()->route('produtos.show', $request->redirect_to_produto)
@@ -500,9 +505,16 @@ class MovimentacaoController extends Controller
         }
 
         // Tratar checkbox concluido (quando não marcado, não vem no request)
+        $concluidoAntes = $movimentacao->concluido;
         $validated['concluido'] = $request->has('concluido');
 
         $movimentacao->update($validated);
+
+        // Criar notificação se movimentação foi marcada como concluída
+        if (!$concluidoAntes && $validated['concluido']) {
+            $notificacaoService = new NotificacaoService();
+            $notificacaoService->criarNotificacaoMovimentacaoConcluida($movimentacao);
+        }
 
         // Verificar se existe back_url para retornar à página de origem
         if ($request->has('back_url') && $request->back_url) {
