@@ -180,6 +180,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');
     Route::get('consultas/media-dias-atraso', [DashboardController::class, 'mediaDiasAtraso'])->name('consultas.media-dias-atraso');
+    Route::get('consultas/pivot-estilistas-status', [DashboardController::class, 'pivotEstilistasStatus'])->name('consultas.pivot-estilistas-status');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -33,8 +33,8 @@
                     
                     <div class="mb-6">
                         <form id="periodo-form" action="{{ route('dashboard.produtos-por-estilista') }}" method="GET" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-700 mb-3">Selecionar Período</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <h3 class="text-lg font-medium text-gray-700 mb-3">Filtros</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <label for="periodo" class="block text-sm font-medium text-gray-700 mb-1">Período Predefinido</label>
                                     <select id="periodo" name="periodo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
@@ -44,6 +44,18 @@
                                         <option value="ano_atual" {{ request('periodo') == 'ano_atual' ? 'selected' : '' }}>Ano atual</option>
                                         <option value="ano_anterior" {{ request('periodo') == 'ano_anterior' ? 'selected' : '' }}>Ano anterior</option>
                                         <option value="personalizado" {{ request('periodo') == 'personalizado' ? 'selected' : '' }}>Período personalizado</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select id="status_id" name="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <option value="todos" {{ request('status_id', 'todos') == 'todos' ? 'selected' : '' }}>Todos os Status</option>
+                                        @foreach($status as $statusItem)
+                                            <option value="{{ $statusItem->id }}" {{ request('status_id') == $statusItem->id ? 'selected' : '' }}>
+                                                {{ $statusItem->descricao }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 

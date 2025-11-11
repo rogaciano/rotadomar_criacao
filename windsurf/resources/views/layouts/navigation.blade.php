@@ -75,7 +75,8 @@
                                 <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">
                                     <a href="{{ route('consultas.produtos-ativos-por-localizacao') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.produtos-ativos-por-localizacao') ? 'bg-gray-100' : '' }}">{{ __('Produtos por Localização') }}</a>
                                     <a href="{{ route('consultas.media-dias-atraso') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.media-dias-atraso') ? 'bg-gray-100' : '' }}">{{ __('Média de Dias por Localização') }}</a>
-                                    <a href="{{ route('dashboard.produtos-por-estilista') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.media-dias-atraso') ? 'bg-gray-100' : '' }}">Ver gráfico dos Estilistas</a>
+                                    <a href="{{ route('dashboard.produtos-por-estilista') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('dashboard.produtos-por-estilista') ? 'bg-gray-100' : '' }}">{{ __('Gráfico por Estilista') }}</a>
+                                    <a href="{{ route('consultas.pivot-estilistas-status') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.pivot-estilistas-status') ? 'bg-gray-100' : '' }}">{{ __('Tabela Estilistas x Status') }}</a>
 
                                 </div>
                             </div>
@@ -275,6 +276,12 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('consultas.media-dias-atraso')" :active="request()->routeIs('consultas.media-dias-atraso')" class="pl-6">
                     {{ __('Média de Dias por Localização') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('dashboard.produtos-por-estilista')" :active="request()->routeIs('dashboard.produtos-por-estilista')" class="pl-6">
+                    {{ __('Gráfico por Estilista') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('consultas.pivot-estilistas-status')" :active="request()->routeIs('consultas.pivot-estilistas-status')" class="pl-6">
+                    {{ __('Tabela Estilistas x Status') }}
                 </x-responsive-nav-link>
             </div>
 

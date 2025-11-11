@@ -14,10 +14,34 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('localizacao')->paginate(10);
-        return view('users.index', compact('users'));
+        $query = User::with('localizacao');
+
+        // Filtro por nome
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        // Filtro por email
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->email . '%');
+        }
+
+        // Filtro por localização
+        if ($request->filled('localizacao_id')) {
+            $query->where('localizacao_id', $request->localizacao_id);
+        }
+
+        // Filtro por tipo de usuário (admin/normal)
+        if ($request->has('is_admin') && $request->is_admin !== '') {
+            $query->where('is_admin', $request->is_admin);
+        }
+
+        $users = $query->orderBy('name')->paginate(10)->withQueryString();
+        $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        
+        return view('users.index', compact('users', 'localizacoes'));
     }
 
     /**
