@@ -1,9 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Notificações') }}
-            </h2>
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ __('Notificações') }}
+                </h2>
+                @if($podeVerTodas ?? false)
+                    <p class="text-sm text-gray-600 mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            Visualização Global - Todas as Localizações
+                        </span>
+                    </p>
+                @endif
+            </div>
             <button id="marcar-todas-visualizadas" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                 Marcar Todas como Lidas
             </button>

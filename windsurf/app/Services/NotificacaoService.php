@@ -47,24 +47,32 @@ class NotificacaoService
     /**
      * Obter notificações não visualizadas para uma localização
      */
-    public function obterNotificacaoesNaoVisualizadas(int $localizacaoId): \Illuminate\Database\Eloquent\Collection
+    public function obterNotificacaoesNaoVisualizadas(int $localizacaoId, bool $podeVerTodas = false): \Illuminate\Database\Eloquent\Collection
     {
-        return Notificacao::with(['movimentacao.produto', 'localizacao'])
-            ->porLocalizacao($localizacaoId)
-            ->naoVisualizadas()
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Notificacao::with(['movimentacao.produto', 'localizacao'])
+            ->naoVisualizadas();
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        return $query->orderBy('created_at', 'desc')->get();
     }
 
     /**
      * Obter todas as notificações para uma localização com paginação
      */
-    public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15)
+    public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15, bool $podeVerTodas = false)
     {
-        return Notificacao::with(['movimentacao.produto', 'localizacao', 'visualizadaPor'])
-            ->porLocalizacao($localizacaoId)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $query = Notificacao::with(['movimentacao.produto', 'localizacao', 'visualizadaPor']);
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     /**
@@ -90,11 +98,16 @@ class NotificacaoService
     /**
      * Contar notificações não visualizadas para uma localização
      */
-    public function contarNotificacaoesNaoVisualizadas(int $localizacaoId): int
+    public function contarNotificacaoesNaoVisualizadas(int $localizacaoId, bool $podeVerTodas = false): int
     {
-        return Notificacao::porLocalizacao($localizacaoId)
-            ->naoVisualizadas()
-            ->count();
+        $query = Notificacao::naoVisualizadas();
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        return $query->count();
     }
 
     /**

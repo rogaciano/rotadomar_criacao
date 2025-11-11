@@ -26,12 +26,17 @@ class NotificacaoController extends Controller
             return redirect()->back()->with('error', 'Usuário não possui localização definida.');
         }
 
+        // Carregar a localização do usuário para verificar permissões
+        $user->load('localizacao');
+        $podeVerTodas = $user->localizacao->pode_ver_todas_notificacoes ?? false;
+
         $notificacoes = $this->notificacaoService->obterNotificacoesPorLocalizacao(
             $user->localizacao_id,
-            $request->get('per_page', 15)
+            $request->get('per_page', 15),
+            $podeVerTodas
         );
 
-        return view('notificacoes.index', compact('notificacoes'));
+        return view('notificacoes.index', compact('notificacoes', 'podeVerTodas'));
     }
 
     /**
@@ -51,8 +56,12 @@ class NotificacaoController extends Controller
             return redirect()->back()->with('error', 'Notificação não encontrada.');
         }
 
+        // Carregar a localização do usuário para verificar permissões
+        $user->load('localizacao');
+        $podeVerTodas = $user->localizacao->pode_ver_todas_notificacoes ?? false;
+
         // Verificar se o usuário pode visualizar esta notificação
-        if ($notificacao->localizacao_id !== $user->localizacao_id) {
+        if (!$podeVerTodas && $notificacao->localizacao_id !== $user->localizacao_id) {
             return redirect()->back()->with('error', 'Acesso negado.');
         }
 
@@ -76,8 +85,12 @@ class NotificacaoController extends Controller
             return response()->json(['notificacoes' => [], 'count' => 0]);
         }
 
-        $notificacoes = $this->notificacaoService->obterNotificacaoesNaoVisualizadas($user->localizacao_id);
-        $count = $this->notificacaoService->contarNotificacaoesNaoVisualizadas($user->localizacao_id);
+        // Carregar a localização do usuário para verificar permissões
+        $user->load('localizacao');
+        $podeVerTodas = $user->localizacao->pode_ver_todas_notificacoes ?? false;
+
+        $notificacoes = $this->notificacaoService->obterNotificacaoesNaoVisualizadas($user->localizacao_id, $podeVerTodas);
+        $count = $this->notificacaoService->contarNotificacaoesNaoVisualizadas($user->localizacao_id, $podeVerTodas);
 
         return response()->json([
             'notificacoes' => $notificacoes->map(function ($notificacao) {
@@ -87,7 +100,8 @@ class NotificacaoController extends Controller
                     'mensagem' => $notificacao->mensagem,
                     'link' => route('notificacoes.visualizar', $notificacao->id),
                     'created_at' => $notificacao->created_at->diffForHumans(),
-                    'tipo' => $notificacao->tipo
+                    'tipo' => $notificacao->tipo,
+                    'localizacao' => $notificacao->localizacao->nome_localizacao
                 ];
             }),
             'count' => $count
@@ -105,9 +119,18 @@ class NotificacaoController extends Controller
             return response()->json(['success' => false, 'message' => 'Usuário não possui localização definida.']);
         }
 
-        $notificacoes = Notificacao::porLocalizacao($user->localizacao_id)
-            ->naoVisualizadas()
-            ->get();
+        // Carregar a localização do usuário para verificar permissões
+        $user->load('localizacao');
+        $podeVerTodas = $user->localizacao->pode_ver_todas_notificacoes ?? false;
+
+        $query = Notificacao::naoVisualizadas();
+        
+        // Se não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($user->localizacao_id);
+        }
+        
+        $notificacoes = $query->get();
 
         foreach ($notificacoes as $notificacao) {
             $notificacao->marcarComoVisualizada($user);

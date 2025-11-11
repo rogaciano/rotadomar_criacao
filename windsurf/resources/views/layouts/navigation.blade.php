@@ -158,7 +158,11 @@
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-medium text-gray-900" x-text="notificacao.titulo"></p>
                                                 <p class="text-sm text-gray-600 truncate" x-text="notificacao.mensagem"></p>
-                                                <p class="text-xs text-gray-400 mt-1" x-text="notificacao.created_at"></p>
+                                                <div class="flex items-center space-x-2 mt-1">
+                                                    <p class="text-xs text-gray-400" x-text="notificacao.created_at"></p>
+                                                    <span class="text-xs text-gray-400">•</span>
+                                                    <p class="text-xs text-blue-600 font-medium" x-text="notificacao.localizacao"></p>
+                                                </div>
                                             </div>
                                         </div>
                                     </a>

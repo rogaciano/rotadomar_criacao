@@ -19,12 +19,14 @@ class Localizacao extends Model
         'ativo',
         'prazo',
         'capacidade',
+        'pode_ver_todas_notificacoes',
         'observacoes'
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
         'capacidade' => 'integer',
+        'pode_ver_todas_notificacoes' => 'boolean',
         'observacoes' => 'string'
     ];
 
