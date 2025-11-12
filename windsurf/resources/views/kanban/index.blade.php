@@ -70,7 +70,7 @@
                 </button>
 
                 <!-- Container do Kanban -->
-                <div id="kanban-container" class="flex gap-4 pb-4 kanban-scroll" style="overflow-x: auto; scroll-behavior: smooth; overflow-y: visible;">
+                <div id="kanban-container" class="flex gap-4 pb-4 kanban-scroll">
                     @forelse($produtosPorLocalizacao as $dados)
                     <!-- Coluna da Localização -->
                     <div class="flex-shrink-0 w-80 bg-gray-100 rounded-lg overflow-hidden">
@@ -231,39 +231,36 @@
         
         /* Scrollbar personalizada para o Kanban (horizontal) */
         .kanban-scroll {
-            overflow-x: auto;
+            overflow-x: auto !important;
+            overflow-y: visible !important;
+            scroll-behavior: smooth;
             scrollbar-width: thin; /* Firefox */
             scrollbar-color: #94a3b8 #f1f5f9; /* Firefox */
         }
         
         .kanban-scroll::-webkit-scrollbar {
-            height: 12px;
+            height: 14px;
             -webkit-appearance: none;
         }
         
         .kanban-scroll::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-            margin: 0 20px;
+            background: #e5e7eb;
+            border-radius: 8px;
         }
         
         .kanban-scroll::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border-radius: 10px;
-            border: 2px solid #f1f5f9;
+            background: #9ca3af;
+            border-radius: 8px;
+            border: 3px solid #e5e7eb;
         }
         
         .kanban-scroll::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #6b7280;
         }
         
-        /* Força a scrollbar a ficar sempre visível */
-        .kanban-scroll::-webkit-scrollbar-thumb {
-            visibility: visible !important;
-        }
-        
-        .kanban-scroll::-webkit-scrollbar-track {
-            visibility: visible !important;
+        /* Botões de navegação sempre visíveis */
+        #scroll-left, #scroll-right {
+            pointer-events: auto;
         }
         
         /* Line clamp para descrição */

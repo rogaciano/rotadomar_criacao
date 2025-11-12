@@ -204,6 +204,28 @@ class ProdutoAnexoController extends Controller
     }
 
     /**
+     * Visualizar anexo (servir arquivo inline para abrir no navegador)
+     */
+    public function show($id)
+    {
+        $anexo = ProdutoAnexo::findOrFail($id);
+        
+        $path = storage_path('app/public/' . $anexo->arquivo_path);
+        
+        if (!file_exists($path)) {
+            abort(404, 'Arquivo não encontrado.');
+        }
+        
+        $mimeType = mime_content_type($path);
+        
+        // Retornar o arquivo com header inline para visualização no navegador
+        return response()->file($path, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . basename($anexo->arquivo_path) . '"'
+        ]);
+    }
+
+    /**
      * Remove o anexo especificado.
      */
     public function destroy($id)

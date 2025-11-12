@@ -186,7 +186,7 @@
                                                     <span class="text-sm text-gray-700">{{ $anexo->descricao }}</span>
                                                 </div>
                                                 <div class="flex items-center">
-                                                    <a href="{{ asset('storage/' . $anexo->arquivo_path) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm mr-3">
+                                                    <a href="{{ route('produtos.anexos.show', $anexo->id) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm mr-3">
                                                         Visualizar
                                                     </a>
                                                     <button type="button" onclick="deleteAttachment({{ $anexo->id }})" class="text-red-600 hover:text-red-800 text-sm">

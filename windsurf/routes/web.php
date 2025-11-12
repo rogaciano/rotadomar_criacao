@@ -139,6 +139,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('produtos/{id}/reprogramar', [ProdutoController::class, 'reprogramar'])->name('produtos.reprogramar');
 
     // Routes para Anexos de Produtos
+    Route::get('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'show'])->name('produtos.anexos.show');
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
     Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');
     
