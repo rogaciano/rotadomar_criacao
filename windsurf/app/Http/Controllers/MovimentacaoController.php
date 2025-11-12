@@ -374,6 +374,7 @@ class MovimentacaoController extends Controller
             $movimentacao->data_devolucao = $validated['data_devolucao'] ?? null;
             $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
+            $movimentacao->created_by = auth()->id(); // Salvar o usuário que criou
             
             $movimentacao->concluido = $request->has('concluido');
 

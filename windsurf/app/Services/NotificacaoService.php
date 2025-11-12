@@ -15,13 +15,14 @@ class NotificacaoService
     {
         $produto = $movimentacao->produto;
         $localizacao = $movimentacao->localizacao;
+        $criador = $movimentacao->criadoPor ? $movimentacao->criadoPor->name : 'Usuário desconhecido';
         
         return Notificacao::create([
             'movimentacao_id' => $movimentacao->id,
             'localizacao_id' => $movimentacao->localizacao_id,
             'tipo' => 'nova_movimentacao',
             'titulo' => 'Nova Movimentação Criada',
-            'mensagem' => "Nova movimentação criada para {$produto->referencia} na {$localizacao->nome_localizacao}",
+            'mensagem' => "Nova movimentação criada para {$produto->referencia} no {$localizacao->nome_localizacao} por {$criador}",
             'link' => route('movimentacoes.show', $movimentacao->id)
         ]);
     }
@@ -39,7 +40,7 @@ class NotificacaoService
             'localizacao_id' => $movimentacao->localizacao_id,
             'tipo' => 'movimentacao_concluida',
             'titulo' => 'Movimentação Concluída',
-            'mensagem' => "Movimentação de {$produto->referencia} foi concluída na {$localizacao->nome_localizacao}",
+            'mensagem' => "Movimentação de {$produto->referencia} foi concluída no {$localizacao->nome_localizacao}",
             'link' => route('movimentacoes.show', $movimentacao->id)
         ]);
     }
@@ -65,7 +66,7 @@ class NotificacaoService
      */
     public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15, bool $podeVerTodas = false)
     {
-        $query = Notificacao::with(['movimentacao.produto', 'localizacao', 'visualizadaPor']);
+        $query = Notificacao::with(['movimentacao.produto', 'movimentacao.criadoPor', 'localizacao', 'visualizadaPor']);
         
         // Se a localização não pode ver todas, filtrar apenas pela sua localização
         if (!$podeVerTodas) {

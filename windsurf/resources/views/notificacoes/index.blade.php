@@ -52,6 +52,9 @@
                                             <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
                                                 <span>{{ $notificacao->created_at->diffForHumans() }}</span>
                                                 <span>{{ $notificacao->localizacao->nome_localizacao }}</span>
+                                                @if($notificacao->movimentacao && $notificacao->movimentacao->criadoPor)
+                                                    <span>Criada por {{ $notificacao->movimentacao->criadoPor->name }}</span>
+                                                @endif
                                                 @if($notificacao->isVisualizada())
                                                     <span>Visualizada por {{ $notificacao->visualizadaPor->name }} em {{ $notificacao->visualizada_em->format('d/m/Y H:i') }}</span>
                                                 @endif
