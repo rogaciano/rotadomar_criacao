@@ -64,7 +64,7 @@ class NotificacaoService
     /**
      * Obter todas as notificações para uma localização com paginação
      */
-    public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15, bool $podeVerTodas = false)
+    public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15, bool $podeVerTodas = false, ?string $filtroTipo = null, ?string $filtroStatus = null)
     {
         $query = Notificacao::with(['movimentacao.produto', 'movimentacao.criadoPor', 'localizacao', 'visualizadaPor']);
         
@@ -73,7 +73,19 @@ class NotificacaoService
             $query->porLocalizacao($localizacaoId);
         }
         
-        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+        // Filtro por tipo
+        if ($filtroTipo) {
+            $query->porTipo($filtroTipo);
+        }
+        
+        // Filtro por status (visualizada ou não)
+        if ($filtroStatus === 'nao_lida') {
+            $query->naoVisualizadas();
+        } elseif ($filtroStatus === 'lida') {
+            $query->whereNotNull('visualizada_por');
+        }
+        
+        return $query->orderBy('created_at', 'desc')->paginate($perPage)->appends(request()->query());
     }
 
     /**
@@ -117,5 +129,30 @@ class NotificacaoService
     public function limparNotificacaoesAntigas(): int
     {
         return Notificacao::where('created_at', '<', now()->subDays(30))->delete();
+    }
+
+    /**
+     * Obter estatísticas de notificações
+     */
+    public function obterEstatisticas(int $localizacaoId, bool $podeVerTodas = false): array
+    {
+        $query = Notificacao::query();
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        $total = $query->count();
+        $naoLidas = (clone $query)->naoVisualizadas()->count();
+        $novas = (clone $query)->porTipo('nova_movimentacao')->count();
+        $concluidas = (clone $query)->porTipo('movimentacao_concluida')->count();
+        
+        return [
+            'total' => $total,
+            'nao_lidas' => $naoLidas,
+            'novas' => $novas,
+            'concluidas' => $concluidas
+        ];
     }
 }

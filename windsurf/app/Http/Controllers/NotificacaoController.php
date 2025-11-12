@@ -30,13 +30,22 @@ class NotificacaoController extends Controller
         $user->load('localizacao');
         $podeVerTodas = $user->localizacao->pode_ver_todas_notificacoes ?? false;
 
+        // Filtros
+        $filtroTipo = $request->get('tipo');
+        $filtroStatus = $request->get('status');
+
         $notificacoes = $this->notificacaoService->obterNotificacoesPorLocalizacao(
             $user->localizacao_id,
             $request->get('per_page', 15),
-            $podeVerTodas
+            $podeVerTodas,
+            $filtroTipo,
+            $filtroStatus
         );
 
-        return view('notificacoes.index', compact('notificacoes', 'podeVerTodas'));
+        // Estatísticas
+        $stats = $this->notificacaoService->obterEstatisticas($user->localizacao_id, $podeVerTodas);
+
+        return view('notificacoes.index', compact('notificacoes', 'podeVerTodas', 'stats', 'filtroTipo', 'filtroStatus'));
     }
 
     /**

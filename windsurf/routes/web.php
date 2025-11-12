@@ -20,6 +20,7 @@ use App\Http\Controllers\MovimentacaoFilterController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\KanbanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +32,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/dados-por-ano', [DashboardController::class, 'getDadosPorAno'])->name('dashboard.dados-por-ano');
     Route::get('/dashboard/produtos-por-estilista', [DashboardController::class, 'produtosPorEstilista'])->name('dashboard.produtos-por-estilista');
+
+    // Kanban - Visualização de produtos por localização
+    Route::get('/kanban', [KanbanController::class, 'index'])->name('kanban.index');
 
     // Rota para servir arquivos de rede
     Route::get('/arquivo/rede', [\App\Http\Controllers\ArquivoController::class, 'servirArquivoRede'])->name('arquivo.rede');

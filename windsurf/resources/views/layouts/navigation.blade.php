@@ -28,7 +28,9 @@
                         {{ __('Movimentações') }}
                     </x-nav-link>
 
-
+                    <x-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
+                        {{ __('Kanban') }}
+                    </x-nav-link>
 
                     <!-- Cadastros Dropdown -->
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
@@ -150,7 +152,7 @@
                                 </template>
                                 
                                 <template x-for="notificacao in notificacoes" :key="notificacao.id">
-                                    <a :href="notificacao.link" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                                    <a :href="notificacao.link" :title="notificacao.mensagem" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
                                         <div class="flex items-start space-x-3">
                                             <div class="flex-shrink-0">
                                                 <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
@@ -253,6 +255,10 @@
                 {{ __('Minhas Movimentações') }}
             </x-responsive-nav-link>
             @endif
+
+            <x-responsive-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
+                {{ __('Kanban') }}
+            </x-responsive-nav-link>
 
             <!-- Responsive Cadastros -->
             <div class="pt-2 pb-3 space-y-1">
