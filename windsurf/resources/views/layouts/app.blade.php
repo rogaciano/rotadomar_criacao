@@ -7,6 +7,11 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -16,7 +21,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        
+
         <!-- Styles personalizados -->
         @stack('styles')
     </head>
@@ -34,7 +39,7 @@
                 <p class="text-gray-600 text-center">Esta consulta pode levar alguns instantes. Por favor, aguarde.</p>
             </div>
         </div>
-        
+
         <div class="min-h-screen bg-gray-100">
             @include('layouts.navigation')
 
@@ -71,25 +76,25 @@
                     </div>
                 @endif
             </div>
-            
+
             <!-- Page Content -->
             <main>
                 {{ $slot }}
             </main>
         </div>
-        
+
         <!-- jQuery (necessário para o Select2) -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        
+
         <!-- Select2 JS -->
         <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        
+
         <script>
             // Mostrar overlay de carregamento para consultas específicas
             document.addEventListener('DOMContentLoaded', function() {
                 // Encontrar o link da consulta por localização
                 const consultaLocalizacaoLinks = document.querySelectorAll('a[href*="consultas.produtos-ativos-por-localizacao"]');
-                
+
                 consultaLocalizacaoLinks.forEach(function(link) {
                     link.addEventListener('click', function(e) {
                         // Mostrar o overlay de carregamento
@@ -98,7 +103,7 @@
                 });
             });
         </script>
-        
+
         <!-- Scripts personalizados -->
         @stack('scripts')
     </body>
