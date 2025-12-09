@@ -11,7 +11,7 @@
             <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
                 <form method="GET" action="{{ route('kanban.index') }}" class="flex flex-wrap items-end gap-4">
                     <!-- Filtro de Mês -->
-                    <div class="flex-1 min-w-[200px]">
+                    <div class="flex-1 min-w-[180px]">
                         <label for="mes" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
                         <select name="mes" id="mes" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             @foreach($meses as $numero => $nome)
@@ -23,12 +23,25 @@
                     </div>
 
                     <!-- Filtro de Ano -->
-                    <div class="flex-1 min-w-[200px]">
+                    <div class="flex-1 min-w-[160px]">
                         <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
                         <select name="ano" id="ano" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             @foreach($anos as $anoOpcao)
                                 <option value="{{ $anoOpcao }}" {{ $ano == $anoOpcao ? 'selected' : '' }}>
                                     {{ $anoOpcao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Filtro de Direcionamento Comercial -->
+                    <div class="flex-1 min-w-[220px]">
+                        <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
+                        <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">Todos</option>
+                            @foreach($direcionamentosComerciais as $direcionamento)
+                                <option value="{{ $direcionamento->id }}" {{ ($direcionamentoComercialId ?? null) == $direcionamento->id ? 'selected' : '' }}>
+                                    {{ $direcionamento->descricao }}
                                 </option>
                             @endforeach
                         </select>
@@ -46,11 +59,24 @@
                 </form>
 
                 <!-- Indicador de Período -->
-                <div class="mt-3 flex items-center text-sm text-gray-600">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span>Exibindo produtos com previsão de facção em <strong>{{ $meses[$mes] }}/{{ $ano }}</strong></span>
+                <div class="mt-3 flex flex-wrap items-center text-sm text-gray-600 gap-2">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Exibindo produtos com previsão de facção em <strong>{{ $meses[$mes] }}/{{ $ano }}</strong></span>
+                    </div>
+
+                    @if(!empty($direcionamentoComercialId))
+                        @php
+                            $direcionamentoAtual = $direcionamentosComerciais->firstWhere('id', $direcionamentoComercialId);
+                        @endphp
+                        @if($direcionamentoAtual)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Direcionamento: <span class="ml-1 font-semibold">{{ $direcionamentoAtual->descricao }}</span>
+                            </span>
+                        @endif
+                    @endif
                 </div>
             </div>
             <!-- Kanban Board com Botões de Navegação -->
@@ -110,13 +136,11 @@
                                         {{ $produto->descricao }}
                                     </p>
 
-                                    <!-- Direcionamento Comercial -->
+                                    <!-- Direcionamento Comercial (texto em negrito) -->
                                     @if($produto->direcionamentoComercial)
-                                        <div class="mb-2">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white">
-                                                {{ $produto->direcionamentoComercial->descricao }}
-                                            </span>
-                                        </div>
+                                        <p class="text-xs text-gray-800 font-semibold mb-2">
+                                            {{ $produto->direcionamentoComercial->descricao }}
+                                        </p>
                                     @endif
 
                                     <!-- Marca -->

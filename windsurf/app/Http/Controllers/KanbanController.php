@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Produto;
 use App\Models\Localizacao;
+use App\Models\DirecionamentoComercial;
 use Illuminate\Support\Facades\DB;
 
 class KanbanController extends Controller
@@ -18,6 +19,7 @@ class KanbanController extends Controller
         // Obter filtros
         $mes = $request->get('mes', now()->month);
         $ano = $request->get('ano', now()->year);
+        $direcionamentoComercialId = $request->get('direcionamento_comercial_id');
 
         // Buscar apenas localizações ativas que fazem movimentação
         $localizacoes = Localizacao::where('ativo', true)
@@ -27,7 +29,7 @@ class KanbanController extends Controller
 
         // Buscar produtos agrupados por localização baseado na data_prevista_faccao
         $produtosPorLocalizacao = [];
-        
+
         foreach ($localizacoes as $localizacao) {
             // Buscar produtos pela data_prevista_faccao em produto_localizacao
             $produtos = Produto::whereHas('localizacoes', function($query) use ($localizacao, $mes, $ano) {
@@ -36,15 +38,20 @@ class KanbanController extends Controller
                       ->whereYear('data_prevista_faccao', $ano);
             })
             ->with([
-                'marca', 
-                'grupoProduto', 
+                'marca',
+                'grupoProduto',
                 'status',
+                'direcionamentoComercial',
                 'localizacoes' => function($query) use ($localizacao, $mes, $ano) {
                     $query->where('localizacao_id', $localizacao->id)
                           ->whereMonth('data_prevista_faccao', $mes)
                           ->whereYear('data_prevista_faccao', $ano);
                 }
             ])
+            // Filtro opcional por Direcionamento Comercial
+            ->when($direcionamentoComercialId, function($query) use ($direcionamentoComercialId) {
+                $query->where('direcionamento_comercial_id', $direcionamentoComercialId);
+            })
             ->get()
             ->map(function($produto) {
                 // Adicionar quantidade_alocada do pivot
@@ -81,6 +88,19 @@ class KanbanController extends Controller
 
         $anos = range(now()->year - 2, now()->year + 1);
 
-        return view('kanban.index', compact('produtosPorLocalizacao', 'meses', 'anos', 'mes', 'ano'));
+        // Lista de direcionamentos comerciais para o filtro
+        $direcionamentosComerciais = DirecionamentoComercial::where('ativo', true)
+            ->orderBy('descricao')
+            ->get();
+
+        return view('kanban.index', compact(
+            'produtosPorLocalizacao',
+            'meses',
+            'anos',
+            'mes',
+            'ano',
+            'direcionamentosComerciais',
+            'direcionamentoComercialId'
+        ));
     }
 }

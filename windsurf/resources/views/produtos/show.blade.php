@@ -96,6 +96,19 @@
                             </div>
 
                             <div>
+                                <span class="block text-sm font-medium text-gray-500">Direcionamento Comercial</span>
+                                <span class="block mt-1 text-sm text-gray-900">
+                                    @if($produto->direcionamentoComercial)
+                                        <span class="font-semibold">
+                                            {{ $produto->direcionamentoComercial->descricao }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400 italic">Sem direcionamento</span>
+                                    @endif
+                                </span>
+                            </div>
+
+                            <div>
                                 <span class="block text-sm font-medium text-gray-500">Quantidade</span>
                                 <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
                             </div>
@@ -215,14 +228,14 @@
                                     </div>
                                     <div class="ml-3">
                                         <p class="text-sm {{ $divergencia > 0 ? 'text-yellow-800' : 'text-red-800' }}">
-                                            <strong>Atenção:</strong> 
+                                            <strong>Atenção:</strong>
                                             @if($divergencia > 0)
-                                                O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) está 
-                                                <strong>{{ number_format(abs($divergencia), 0, ',', '.') }} unidade(s) acima</strong> 
+                                                O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) está
+                                                <strong>{{ number_format(abs($divergencia), 0, ',', '.') }} unidade(s) acima</strong>
                                                 da quantidade pretendida do produto (<strong>{{ number_format($quantidadeProduto, 0, ',', '.') }}</strong>).
                                             @else
-                                                O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) está 
-                                                <strong>{{ number_format(abs($divergencia), 0, ',', '.') }} unidade(s) abaixo</strong> 
+                                                O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) está
+                                                <strong>{{ number_format(abs($divergencia), 0, ',', '.') }} unidade(s) abaixo</strong>
                                                 da quantidade pretendida do produto (<strong>{{ number_format($quantidadeProduto, 0, ',', '.') }}</strong>).
                                             @endif
                                         </p>
@@ -239,7 +252,7 @@
                                     </div>
                                     <div class="ml-3">
                                         <p class="text-sm text-green-800">
-                                            <strong>Perfeito!</strong> O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>) 
+                                            <strong>Perfeito!</strong> O total das localizações (<strong>{{ number_format($totalLocalizacoes, 0, ',', '.') }}</strong>)
                                             está de acordo com a quantidade pretendida do produto.
                                         </p>
                                     </div>
@@ -305,13 +318,13 @@
                                                         @php
                                                             $dataFaccao = '';
                                                             if($localizacao->pivot->data_prevista_faccao) {
-                                                                $dataFaccao = is_string($localizacao->pivot->data_prevista_faccao) 
-                                                                    ? $localizacao->pivot->data_prevista_faccao 
+                                                                $dataFaccao = is_string($localizacao->pivot->data_prevista_faccao)
+                                                                    ? $localizacao->pivot->data_prevista_faccao
                                                                     : $localizacao->pivot->data_prevista_faccao->format('Y-m-d');
                                                             }
                                                         @endphp
-                                                        <button type="button" 
-                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }})" 
+                                                        <button type="button"
+                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }})"
                                                             class="text-indigo-600 hover:text-indigo-800 text-sm">
                                                             Editar
                                                         </button>
@@ -386,7 +399,7 @@
                             $quantidadeProduto = $produto->quantidade ?? 0;
                             $isEqual = $totalGeral == $quantidadeProduto;
                          @endphp
-                         
+
                          @if($produto->cores->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -493,10 +506,10 @@
                                                             <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                         </svg>
                                                         <span>
-                                                            Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} | 
-                                                            Variações de cores: {{ number_format($totalCores, 0, ',', '.') }} | 
-                                                            Combinações: {{ number_format($totalCombinacoes, 0, ',', '.') }} | 
-                                                            Total geral: {{ number_format($totalGeral, 0, ',', '.') }} | 
+                                                            Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} |
+                                                            Variações de cores: {{ number_format($totalCores, 0, ',', '.') }} |
+                                                            Combinações: {{ number_format($totalCombinacoes, 0, ',', '.') }} |
+                                                            Total geral: {{ number_format($totalGeral, 0, ',', '.') }} |
                                                             Diferença: {{ number_format(abs($totalGeral - $quantidadeProduto), 0, ',', '.') }}
                                                         </span>
                                                      </div>
@@ -882,7 +895,7 @@
                                     observacao,
                                     concluido
                                 });
-                                
+
                                 document.getElementById('edit-localizacao-id').value = localizacaoId;
                                 document.getElementById('edit-localizacao-nome').textContent = nomeLocalizacao;
                                 document.getElementById('edit-ordem-producao').value = ordemProducao || '';
@@ -890,14 +903,14 @@
                                 document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
                                 document.getElementById('edit-concluido').checked = concluido == 1;
-                                
+
                                 // Atualizar action do formulário com o ID do registro produto_localizacao
                                 const form = document.getElementById('form-editar-localizacao');
                                 const currentRoute = "{{ route('produtos.localizacoes.update', [$produto->id, 'PLACEHOLDER']) }}";
                                 form.action = currentRoute.replace('PLACEHOLDER', produtoLocalizacaoId);
-                                
+
                                 console.log('Action do formulário:', form.action);
-                                
+
                                 document.getElementById('modal-editar-localizacao').classList.remove('hidden');
                             } catch (error) {
                                 console.error('Erro ao abrir modal de edição:', error);
@@ -925,24 +938,24 @@
                             <form id="form-observacao" onsubmit="salvarObservacao(event)">
                                 @csrf
                                 <input type="hidden" name="produto_id" value="{{ $produto->id }}">
-                                
+
                                 <div class="mb-4">
                                     <label for="observacao" class="block text-sm font-medium text-gray-700 mb-2">Observação *</label>
-                                    
+
                                     <!-- Editor Quill -->
                                     <div id="editor-container" style="height: 150px; background: white; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
-                                    <textarea 
-                                        id="observacao" 
-                                        name="observacao" 
+                                    <textarea
+                                        id="observacao"
+                                        name="observacao"
                                         style="display: none;"
                                     ></textarea>
-                                    
+
                                     <div class="mt-2 text-xs text-gray-500">
                                         <p>💡 Use a barra de ferramentas acima para formatar o texto com cores, negrito, etc.</p>
                                         <p class="mt-1 text-gray-400">Máximo de 1000 caracteres</p>
                                     </div>
                                 </div>
-                                
+
                                 <div class="flex justify-end space-x-2">
                                     <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                                         Cancelar
@@ -1111,7 +1124,7 @@
                                                     Este produto é a <strong>reprogramação #{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}</strong> de:
                                                 </p>
                                                 <div class="mt-2">
-                                                    <a href="{{ route('produtos.show', $produto->produtoOriginal->id) }}" 
+                                                    <a href="{{ route('produtos.show', $produto->produtoOriginal->id) }}"
                                                        class="inline-flex items-center px-4 py-2 bg-white border border-orange-300 rounded-md font-semibold text-sm text-orange-700 hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -1157,7 +1170,7 @@
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <a href="{{ route('produtos.show', $reprogramacao->id) }}" 
+                                                        <a href="{{ route('produtos.show', $reprogramacao->id) }}"
                                                            class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
@@ -1376,12 +1389,12 @@
                         <label for="numero_reprogramacao_manual" class="block text-xs font-semibold text-yellow-800 mb-1">
                             Número de Reprogramação (opcional)
                         </label>
-                        <input 
-                            type="number" 
-                            id="numero_reprogramacao_manual" 
-                            name="numero_reprogramacao_manual" 
-                            min="1" 
-                            max="99" 
+                        <input
+                            type="number"
+                            id="numero_reprogramacao_manual"
+                            name="numero_reprogramacao_manual"
+                            min="1"
+                            max="99"
                             placeholder="{{ $proximoNumero }}"
                             class="w-full text-xs border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 rounded-md shadow-sm"
                             onkeyup="atualizarPreviewReferencia('{{ $produto->referencia }}', {{ $proximoNumero }})"
@@ -1534,7 +1547,7 @@
         // Funções para o modal de observações
         function abrirModalObservacao() {
             document.getElementById('modal-nova-observacao').classList.remove('hidden');
-            
+
             // Inicializar Quill apenas uma vez
             if (!quillEditor) {
                 quillEditor = new Quill('#editor-container', {
@@ -1588,39 +1601,39 @@
         // Salvar observação
         async function salvarObservacao(event) {
             event.preventDefault();
-            
+
             console.log('Função salvarObservacao chamada');
-            
+
             // Sincronizar conteúdo do Quill com o textarea antes de enviar
             if (quillEditor) {
                 const html = quillEditor.root.innerHTML;
                 document.getElementById('observacao').value = html;
                 console.log('HTML do Quill:', html);
             }
-            
+
             const form = event.target;
             const submitButton = form.querySelector('button[type="submit"]');
             const originalText = submitButton.textContent;
-            
+
             // Validar se há conteúdo
             const observacaoValue = document.getElementById('observacao').value;
             const textoLimpo = quillEditor ? quillEditor.getText().trim() : observacaoValue.trim();
-            
+
             console.log('Valor do textarea:', observacaoValue);
             console.log('Texto limpo:', textoLimpo);
             console.log('Produto ID:', document.querySelector('input[name="produto_id"]').value);
-            
+
             // Criar FormData manualmente para garantir que os dados estão corretos
             const formData = new FormData();
             formData.append('produto_id', document.querySelector('input[name="produto_id"]').value);
             formData.append('observacao', observacaoValue);
             formData.append('_token', '{{ csrf_token() }}');
-            
+
             if (!textoLimpo || textoLimpo === '') {
                 alert('Por favor, digite uma observação.');
                 return;
             }
-            
+
             submitButton.disabled = true;
             submitButton.textContent = 'Salvando...';
 
@@ -1641,13 +1654,13 @@
                 if (response.ok && data.success) {
                     // Mostrar mensagem de sucesso
                     alert('Observação adicionada com sucesso!');
-                    
+
                     // Recarregar a página para mostrar a nova observação
                     window.location.reload();
                 } else {
                     // Mostrar erro de validação ou outro erro
                     let errorMessage = 'Erro ao salvar observação.';
-                    
+
                     if (data.message) {
                         errorMessage = data.message;
                     } else if (data.errors) {
@@ -1655,7 +1668,7 @@
                         const errors = Object.values(data.errors).flat();
                         errorMessage = errors.join('\n');
                     }
-                    
+
                     alert(errorMessage);
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
@@ -1704,17 +1717,17 @@
         function atualizarPreviewReferencia(referenciaBase, numeroSugerido) {
             const inputNumero = document.getElementById('numero_reprogramacao_manual');
             const previewElement = document.getElementById('preview-referencia');
-            
+
             let numero = parseInt(inputNumero.value);
-            
+
             // Se não digitou nada ou número inválido, usar o sugerido
             if (!numero || numero < 1 || numero > 99) {
                 numero = numeroSugerido;
             }
-            
+
             const numeroFormatado = numero.toString().padStart(2, '0');
             const novaReferencia = referenciaBase + '-' + numeroFormatado;
-            
+
             previewElement.textContent = novaReferencia;
         }
 
@@ -1722,7 +1735,7 @@
         function capturarNumeroReprogramacao() {
             const inputNumero = document.getElementById('numero_reprogramacao_manual');
             const hiddenInput = document.getElementById('numero_reprogramacao_hidden');
-            
+
             // Se o usuário digitou um número, usar esse valor
             if (inputNumero.value && parseInt(inputNumero.value) > 0) {
                 hiddenInput.value = inputNumero.value;

@@ -211,6 +211,32 @@ class Produto extends Model
     }
 
     /**
+     * Retorna a primeira data prevista de facção entre as localizações do produto
+     */
+    public function getPrimeiraDataPrevistaFaccaoAttribute()
+    {
+        // Garante que as localizações estejam carregadas
+        $localizacoes = $this->relationLoaded('localizacoes')
+            ? $this->localizacoes
+            : $this->localizacoes()->get();
+
+        $primeira = $localizacoes
+            ->filter(function ($loc) {
+                return !empty($loc->pivot->data_prevista_faccao);
+            })
+            ->sortBy(function ($loc) {
+                return $loc->pivot->data_prevista_faccao;
+            })
+            ->first();
+
+        if (!$primeira) {
+            return null;
+        }
+
+        return \Carbon\Carbon::parse($primeira->pivot->data_prevista_faccao);
+    }
+
+    /**
      * Relacionamento com as combinações de cores do produto
      */
     public function combinacoes()

@@ -251,6 +251,21 @@
                                         </div>
                                     </div>
 
+                                    <!-- Data Prevista para Facção -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Prevista para Facção</label>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <label for="data_prevista_faccao_inicio" class="block text-xs text-gray-600 mb-1">Início</label>
+                                                <input type="date" name="data_prevista_faccao_inicio" id="data_prevista_faccao_inicio" value="{{ $filters['data_prevista_faccao_inicio'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                            <div>
+                                                <label for="data_prevista_faccao_fim" class="block text-xs text-gray-600 mb-1">Fim</label>
+                                                <input type="date" name="data_prevista_faccao_fim" id="data_prevista_faccao_fim" value="{{ $filters['data_prevista_faccao_fim'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -290,10 +305,16 @@
                                         Data Prev. Produção
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        1ª Data Prev. Facção
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Marca
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Grupo
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Direcionamento Comercial
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
@@ -325,6 +346,13 @@
                                             {{ $produto->data_prevista_producao_mes_ano }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($produto->primeira_data_prevista_faccao)
+                                                {{ $produto->primeira_data_prevista_faccao->format('d/m/Y') }}
+                                            @else
+                                                <span class="text-gray-400 text-xs italic">Sem data</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             @if($produto->marca && $produto->marca->logo_path)
                                                 <img src="{{ asset('storage/' . $produto->marca->logo_path) }}" alt="{{ $produto->marca->nome_marca }}" class="h-6 w-auto object-contain" title="{{ $produto->marca->nome_marca }}">
                                             @else
@@ -333,6 +361,15 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $produto->grupoProduto->descricao ?? 'N/A' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            @if($produto->direcionamentoComercial)
+                                                <span class="font-semibold">
+                                                    {{ $produto->direcionamentoComercial->descricao }}
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400 text-xs italic">Sem direcionamento</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
@@ -548,7 +585,9 @@
                 'data_inicio': 'Data Cadastro (De)',
                 'data_fim': 'Data Cadastro (Até)',
                 'data_prevista_inicio': 'Data Prev. Produção (De)',
-                'data_prevista_fim': 'Data Prev. Produção (Até)'
+                'data_prevista_fim': 'Data Prev. Produção (Até)',
+                'data_prevista_faccao_inicio': 'Data Prev. Facção (De)',
+                'data_prevista_faccao_fim': 'Data Prev. Facção (Até)'
             };
 
             // Função para obter o texto de um select pelo valor

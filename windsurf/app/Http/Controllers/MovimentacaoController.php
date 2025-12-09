@@ -27,9 +27,9 @@ class MovimentacaoController extends Controller
         if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
-        
+
         $user = auth()->user();
-        
+
         // Verificar se o usuário tem uma localização atribuída
         if (!$user->localizacao_id) {
             return view('movimentacoes.minhas', [
@@ -39,19 +39,19 @@ class MovimentacaoController extends Controller
                 'totalAtrasadas' => 0,
             ]);
         }
-        
+
         // Carregar localização do usuário
         $user->load('localizacao');
         $localizacao = $user->localizacao;
-        
+
         // Obter todas as movimentações pendentes
         $movimentacoes = $user->getMovimentacoesPendentes();
-        
+
         // Calcular dias e status de atraso para cada movimentação
         $movimentacoes->each(function ($movimentacao) use ($localizacao) {
             // Usar dias úteis ao invés de dias corridos
             $movimentacao->dias_decorridos = MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada);
-            
+
             if ($localizacao->prazo) {
                 $movimentacao->esta_atrasado = $movimentacao->dias_decorridos > $localizacao->prazo;
                 $movimentacao->dias_restantes = (int) ($localizacao->prazo - $movimentacao->dias_decorridos);
@@ -60,17 +60,17 @@ class MovimentacaoController extends Controller
                 $movimentacao->dias_restantes = null;
             }
         });
-        
+
         // Ordenar por dias decorridos (mais atrasadas primeiro)
         $movimentacoes = $movimentacoes->sortByDesc('dias_decorridos');
-        
+
         // Contar totais
         $totalPendentes = $movimentacoes->count();
         $totalAtrasadas = $movimentacoes->where('esta_atrasado', true)->count();
-        
+
         return view('movimentacoes.minhas', compact('movimentacoes', 'localizacao', 'totalPendentes', 'totalAtrasadas'));
     }
-    
+
     /**
      * Display a listing of the resource.
      */
@@ -79,13 +79,13 @@ class MovimentacaoController extends Controller
         if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
-        
+
         // Verificar se é uma requisição de limpeza de filtros
         if ($request->has('limpar_filtros')) {
             auth()->user()->clearFilters('movimentacoes');
             return redirect()->route('movimentacoes.filtro.status-dias');
         }
-        
+
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
         if ($request->anyFilled([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
@@ -97,9 +97,9 @@ class MovimentacaoController extends Controller
                 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
                 'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
             ]);
-            
+
             auth()->user()->saveFilters('movimentacoes', $filterParams);
-        } 
+        }
         // Se não tem parâmetros na URL mas tem filtros salvos, redirecionar com os filtros salvos
         else if (!$request->hasAny([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
@@ -107,13 +107,20 @@ class MovimentacaoController extends Controller
             'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
         ])) {
             $savedFilters = auth()->user()->getFilters('movimentacoes');
-            
+
             if (!empty($savedFilters)) {
                 return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters);
             }
         }
 
-        $query = Movimentacao::with(['produto', 'produto.marca', 'tipo', 'situacao', 'localizacao']);
+        $query = Movimentacao::with([
+            'produto',
+            'produto.marca',
+            'produto.direcionamentoComercial',
+            'tipo',
+            'situacao',
+            'localizacao'
+        ]);
 
         // Filtro por referência do produto
         if ($request->filled('referencia')) {
@@ -139,7 +146,7 @@ class MovimentacaoController extends Controller
                 $q->where('marca_id', $request->marca_id);
             });
         }
-        
+
         // Filtro por Grupo de Produto
         if ($request->filled('grupo_produto_id')) {
             $grupoProdutoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
@@ -154,7 +161,7 @@ class MovimentacaoController extends Controller
                 $q->where('status_id', $request->status_id);
             });
         }
-        
+
         // Filtro por Tecido do produto
         if ($request->filled('tecido_id')) {
             $tecidoIds = is_array($request->tecido_id) ? $request->tecido_id : [$request->tecido_id];
@@ -191,12 +198,12 @@ class MovimentacaoController extends Controller
         if ($request->filled('comprometido')) {
             $query->where('comprometido', $request->comprometido);
         }
-        
+
         // Adicionar filtro para o campo concluido
         if ($request->filled('concluido')) {
             $query->where('concluido', $request->concluido);
         }
-        
+
         // Filtro por status de dias (Atrasados, Em Dia)
         if ($request->filled('status_dias')) {
             $query = MovimentacaoFilterController::applyStatusDiasFilter($query, $request->status_dias);
@@ -248,36 +255,36 @@ class MovimentacaoController extends Controller
 
         // Carregar produtos para o select
         $produtos = Produto::orderBy('referencia')->get();
-        
+
         // Carregar situações para o select
         $situacoesAtivas = Situacao::where('ativo', true)->orderBy('descricao')->get();
         $situacoesInativas = Situacao::where('ativo', false)->orderBy('descricao')->get();
-        
+
         // Combinar as coleções: ativas primeiro, depois inativas
         $situacoes = $situacoesAtivas->concat($situacoesInativas);
-        
+
         // Carregar tipos para o select
         $tiposAtivos = Tipo::where('ativo', true)->orderBy('descricao')->get();
         $tiposInativos = Tipo::where('ativo', false)->orderBy('descricao')->get();
-        
+
         // Combinar as coleções: ativas primeiro, depois inativas
         $tipos = $tiposAtivos->concat($tiposInativos);
-        
+
         // Carregar localizações para o select
         $localizacoesAtivas = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         $localizacoesInativas = Localizacao::where('ativo', false)->orderBy('nome_localizacao')->get();
-        
+
         // Combinar as coleções: ativas primeiro, depois inativas
         $localizacoes = $localizacoesAtivas->concat($localizacoesInativas);
-        
+
         $status = Status::where('ativo', true)->orderBy('descricao')->get();
-        
+
         // Carregar marcas para o filtro
         $marcas = Marca::where('ativo', true)->orderBy('nome_marca')->get();
-        
+
         // Carregar tecidos para o filtro
         $tecidos = Tecido::where('ativo', true)->orderBy('descricao')->get();
-        
+
         // Carregar grupos de produtos para o filtro (incluindo ativo = NULL)
         $grupoProdutos = GrupoProduto::orderBy('descricao')->get();
 
@@ -304,7 +311,7 @@ class MovimentacaoController extends Controller
         // Pré-selecionar produto se fornecido via query string
         $produto_id = $request->query('produto_id');
         $produto_selecionado = null;
-        
+
         if ($produto_id) {
             $produto_selecionado = Produto::find($produto_id);
         }
@@ -375,7 +382,7 @@ class MovimentacaoController extends Controller
             $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
             $movimentacao->created_by = auth()->id(); // Salvar o usuário que criou
-            
+
             $movimentacao->concluido = $request->has('concluido');
 
             // Upload de anexo se existir
@@ -400,7 +407,7 @@ class MovimentacaoController extends Controller
 
             // Usar os filtros salvos do usuário
             $savedFilters = auth()->user()->getFilters('movimentacoes');
-            
+
             return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                     ->with('success', 'Movimentação criada com sucesso!');
         } catch (\Exception $e) {
@@ -530,7 +537,7 @@ class MovimentacaoController extends Controller
 
         // Usar os filtros salvos do usuário
         $savedFilters = auth()->user()->getFilters('movimentacoes');
-        
+
         return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                 ->with('success', 'Movimentação atualizada com sucesso!');
     }
@@ -554,10 +561,10 @@ class MovimentacaoController extends Controller
             }
 
             $movimentacao->delete();
-            
+
             // Usar os filtros salvos do usuário
             $savedFilters = auth()->user()->getFilters('movimentacoes');
-            
+
             return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                     ->with('success', 'Movimentação excluída com sucesso!');
         } catch (\Exception $e) {
@@ -611,7 +618,7 @@ class MovimentacaoController extends Controller
                 $q->where('marca_id', $request->marca_id);
             });
         }
-        
+
         // Filtro por Grupo de Produto
         if ($request->filled('grupo_produto_id')) {
             $grupoProdutoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
@@ -626,7 +633,7 @@ class MovimentacaoController extends Controller
                 $q->where('status_id', $request->status_id);
             });
         }
-        
+
         // Filtro por Tecido do produto
         if ($request->filled('tecido_id')) {
             $tecidoIds = is_array($request->tecido_id) ? $request->tecido_id : [$request->tecido_id];
@@ -663,12 +670,12 @@ class MovimentacaoController extends Controller
         if ($request->filled('comprometido')) {
             $query->where('comprometido', $request->comprometido);
         }
-        
+
         // Adicionar filtro para o campo concluido
         if ($request->filled('concluido')) {
             $query->where('concluido', $request->concluido);
         }
-        
+
         // Filtro por status de dias (Atrasados, Em Dia)
         if ($request->filled('status_dias')) {
             $query = MovimentacaoFilterController::applyStatusDiasFilter($query, $request->status_dias);
@@ -746,7 +753,7 @@ class MovimentacaoController extends Controller
             } else {
                 // Usar os filtros salvos do usuário
                 $savedFilters = auth()->user()->getFilters('movimentacoes');
-                
+
                 return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters)
                         ->with('success', 'Anexo removido com sucesso!');
             }

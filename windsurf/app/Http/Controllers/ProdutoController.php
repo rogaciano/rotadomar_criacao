@@ -34,8 +34,9 @@ class ProdutoController extends Controller
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id',
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id',
             'status', 'direcionamento_comercial_id', 'localizacao_id', 'localizacao', 'localizacao_planejamento_id', 'incluir_excluidos',
-            'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido',
-            'situacao_id', 'situacao', 'sort', 'direction', 'page'
+            'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim',
+            'data_prevista_faccao_inicio', 'data_prevista_faccao_fim',
+            'concluido', 'situacao_id', 'situacao', 'sort', 'direction', 'page'
         ];
 
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
@@ -55,7 +56,17 @@ class ProdutoController extends Controller
         // Usar os filtros da requisição ou os filtros salvos
         $filters = $request->all();
 
-        $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao', 'movimentacoes.situacao']);
+        $query = Produto::with([
+            'marca',
+            'tecidos',
+            'estilista',
+            'grupoProduto',
+            'status',
+            'direcionamentoComercial',
+            'localizacoes',
+            'movimentacoes.localizacao',
+            'movimentacoes.situacao'
+        ]);
 
         // Filtros
         if (!empty($filters['referencia'])) {
@@ -185,6 +196,21 @@ class ProdutoController extends Controller
                       $q2->whereNull('concluido')
                          ->orWhere('concluido', 0);
                   });
+            });
+        }
+
+        // Filtros por Data Prevista para Facção (produto_localizacao)
+        if (!empty($filters['data_prevista_faccao_inicio']) || !empty($filters['data_prevista_faccao_fim'])) {
+            $inicio = $filters['data_prevista_faccao_inicio'] ?? null;
+            $fim = $filters['data_prevista_faccao_fim'] ?? null;
+
+            $query->whereHas('localizacoes', function($q) use ($inicio, $fim) {
+                if ($inicio) {
+                    $q->whereDate('data_prevista_faccao', '>=', $inicio);
+                }
+                if ($fim) {
+                    $q->whereDate('data_prevista_faccao', '<=', $fim);
+                }
             });
         }
 
@@ -387,6 +413,7 @@ class ProdutoController extends Controller
             'estilista',
             'grupoProduto',
             'status',
+            'direcionamentoComercial',
             'localizacao',
             'observacoes',
             'combinacoes' => function($query) {

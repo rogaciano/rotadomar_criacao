@@ -428,11 +428,23 @@
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-center">
                                             @if($movimentacao->produto && $movimentacao->produto->status)
-                                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                                                    {{ $movimentacao->produto->status->descricao }}
-                                                </span>
+                                                <div>
+                                                    <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                                        {{ $movimentacao->produto->status->descricao }}
+                                                    </span>
+                                                </div>
                                             @else
-                                                <span class="text-gray-400">N/A</span>
+                                                <div>
+                                                    <span class="text-gray-400">N/A</span>
+                                                </div>
+                                            @endif
+
+                                            @if($movimentacao->produto && $movimentacao->produto->direcionamentoComercial)
+                                                <div class="mt-1 text-[11px] text-gray-700">
+                                                    <span class="font-semibold">
+                                                        {{ $movimentacao->produto->direcionamentoComercial->descricao }}
+                                                    </span>
+                                                </div>
                                             @endif
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-center">
@@ -630,13 +642,27 @@
                                                     <span class="text-red-500">Produto não encontrado</span>
                                                 @endif
                                             </div>
-                                            @if($movimentacao->produto && $movimentacao->produto->status)
-                                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                                                    {{ $movimentacao->produto->status->descricao }}
-                                                </span>
-                                            @else
-                                                <span class="text-gray-400">N/A</span>
-                                            @endif
+                                            <div class="text-right">
+                                                @if($movimentacao->produto && $movimentacao->produto->status)
+                                                    <div>
+                                                        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                                            {{ $movimentacao->produto->status->descricao }}
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <div>
+                                                        <span class="text-gray-400">N/A</span>
+                                                    </div>
+                                                @endif
+
+                                                @if($movimentacao->produto && $movimentacao->produto->direcionamentoComercial)
+                                                    <div class="mt-1 text-[11px] text-gray-700">
+                                                        <span class="font-semibold">
+                                                            {{ $movimentacao->produto->direcionamentoComercial->descricao }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
                                         </div>
                                         @if($movimentacao->produto)
                                             <div class="text-sm text-gray-500 truncate" title="{{ $movimentacao->produto->descricao }}">{{ Str::limit($movimentacao->produto->descricao, 40, '...') }}</div>
