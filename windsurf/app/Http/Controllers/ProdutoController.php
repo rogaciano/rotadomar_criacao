@@ -21,39 +21,39 @@ class ProdutoController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        
+
         // Verificar se é uma requisição de limpeza de filtros
         if ($request->has('limpar_filtros')) {
             auth()->user()->clearFilters('produtos');
             return redirect()->route('produtos.index');
         }
-        
+
         // Lista de campos de filtro válidos
         $validFilters = [
-            'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
-            'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
-            'status', 'localizacao_id', 'localizacao', 'incluir_excluidos',
+            'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id',
+            'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id',
+            'status', 'localizacao_id', 'localizacao', 'localizacao_planejamento_id', 'incluir_excluidos',
             'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido',
             'situacao_id', 'situacao', 'sort', 'direction', 'page'
         ];
-        
+
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
         if ($request->anyFilled($validFilters)) {
             $filterParams = $request->only($validFilters);
             auth()->user()->saveFilters('produtos', $filterParams);
-        } 
+        }
         // Se não tem parâmetros na URL mas tem filtros salvos, redirecionar com os filtros salvos
         else if (!$request->hasAny($validFilters) && !$request->ajax()) {
             $savedFilters = auth()->user()->getFilters('produtos');
-            
+
             if (!empty($savedFilters)) {
                 return redirect()->route('produtos.index', $savedFilters);
             }
         }
-        
+
         // Usar os filtros da requisição ou os filtros salvos
         $filters = $request->all();
-        
+
         $query = Produto::with(['marca', 'tecidos', 'estilista', 'grupoProduto', 'status', 'movimentacoes.localizacao', 'movimentacoes.situacao']);
 
         // Filtros
@@ -113,13 +113,13 @@ class ProdutoController extends Controller
 
         // Filtro por localização (aceita ID ou nome)
         $localizacaoId = null;
-        
+
         if (!empty($filters['localizacao_id'])) {
             $localizacaoId = $filters['localizacao_id'];
         } elseif (!empty($filters['localizacao'])) {
             $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $filters['localizacao'])->value('id');
         }
-        
+
         if ($localizacaoId) {
             // Obter IDs dos produtos cuja última movimentação está na localização selecionada
             $subquery = \App\Models\Movimentacao::select('produto_id')
@@ -129,19 +129,19 @@ class ProdutoController extends Controller
                       ->from('movimentacoes')
                       ->groupBy('produto_id');
                 });
-                
+
             $query->whereIn('id', $subquery);
         }
-        
+
         // Filtro por situação (aceita ID ou nome)
         $situacaoId = null;
-        
+
         if (!empty($filters['situacao_id'])) {
             $situacaoId = $filters['situacao_id'];
         } elseif (!empty($filters['situacao'])) {
             $situacaoId = \App\Models\Situacao::where('descricao', $filters['situacao'])->value('id');
         }
-        
+
         if ($situacaoId) {
             // Obter IDs dos produtos cuja última movimentação está na situação selecionada
             $subquery = \App\Models\Movimentacao::select('produto_id')
@@ -151,15 +151,15 @@ class ProdutoController extends Controller
                       ->from('movimentacoes')
                       ->groupBy('produto_id');
                 });
-                
+
             $query->whereIn('id', $subquery);
         }
-        
+
         // Filtro por status de conclusão (dropdown)
         $concluido = isset($filters['concluido']) ? $filters['concluido'] : null;
         if ($concluido !== null && $concluido !== '') {
             $concluidoValue = $concluido === '1' ? 1 : 0;
-            
+
             $subquery = \App\Models\Movimentacao::select('produto_id')
                 ->where('concluido', $concluidoValue)
                 ->whereIn('id', function($q) {
@@ -167,8 +167,19 @@ class ProdutoController extends Controller
                       ->from('movimentacoes')
                       ->groupBy('produto_id');
                 });
-                
+
             $query->whereIn('id', $subquery);
+        }
+
+        // Filtro por localização de planejamento (produto_localizacao) - apenas não concluídos
+        if (!empty($filters['localizacao_planejamento_id'])) {
+            $query->whereHas('localizacoes', function($q) use ($filters) {
+                $q->where('localizacao_id', $filters['localizacao_planejamento_id'])
+                  ->where(function($q2) {
+                      $q2->whereNull('concluido')
+                         ->orWhere('concluido', 0);
+                  });
+            });
         }
 
         // Incluir excluídos se solicitado
@@ -206,13 +217,18 @@ class ProdutoController extends Controller
         $statuses = Status::orderBy('descricao')->get();
         $localizacoes = \App\Models\Localizacao::orderBy('nome_localizacao')->get();
         $situacoes = \App\Models\Situacao::where('ativo', true)->orderBy('descricao')->get();
-        
+
+        // Localizações com capacidade > 0 (para filtro de planejamento)
+        $localizacoesPlanejamento = \App\Models\Localizacao::whereHas('capacidadesMensais', function($q) {
+            $q->where('capacidade', '>', 0);
+        })->orderBy('nome_localizacao')->get();
+
         // Preservar os filtros na paginação
         $produtos->appends($filters);
 
         return view('produtos.index', compact(
-            'produtos', 'marcas', 'tecidos', 'estilistas', 'grupos', 
-            'statuses', 'localizacoes', 'situacoes', 'filters'
+            'produtos', 'marcas', 'tecidos', 'estilistas', 'grupos',
+            'statuses', 'localizacoes', 'localizacoesPlanejamento', 'situacoes', 'filters'
         ));
     }
 
@@ -255,7 +271,7 @@ class ProdutoController extends Controller
             'cores.*.quantidade.required' => 'A quantidade da cor é obrigatória.',
             'cores.*.quantidade.min' => 'A quantidade da cor deve ser maior que zero.',
         ];
-        
+
         $validator = Validator::make($request->all(), [
             'referencia' => 'required|string|max:50|unique:produtos,referencia',
             'descricao' => 'required|string|max:255',
@@ -344,7 +360,7 @@ class ProdutoController extends Controller
 
         // Usar os filtros salvos do usuário
         $savedFilters = auth()->user()->getFilters('produtos');
-        
+
         return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto criado com sucesso!');
     }
@@ -355,13 +371,13 @@ class ProdutoController extends Controller
     public function show(string $id)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        
+
         // Buscar produto sem cache, garantindo dados frescos
         $produto = Produto::withTrashed()->with([
-            'marca', 
-            'tecidos', 
-            'estilista', 
-            'grupoProduto', 
+            'marca',
+            'tecidos',
+            'estilista',
+            'grupoProduto',
             'status',
             'localizacao',
             'observacoes',
@@ -371,7 +387,7 @@ class ProdutoController extends Controller
                 }]);
             }
         ])->findOrFail($id);
-        
+
         // Recarregar localizações de forma fresca (sem cache)
         $produto->load('localizacoes');
 
@@ -380,16 +396,16 @@ class ProdutoController extends Controller
             ->with(['localizacao', 'tipo', 'situacao'])
             ->orderBy('data_entrada', 'asc')
             ->get();
-            
+
         // Carregar observações diretamente (workaround)
         $observacoes = \App\Models\ProdutoObservacao::where('produto_id', $id)
             ->with('usuario')
             ->orderBy('created_at', 'desc')
             ->get();
-            
+
         // Enriquecer as cores do produto com informações de estoque
         $coresEnriquecidas = collect([]);
-        
+
         foreach ($produto->cores as $cor) {
             $corInfo = [
                 'id' => $cor->id,
@@ -403,24 +419,24 @@ class ProdutoController extends Controller
                 'consumo_deste_produto' => 0,
                 'consumo_total' => 0
             ];
-            
+
             // Para cada tecido do produto, verificar estoque da cor
             foreach ($produto->tecidos as $tecido) {
                 $estoqueCor = \App\Models\TecidoCorEstoque::where('tecido_id', $tecido->id)
                     ->where('cor', $cor->cor)
                     ->first();
-                    
+
                 if ($estoqueCor) {
                     $corInfo['estoque'] += $estoqueCor->quantidade;
                     $corInfo['necessidade'] += $estoqueCor->necessidade;
                     $corInfo['saldo'] += $estoqueCor->saldo;
-                    
+
                     // Calcular consumo específico deste produto
                     // Consumo deste produto = quantidade da cor * consumo do tecido
                     $consumoProduto = $cor->quantidade * $tecido->pivot->consumo;
                     $corInfo['consumo_deste_produto'] += $consumoProduto;
                     $corInfo['consumo_total'] += $tecido->pivot->consumo;
-                    
+
                     // Calcular produção possível se houver consumo definido
                     if ($tecido->pivot->consumo > 0) {
                         // Usar o saldo ao invés da quantidade para calcular a produção possível
@@ -429,7 +445,7 @@ class ProdutoController extends Controller
                     }
                 }
             }
-            
+
             $coresEnriquecidas->push($corInfo);
         }
 
@@ -598,7 +614,7 @@ class ProdutoController extends Controller
         if ($request->has('cores')) {
             // Remover todas as cores existentes
             $produto->cores()->delete();
-            
+
             // Adicionar apenas as cores com quantidade > 0
             foreach ($request->cores as $cor) {
                 if (!empty($cor['cor']) && isset($cor['quantidade']) && $cor['quantidade'] > 0) {
@@ -614,7 +630,7 @@ class ProdutoController extends Controller
 
         // Usar os filtros salvos do usuário
         $savedFilters = auth()->user()->getFilters('produtos');
-        
+
         return redirect()->route('produtos.show', $produto->id)
             ->with('success', 'Produto atualizado com sucesso!');
     }
@@ -639,25 +655,25 @@ class ProdutoController extends Controller
 
         // Usar os filtros salvos do usuário
         $savedFilters = auth()->user()->getFilters('produtos');
-        
+
         return redirect()->route('produtos.index', $savedFilters)
             ->with('success', $message);
     }
-    
+
     /**
      * Gera um PDF do produto
      */
     public function generatePdf(string $id)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        $produto = Produto::with(['marca', 'grupoProduto', 'status', 'estilista', 'tecidos', 
+        $produto = Produto::with(['marca', 'grupoProduto', 'status', 'estilista', 'tecidos',
             'movimentacoes' => function($query) {
                 $query->with(['localizacao', 'tipo', 'situacao'])->latest('data_entrada');
             }])->findOrFail($id);
-        
+
         $pdf = PDF::loadView('produtos.pdf', compact('produto'))
                ->setPaper('a4', 'landscape');
-        
+
         return $pdf->stream('produto-' . $produto->referencia . '.pdf');
     }
 
@@ -744,7 +760,7 @@ class ProdutoController extends Controller
                             $producaoPossivel = floor($estoqueCor->saldo / $tecidoProduto->pivot->consumo);
                         }
                     }
-                    
+
                     return [
                         'cor' => $normalizeCor($estoqueCor->cor),
                         'codigo_cor' => $normalizeCodigo($estoqueCor->codigo_cor),
@@ -757,27 +773,27 @@ class ProdutoController extends Controller
                     ];
                 })
                 // Deduplicar após normalização, mantendo o maior estoque para cada cor
-                ->groupBy(function($c) use ($makeKey) { 
-                    return $makeKey($c['cor'], $c['codigo_cor']); 
+                ->groupBy(function($c) use ($makeKey) {
+                    return $makeKey($c['cor'], $c['codigo_cor']);
                 })
                 ->map(function($group) {
                     $first = $group->first();
-                    
+
                     // Encontrar o maior estoque e a maior produção possível entre duplicados
                     $maxEstoque = 0;
                     $maxNecessidade = 0;
                     $maxProducaoPossivel = 0;
-                    
+
                     foreach ($group as $g) {
                         $maxEstoque = max($maxEstoque, $g['estoque']);
                         $maxNecessidade = max($maxNecessidade, $g['necessidade']);
                         $maxProducaoPossivel = max($maxProducaoPossivel, $g['producao_possivel']);
                     }
-                    
+
                     $first['estoque'] = $maxEstoque;
                     $first['necessidade'] = $maxNecessidade;
                     $first['producao_possivel'] = $maxProducaoPossivel;
-                    
+
                     return $first;
                 })
                 ->values();
@@ -792,19 +808,19 @@ class ProdutoController extends Controller
         if (!empty($tecidoIds) && !$coresExistentes->isEmpty()) {
             $coresExistentes = $coresExistentes->map(function($corExistente) use ($estoquesCores, $makeKey) {
                 $key = $makeKey($corExistente['cor'], $corExistente['codigo_cor']);
-                
+
                 // Encontrar a mesma cor nas cores disponíveis para obter informações de estoque
                 $corDisponivel = $estoquesCores->first(function($c) use ($key, $makeKey) {
                     return $makeKey($c['cor'], $c['codigo_cor']) === $key;
                 });
-                
+
                 if ($corDisponivel) {
                     $corExistente['estoque'] = $corDisponivel['estoque'];
                     $corExistente['necessidade'] = $corDisponivel['necessidade'];
                     $corExistente['saldo'] = $corDisponivel['saldo'];
                     $corExistente['producao_possivel'] = $corDisponivel['producao_possivel'];
                 }
-                
+
                 return $corExistente;
             });
         }
@@ -845,21 +861,21 @@ class ProdutoController extends Controller
     public function generateListPdf(Request $request)
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
-        
+
         // Usar os mesmos filtros da sessão ou da requisição
         $useSessionFilters = !$request->hasAny([
-            'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id', 
-            'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id', 
+            'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id',
+            'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id',
             'status', 'localizacao_id', 'localizacao', 'situacao_id', 'situacao', 'incluir_excluidos',
             'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido'
         ]) && $request->method() === 'GET' && !$request->ajax() && !$request->has('force_generate');
-        
+
         $filters = $useSessionFilters ? session('produtos_filters', []) : $request->all();
-        
+
         try {
             // Simplify the query to avoid issues with count and complex selects
             $query = Produto::select('produtos.*'); // Start with a clean select
-            
+
             // Apply filters
             if (!empty($filters['referencia'])) {
                 $query->where('referencia', 'like', '%' . $filters['referencia'] . '%');
@@ -917,13 +933,13 @@ class ProdutoController extends Controller
 
             // Filtro por localização
             $localizacaoId = null;
-            
+
             if (!empty($filters['localizacao_id'])) {
                 $localizacaoId = $filters['localizacao_id'];
             } elseif (!empty($filters['localizacao'])) {
                 $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $filters['localizacao'])->value('id');
             }
-            
+
             if ($localizacaoId) {
                 // Obter IDs dos produtos cuja última movimentação está na localização selecionada
                 $subquery = \App\Models\Movimentacao::select('produto_id')
@@ -933,19 +949,19 @@ class ProdutoController extends Controller
                           ->from('movimentacoes')
                           ->groupBy('produto_id');
                     });
-                    
+
                 $query->whereIn('id', $subquery);
             }
-            
+
             // Filtro por situação
             $situacaoId = null;
-            
+
             if (!empty($filters['situacao_id'])) {
                 $situacaoId = $filters['situacao_id'];
             } elseif (!empty($filters['situacao'])) {
                 $situacaoId = \App\Models\Situacao::where('descricao', $filters['situacao'])->value('id');
             }
-            
+
             if ($situacaoId) {
                 // Obter IDs dos produtos cuja última movimentação está na situação selecionada
                 $subquery = \App\Models\Movimentacao::select('produto_id')
@@ -955,15 +971,15 @@ class ProdutoController extends Controller
                           ->from('movimentacoes')
                           ->groupBy('produto_id');
                     });
-                    
+
                 $query->whereIn('id', $subquery);
             }
-            
+
             // Filtro por status de conclusão
             $concluido = isset($filters['concluido']) ? $filters['concluido'] : null;
             if ($concluido !== null && $concluido !== '') {
                 $concluidoValue = $concluido === '1' ? 1 : 0;
-                
+
                 $subquery = \App\Models\Movimentacao::select('produto_id')
                     ->where('concluido', $concluidoValue)
                     ->whereIn('id', function($q) {
@@ -971,7 +987,7 @@ class ProdutoController extends Controller
                           ->from('movimentacoes')
                           ->groupBy('produto_id');
                     });
-                    
+
                 $query->whereIn('id', $subquery);
             }
 
@@ -988,7 +1004,7 @@ class ProdutoController extends Controller
             if (!empty($filters['data_fim'])) {
                 $query->whereDate('created_at', '<=', $filters['data_fim']);
             }
-            
+
             // Filtro por data prevista de produção
             if (!empty($filters['data_prevista_inicio'])) {
                 $query->whereDate('data_prevista_producao', '>=', $filters['data_prevista_inicio']);
@@ -997,7 +1013,7 @@ class ProdutoController extends Controller
             if (!empty($filters['data_prevista_fim'])) {
                 $query->whereDate('data_prevista_producao', '<=', $filters['data_prevista_fim']);
             }
-            
+
             // Skip the count check and proceed directly to PDF generation
             // This avoids the error when counting with complex queries
             if ($request->has('force_generate')) {
@@ -1011,7 +1027,7 @@ class ProdutoController extends Controller
             $produtos = $query->orderBy('referencia')
                 ->with(['marca', 'grupoProduto', 'status', 'estilista'])
                 ->get();
-                
+
             // Now that we have the products, we can manually add the localizacao_atual, situacao_atual and concluido_atual
             foreach ($produtos as $produto) {
                 // Get the latest movimentacao for this product
@@ -1019,7 +1035,7 @@ class ProdutoController extends Controller
                     ->with(['localizacao', 'situacao'])
                     ->orderBy('id', 'desc')
                     ->first();
-                    
+
                 if ($ultimaMovimentacao) {
                     $produto->localizacao_atual = $ultimaMovimentacao->localizacao;
                     $produto->situacao_atual = $ultimaMovimentacao->situacao;
@@ -1033,13 +1049,13 @@ class ProdutoController extends Controller
 
             $pdf = PDF::loadView('produtos.lista-pdf', compact('produtos'))
                    ->setPaper('a4', 'landscape');
-            
+
             return $pdf->stream('lista-produtos.pdf');
-            
+
         } catch (\Exception $e) {
             // Log the error for debugging
             \Log::error('Error generating PDF: ' . $e->getMessage());
-            
+
             // Return a user-friendly error message
             return back()->with('error', 'Ocorreu um erro ao gerar o PDF. Por favor, tente novamente ou entre em contato com o suporte.');
         }
@@ -1067,17 +1083,17 @@ class ProdutoController extends Controller
             // Verificar se foi fornecido um número de reprogramação manual
             if ($request->has('numero_reprogramacao') && !empty($request->numero_reprogramacao)) {
                 $numeroReprogramacao = (int) $request->numero_reprogramacao;
-                
+
                 // Validar range
                 if ($numeroReprogramacao < 1 || $numeroReprogramacao > 99) {
                     return back()->with('error', 'O número de reprogramação deve estar entre 1 e 99.');
                 }
-                
+
                 // Verificar se já existe uma reprogramação com esse número
                 $reprogramacaoExistente = Produto::where('produto_original_id', $produtoOriginal->id)
                     ->where('numero_reprogramacao', $numeroReprogramacao)
                     ->exists();
-                
+
                 if ($reprogramacaoExistente) {
                     return back()->with('error', "Já existe uma reprogramação com o número {$numeroReprogramacao} para este produto.");
                 }
@@ -1085,7 +1101,7 @@ class ProdutoController extends Controller
                 // Calcular próximo número de reprogramação automaticamente
                 $ultimaReprogramacao = Produto::where('produto_original_id', $produtoOriginal->id)
                     ->max('numero_reprogramacao');
-                
+
                 $numeroReprogramacao = ($ultimaReprogramacao ?? 0) + 1;
 
                 // Verificar limite de reprogramações
@@ -1146,7 +1162,7 @@ class ProdutoController extends Controller
                             $anexo->caminho_arquivo
                         );
                         Storage::copy($anexo->caminho_arquivo, $novoPath);
-                        
+
                         $novoProduto->anexos()->create([
                             'nome_arquivo' => $anexo->nome_arquivo,
                             'caminho_arquivo' => $novoPath,

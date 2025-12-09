@@ -43,4 +43,10 @@ class Localizacao extends Model
     {
         return $this->hasMany(User::class, 'localizacao_id');
     }
+
+    // Relacionamento com capacidades mensais
+    public function capacidadesMensais()
+    {
+        return $this->hasMany(LocalizacaoCapacidadeMensal::class);
+    }
 }

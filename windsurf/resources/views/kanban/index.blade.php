@@ -56,18 +56,23 @@
             <!-- Kanban Board com Botões de Navegação -->
             <div class="relative" style="min-height: 500px;">
                 <!-- Botão Esquerda -->
-                <button id="scroll-left" class="absolute left-2 top-[200px] z-30 bg-white hover:bg-gray-100 shadow-lg rounded-full p-3 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
+                <button id="scroll-left" class="absolute left-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-lg rounded-full p-3 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
                     <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
 
                 <!-- Botão Direita -->
-                <button id="scroll-right" class="absolute right-2 top-[200px] z-30 bg-white hover:bg-gray-100 shadow-lg rounded-full p-3 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
+                <button id="scroll-right" class="absolute right-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-lg rounded-full p-3 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
                     <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </button>
+
+                <!-- Barra de Rolagem Superior -->
+                <div id="kanban-scroll-top" class="kanban-scroll-top mb-2">
+                    <div id="kanban-scroll-top-content"></div>
+                </div>
 
                 <!-- Container do Kanban -->
                 <div id="kanban-container" class="flex gap-4 pb-4 kanban-scroll">
@@ -93,7 +98,7 @@
                                 <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 border-{{ $produto->marca->cor_fundo ?? 'gray' }}-500">
                                     <!-- Referência -->
                                     <div class="flex items-start justify-between mb-2">
-                                        <a href="{{ route('produtos.show', $produto->id) }}" 
+                                        <a href="{{ route('produtos.show', $produto->id) }}"
                                            class="text-blue-600 hover:text-blue-800 font-bold text-lg"
                                            target="_blank">
                                             {{ $produto->referencia }}
@@ -109,7 +114,7 @@
                                     @if($produto->marca)
                                         <div class="mb-2">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                                  style="background-color: {{ $produto->marca->cor_fundo ?? '#f3f4f6' }}; 
+                                                  style="background-color: {{ $produto->marca->cor_fundo ?? '#f3f4f6' }};
                                                          color: {{ $produto->marca->cor_fonte ?? '#1f2937' }};">
                                                 {{ $produto->marca->nome_marca }}
                                             </span>
@@ -172,10 +177,10 @@
             const container = document.getElementById('kanban-container');
             const scrollLeftBtn = document.getElementById('scroll-left');
             const scrollRightBtn = document.getElementById('scroll-right');
-            
+
             // Quantidade de pixels para rolar (largura de uma coluna + gap)
             const scrollAmount = 336; // 320px (coluna) + 16px (gap)
-            
+
             // Função para rolar para a esquerda
             scrollLeftBtn.addEventListener('click', function() {
                 container.scrollBy({
@@ -183,7 +188,7 @@
                     behavior: 'smooth'
                 });
             });
-            
+
             // Função para rolar para a direita
             scrollRightBtn.addEventListener('click', function() {
                 container.scrollBy({
@@ -191,22 +196,59 @@
                     behavior: 'smooth'
                 });
             });
-            
+
             // Função para mostrar/ocultar botões baseado na posição do scroll
             function updateButtonVisibility() {
                 const isAtStart = container.scrollLeft <= 0;
                 const isAtEnd = container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
-                
+
                 scrollLeftBtn.style.display = isAtStart ? 'none' : 'block';
                 scrollRightBtn.style.display = isAtEnd ? 'none' : 'block';
             }
-            
+
             // Atualizar visibilidade dos botões ao carregar e ao rolar
             updateButtonVisibility();
             container.addEventListener('scroll', updateButtonVisibility);
-            
+
             // Atualizar ao redimensionar a janela
             window.addEventListener('resize', updateButtonVisibility);
+
+            // Sincronizar barra de rolagem superior com a inferior
+            const scrollTop = document.getElementById('kanban-scroll-top');
+            const scrollTopContent = document.getElementById('kanban-scroll-top-content');
+
+            // Definir largura do conteúdo da barra superior igual ao conteúdo do kanban
+            function updateTopScrollWidth() {
+                scrollTopContent.style.width = container.scrollWidth + 'px';
+            }
+
+            updateTopScrollWidth();
+            window.addEventListener('resize', updateTopScrollWidth);
+
+            // Observar mudanças no tamanho do container
+            const resizeObserver = new ResizeObserver(() => {
+                updateTopScrollWidth();
+            });
+            resizeObserver.observe(container);
+
+            // Sincronizar scroll entre as duas barras (evitar loop)
+            let isScrolling = false;
+
+            scrollTop.addEventListener('scroll', function() {
+                if (!isScrolling) {
+                    isScrolling = true;
+                    container.scrollLeft = this.scrollLeft;
+                    requestAnimationFrame(() => { isScrolling = false; });
+                }
+            });
+
+            container.addEventListener('scroll', function() {
+                if (!isScrolling) {
+                    isScrolling = true;
+                    scrollTop.scrollLeft = this.scrollLeft;
+                    requestAnimationFrame(() => { isScrolling = false; });
+                }
+            });
         });
     </script>
     @endpush
@@ -228,7 +270,7 @@
         .overflow-y-auto::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-        
+
         /* Scrollbar personalizada para o Kanban (horizontal) */
         .kanban-scroll {
             overflow-x: auto !important;
@@ -237,32 +279,32 @@
             scrollbar-width: thin; /* Firefox */
             scrollbar-color: #94a3b8 #f1f5f9; /* Firefox */
         }
-        
+
         .kanban-scroll::-webkit-scrollbar {
             height: 14px;
             -webkit-appearance: none;
         }
-        
+
         .kanban-scroll::-webkit-scrollbar-track {
             background: #e5e7eb;
             border-radius: 8px;
         }
-        
+
         .kanban-scroll::-webkit-scrollbar-thumb {
             background: #9ca3af;
             border-radius: 8px;
             border: 3px solid #e5e7eb;
         }
-        
+
         .kanban-scroll::-webkit-scrollbar-thumb:hover {
             background: #6b7280;
         }
-        
+
         /* Botões de navegação sempre visíveis */
         #scroll-left, #scroll-right {
             pointer-events: auto;
         }
-        
+
         /* Line clamp para descrição */
         .line-clamp-2 {
             display: -webkit-box;
@@ -270,10 +312,44 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         /* Sombra no header fixo das colunas */
         .sticky {
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Barra de rolagem superior */
+        .kanban-scroll-top {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 24px;
+            padding-top: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: #94a3b8 #f1f5f9;
+        }
+
+        .kanban-scroll-top::-webkit-scrollbar {
+            height: 14px;
+            -webkit-appearance: none;
+        }
+
+        .kanban-scroll-top::-webkit-scrollbar-track {
+            background: #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .kanban-scroll-top::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 8px;
+            border: 3px solid #e5e7eb;
+        }
+
+        .kanban-scroll-top::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        #kanban-scroll-top-content {
+            height: 1px;
         }
     </style>
     @endpush

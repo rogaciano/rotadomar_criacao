@@ -33,7 +33,7 @@
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    
+
                     <!-- Cabeçalho dos Filtros com Toggle -->
                     <div class="mb-4 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-800">Filtros</h3>
@@ -192,11 +192,23 @@
                                 @endif
                             </div>
 
+                            <div>
+                                <label for="localizacao_planejamento_id" class="block text-sm font-medium text-gray-700 mb-1">Localização Planejamento</label>
+                                <select name="localizacao_planejamento_id" id="localizacao_planejamento_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todas</option>
+                                    @foreach($localizacoesPlanejamento as $localizacao)
+                                        <option value="{{ $localizacao->id }}" {{ ($filters['localizacao_planejamento_id'] ?? '') == $localizacao->id ? 'selected' : '' }}>
+                                            {{ $localizacao->nome_localizacao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <!-- Seção de Filtros por Data -->
                             <div class="md:col-span-4 border-t pt-4 mt-2">
                                 <h3 class="text-sm font-semibold text-gray-700 mb-3">Filtro por Datas</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    
+
                                     <!-- Data de Cadastro -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Data de Cadastro</label>
@@ -440,19 +452,19 @@
                     // Obter os filtros do formulário
                     const formData = new FormData(document.getElementById('filter-form'));
                     const queryParams = new URLSearchParams(formData).toString();
-                    
+
                     // Gerar o PDF diretamente com force_generate=1 para evitar o erro de contagem
                     const pdfUrl = '{{ route("produtos.lista.pdf") }}?' + queryParams + '&force_generate=1';
-                    
+
                     // Abrir o PDF em uma nova aba
                     const pdfWindow = window.open(pdfUrl, '_blank');
-                    
+
                     // Restaurar o botão após um curto período
                     setTimeout(function() {
                         btnGerarPdf.disabled = false;
                         btnGerarPdf.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Gerar PDF';
                     }, 1500);
-                    
+
                     // Verificar se a janela do PDF foi bloqueada pelo navegador
                     if (!pdfWindow || pdfWindow.closed || typeof pdfWindow.closed === 'undefined') {
                         alert('Por favor, permita pop-ups para este site para visualizar o PDF.');
@@ -518,6 +530,7 @@
                 'grupo_id': 'Grupo',
                 'status_id': 'Status',
                 'localizacao_id': 'Localização',
+                'localizacao_planejamento_id': 'Localização Planejamento',
                 'situacao_id': 'Situação',
                 'data_inicio': 'Data Cadastro (De)',
                 'data_fim': 'Data Cadastro (Até)',
@@ -537,15 +550,15 @@
             function updateActiveFilters() {
                 const filters = @json($filters ?? []);
                 activeFiltersList.innerHTML = '';
-                
+
                 let hasActiveFilters = false;
-                
+
                 Object.keys(filters).forEach(key => {
                     const value = filters[key];
                     if (value && value !== '' && key !== 'page') {
                         hasActiveFilters = true;
                         let displayValue = value;
-                        
+
                         // Formatar valor baseado no tipo de filtro
                         if (key === 'concluido') {
                             displayValue = value === '1' ? 'Concluídos' : 'Não Concluídos';
@@ -558,7 +571,7 @@
                             const date = new Date(value + 'T00:00:00');
                             displayValue = date.toLocaleDateString('pt-BR');
                         }
-                        
+
                         const badge = document.createElement('span');
                         badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
                         badge.innerHTML = `
@@ -568,14 +581,14 @@
                         activeFiltersList.appendChild(badge);
                     }
                 });
-                
+
                 return hasActiveFilters;
             }
 
             // Função para alternar visibilidade dos filtros
             function toggleFilters() {
                 const isHidden = filtersContainer.classList.contains('hidden');
-                
+
                 if (isHidden) {
                     // Mostrar filtros
                     filtersContainer.classList.remove('hidden');
