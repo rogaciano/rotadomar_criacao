@@ -296,7 +296,10 @@ class MovimentacaoController extends Controller
         $produtos = Produto::orderBy('referencia')->get();
         $situacoes = Situacao::where('ativo', true)->orderBy('descricao')->get();
         $tipos = Tipo::where('ativo', true)->orderBy('descricao')->get();
-        $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $localizacoes = Localizacao::where('ativo', true)
+            ->where('faz_movimentacao', true)
+            ->orderBy('nome_localizacao')
+            ->get();
 
         // Pré-selecionar produto se fornecido via query string
         $produto_id = $request->query('produto_id');
@@ -371,6 +374,7 @@ class MovimentacaoController extends Controller
             $movimentacao->data_devolucao = $validated['data_devolucao'] ?? null;
             $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
+            $movimentacao->created_by = auth()->id(); // Salvar o usuário que criou
             
             $movimentacao->concluido = $request->has('concluido');
 
@@ -429,7 +433,9 @@ class MovimentacaoController extends Controller
         $produtos = Produto::orderBy('referencia')->get();
         $situacoes = Situacao::orderBy('descricao')->get();
         $tipos = Tipo::orderBy('descricao')->get();
-        $localizacoes = Localizacao::orderBy('nome_localizacao')->get();
+        $localizacoes = Localizacao::where('faz_movimentacao', true)
+            ->orderBy('nome_localizacao')
+            ->get();
         $backUrl = $request->query('back_url');
 
         return view('movimentacoes.edit', compact('movimentacao', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'backUrl'));

@@ -59,6 +59,18 @@
                                 <input id="ativo" name="ativo" type="checkbox" value="1" {{ old('ativo', $localizacao->ativo) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
                                 <label for="ativo" class="ml-2 block text-sm text-gray-900">Ativo</label>
                             </div>
+
+                            <!-- Faz Movimentação -->
+                            <div class="flex items-center mt-8">
+                                <input id="faz_movimentacao" name="faz_movimentacao" type="checkbox" value="1" {{ old('faz_movimentacao', $localizacao->faz_movimentacao) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                                <label for="faz_movimentacao" class="ml-2 block text-sm text-gray-900">Faz Movimentação</label>
+                            </div>
+
+                            <!-- Pode Ver Todas Notificações -->
+                            <div class="flex items-center mt-8">
+                                <input id="pode_ver_todas_notificacoes" name="pode_ver_todas_notificacoes" type="checkbox" value="1" {{ old('pode_ver_todas_notificacoes', $localizacao->pode_ver_todas_notificacoes) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                                <label for="pode_ver_todas_notificacoes" class="ml-2 block text-sm text-gray-900">Pode Ver Todas Notificações</label>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">

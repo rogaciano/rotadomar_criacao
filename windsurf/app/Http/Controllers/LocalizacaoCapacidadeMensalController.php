@@ -289,9 +289,15 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
     /**
      * Sugerir redistribuição de produtos excedentes
+     * DESABILITADO: Tabela produto_alocacao_mensal não existe mais
      */
     public function sugerirRedistribuicao(Request $request)
     {
+        return response()->json([
+            'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
+        ], 410);
+        
+        /* CÓDIGO ANTIGO COMENTADO
         $localizacaoId = $request->localizacao_id;
         $mes = $request->mes;
         $ano = $request->ano;
@@ -395,13 +401,20 @@ class LocalizacaoCapacidadeMensalController extends Controller
             'capacidade_destino' => $capacidadeDestino,
             'localizacao' => $capacidadeAtual->localizacao
         ]);
+        */
     }
 
     /**
      * Aplicar redistribuição de alocações
+     * DESABILITADO: Tabela produto_alocacao_mensal não existe mais
      */
     public function aplicarRedistribuicao(Request $request)
     {
+        return response()->json([
+            'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
+        ], 410);
+        
+        /* CÓDIGO ANTIGO COMENTADO
         $validator = Validator::make($request->all(), [
             'alocacoes' => 'required|array',
             'alocacoes.*.alocacao_id' => 'required|exists:produto_alocacao_mensal,id',
@@ -510,6 +523,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 'message' => 'Erro ao redistribuir: ' . $e->getMessage()
             ], 500);
         }
+        */
     }
 
     /**
@@ -605,9 +619,15 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
     /**
      * Reverter redistribuição de alocação
+     * DESABILITADO: Tabela produto_alocacao_mensal não existe mais
      */
     public function reverterRedistribuicao(Request $request)
     {
+        return response()->json([
+            'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
+        ], 410);
+        
+        /* CÓDIGO ANTIGO COMENTADO
         $validator = Validator::make($request->all(), [
             'historico_id' => 'required|exists:produto_redistribuicao_historico,id'
         ]);
@@ -678,6 +698,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 'message' => 'Erro ao reverter redistribuição: ' . $e->getMessage()
             ], 500);
         }
+        */
     }
 
     /**

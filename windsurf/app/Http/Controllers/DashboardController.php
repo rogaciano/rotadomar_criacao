@@ -419,11 +419,18 @@ class DashboardController extends Controller
         }
 
         // Buscar produtos do período selecionado agrupados por estilista
-        $produtosPorEstilista = Produto::select('estilistas.id as estilista_id', 'estilistas.nome_estilista', DB::raw('count(*) as total'))
+        $query = Produto::select('estilistas.id as estilista_id', 'estilistas.nome_estilista', DB::raw('count(*) as total'))
             ->join('estilistas', 'produtos.estilista_id', '=', 'estilistas.id')
             ->where('produtos.created_at', '>=', $dataInicio)
-            ->where('produtos.created_at', '<=', $dataFim)
-            ->groupBy('estilistas.id', 'estilistas.nome_estilista')
+            ->where('produtos.created_at', '<=', $dataFim);
+
+        // Aplicar filtro por status se selecionado
+        $statusSelecionado = $request->input('status_id');
+        if ($statusSelecionado && $statusSelecionado !== 'todos') {
+            $query->where('produtos.status_id', $statusSelecionado);
+        }
+
+        $produtosPorEstilista = $query->groupBy('estilistas.id', 'estilistas.nome_estilista')
             ->orderByDesc('total')
             ->get();
 
@@ -461,8 +468,11 @@ class DashboardController extends Controller
         $periodoInicio = $dataInicio->format('d/m/Y');
         $periodoFim = $dataFim->format('d/m/Y');
         
+        // Buscar todos os status para o filtro
+        $status = Status::where('ativo', true)->orderBy('descricao')->get();
+        
         // Passar os dados completos dos estilistas para a view
-        return view('dashboard.produtos-por-estilista', compact('labels', 'data', 'cores', 'periodoInicio', 'periodoFim', 'titulo', 'dadosGrafico'));
+        return view('dashboard.produtos-por-estilista', compact('labels', 'data', 'cores', 'periodoInicio', 'periodoFim', 'titulo', 'dadosGrafico', 'status'));
     }
 
     /**
@@ -584,5 +594,134 @@ class DashboardController extends Controller
         })->toArray();
 
         return view('consultas.media-dias-atraso', compact('localizacoesAtivas', 'localizacoesInativas', 'labels', 'data', 'cores'));
+    }
+
+    /**
+     * Exibe uma pivot table cruzando estilistas (linhas) com status (colunas).
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
+    public function pivotEstilistasStatus(Request $request)
+    {
+        // Determinar o período com base na seleção do usuário
+        $periodo = $request->input('periodo', 'ultimos_12_meses');
+        $dataAtual = Carbon::now();
+        $titulo = '';
+
+        // Definir datas de início e fim com base no período selecionado
+        switch ($periodo) {
+            case 'ultimos_3_meses':
+                $dataInicio = $dataAtual->copy()->subMonths(3);
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Últimos 3 meses';
+                break;
+
+            case 'ultimos_6_meses':
+                $dataInicio = $dataAtual->copy()->subMonths(6);
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Últimos 6 meses';
+                break;
+
+            case 'ano_atual':
+                $dataInicio = Carbon::createFromDate($dataAtual->year, 1, 1)->startOfDay();
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Ano atual (' . $dataAtual->year . ')';
+                break;
+
+            case 'ano_anterior':
+                $dataInicio = Carbon::createFromDate($dataAtual->year - 1, 1, 1)->startOfDay();
+                $dataFim = Carbon::createFromDate($dataAtual->year - 1, 12, 31)->endOfDay();
+                $titulo = 'Ano anterior (' . ($dataAtual->year - 1) . ')';
+                break;
+
+            case 'personalizado':
+                $dataInicio = $request->filled('data_inicio')
+                    ? Carbon::createFromFormat('Y-m-d', $request->input('data_inicio'))->startOfDay()
+                    : $dataAtual->copy()->subMonths(12);
+
+                $dataFim = $request->filled('data_fim')
+                    ? Carbon::createFromFormat('Y-m-d', $request->input('data_fim'))->endOfDay()
+                    : $dataAtual->copy();
+
+                $titulo = 'Período personalizado';
+                break;
+
+            case 'ultimos_12_meses':
+            default:
+                $dataInicio = $dataAtual->copy()->subMonths(12);
+                $dataFim = $dataAtual->copy();
+                $titulo = 'Últimos 12 meses';
+                break;
+        }
+
+        // Buscar todos os status ativos
+        $todosStatus = Status::where('ativo', true)->orderBy('descricao')->get();
+
+        // Buscar todos os estilistas que têm produtos no período
+        $estilistas = Estilista::select('estilistas.id', 'estilistas.nome_estilista')
+            ->join('produtos', 'estilistas.id', '=', 'produtos.estilista_id')
+            ->where('produtos.created_at', '>=', $dataInicio)
+            ->where('produtos.created_at', '<=', $dataFim)
+            ->groupBy('estilistas.id', 'estilistas.nome_estilista')
+            ->orderBy('estilistas.nome_estilista')
+            ->get();
+
+        // Criar a matriz pivot
+        $pivotData = [];
+        $totaisPorStatus = [];
+        $totaisPorEstilista = [];
+
+        // Inicializar totais por status
+        foreach ($todosStatus as $status) {
+            $totaisPorStatus[$status->id] = 0;
+        }
+
+        // Para cada estilista, buscar a quantidade de produtos por status
+        foreach ($estilistas as $estilista) {
+            $linhaDados = [
+                'estilista_id' => $estilista->id,
+                'nome_estilista' => $estilista->nome_estilista,
+                'status' => [],
+                'total_estilista' => 0
+            ];
+
+            foreach ($todosStatus as $status) {
+                $quantidade = Produto::where('estilista_id', $estilista->id)
+                    ->where('status_id', $status->id)
+                    ->where('created_at', '>=', $dataInicio)
+                    ->where('created_at', '<=', $dataFim)
+                    ->count();
+
+                $linhaDados['status'][$status->id] = $quantidade;
+                $linhaDados['total_estilista'] += $quantidade;
+                $totaisPorStatus[$status->id] += $quantidade;
+            }
+
+            $totaisPorEstilista[$estilista->id] = $linhaDados['total_estilista'];
+            $pivotData[] = $linhaDados;
+        }
+
+        // Calcular total geral
+        $totalGeral = array_sum($totaisPorStatus);
+
+        // Ordenar estilistas por total (decrescente)
+        usort($pivotData, function($a, $b) {
+            return $b['total_estilista'] <=> $a['total_estilista'];
+        });
+
+        // Período do relatório
+        $periodoInicio = $dataInicio->format('d/m/Y');
+        $periodoFim = $dataFim->format('d/m/Y');
+
+        return view('consultas.pivot-estilistas-status', compact(
+            'pivotData', 
+            'todosStatus', 
+            'totaisPorStatus', 
+            'totalGeral', 
+            'periodoInicio', 
+            'periodoFim', 
+            'titulo'
+        ));
     }
 }

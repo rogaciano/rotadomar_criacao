@@ -28,7 +28,9 @@
                         {{ __('Movimentações') }}
                     </x-nav-link>
 
-
+                    <x-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
+                        {{ __('Kanban') }}
+                    </x-nav-link>
 
                     <!-- Cadastros Dropdown -->
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
@@ -75,7 +77,8 @@
                                 <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white">
                                     <a href="{{ route('consultas.produtos-ativos-por-localizacao') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.produtos-ativos-por-localizacao') ? 'bg-gray-100' : '' }}">{{ __('Produtos por Localização') }}</a>
                                     <a href="{{ route('consultas.media-dias-atraso') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.media-dias-atraso') ? 'bg-gray-100' : '' }}">{{ __('Média de Dias por Localização') }}</a>
-                                    <a href="{{ route('dashboard.produtos-por-estilista') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.media-dias-atraso') ? 'bg-gray-100' : '' }}">Ver gráfico dos Estilistas</a>
+                                    <a href="{{ route('dashboard.produtos-por-estilista') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('dashboard.produtos-por-estilista') ? 'bg-gray-100' : '' }}">{{ __('Gráfico por Estilista') }}</a>
+                                    <a href="{{ route('consultas.pivot-estilistas-status') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('consultas.pivot-estilistas-status') ? 'bg-gray-100' : '' }}">{{ __('Tabela Estilistas x Status') }}</a>
 
                                 </div>
                             </div>
@@ -149,7 +152,7 @@
                                 </template>
                                 
                                 <template x-for="notificacao in notificacoes" :key="notificacao.id">
-                                    <a :href="notificacao.link" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                                    <a :href="notificacao.link" :title="notificacao.mensagem" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
                                         <div class="flex items-start space-x-3">
                                             <div class="flex-shrink-0">
                                                 <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
@@ -157,7 +160,11 @@
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-medium text-gray-900" x-text="notificacao.titulo"></p>
                                                 <p class="text-sm text-gray-600 truncate" x-text="notificacao.mensagem"></p>
-                                                <p class="text-xs text-gray-400 mt-1" x-text="notificacao.created_at"></p>
+                                                <div class="flex items-center space-x-2 mt-1">
+                                                    <p class="text-xs text-gray-400" x-text="notificacao.created_at"></p>
+                                                    <span class="text-xs text-gray-400">•</span>
+                                                    <p class="text-xs text-blue-600 font-medium" x-text="notificacao.localizacao"></p>
+                                                </div>
                                             </div>
                                         </div>
                                     </a>
@@ -249,6 +256,10 @@
             </x-responsive-nav-link>
             @endif
 
+            <x-responsive-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
+                {{ __('Kanban') }}
+            </x-responsive-nav-link>
+
             <!-- Responsive Cadastros -->
             <div class="pt-2 pb-3 space-y-1">
                 <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Cadastros') }}</div>
@@ -275,6 +286,12 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('consultas.media-dias-atraso')" :active="request()->routeIs('consultas.media-dias-atraso')" class="pl-6">
                     {{ __('Média de Dias por Localização') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('dashboard.produtos-por-estilista')" :active="request()->routeIs('dashboard.produtos-por-estilista')" class="pl-6">
+                    {{ __('Gráfico por Estilista') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('consultas.pivot-estilistas-status')" :active="request()->routeIs('consultas.pivot-estilistas-status')" class="pl-6">
+                    {{ __('Tabela Estilistas x Status') }}
                 </x-responsive-nav-link>
             </div>
 

@@ -15,13 +15,14 @@ class NotificacaoService
     {
         $produto = $movimentacao->produto;
         $localizacao = $movimentacao->localizacao;
+        $criador = $movimentacao->criadoPor ? $movimentacao->criadoPor->name : 'Usuário desconhecido';
         
         return Notificacao::create([
             'movimentacao_id' => $movimentacao->id,
             'localizacao_id' => $movimentacao->localizacao_id,
             'tipo' => 'nova_movimentacao',
             'titulo' => 'Nova Movimentação Criada',
-            'mensagem' => "Nova movimentação criada para {$produto->referencia} na {$localizacao->nome_localizacao}",
+            'mensagem' => "Nova movimentação criada para {$produto->referencia} no {$localizacao->nome_localizacao} por {$criador}",
             'link' => route('movimentacoes.show', $movimentacao->id)
         ]);
     }
@@ -39,7 +40,7 @@ class NotificacaoService
             'localizacao_id' => $movimentacao->localizacao_id,
             'tipo' => 'movimentacao_concluida',
             'titulo' => 'Movimentação Concluída',
-            'mensagem' => "Movimentação de {$produto->referencia} foi concluída na {$localizacao->nome_localizacao}",
+            'mensagem' => "Movimentação de {$produto->referencia} foi concluída no {$localizacao->nome_localizacao}",
             'link' => route('movimentacoes.show', $movimentacao->id)
         ]);
     }
@@ -47,24 +48,44 @@ class NotificacaoService
     /**
      * Obter notificações não visualizadas para uma localização
      */
-    public function obterNotificacaoesNaoVisualizadas(int $localizacaoId): \Illuminate\Database\Eloquent\Collection
+    public function obterNotificacaoesNaoVisualizadas(int $localizacaoId, bool $podeVerTodas = false): \Illuminate\Database\Eloquent\Collection
     {
-        return Notificacao::with(['movimentacao.produto', 'localizacao'])
-            ->porLocalizacao($localizacaoId)
-            ->naoVisualizadas()
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Notificacao::with(['movimentacao.produto', 'localizacao'])
+            ->naoVisualizadas();
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        return $query->orderBy('created_at', 'desc')->get();
     }
 
     /**
      * Obter todas as notificações para uma localização com paginação
      */
-    public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15)
+    public function obterNotificacoesPorLocalizacao(int $localizacaoId, int $perPage = 15, bool $podeVerTodas = false, ?string $filtroTipo = null, ?string $filtroStatus = null)
     {
-        return Notificacao::with(['movimentacao.produto', 'localizacao', 'visualizadaPor'])
-            ->porLocalizacao($localizacaoId)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $query = Notificacao::with(['movimentacao.produto', 'movimentacao.criadoPor', 'localizacao', 'visualizadaPor']);
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        // Filtro por tipo
+        if ($filtroTipo) {
+            $query->porTipo($filtroTipo);
+        }
+        
+        // Filtro por status (visualizada ou não)
+        if ($filtroStatus === 'nao_lida') {
+            $query->naoVisualizadas();
+        } elseif ($filtroStatus === 'lida') {
+            $query->whereNotNull('visualizada_por');
+        }
+        
+        return $query->orderBy('created_at', 'desc')->paginate($perPage)->appends(request()->query());
     }
 
     /**
@@ -90,11 +111,16 @@ class NotificacaoService
     /**
      * Contar notificações não visualizadas para uma localização
      */
-    public function contarNotificacaoesNaoVisualizadas(int $localizacaoId): int
+    public function contarNotificacaoesNaoVisualizadas(int $localizacaoId, bool $podeVerTodas = false): int
     {
-        return Notificacao::porLocalizacao($localizacaoId)
-            ->naoVisualizadas()
-            ->count();
+        $query = Notificacao::naoVisualizadas();
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        return $query->count();
     }
 
     /**
@@ -103,5 +129,30 @@ class NotificacaoService
     public function limparNotificacaoesAntigas(): int
     {
         return Notificacao::where('created_at', '<', now()->subDays(30))->delete();
+    }
+
+    /**
+     * Obter estatísticas de notificações
+     */
+    public function obterEstatisticas(int $localizacaoId, bool $podeVerTodas = false): array
+    {
+        $query = Notificacao::query();
+        
+        // Se a localização não pode ver todas, filtrar apenas pela sua localização
+        if (!$podeVerTodas) {
+            $query->porLocalizacao($localizacaoId);
+        }
+        
+        $total = $query->count();
+        $naoLidas = (clone $query)->naoVisualizadas()->count();
+        $novas = (clone $query)->porTipo('nova_movimentacao')->count();
+        $concluidas = (clone $query)->porTipo('movimentacao_concluida')->count();
+        
+        return [
+            'total' => $total,
+            'nao_lidas' => $naoLidas,
+            'novas' => $novas,
+            'concluidas' => $concluidas
+        ];
     }
 }

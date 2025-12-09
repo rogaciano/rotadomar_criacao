@@ -25,7 +25,8 @@ class Movimentacao extends Model
         'situacao_id',
         'observacao',
         'anexo',
-        'concluido'
+        'concluido',
+        'created_by'
     ];
 
     protected $casts = [
@@ -83,6 +84,11 @@ class Movimentacao extends Model
     public function situacao()
     {
         return $this->belongsTo(Situacao::class)->withTrashed();
+    }
+
+    public function criadoPor()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**

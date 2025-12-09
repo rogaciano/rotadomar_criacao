@@ -67,11 +67,23 @@ class LocalizacaoController extends Controller
             'prazo' => 'nullable|integer|min:0',
             'capacidade' => 'nullable|integer|min:0',
             'ativo' => 'sometimes|boolean',
+            'faz_movimentacao' => 'sometimes|boolean',
+            'pode_ver_todas_notificacoes' => 'sometimes|boolean',
         ]);
         
         // Definir ativo como false se não estiver presente no request
         if (!isset($validated['ativo'])) {
             $validated['ativo'] = false;
+        }
+        
+        // Definir faz_movimentacao como false se não estiver presente no request
+        if (!isset($validated['faz_movimentacao'])) {
+            $validated['faz_movimentacao'] = false;
+        }
+        
+        // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
+        if (!isset($validated['pode_ver_todas_notificacoes'])) {
+            $validated['pode_ver_todas_notificacoes'] = false;
         }
         
         try {
@@ -167,11 +179,23 @@ class LocalizacaoController extends Controller
             'prazo' => 'nullable|integer|min:0',
             'capacidade' => 'nullable|integer|min:0',
             'ativo' => 'sometimes|boolean',
+            'faz_movimentacao' => 'sometimes|boolean',
+            'pode_ver_todas_notificacoes' => 'sometimes|boolean',
         ]);
         
         // Definir ativo como false se não estiver presente no request
         if (!isset($validated['ativo'])) {
             $validated['ativo'] = false;
+        }
+        
+        // Definir faz_movimentacao como false se não estiver presente no request
+        if (!isset($validated['faz_movimentacao'])) {
+            $validated['faz_movimentacao'] = false;
+        }
+        
+        // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
+        if (!isset($validated['pode_ver_todas_notificacoes'])) {
+            $validated['pode_ver_todas_notificacoes'] = false;
         }
         
         try {
