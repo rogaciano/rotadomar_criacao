@@ -797,7 +797,7 @@
 
                     <!-- Paginação -->
                     <div class="mt-4">
-                        {{ $movimentacoes->appends(request()->query())->links('vendor.pagination.simple-tailwind') }}
+                        {{ $movimentacoes->withQueryString()->links() }}
                     </div>
                 </div>
             </div>

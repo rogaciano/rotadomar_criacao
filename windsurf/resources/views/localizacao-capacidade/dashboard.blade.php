@@ -285,25 +285,25 @@
                                                                         ->whereNotNull('pivot.data_prevista_faccao')
                                                                         ->sortBy('pivot.data_prevista_faccao')
                                                                         ->first();
-                                                                    
+
                                                                     $dataFormatada = 'N/A';
                                                                     if ($primeiraData && $primeiraData->pivot->data_prevista_faccao) {
-                                                                        $dataFormatada = is_string($primeiraData->pivot->data_prevista_faccao) 
+                                                                        $dataFormatada = is_string($primeiraData->pivot->data_prevista_faccao)
                                                                             ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('Y-m-d')
                                                                             : $primeiraData->pivot->data_prevista_faccao->format('Y-m-d');
                                                                     }
-                                                                    
-                                                                    return $produto->id . '|' . 
-                                                                           $produto->referencia . '|' . 
-                                                                           $produto->descricao . '|' . 
-                                                                           ($produto->marca ? $produto->marca->id : 'sem_marca') . '|' . 
-                                                                           ($produto->grupoProduto ? $produto->grupoProduto->id : 'sem_grupo') . '|' . 
-                                                                           $produto->quantidade . '|' . 
-                                                                           $dataFormatada . '|' . 
+
+                                                                    return $produto->id . '|' .
+                                                                           $produto->referencia . '|' .
+                                                                           $produto->descricao . '|' .
+                                                                           ($produto->marca ? $produto->marca->id : 'sem_marca') . '|' .
+                                                                           ($produto->grupoProduto ? $produto->grupoProduto->id : 'sem_grupo') . '|' .
+                                                                           $produto->quantidade . '|' .
+                                                                           $dataFormatada . '|' .
                                                                            ($produto->status ? $produto->status->id : 'sem_status');
                                                                 });
                                                             @endphp
-                                                            
+
                                                             @foreach($produtosAgrupados as $chave => $produtosGrupo)
                                                                 @php
                                                                     $produtoPrincipal = $produtosGrupo->first();
@@ -345,7 +345,7 @@
                                                                                 });
                                                                                 $todasObsLocalizacoes = $todasObsLocalizacoes->merge($obsLoc);
                                                                             }
-                                                                            
+
                                                                             // Remover duplicatas baseado em ordem_producao + observacao
                                                                             $todasObsLocalizacoes = $todasObsLocalizacoes->unique(function($loc) {
                                                                                 return $loc->pivot->ordem_producao . '|' . $loc->pivot->observacao;
@@ -353,14 +353,14 @@
 
                                                                             $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                                                         @endphp
-                                                                        
+
                                                                         {{-- Observações do Produto (apenas uma vez) --}}
                                                                         @if($obs->count() > 0)
                                                                             @foreach($obs as $observacao)
                                                                                 @php
                                                                                     // Processar observações (suporta HTML do Quill e tags customizadas)
                                                                                     $obsTexto = $observacao->observacao;
-                                                                                    
+
                                                                                     // Se não contém tags HTML do Quill, processar tags customizadas
                                                                                     if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
                                                                                         $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
@@ -371,8 +371,12 @@
                                                                                         $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
                                                                                         $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
                                                                                     }
-                                                                                    
-                                                                                    $obsTexto = Str::limit($obsTexto, 120);
+
+                                                                                    // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
+                                                                                    $textoLimpo = strip_tags($obsTexto);
+                                                                                    if (strlen($textoLimpo) > 120) {
+                                                                                        $obsTexto = Str::limit($textoLimpo, 120);
+                                                                                    }
                                                                                 @endphp
                                                                                 <div class="text-xs text-gray-700 mb-1">
                                                                                     {!! $obsTexto !!}
@@ -421,7 +425,12 @@
                                                                                                         $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
                                                                                                         $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
                                                                                                         $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = Str::limit($obsTexto, 80);
+
+                                                                                                        // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
+                                                                                                        $textoLimpo = strip_tags($obsTexto);
+                                                                                                        if (strlen($textoLimpo) > 80) {
+                                                                                                            $obsTexto = Str::limit($textoLimpo, 80);
+                                                                                                        }
                                                                                                     @endphp
                                                                                                     <span class="text-gray-600">{!! $obsTexto !!}</span>
                                                                                                 @endif
@@ -441,7 +450,7 @@
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endforeach
-                                                                                
+
                                                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                                                 @if($todasObsLocalizacoes->count() > 1)
                                                                                     <tr class="border-t-2 border-gray-300 bg-gray-50">
@@ -457,7 +466,7 @@
                                                                                 @endif
                                                                             </table>
                                                                         @endif
-                                                                        
+
                                                                         @if(!$temObservacoes)
                                                                             <div class="text-xs text-gray-400 italic">-</div>
                                                                         @endif

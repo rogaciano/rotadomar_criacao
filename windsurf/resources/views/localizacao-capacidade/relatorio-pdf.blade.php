@@ -9,13 +9,13 @@
             margin: 15mm;
             size: A4 landscape;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: Arial, sans-serif;
             font-size: 10px;
@@ -23,102 +23,102 @@
             margin: 0;
             padding: 10px;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #3B82F6;
             padding-bottom: 10px;
         }
-        
+
         .header h1 {
             font-size: 20px;
             color: #1F2937;
             margin-bottom: 5px;
         }
-        
+
         .header p {
             font-size: 12px;
             color: #6B7280;
         }
-        
+
         .localizacao-section {
             margin-bottom: 25px;
             page-break-inside: avoid;
         }
-        
+
         .localizacao-header {
             background-color: #F3F4F6;
             padding: 10px;
             border-left: 4px solid #3B82F6;
             margin-bottom: 10px;
         }
-        
+
         .localizacao-title {
             font-size: 14px;
             font-weight: bold;
             color: #1F2937;
             margin-bottom: 5px;
         }
-        
+
         .stats-grid {
             display: table;
             width: 100%;
             margin-bottom: 10px;
         }
-        
+
         .stats-row {
             display: table-row;
         }
-        
+
         .stat-cell {
             display: table-cell;
             padding: 8px;
             border: 1px solid #E5E7EB;
             width: 25%;
         }
-        
+
         .stat-label {
             font-size: 9px;
             color: #6B7280;
             text-transform: uppercase;
             margin-bottom: 3px;
         }
-        
+
         .stat-value {
             font-size: 13px;
             font-weight: bold;
         }
-        
+
         .stat-value.green {
             color: #059669;
         }
-        
+
         .stat-value.red {
             color: #DC2626;
         }
-        
+
         .stat-value.yellow {
             color: #D97706;
         }
-        
+
         .produtos-section {
             margin-top: 15px;
         }
-        
+
         .produtos-title {
             font-size: 11px;
             font-weight: bold;
             color: #1F2937;
             margin-bottom: 8px;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
         }
-        
+
         th {
             background-color: #F9FAFB;
             padding: 6px 4px;
@@ -129,32 +129,32 @@
             text-transform: uppercase;
             border: 1px solid #E5E7EB;
         }
-        
+
         td {
             padding: 5px 4px;
             font-size: 9px;
             border: 1px solid #E5E7EB;
         }
-        
+
         tr:nth-child(even) {
             background-color: #F9FAFB;
         }
-        
+
         .text-center {
             text-align: center;
         }
-        
+
         .font-semibold {
             font-weight: 600;
         }
-        
+
         .observacao {
             font-size: 8px;
             color: #4B5563;
             line-height: 1.3;
             margin-bottom: 2px;
         }
-        
+
         .qtd-alocada {
             display: inline-block;
             background-color: #DBEAFE;
@@ -165,7 +165,7 @@
             font-weight: 600;
             margin-top: 4px;
         }
-        
+
         .check-icon {
             display: inline-block;
             width: 10px;
@@ -176,7 +176,7 @@
             position: relative;
             vertical-align: middle;
         }
-        
+
         .check-icon::after {
             content: '✓';
             color: white;
@@ -187,19 +187,19 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-        
+
         .alocacao-item {
             margin-bottom: 8px;
             padding-bottom: 8px;
             border-bottom: 1px solid #E5E7EB;
         }
-        
+
         .alocacao-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
         }
-        
+
         .obs-table {
             width: 100%;
             border: none;
@@ -207,40 +207,40 @@
             padding: 0;
             border-collapse: collapse;
         }
-        
+
         .obs-table tr {
             border: none;
             border-bottom: 1px solid #E5E7EB;
         }
-        
+
         .obs-table tr:last-child {
             border-bottom: none;
         }
-        
+
         .obs-table td {
             border: none;
             padding: 4px 4px;
             vertical-align: top;
         }
-        
+
         .obs-info {
             width: 70%;
             padding-right: 8px;
         }
-        
+
         .obs-qtd {
             width: 30%;
             text-align: right;
             padding-left: 8px;
         }
-        
+
         .no-produtos {
             text-align: center;
             padding: 20px;
             color: #9CA3AF;
             font-style: italic;
         }
-        
+
         .footer {
             margin-top: 30px;
             padding-top: 15px;
@@ -300,21 +300,21 @@
                                 ->whereNotNull('pivot.data_prevista_faccao')
                                 ->sortBy('pivot.data_prevista_faccao')
                                 ->first();
-                            
+
                             $dataFormatada = 'N/A';
                             if ($primeiraData && $primeiraData->pivot->data_prevista_faccao) {
-                                $dataFormatada = is_string($primeiraData->pivot->data_prevista_faccao) 
+                                $dataFormatada = is_string($primeiraData->pivot->data_prevista_faccao)
                                     ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('Y-m-d')
                                     : $primeiraData->pivot->data_prevista_faccao->format('Y-m-d');
                             }
-                            
-                            return $produto->id . '|' . 
-                                   $produto->referencia . '|' . 
-                                   $produto->descricao . '|' . 
-                                   ($produto->marca ? $produto->marca->id : 'sem_marca') . '|' . 
-                                   ($produto->grupoProduto ? $produto->grupoProduto->id : 'sem_grupo') . '|' . 
-                                   $produto->quantidade . '|' . 
-                                   $dataFormatada . '|' . 
+
+                            return $produto->id . '|' .
+                                   $produto->referencia . '|' .
+                                   $produto->descricao . '|' .
+                                   ($produto->marca ? $produto->marca->id : 'sem_marca') . '|' .
+                                   ($produto->grupoProduto ? $produto->grupoProduto->id : 'sem_grupo') . '|' .
+                                   $produto->quantidade . '|' .
+                                   $dataFormatada . '|' .
                                    ($produto->status ? $produto->status->id : 'sem_status');
                         });
                     @endphp
@@ -367,7 +367,7 @@
                                                 });
                                                 $todasObsLocalizacoes = $todasObsLocalizacoes->merge($obsLoc);
                                             }
-                                            
+
                                             // Remover duplicatas baseado em ordem_producao + observacao
                                             $todasObsLocalizacoes = $todasObsLocalizacoes->unique(function($loc) {
                                                 return $loc->pivot->ordem_producao . '|' . $loc->pivot->observacao;
@@ -375,14 +375,14 @@
 
                                             $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                         @endphp
-                                        
+
                                         {{-- Observações do Produto (apenas uma vez) --}}
                                         @if($obs->count() > 0)
                                             @foreach($obs as $observacao)
                                                 @php
                                                     // Processar observações (suporta HTML do Quill e tags customizadas)
                                                     $obsTexto = $observacao->observacao;
-                                                    
+
                                                     // Se não contém tags HTML do Quill, processar tags customizadas
                                                     if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
                                                         $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
@@ -393,8 +393,12 @@
                                                         $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
                                                         $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
                                                     }
-                                                    
-                                                    $obsTexto = Str::limit($obsTexto, 100);
+
+                                                    // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
+                                                    $textoLimpo = strip_tags($obsTexto);
+                                                    if (strlen($textoLimpo) > 100) {
+                                                        $obsTexto = Str::limit($textoLimpo, 100);
+                                                    }
                                                 @endphp
                                                 <div class="observacao">
                                                     {!! $obsTexto !!}
@@ -443,7 +447,12 @@
                                                                         $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
                                                                         $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
                                                                         $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = Str::limit($obsTexto, 80);
+
+                                                                        // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
+                                                                        $textoLimpo = strip_tags($obsTexto);
+                                                                        if (strlen($textoLimpo) > 80) {
+                                                                            $obsTexto = Str::limit($textoLimpo, 80);
+                                                                        }
                                                                     @endphp
                                                                     {!! $obsTexto !!}
                                                                 @endif
@@ -457,7 +466,7 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
-                                                
+
                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                 @if($todasObsLocalizacoes->count() > 1)
                                                     <tr style="border-top: 2px solid #6B7280; background-color: #F9FAFB;">
@@ -473,7 +482,7 @@
                                                 @endif
                                             </table>
                                         @endif
-                                        
+
                                         @if(!$temObservacoes)
                                             <div class="observacao" style="color: #9CA3AF; font-style: italic;">-</div>
                                         @endif

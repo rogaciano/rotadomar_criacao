@@ -158,42 +158,46 @@
                                                             $debugInfo .= "Count rel: {$produto->observacoes->count()} | ";
                                                         }
                                                     }
-                                                    
+
                                                     // Tentar carregar diretamente
                                                     $obsDirecta = \App\Models\ProdutoObservacao::where('produto_id', $produto->id)->get();
-                                                    
+
                                                     if ($produto->referencia == '060021') {
                                                         $debugInfo .= "Count direto: {$obsDirecta->count()}";
                                                     }
-                                                    
+
                                                     // Usar a query direta sempre
                                                     $produto->setRelation('observacoes', $obsDirecta);
                                                 @endphp
-                                                
+
                                                 @if($produto->referencia == '060021')
                                                     <div class="text-xs text-red-600 mb-1">DEBUG: {{ $debugInfo }}</div>
                                                 @endif
-                                                
+
                                                 @php
                                                     // Buscar observações das localizações (ordem de produção)
                                                     $obsLocalizacoes = $produto->localizacoes->filter(function($loc) {
                                                         return $loc->pivot->ordem_producao || $loc->pivot->observacao;
                                                     });
-                                                    
+
                                                     $temObservacoes = ($produto->observacoes && $produto->observacoes->count() > 0) || $obsLocalizacoes->count() > 0;
                                                 @endphp
-                                                
+
                                                 @if($temObservacoes)
                                                     <div class="max-w-xs">
                                                         {{-- Observações do Produto --}}
                                                         @if($produto->observacoes && $produto->observacoes->count() > 0)
                                                             @foreach($produto->observacoes as $obs)
+                                                                @php
+                                                                    // Limitar texto de forma segura para HTML
+                                                                    $obsTextoShow = strip_tags($obs->observacao);
+                                                                @endphp
                                                                 <div class="mb-1 text-xs {{ !$loop->last || $obsLocalizacoes->count() > 0 ? 'border-b border-gray-200 pb-1' : '' }}">
-                                                                    {{ Str::limit($obs->observacao, 80) }}
+                                                                    {{ Str::limit($obsTextoShow, 80) }}
                                                                 </div>
                                                             @endforeach
                                                         @endif
-                                                        
+
                                                         {{-- Observações das Localizações (Ordem de Produção) --}}
                                                         @foreach($obsLocalizacoes as $loc)
                                                             <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
@@ -204,7 +208,11 @@
                                                                     <span class="text-gray-500"> - </span>
                                                                 @endif
                                                                 @if($loc->pivot->observacao)
-                                                                    <span class="text-gray-600">{{ Str::limit($loc->pivot->observacao, 60) }}</span>
+                                                                    @php
+                                                                        // Limitar texto de forma segura para HTML
+                                                                        $obsLocTexto = strip_tags($loc->pivot->observacao);
+                                                                    @endphp
+                                                                    <span class="text-gray-600">{{ Str::limit($obsLocTexto, 60) }}</span>
                                                                 @endif
                                                             </div>
                                                         @endforeach
