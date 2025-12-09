@@ -21,6 +21,7 @@ use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\DirecionamentoComercialController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -127,6 +128,10 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('situacoes/{situacao}/restore', [SituacaoController::class, 'restore'])->name('situacoes.restore');
     Route::delete('situacoes/{situacao}/force-delete', [SituacaoController::class, 'forceDelete'])->name('situacoes.force-delete');
 
+    // Routes para Direcionamentos Comerciais
+    Route::resource('direcionamentos-comerciais', DirecionamentoComercialController::class);
+    Route::post('direcionamentos-comerciais/{id}/restore', [DirecionamentoComercialController::class, 'restore'])->name('direcionamentos-comerciais.restore');
+
     // Routes para Status
     Route::resource('status', StatusController::class);
 
@@ -142,22 +147,22 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'show'])->name('produtos.anexos.show');
     Route::post('produtos/{produto}/anexos', [ProdutoAnexoController::class, 'store'])->name('produtos.anexos.store');
     Route::delete('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'destroy'])->name('produtos.anexos.destroy');
-    
+
     // Routes para Localizações de Produtos
     Route::post('produtos/{produto}/localizacoes', [ProdutoLocalizacaoController::class, 'store'])->name('produtos.localizacoes.store');
     Route::put('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'update'])->name('produtos.localizacoes.update');
     Route::delete('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'destroy'])->name('produtos.localizacoes.destroy');
-    
+
     // Routes para Observações de Produtos
     Route::post('produtos/observacoes', [ProdutoObservacaoController::class, 'store'])->name('produtos.observacoes.store');
     Route::delete('produtos/observacoes/{observacao}', [ProdutoObservacaoController::class, 'destroy'])->name('produtos.observacoes.destroy');
-    
+
     // Routes para Combinações de Produtos
     Route::post('produtos/{produto}/combinacoes', [ProdutoCombinacaoController::class, 'store'])->name('produtos.combinacoes.store');
     Route::put('produtos/combinacoes/{combinacao}', [ProdutoCombinacaoController::class, 'update'])->name('produtos.combinacoes.update');
     Route::delete('produtos/combinacoes/{combinacao}', [ProdutoCombinacaoController::class, 'destroy'])->name('produtos.combinacoes.destroy');
     Route::get('produtos/{produto}/combinacoes', [ProdutoCombinacaoController::class, 'getCombinacoes'])->name('produtos.combinacoes.get');
-    
+
     // Routes para Componentes de Combinações
     Route::post('combinacoes/{combinacao}/componentes', [ProdutoCombinacaoController::class, 'addComponente'])->name('combinacoes.componentes.add');
     Route::put('combinacoes/componentes/{componente}', [ProdutoCombinacaoController::class, 'updateComponente'])->name('combinacoes.componentes.update');
@@ -172,7 +177,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::delete('movimentacoes/{movimentacao}/remover-anexo', [MovimentacaoController::class, 'removerAnexo'])->name('movimentacoes.remover-anexo');
     Route::get('movimentacoes/{movimentacao}/pdf', [MovimentacaoController::class, 'generatePdf'])->name('movimentacoes.pdf');
     Route::get('movimentacoes-lista-pdf', [MovimentacaoController::class, 'generateListPdf'])->name('movimentacoes.lista.pdf');
-    
+
     // Filtro de Movimentações por Status de Dias
     Route::get('movimentacoes/filtro/status-dias', [MovimentacaoFilterController::class, 'filtrarPorStatusDias'])->name('movimentacoes.filtro.status-dias');
 

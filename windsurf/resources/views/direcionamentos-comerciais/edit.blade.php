@@ -1,0 +1,47 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Editar Direcionamento Comercial') }}
+            </h2>
+            <a href="{{ route('direcionamentos-comerciais.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                Voltar
+            </a>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+
+                <!-- Formulário de Edição -->
+                <form action="{{ route('direcionamentos-comerciais.update', $direcionamento) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="mb-4">
+                        <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Descrição') }} *</label>
+                        <input id="descricao" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" type="text" name="descricao" value="{{ old('descricao', $direcionamento->descricao) }}" required autofocus maxlength="100" />
+                        @error('descricao')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="ativo" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" {{ old('ativo', $direcionamento->ativo) ? 'checked' : '' }}>
+                            <span class="ml-2 text-gray-700">Ativo</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-end mt-4">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            {{ __('Atualizar') }}
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</x-app-layout>

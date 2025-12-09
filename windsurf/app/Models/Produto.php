@@ -25,6 +25,7 @@ class Produto extends Model
         'preco_atacado',
         'preco_varejo',
         'status_id',
+        'direcionamento_comercial_id',
         'localizacao_id',
         'anexo_ficha_producao',
         'anexo_catalogo_vendas',
@@ -80,6 +81,11 @@ class Produto extends Model
         return $this->belongsTo(Status::class);
     }
 
+    public function direcionamentoComercial()
+    {
+        return $this->belongsTo(DirecionamentoComercial::class);
+    }
+
     public function localizacao()
     {
         return $this->belongsTo(\App\Models\Localizacao::class);
@@ -98,7 +104,7 @@ class Produto extends Model
     {
         return $this->hasMany(Movimentacao::class, 'produto_id');
     }
-    
+
     /**
      * Relacionamento com os anexos do produto
      */
@@ -200,10 +206,10 @@ class Produto extends Model
         if (!$this->data_prevista_producao) {
             return 'N/A';
         }
-        
+
         return $this->data_prevista_producao->format('m/Y');
     }
-    
+
     /**
      * Relacionamento com as combinações de cores do produto
      */
@@ -218,7 +224,7 @@ class Produto extends Model
     public function getCoresDisponiveisAttribute()
     {
         $coresDisponiveis = collect();
-        
+
         foreach ($this->tecidos as $tecido) {
             foreach ($tecido->estoquesCores as $estoqueCor) {
                 $coresDisponiveis->push([
@@ -229,12 +235,12 @@ class Produto extends Model
                 ]);
             }
         }
-        
+
         return $coresDisponiveis->unique(function ($item) {
             return $item['cor'] . '|' . $item['codigo_cor'];
         });
     }
-    
+
     /**
      * Retorna a localização atual do produto baseada na última movimentação
      */
@@ -245,10 +251,10 @@ class Produto extends Model
             ->orderBy('id', 'desc')
             ->with('localizacao')
             ->first();
-            
+
         return $ultimaMovimentacao ? $ultimaMovimentacao->localizacao : null;
     }
-    
+
     /**
      * Relacionamento para a localização atual do produto
      * Este relacionamento é usado para eager loading da localização atual
@@ -257,7 +263,7 @@ class Produto extends Model
     {
         return $this->belongsTo(\App\Models\Localizacao::class, 'localizacao_atual_id');
     }
-    
+
     /**
      * Retorna o status de conclusão atual do produto baseado na última movimentação
      */
@@ -267,10 +273,10 @@ class Produto extends Model
         $ultimaMovimentacao = $this->movimentacoes()
             ->orderBy('id', 'desc')
             ->first();
-            
+
         return $ultimaMovimentacao ? $ultimaMovimentacao->concluido : null;
     }
-    
+
     /**
      * Retorna a situação atual do produto baseada na última movimentação
      */
@@ -281,10 +287,10 @@ class Produto extends Model
             ->orderBy('id', 'desc')
             ->with('situacao')
             ->first();
-            
+
         return $ultimaMovimentacao ? $ultimaMovimentacao->situacao : null;
     }
-    
+
     /**
      * Relacionamento para a situação atual do produto
      * Este relacionamento é usado para eager loading da situação atual

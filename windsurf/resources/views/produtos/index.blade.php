@@ -163,6 +163,18 @@
                             </div>
 
                             <div>
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
+                                <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todos</option>
+                                    @foreach($direcionamentosComerciais as $direcionamento)
+                                        <option value="{{ $direcionamento->id }}" {{ ($filters['direcionamento_comercial_id'] ?? '') == $direcionamento->id ? 'selected' : '' }}>
+                                            {{ $direcionamento->descricao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
                                 <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
@@ -522,13 +534,14 @@
             const filterLabels = {
                 'referencia': 'Referência',
                 'descricao': 'Descrição',
-                'concluido': 'Status',
+                'concluido': 'Status de Conclusão',
                 'incluir_excluidos': 'Incluir Excluídos',
                 'marca_id': 'Marca',
                 'tecido_id': 'Tecido',
                 'estilista_id': 'Estilista',
                 'grupo_id': 'Grupo',
                 'status_id': 'Status',
+                'direcionamento_comercial_id': 'Direcionamento Comercial',
                 'localizacao_id': 'Localização',
                 'localizacao_planejamento_id': 'Localização Planejamento',
                 'situacao_id': 'Situação',

@@ -12,7 +12,7 @@
                     </svg>
                     Salvar
                 </button>
-                
+
                 <!-- Botão Voltar -->
                 <a href="{{ request('back_url') ? request('back_url') : route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -134,6 +134,19 @@
                                     @foreach($statuses as $status)
                                         <option value="{{ $status->id }}" {{ old('status_id', $produto->status_id) == $status->id ? 'selected' : '' }} class="text-gray-700">
                                             {{ $status->descricao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Direcionamento Comercial -->
+                            <div>
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
+                                <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700 bg-white">
+                                    <option value="">Selecione um direcionamento</option>
+                                    @foreach($direcionamentosComerciais as $direcionamento)
+                                        <option value="{{ $direcionamento->id }}" {{ old('direcionamento_comercial_id', $produto->direcionamento_comercial_id) == $direcionamento->id ? 'selected' : '' }} class="text-gray-700">
+                                            {{ $direcionamento->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -328,7 +341,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Botão de salvar -->
                         <div class="flex justify-end mt-6">
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -411,7 +424,7 @@
                                         <option value="">Selecione um tecido primeiro</option>
                                     </select>
                                 </div>
-                                
+
                                 <!-- Informações de estoque -->
                                 <div id="info-estoque" class="hidden bg-gray-50 p-3 rounded-md border border-gray-200">
                                     <h4 class="text-sm font-medium text-gray-700 mb-2">Informações de Estoque</h4>
@@ -430,7 +443,7 @@
                                         </tr>
                                     </table>
                                 </div>
-                                
+
                                 <div>
                                     <label for="componente-consumo" class="block text-sm font-medium text-gray-700 mb-1">Consumo (metros)</label>
                                     <input type="number" id="componente-consumo" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" min="0.001" step="0.001" value="1" required>
@@ -446,7 +459,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Modal para adicionar anexo -->
     <div id="modal-anexo" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -491,7 +504,7 @@
         var modal = document.getElementById('modal-combinacao');
         modal.classList.remove('hidden');
         modal.style.display = 'block';
-        
+
         // Adicionar evento para fechar o modal ao clicar fora dele
         window.onclick = function(event) {
             if (event.target == modal) {
@@ -505,27 +518,27 @@
         if (!confirm('Tem certeza que deseja excluir este anexo?')) {
             return;
         }
-        
+
         // Criar um formulário temporário para enviar a requisição DELETE
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ url("produtos/anexos") }}/' + anexoId;
         form.style.display = 'none';
-        
+
         // Adicionar campo CSRF
         const csrfField = document.createElement('input');
         csrfField.type = 'hidden';
         csrfField.name = '_token';
         csrfField.value = '{{ csrf_token() }}';
         form.appendChild(csrfField);
-        
+
         // Adicionar campo METHOD spoofing para DELETE
         const methodField = document.createElement('input');
         methodField.type = 'hidden';
         methodField.name = '_method';
         methodField.value = 'DELETE';
         form.appendChild(methodField);
-        
+
         // Adicionar o formulário ao body e submeter
         document.body.appendChild(form);
         form.submit();
@@ -535,12 +548,12 @@
         // Variáveis para combinações
         const combinacoesContainer = $('#combinacoes-container');
         let combinacoes = [];
-        
+
         // Atualizar o contador de cores
         function updateCoresCount(count) {
             $('#cores-count').text(count);
         }
-        
+
         // Funções para gerenciar combinações
         function carregarCombinacoes() {
             $.ajax({
@@ -559,19 +572,19 @@
                 }
             });
         }
-        
+
         // Carregar combinações ao iniciar
         carregarCombinacoes();
-        
+
         // Renderizar combinações
         function renderizarCombinacoes() {
             if (!combinacoes || combinacoes.length === 0) {
                 combinacoesContainer.html('<div class="text-center py-4 text-gray-500 italic">Clique em "Nova Combinação" para adicionar uma combinação de cores.</div>');
                 return;
             }
-            
+
             let html = '';
-            
+
             combinacoes.forEach(function(combinacao) {
                 html += `
                     <div class="combinacao-item mb-6 pb-6 border-b border-gray-200 last:border-b-0 last:mb-0 last:pb-0" data-id="${combinacao.id}">
@@ -594,11 +607,11 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="componentes-container" data-combinacao-id="${combinacao.id}">
                             ${renderizarComponentes(combinacao.componentes)}
                         </div>
-                        
+
                         <div class="mt-3">
                             <button type="button" class="adicionar-componente inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" data-combinacao-id="${combinacao.id}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -610,18 +623,18 @@
                     </div>
                 `;
             });
-            
+
             combinacoesContainer.html(html);
         }
-        
+
         // Renderizar componentes de uma combinação
         function renderizarComponentes(componentes) {
             if (!componentes || componentes.length === 0) {
                 return '<div class="text-center py-3 text-gray-500 italic">Nenhum componente adicionado.</div>';
             }
-            
+
             let html = '<div class="grid grid-cols-1 gap-3">';
-            
+
             componentes.forEach(function(componente) {
                 html += `
                     <div class="componente-item bg-gray-50 p-3 rounded-md border border-gray-200" data-id="${componente.id}">
@@ -650,11 +663,11 @@
                     </div>
                 `;
             });
-            
+
             html += '</div>';
             return html;
         }
-        
+
         // Funções para gerenciar modais
         function mostrarModalCombinacao(combinacaoId = null) {
             // Limpar campos
@@ -662,7 +675,7 @@
             $('#combinacao-descricao').val('');
             $('#combinacao-quantidade').val('1');
             $('#combinacao-observacoes').val('');
-            
+
             // Se for edição, carregar dados da combinação
             if (combinacaoId) {
                 const combinacao = combinacoes.find(c => c.id == combinacaoId);
@@ -676,12 +689,12 @@
             } else {
                 $('#modal-combinacao-title').text('Nova Combinação');
             }
-            
+
             // Exibir modal
             $('#modal-combinacao').removeClass('hidden');
             document.getElementById('modal-combinacao').style.display = 'block';
         }
-        
+
         function mostrarModalComponente(combinacaoId, componenteId = null) {
             // Limpar campos
             $('#componente-id').val('');
@@ -689,10 +702,10 @@
             $('#componente-tecido').val('').trigger('change');
             $('#componente-cor').val('').prop('disabled', true);
             $('#componente-consumo').val('1');
-            
+
             // Atualizar lista de tecidos disponíveis com base nos tecidos atualmente selecionados
             atualizarTecidosDisponiveis(componenteId);
-            
+
             // Se for edição, carregar dados do componente
             if (componenteId) {
                 const combinacao = combinacoes.find(c => c.id == combinacaoId);
@@ -702,31 +715,31 @@
                         $('#modal-componente-title').text('Editar Componente');
                         $('#componente-id').val(componente.id);
                         $('#componente-tecido').val(componente.tecido_id).trigger('change');
-                        
+
                         // Carregar cores do tecido e selecionar a cor atual
                         carregarCoresTecido(componente.tecido_id, componente.cor, componente.codigo_cor);
-                        
+
                         $('#componente-consumo').val(componente.consumo);
                     }
                 }
             } else {
                 $('#modal-componente-title').text('Adicionar Componente');
             }
-            
+
             // Exibir modal
             $('#modal-componente').removeClass('hidden');
             document.getElementById('modal-componente').style.display = 'block';
         }
-        
+
         // Função para atualizar a lista de tecidos disponíveis no modal de componente
         function atualizarTecidosDisponiveis(componenteId = null) {
             const tecidosDisponiveis = [];
-            
+
             // Percorrer todos os selects de tecido na página
             $('.tecido-select').each(function() {
                 const tecidoId = $(this).val();
                 const tecidoText = $(this).find('option:selected').text();
-                
+
                 if (tecidoId && tecidoId !== '' && tecidoText && tecidoText !== 'Selecione um tecido') {
                     // Verificar se já não está na lista
                     if (!tecidosDisponiveis.find(t => t.id === tecidoId)) {
@@ -737,27 +750,27 @@
                     }
                 }
             });
-            
+
             // Atualizar o select de tecidos no modal
             const selectTecido = $('#componente-tecido');
             const tecidoAtualSelecionado = selectTecido.val();
-            
+
             // Limpar e reconstruir as opções
             selectTecido.html('<option value="">Selecione um tecido</option>');
-            
+
             tecidosDisponiveis.forEach(function(tecido) {
                 const option = $('<option></option>')
                     .attr('value', tecido.id)
                     .text(tecido.text);
                 selectTecido.append(option);
             });
-            
+
             // Se estava editando, manter o tecido selecionado
             if (tecidoAtualSelecionado && componenteId) {
                 selectTecido.val(tecidoAtualSelecionado);
             }
         }
-        
+
         // Função para carregar cores de um tecido
         function carregarCoresTecido(tecidoId, corSelecionada = null, codigoCor = null) {
             if (!tecidoId) {
@@ -766,27 +779,27 @@
                 $('#info-estoque').addClass('hidden');
                 return;
             }
-            
+
             $.ajax({
                 url: '{{ url("tecidos") }}/' + tecidoId + '/cores',
                 method: 'GET',
                 success: function(response) {
                     if (response.success && response.cores && response.cores.length > 0) {
                         let options = '<option value="">Selecione uma cor</option>';
-                        
+
                         response.cores.forEach(function(cor) {
                             const selected = corSelecionada && cor.cor === corSelecionada ? ' selected' : '';
                             options += `<option value="${cor.cor}" data-codigo="${cor.codigo_cor || ''}" data-estoque="${cor.estoque || 0}" data-necessidade="${cor.necessidade || 0}" data-saldo="${cor.saldo || 0}" data-producao="${cor.producao_possivel || 0}"${selected}>${cor.cor} ${cor.codigo_cor ? `(${cor.codigo_cor})` : ''}</option>`;
                         });
-                        
+
                         $('#componente-cor').html(options);
                         $('#componente-cor').prop('disabled', false);
-                        
+
                         // Se temos uma cor selecionada mas não foi encontrada nas opções, adicionar manualmente
                         if (corSelecionada && !$('#componente-cor').val()) {
                             const newOption = `<option value="${corSelecionada}" data-codigo="${codigoCor || ''}" data-estoque="0" data-necessidade="0" data-saldo="0" data-producao="0" selected>${corSelecionada} ${codigoCor ? `(${codigoCor})` : ''}</option>`;
                             $('#componente-cor').append(newOption);
-                        }          
+                        }
                         // Se já temos uma cor selecionada, mostrar informações de estoque
                         if (corSelecionada) {
                             atualizarInfoEstoque();
@@ -804,20 +817,20 @@
                 }
             });
         }
-        
+
         // Função para atualizar as informações de estoque
         function atualizarInfoEstoque() {
             const corOption = $('#componente-cor option:selected');
-            
+
             if (corOption.val()) {
                 const estoque = parseFloat(corOption.data('estoque')) || 0;
                 const necessidade = parseFloat(corOption.data('necessidade')) || 0;
                 const saldo = parseFloat(corOption.data('saldo')) || 0;
                 const producao = parseFloat(corOption.data('producao')) || 0;
-                
+
                 $('#info-estoque-valor').text(estoque.toLocaleString('pt-BR') + ' m');
                 $('#info-necessidade-valor').text(necessidade.toLocaleString('pt-BR') + ' m');
-                
+
                 // Aplicar cores para saldo
                 const saldoElement = $('#info-saldo-valor');
                 saldoElement.text(saldo.toLocaleString('pt-BR') + ' m');
@@ -826,7 +839,7 @@
                 } else {
                     saldoElement.removeClass('text-red-600').addClass('text-green-600');
                 }
-                
+
                 // Aplicar cores para produção possível
                 const producaoElement = $('#info-producao-valor');
                 producaoElement.text(producao.toLocaleString('pt-BR') + ' unidades');
@@ -835,30 +848,30 @@
                 } else {
                     producaoElement.removeClass('text-red-600').addClass('text-green-600');
                 }
-                
+
                 $('#info-estoque').removeClass('hidden');
             } else {
                 $('#info-estoque').addClass('hidden');
             }
         }
-        
+
         // Event handlers
         $(document).on('click', '#add-combinacao', function() {
             mostrarModalCombinacao();
         });
-        
+
         $(document).on('click', '.editar-combinacao', function() {
             const combinacaoId = $(this).data('id');
             mostrarModalCombinacao(combinacaoId);
         });
-        
+
         $(document).on('click', '.excluir-combinacao', function() {
             if (!confirm('Tem certeza que deseja excluir esta combinação?')) {
                 return;
             }
-            
+
             const combinacaoId = $(this).data('id');
-            
+
             $.ajax({
                 url: '{{ url("produtos/combinacoes") }}/' + combinacaoId,
                 method: 'DELETE',
@@ -877,27 +890,27 @@
                 }
             });
         });
-        
+
         $(document).on('click', '#salvar-combinacao', function() {
             const combinacaoId = $('#combinacao-id').val();
             const descricao = $('#combinacao-descricao').val();
             const quantidade = $('#combinacao-quantidade').val();
             const observacoes = $('#combinacao-observacoes').val();
-            
+
             if (!descricao || !quantidade) {
                 alert('Por favor, preencha todos os campos obrigatórios.');
                 return;
             }
-            
+
             const data = {
                 descricao: descricao,
                 quantidade_pretendida: quantidade,
                 observacoes: observacoes,
                 _token: '{{ csrf_token() }}'
             };
-            
+
             let url, method;
-            
+
             if (combinacaoId) {
                 // Edição
                 url = '{{ url("produtos/combinacoes") }}/' + combinacaoId;
@@ -907,7 +920,7 @@
                 url = '{{ url("produtos") }}/' + {{ $produto->id }} + '/combinacoes';
                 method = 'POST';
             }
-            
+
             $.ajax({
                 url: url,
                 method: method,
@@ -926,25 +939,25 @@
                 }
             });
         });
-        
+
         $(document).on('click', '.adicionar-componente', function() {
             const combinacaoId = $(this).data('combinacao-id');
             mostrarModalComponente(combinacaoId);
         });
-        
+
         $(document).on('click', '.editar-componente', function() {
             const componenteId = $(this).data('id');
             const combinacaoId = $(this).data('combinacao-id');
             mostrarModalComponente(combinacaoId, componenteId);
         });
-        
+
         $(document).on('click', '.excluir-componente', function() {
             if (!confirm('Tem certeza que deseja excluir este componente?')) {
                 return;
             }
-            
+
             const componenteId = $(this).data('id');
-            
+
             $.ajax({
                 url: '{{ url("combinacoes/componentes") }}/' + componenteId,
                 method: 'DELETE',
@@ -963,16 +976,16 @@
                 }
             });
         });
-        
+
         $(document).on('change', '#componente-tecido', function() {
             const tecidoId = $(this).val();
             carregarCoresTecido(tecidoId);
         });
-        
+
         $(document).on('change', '#componente-cor', function() {
             atualizarInfoEstoque();
         });
-        
+
         $(document).on('click', '#salvar-componente', function() {
             const componenteId = $('#componente-id').val();
             const combinacaoId = $('#componente-combinacao-id').val();
@@ -981,12 +994,12 @@
             const cor = corOption.val();
             const codigoCor = corOption.data('codigo');
             const consumo = $('#componente-consumo').val();
-            
+
             if (!tecidoId || !cor || !consumo) {
                 alert('Por favor, preencha todos os campos obrigatórios.');
                 return;
             }
-            
+
             const data = {
                 tecido_id: tecidoId,
                 cor: cor,
@@ -994,9 +1007,9 @@
                 consumo: consumo,
                 _token: '{{ csrf_token() }}'
             };
-            
+
             let url, method;
-            
+
             if (componenteId) {
                 // Edição
                 url = '{{ url("combinacoes/componentes") }}/' + componenteId;
@@ -1006,7 +1019,7 @@
                 url = '{{ url("combinacoes") }}/' + combinacaoId + '/componentes';
                 method = 'POST';
             }
-            
+
             $.ajax({
                 url: url,
                 method: method,
@@ -1025,33 +1038,33 @@
                 }
             });
         });
-        
+
         // Debug: Capturar evento de submit do formulário
         $('form').on('submit', function(e) {
-            
+
             // Verificar campos obrigatórios
             let camposVazios = [];
-            
+
             // Verificar campos required
             $(this).find('[required]').each(function() {
                 const campo = $(this);
                 const valor = campo.val();
                 const nome = campo.attr('name') || campo.attr('id');
-                
+
                 if (!valor || valor.trim() === '') {
                     camposVazios.push(nome);
                 }
             });
-            
+
             // Verificar se há pelo menos um tecido selecionado
             const tecidosSelecionados = $('.tecido-select').filter(function() {
                 return $(this).val() && $(this).val() !== '';
             }).length;
-            
+
             if (tecidosSelecionados === 0) {
                 camposVazios.push('tecidos');
             }
-            
+
             if (camposVazios.length > 0) {
                 e.preventDefault();
                 alert('Por favor, preencha todos os campos obrigatórios: ' + camposVazios.join(', '));
@@ -1109,7 +1122,7 @@
             if (window.currentAjaxRequest) {
                 window.currentAjaxRequest.abort();
             }
-            
+
             try {
                 // Fazer requisição AJAX
                 window.currentAjaxRequest = $.ajax({
@@ -1147,7 +1160,7 @@
         }
 
         function renderCores(cores) {
-            
+
             if (!cores || cores.length === 0) {
                 coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Nenhuma cor disponível para os tecidos selecionados.</div>');
                 updateCoresCount(0);
@@ -1164,17 +1177,17 @@
                 const borderColor = cor.tipo === 'existente' ? 'border-green-300 bg-green-50' : 'border-blue-300 bg-blue-50';
                 const labelColor = cor.tipo === 'existente' ? 'text-green-700' : 'text-blue-700';
                 const typeLabel = cor.tipo === 'existente' ? 'Cadastrada' : 'Disponível';
-                
+
                 // Formatar valores numéricos
                 const estoque = parseFloat(cor.estoque || 0).toFixed(2).replace('.', ',');
                 const necessidade = parseFloat(cor.necessidade || 0).toFixed(2).replace('.', ',');
                 const producaoPossivel = parseInt(cor.producao_possivel || 0);
-                
+
                 // Determinar a cor do saldo (estoque - necessidade)
                 const saldo = parseFloat(cor.estoque || 0) - parseFloat(cor.necessidade || 0);
                 const saldoFormatado = saldo.toFixed(2).replace('.', ',');
                 const saldoClass = saldo >= 0 ? 'text-green-600' : 'text-red-600';
-                
+
                 const corHtml = `
                     <div class="mb-3 p-3 border ${borderColor} rounded-md">
                         <div class="flex flex-col space-y-3">
@@ -1189,11 +1202,11 @@
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <label class="text-sm text-gray-700">Quantidade:</label>
-                                    <input type="number" 
-                                           name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][quantidade]" 
-                                           value="${cor.quantidade || 0}" 
-                                           placeholder="0" 
-                                           min="0" 
+                                    <input type="number"
+                                           name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][quantidade]"
+                                           value="${cor.quantidade || 0}"
+                                           placeholder="0"
+                                           min="0"
                                            class="w-20 text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][cor]" value="${cor.cor}">
                                     <input type="hidden" name="cores[${cor.tipo === 'existente' ? indexExistentes : cores.filter(c => c.tipo === 'existente').length + indexDisponiveis}][codigo_cor]" value="${cor.codigo_cor}">
@@ -1227,7 +1240,7 @@
             });
 
             let finalHtml = '';
-            
+
             if (htmlExistentes) {
                 finalHtml += `
                     <div class="mb-4">
@@ -1236,7 +1249,7 @@
                     </div>
                 `;
             }
-            
+
             if (htmlDisponiveis) {
                 finalHtml += `
                     <div class="mb-4">
@@ -1245,13 +1258,13 @@
                     </div>
                 `;
             }
-            
+
             coresContainer.html(finalHtml);
-            
+
             // Atualizar o contador de cores selecionadas
             updateCoresCount(cores.length);
         }
-        
+
         // Função para atualizar o contador de cores
         function updateCoresCount(count) {
             $('#cores-count').text(count);
@@ -1279,9 +1292,9 @@
         // Adicionar tecido - usando event delegation para garantir que funcione
         $(document).on('click', '#add-tecido', function(e) {
             e.preventDefault();
-            
+
             const newIndex = tecidosContainer.find('.tecido-item').length;
-            
+
             const template = `
                 <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t border-gray-200">
                     <div class="flex items-center gap-4">
@@ -1297,7 +1310,7 @@
                         <button type="button" class="remove-tecido text-red-500 hover:text-red-700"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg></button>
                     </div>
                 </div>`;
-            
+
             tecidosContainer.append(template);
             const newSelect = tecidosContainer.find('.tecido-select-new');
             initializeSelect2(newSelect, 'Selecione um tecido');
@@ -1318,30 +1331,30 @@
         // Initial setup
         initializeSelect2('.grupo-select', 'Selecione um grupo');
         initializeSelect2('.estilista-select', 'Selecione um estilista');
-        
+
         // Inicializar Select2 para tecidos e verificar se foram inicializados corretamente
         const tecidoSelects = $('.tecido-select');
         initializeSelect2('.tecido-select', 'Selecione um tecido');
-        
+
         // Verificar valores iniciais dos selects de tecido
         tecidoSelects.each(function(index) {
         });
-        
+
         // Atualizar cores quando um tecido é alterado
         const debouncedUpdateColors = debounce(updateColorVariations, 400);
         tecidosContainer.on('change', '.tecido-select', function() {
             debouncedUpdateColors();
         });
-        
+
         // Inicialização
-        
+
         // Atualizar botões de remover tecido
         updateRemoveTecidoButtons();
-        
+
         // Carregar cores diretamente com delay maior para garantir que Select2 esteja inicializado
         setTimeout(function() {
             // updateColorVariations(); // COMENTADO para evitar dupla chamada
-            
+
             // Verificar novamente os tecidos selecionados
             const tecidosSelecionados = [];
             $('.tecido-select').each(function() {
@@ -1350,18 +1363,18 @@
                     tecidosSelecionados.push(val);
                 }
             });
-            
+
             if (tecidosSelecionados.length > 0) {
                 updateColorVariations(); // Chamar apenas se houver tecidos selecionados
             } else {
                 coresContainer.html('<div class="text-center py-4 text-gray-500 italic">Selecione pelo menos um tecido para ver as cores disponíveis.</div>');
             }
         }, 1500);
-        
+
         // Exibir mensagem ao usuário
         const infoMsg = $('<div class="mt-2 text-xs text-blue-600">Todas as cores disponíveis para os tecidos selecionados serão exibidas automaticamente.</div>');
         coresContainer.parent().append(infoMsg);
-        
+
     });
 </script>
 @endpush

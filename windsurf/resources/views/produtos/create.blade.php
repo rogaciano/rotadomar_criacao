@@ -127,6 +127,19 @@
                                 </select>
                             </div>
 
+                            <!-- Direcionamento Comercial -->
+                            <div>
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
+                                <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                    <option value="">Selecione um direcionamento</option>
+                                    @foreach($direcionamentosComerciais as $direcionamento)
+                                        <option value="{{ $direcionamento->id }}" {{ old('direcionamento_comercial_id') == $direcionamento->id ? 'selected' : '' }} class="text-gray-700">
+                                            {{ $direcionamento->descricao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                         </div>
 
                         <!-- Seção de Tecidos separada em uma única coluna -->
@@ -220,7 +233,7 @@
                 }).on('select2:select', function (e) {
                     // Debug: log quando um item é selecionado
                     console.log('Tecido selecionado:', e.params.data);
-                    
+
                 });
             }
 
@@ -310,7 +323,7 @@
                     success: function(response) {
                         console.log('Resposta da API:', response);
                         console.log('Estrutura completa da resposta:', JSON.stringify(response, null, 2));
-                        
+
                         // Limpar o container uma única vez
                         coresContainer.empty();
 
@@ -332,7 +345,7 @@
                                         </thead>
                                         <tbody class="bg-white divide-y divide-gray-200">
                             `;
-                            
+
                             let tableRows = '';
                             cores.forEach((cor, index) => {
                                 console.log('Cor encontrada:', cor);
@@ -342,13 +355,13 @@
                                 console.log(`Processando: nome="${corNome}", codigo="${codigoCor}"`);
                                 tableRows += generateCorItemHtml(corNome, codigoCor, index);
                             });
-                            
+
                             const tableFooter = `
                                         </tbody>
                                     </table>
                                 </div>
                             `;
-                            
+
                             coresContainer.html(tableHeader + tableRows + tableFooter);
                         } else {
                             coresContainer.html('<p class="text-gray-500 text-sm">Nenhuma cor disponível para os tecidos selecionados.</p>');
@@ -369,8 +382,8 @@
                 return `
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-center">
-                            <div class="w-12 h-12 rounded-lg border-2 border-gray-300 mx-auto shadow-sm" 
-                                 style="background-color: ${codigoCor || '#FFFFFF'}" 
+                            <div class="w-12 h-12 rounded-lg border-2 border-gray-300 mx-auto shadow-sm"
+                                 style="background-color: ${codigoCor || '#FFFFFF'}"
                                  title="${codigoCor || 'N/A'}"></div>
                         </td>
                         <td class="px-4 py-3">
@@ -380,10 +393,10 @@
                             <input type="hidden" name="cores[${index}][codigo_cor]" value="${codigoCor || ''}">
                         </td>
                         <td class="px-4 py-3">
-                            <input type="number" 
-                                   name="cores[${index}][quantidade]" 
-                                   placeholder="0" 
-                                   min="0" 
+                            <input type="number"
+                                   name="cores[${index}][quantidade]"
+                                   placeholder="0"
+                                   min="0"
                                    class="w-24 text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                         </td>
                     </tr>
@@ -394,7 +407,7 @@
 
             // Inicialização com delay para garantir que o Select2 esteja completamente carregado
             updateRemoveButtons();
-            
+
             // O carregamento de cores agora acontecerá apenas quando o usuário
             // interagir com o seletor de tecidos.
         });

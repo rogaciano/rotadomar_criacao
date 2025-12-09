@@ -106,9 +106,18 @@
                                     </div>
 
                                     <!-- Descrição -->
-                                    <p class="text-sm text-gray-700 mb-2 line-clamp-2">
+                                    <p class="text-sm text-gray-700 mb-1 line-clamp-2">
                                         {{ $produto->descricao }}
                                     </p>
+
+                                    <!-- Direcionamento Comercial -->
+                                    @if($produto->direcionamentoComercial)
+                                        <div class="mb-2">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500 text-white">
+                                                {{ $produto->direcionamentoComercial->descricao }}
+                                            </span>
+                                        </div>
+                                    @endif
 
                                     <!-- Marca -->
                                     @if($produto->marca)

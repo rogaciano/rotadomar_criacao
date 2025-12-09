@@ -8,6 +8,7 @@ use App\Models\Tecido;
 use App\Models\Estilista;
 use App\Models\GrupoProduto;
 use App\Models\Status;
+use App\Models\DirecionamentoComercial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -32,7 +33,7 @@ class ProdutoController extends Controller
         $validFilters = [
             'referencia', 'descricao', 'marca_id', 'marca', 'tecido_id',
             'estilista_id', 'estilista', 'grupo_id', 'grupo', 'status_id',
-            'status', 'localizacao_id', 'localizacao', 'localizacao_planejamento_id', 'incluir_excluidos',
+            'status', 'direcionamento_comercial_id', 'localizacao_id', 'localizacao', 'localizacao_planejamento_id', 'incluir_excluidos',
             'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim', 'concluido',
             'situacao_id', 'situacao', 'sort', 'direction', 'page'
         ];
@@ -109,6 +110,11 @@ class ProdutoController extends Controller
             if ($statusId) {
                 $query->where('status_id', $statusId);
             }
+        }
+
+        // Filtro por direcionamento comercial (apenas por ID)
+        if (!empty($filters['direcionamento_comercial_id'])) {
+            $query->where('direcionamento_comercial_id', $filters['direcionamento_comercial_id']);
         }
 
         // Filtro por localização (aceita ID ou nome)
@@ -215,6 +221,7 @@ class ProdutoController extends Controller
         $estilistas = Estilista::orderBy('nome_estilista')->get();
         $grupos = GrupoProduto::orderBy('descricao')->get();
         $statuses = Status::orderBy('descricao')->get();
+        $direcionamentosComerciais = DirecionamentoComercial::orderBy('descricao')->get();
         $localizacoes = \App\Models\Localizacao::orderBy('nome_localizacao')->get();
         $situacoes = \App\Models\Situacao::where('ativo', true)->orderBy('descricao')->get();
 
@@ -228,7 +235,7 @@ class ProdutoController extends Controller
 
         return view('produtos.index', compact(
             'produtos', 'marcas', 'tecidos', 'estilistas', 'grupos',
-            'statuses', 'localizacoes', 'localizacoesPlanejamento', 'situacoes', 'filters'
+            'statuses', 'direcionamentosComerciais', 'localizacoes', 'localizacoesPlanejamento', 'situacoes', 'filters'
         ));
     }
 
@@ -245,8 +252,9 @@ class ProdutoController extends Controller
         $grupos = GrupoProduto::where('ativo', true)->orderBy('descricao')->get();
         $statuses = Status::where('ativo', true)->orderBy('descricao')->get();
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $direcionamentosComerciais = DirecionamentoComercial::where('ativo', true)->orderBy('descricao')->get();
 
-        return view('produtos.create', compact('marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes'));
+        return view('produtos.create', compact('marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes', 'direcionamentosComerciais'));
     }
 
     /**
@@ -467,8 +475,9 @@ class ProdutoController extends Controller
         $grupos = GrupoProduto::where('ativo', true)->orderBy('descricao')->get();
         $statuses = Status::where('ativo', true)->orderBy('descricao')->get();
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $direcionamentosComerciais = DirecionamentoComercial::where('ativo', true)->orderBy('descricao')->get();
 
-        return view('produtos.edit', compact('produto', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes'));
+        return view('produtos.edit', compact('produto', 'marcas', 'tecidos', 'estilistas', 'grupos', 'statuses', 'localizacoes', 'direcionamentosComerciais'));
     }
 
     /**

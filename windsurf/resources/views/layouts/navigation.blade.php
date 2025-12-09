@@ -54,6 +54,7 @@
                                     <a href="{{ route('status.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('status.*') ? 'bg-gray-100' : '' }}">{{ __('Status') }}</a>
                                     <a href="{{ route('situacoes.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('situacoes.*') ? 'bg-gray-100' : '' }}">{{ __('Situações') }}</a>
                                     <a href="{{ route('localizacoes.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('localizacoes.*') && !request()->routeIs('localizacao-capacidade.*') ? 'bg-gray-100' : '' }}">{{ __('Localizações') }}</a>
+                                    <a href="{{ route('direcionamentos-comerciais.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('direcionamentos-comerciais.*') ? 'bg-gray-100' : '' }}">{{ __('Direcionamentos Comerciais') }}</a>
                                     <a href="{{ route('localizacao-capacidade.dashboard') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('localizacao-capacidade.*') ? 'bg-gray-100' : '' }}">{{ __('Capacidade Mensal') }}</a>
                                 </div>
                             </div>
@@ -90,9 +91,9 @@
             </div>
 
             <!-- Notifications Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6" x-data="{ 
-                open: false, 
-                notificacoes: [], 
+            <div class="hidden sm:flex sm:items-center sm:ms-6" x-data="{
+                open: false,
+                notificacoes: [],
                 count: 0,
                 loading: false,
                 async loadNotificacoes() {
@@ -116,16 +117,16 @@
                 }
             }">
                 <div class="relative">
-                    <button @click="open = !open; if(open) loadNotificacoes()" @click.away="open = false" 
+                    <button @click="open = !open; if(open) loadNotificacoes()" @click.away="open = false"
                             class="relative inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12h5v12z" />
                         </svg>
-                        <span x-show="count > 0" x-text="count" 
+                        <span x-show="count > 0" x-text="count"
                               class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1.25rem] h-5"></span>
                     </button>
 
-                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" 
+                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
                          class="absolute z-50 mt-2 w-80 rounded-md shadow-lg origin-top-right right-0 bg-white ring-1 ring-black ring-opacity-5" style="display: none;">
                         <div class="py-1">
                             <div class="px-4 py-2 border-b border-gray-200">
@@ -134,7 +135,7 @@
                                     <a href="{{ route('notificacoes.index') }}" class="text-xs text-blue-600 hover:text-blue-800">Ver todas</a>
                                 </div>
                             </div>
-                            
+
                             <div class="max-h-96 overflow-y-auto">
                                 <template x-if="loading">
                                     <div class="px-4 py-3 text-center text-gray-500">
@@ -144,13 +145,13 @@
                                         </svg>
                                     </div>
                                 </template>
-                                
+
                                 <template x-if="!loading && notificacoes.length === 0">
                                     <div class="px-4 py-3 text-center text-gray-500 text-sm">
                                         Nenhuma notificação nova
                                     </div>
                                 </template>
-                                
+
                                 <template x-for="notificacao in notificacoes" :key="notificacao.id">
                                     <a :href="notificacao.link" :title="notificacao.mensagem" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
                                         <div class="flex items-start space-x-3">
@@ -249,7 +250,7 @@
             <x-responsive-nav-link :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
                 {{ __('Movimentações') }}
             </x-responsive-nav-link>
-            
+
             @if(auth()->user()->localizacao_id)
             <x-responsive-nav-link :href="route('movimentacoes.minhas')" :active="request()->routeIs('movimentacoes.minhas')">
                 {{ __('Minhas Movimentações') }}
@@ -274,6 +275,24 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('grupo_produtos.index')" :active="request()->routeIs('grupo_produtos.*')" class="pl-6">
                     {{ __('Grupos de Produtos') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('tipos.index')" :active="request()->routeIs('tipos.*')" class="pl-6">
+                    {{ __('Tipos') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('status.index')" :active="request()->routeIs('status.*')" class="pl-6">
+                    {{ __('Status') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('situacoes.index')" :active="request()->routeIs('situacoes.*')" class="pl-6">
+                    {{ __('Situações') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('localizacoes.index')" :active="request()->routeIs('localizacoes.*') && !request()->routeIs('localizacao-capacidade.*')" class="pl-6">
+                    {{ __('Localizações') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('direcionamentos-comerciais.index')" :active="request()->routeIs('direcionamentos-comerciais.*')" class="pl-6">
+                    {{ __('Direcionamentos Comerciais') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')" class="pl-6">
+                    {{ __('Capacidade Mensal') }}
                 </x-responsive-nav-link>
 
             </div>
