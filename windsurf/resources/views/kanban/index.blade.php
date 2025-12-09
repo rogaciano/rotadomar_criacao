@@ -56,15 +56,15 @@
             <!-- Kanban Board com Botões de Navegação -->
             <div class="relative" style="min-height: 500px;">
                 <!-- Botão Esquerda -->
-                <button id="scroll-left" class="absolute left-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-lg rounded-full p-3 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="scroll-left" class="absolute left-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-md rounded-full p-2 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
+                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
 
                 <!-- Botão Direita -->
-                <button id="scroll-right" class="absolute right-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-lg rounded-full p-3 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
-                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="scroll-right" class="absolute right-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-md rounded-full p-2 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
+                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </button>
@@ -322,8 +322,8 @@
         .kanban-scroll-top {
             overflow-x: auto;
             overflow-y: hidden;
-            height: 24px;
-            padding-top: 6px;
+            height: 32px;
+            padding-top: 12px;
             scrollbar-width: thin;
             scrollbar-color: #94a3b8 #f1f5f9;
         }
