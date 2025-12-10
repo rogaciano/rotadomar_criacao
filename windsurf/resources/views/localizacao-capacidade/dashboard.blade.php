@@ -374,7 +374,7 @@
 
                                                                                     // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
                                                                                     $textoLimpo = strip_tags($obsTexto);
-                                                                                    $textoCompleto = $textoLimpo;
+                                                                                    $textoCompleto = $obsTexto; // Preservar formatação HTML com cores
                                                                                     $isTruncated = strlen($textoLimpo) > 80;
                                                                                     $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoLimpo;
                                                                                 @endphp
@@ -439,7 +439,7 @@
 
                                                                                                         // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
                                                                                                         $textoLimpo = strip_tags($obsTexto);
-                                                                                                        $textoCompletoLoc = $textoLimpo;
+                                                                                                        $textoCompletoLoc = $obsTexto; // Preservar formatação HTML com cores
                                                                                                         $isTruncatedLoc = strlen($textoLimpo) > 80;
                                                                                                         $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpo, 80) : $textoLimpo;
                                                                                                     @endphp
