@@ -131,7 +131,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                   ->whereMonth('data_prevista_faccao', $capacidade->mes)
                   ->whereYear('data_prevista_faccao', $capacidade->ano);
         })
-        ->with(['marca', 'grupoProduto', 'observacoes', 'localizacoes' => function($query) use ($capacidade) {
+        ->with(['marca', 'grupoProduto', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade) {
             $query->where('localizacao_id', $capacidade->localizacao_id)
                   ->whereMonth('data_prevista_faccao', $capacidade->mes)
                   ->whereYear('data_prevista_faccao', $capacidade->ano);
@@ -267,7 +267,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
             })
-            ->with(['marca', 'grupoProduto', 'status', 'localizacoes' => function($query) use ($capacidade, $mes, $ano) {
+            ->with(['marca', 'grupoProduto', 'status', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade, $mes, $ano) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
@@ -781,7 +781,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
             })
-            ->with(['marca', 'grupoProduto', 'status', 'localizacoes' => function($query) use ($capacidade, $mes, $ano) {
+            ->with(['marca', 'grupoProduto', 'status', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade, $mes, $ano) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);

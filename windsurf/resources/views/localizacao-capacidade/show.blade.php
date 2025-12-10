@@ -192,7 +192,7 @@
                                                                     // Limitar texto de forma segura para HTML
                                                                     $obsTextoShow = strip_tags($obs->observacao);
                                                                 @endphp
-                                                                <div class="mb-1 text-xs {{ !$loop->last || $obsLocalizacoes->count() > 0 ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                                <div class="mb-1 text-xs {{ !$loop->last || $obsLocalizacoes->count() > 0 || $produto->direcionamentoComercial ? 'border-b border-gray-200 pb-1' : '' }}">
                                                                     {{ Str::limit($obsTextoShow, 80) }}
                                                                 </div>
                                                             @endforeach
@@ -200,7 +200,7 @@
 
                                                         {{-- Observações das Localizações (Ordem de Produção) --}}
                                                         @foreach($obsLocalizacoes as $loc)
-                                                            <div class="mb-1 text-xs {{ !$loop->last ? 'border-b border-gray-200 pb-1' : '' }}">
+                                                            <div class="mb-1 text-xs {{ !$loop->last || $produto->direcionamentoComercial ? 'border-b border-gray-200 pb-1' : '' }}">
                                                                 @if($loc->pivot->ordem_producao)
                                                                     <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
                                                                 @endif
@@ -216,9 +216,27 @@
                                                                 @endif
                                                             </div>
                                                         @endforeach
+
+                                                        {{-- Direcionamento Comercial --}}
+                                                        @if($produto->direcionamentoComercial)
+                                                            <div class="mt-1 text-xs">
+                                                                <span class="font-semibold text-purple-700">Dir. Comercial:</span>
+                                                                <span class="text-gray-600">{{ $produto->direcionamentoComercial->descricao }}</span>
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 @else
-                                                    <span class="text-gray-400 italic text-xs">-</span>
+                                                    {{-- Se não tem observações, mostrar só o direcionamento comercial se existir --}}
+                                                    @if($produto->direcionamentoComercial)
+                                                        <div class="max-w-xs">
+                                                            <div class="text-xs">
+                                                                <span class="font-semibold text-purple-700">Dir. Comercial:</span>
+                                                                <span class="text-gray-600">{{ $produto->direcionamentoComercial->descricao }}</span>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <span class="text-gray-400 italic text-xs">-</span>
+                                                    @endif
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-gray-900">

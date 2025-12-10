@@ -467,7 +467,28 @@
                                                                             </table>
                                                                         @endif
 
-                                                                        @if(!$temObservacoes)
+                                                                        {{-- Direcionamento Comercial --}}
+                                                                        @php
+                                                                            // Verificar se pelo menos um produto tem direcionamento comercial
+                                                                            $direcionamentoComercial = null;
+                                                                            foreach($produtosGrupo as $produto) {
+                                                                                if($produto->direcionamentoComercial) {
+                                                                                    $direcionamentoComercial = $produto->direcionamentoComercial;
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        @endphp
+
+                                                                        @if($direcionamentoComercial)
+                                                                            <div class="mt-2 pt-2 border-t border-gray-200">
+                                                                                <div class="text-xs">
+                                                                                    <span class="font-semibold text-purple-700">Dir. Comercial:</span>
+                                                                                    <span class="text-gray-600">{{ $direcionamentoComercial->descricao }}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        @if(!$temObservacoes && !$direcionamentoComercial)
                                                                             <div class="text-xs text-gray-400 italic">-</div>
                                                                         @endif
                                                                     </td>

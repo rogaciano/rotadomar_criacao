@@ -198,15 +198,15 @@
                                                     @php
                                                         $isFicha = stripos($anexo->descricao ?? '', 'ficha') !== false;
                                                     @endphp
-                                                    <a href="{{ route('produtos.anexos.show', $anexo->id) }}"
-                                                       target="_blank"
-                                                       title="{{ $anexo->descricao }}"
-                                                       class="inline-flex items-center justify-center w-5 h-5 rounded-full border text-[10px]
-                                                              {{ $isFicha ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700' }}">
+                                                    <button type="button"
+                                                            onclick="abrirPreviewAnexo('{{ route('produtos.anexos.show', $anexo->id) }}', '{{ addslashes($anexo->descricao) }}')"
+                                                            title="{{ $anexo->descricao }}"
+                                                            class="inline-flex items-center justify-center w-5 h-5 rounded-full border text-[10px]
+                                                                   {{ $isFicha ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700' }}">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
                                                         </svg>
-                                                    </a>
+                                                    </button>
                                                 @endforeach
                                             </div>
                                         @endif
@@ -235,6 +235,46 @@
                 @endforelse
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- Modal de preview de anexo --}}
+    <div id="modal-preview-anexo"
+         class="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4"
+         style="display: none;">
+        <div class="bg-white flex flex-col shadow-2xl rounded-lg"
+             style="width: 1160px; height: 1640px; max-width: 100%; max-height: 98vh; resize: both; overflow: hidden; min-width: 320px; min-height: 480px;">
+            <!-- Cabeçalho -->
+            <div class="flex items-center justify-between px-4 py-2 border-b bg-gray-50 flex-shrink-0 cursor-move">
+                <h3 id="modal-preview-anexo-titulo" class="text-sm font-semibold text-gray-800">
+                    Preview do Anexo
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                            onclick="resetarTamanhoModal()"
+                            class="text-xs text-blue-600 hover:text-blue-800 mr-2"
+                            title="Resetar Tamanho">
+                        Resetar
+                    </button>
+                    <button type="button"
+                            onclick="fecharPreviewAnexo()"
+                            class="text-gray-500 hover:text-gray-700 text-2xl leading-none">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Corpo -->
+            <div class="flex-1 w-full h-full relative bg-gray-100 overflow-hidden">
+                <iframe id="modal-preview-anexo-frame"
+                        src=""
+                        class="w-full h-full border-0 absolute inset-0"
+                        title="Preview do Anexo PDF">
+                </iframe>
+            </div>
+            
+            <!-- Grip de redimensionamento visual -->
+            <div class="h-3 bg-gray-100 cursor-nwse-resize w-full flex-shrink-0 border-t border-gray-200" title="Arraste para redimensionar"></div>
         </div>
     </div>
 
@@ -327,6 +367,59 @@
                 });
             }
         });
+
+        function abrirPreviewAnexo(url, descricao) {
+            const modal = document.getElementById('modal-preview-anexo');
+            const iframe = document.getElementById('modal-preview-anexo-frame');
+            const titulo = document.getElementById('modal-preview-anexo-titulo');
+
+            if (titulo) {
+                titulo.textContent = descricao ? ('Anexo - ' + descricao) : 'Preview do Anexo';
+            }
+
+            // Forçar zoom mais adequado no visualizador de PDF (quando suportado)
+            let pdfUrl = url;
+            if (!pdfUrl.includes('#')) {
+                pdfUrl += '#view=FitH';
+            }
+
+            iframe.src = pdfUrl;
+            modal.classList.remove('hidden');
+            modal.style.display = 'block';
+        }
+
+        function fecharPreviewAnexo() {
+            const modal = document.getElementById('modal-preview-anexo');
+            const iframe = document.getElementById('modal-preview-anexo-frame');
+
+            iframe.src = '';
+            modal.style.display = 'none';
+        }
+
+        // Fechar ao clicar fora do conteúdo do modal
+        document.addEventListener('click', function (e) {
+            const modal = document.getElementById('modal-preview-anexo');
+            if (!modal || modal.style.display === 'none') return;
+
+            if (e.target === modal) {
+                fecharPreviewAnexo();
+            }
+        });
+
+        // Fechar com ESC
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                fecharPreviewAnexo();
+            }
+        });
+
+        function resetarTamanhoModal() {
+            const modalContent = document.querySelector('#modal-preview-anexo > div');
+            if (modalContent) {
+                modalContent.style.width = '1160px';
+                modalContent.style.height = '1640px';
+            }
+        }
     </script>
     @endpush
 
