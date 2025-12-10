@@ -20,10 +20,27 @@ class KanbanController extends Controller
         $mes = $request->get('mes', now()->month);
         $ano = $request->get('ano', now()->year);
         $direcionamentoComercialId = $request->get('direcionamento_comercial_id');
+        // Pode vir string única ou array do multi-select; normalizar para array
+        $localizacaoId = $request->get('localizacao_id');
+        $localizacaoIds = collect($localizacaoId)->filter()->values()->all();
 
-        // Buscar apenas localizações ativas que fazem movimentação
-        $localizacoes = Localizacao::where('ativo', true)
+        // Lista completa de localizações ativas, com capacidade > 0 e que fazem movimentação (para o filtro)
+        $todasLocalizacoes = Localizacao::where('ativo', true)
             ->where('faz_movimentacao', true)
+            ->where('capacidade', '>', 0)
+            ->orderBy('nome_localizacao')
+            ->get();
+
+        // Localizações que serão exibidas nas colunas do Kanban (pode ser filtrada)
+        $localizacoesQuery = Localizacao::where('ativo', true)
+            ->where('faz_movimentacao', true)
+            ->where('capacidade', '>', 0);
+
+        if (!empty($localizacaoIds)) {
+            $localizacoesQuery->whereIn('id', $localizacaoIds);
+        }
+
+        $localizacoes = $localizacoesQuery
             ->orderBy('nome_localizacao')
             ->get();
 
@@ -99,6 +116,8 @@ class KanbanController extends Controller
             'anos',
             'mes',
             'ano',
+            'todasLocalizacoes',
+            'localizacaoIds',
             'direcionamentosComerciais',
             'direcionamentoComercialId'
         ));

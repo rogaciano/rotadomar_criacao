@@ -11,7 +11,7 @@
             <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
                 <form method="GET" action="{{ route('kanban.index') }}" class="flex flex-wrap items-end gap-4">
                     <!-- Filtro de Mês -->
-                    <div class="flex-1 min-w-[180px]">
+                    <div class="flex-1 min-w-[140px]">
                         <label for="mes" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
                         <select name="mes" id="mes" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             @foreach($meses as $numero => $nome)
@@ -23,12 +23,26 @@
                     </div>
 
                     <!-- Filtro de Ano -->
-                    <div class="flex-1 min-w-[160px]">
+                    <div class="flex-1 min-w-[120px]">
                         <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
                         <select name="ano" id="ano" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             @foreach($anos as $anoOpcao)
                                 <option value="{{ $anoOpcao }}" {{ $ano == $anoOpcao ? 'selected' : '' }}>
                                     {{ $anoOpcao }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Filtro de Localização (multi-select com Select2) -->
+                    <div class="flex-1 min-w-[220px]">
+                        <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização (uma ou mais)</label>
+                        <select name="localizacao_id[]" id="localizacao_id" multiple
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-localizacao">
+                            @foreach($todasLocalizacoes as $localizacao)
+                                <option value="{{ $localizacao->id }}"
+                                    {{ !empty($localizacaoIds ?? []) && in_array($localizacao->id, $localizacaoIds) ? 'selected' : '' }}>
+                                    {{ $localizacao->nome_localizacao }}
                                 </option>
                             @endforeach
                         </select>
@@ -154,7 +168,7 @@
                                         </div>
                                     @endif
 
-                                    <!-- Quantidade e Data Prevista -->
+                                    <!-- Quantidade, Data Prevista e Anexos -->
                                     <div class="mt-2 pt-2 border-t border-gray-200 space-y-1">
                                         <div class="flex items-center justify-between text-xs">
                                             <span class="flex items-center text-gray-600">
@@ -166,15 +180,35 @@
                                             <span class="font-semibold text-gray-900">{{ $produto->quantidade_alocada ?? 0 }}</span>
                                         </div>
                                         @if($produto->data_prevista)
-                                        <div class="flex items-center justify-between text-xs">
-                                            <span class="flex items-center text-gray-600">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                                </svg>
-                                                Previsão:
-                                            </span>
-                                            <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($produto->data_prevista)->format('d/m/Y') }}</span>
-                                        </div>
+                                            <div class="flex items-center justify-between text-xs">
+                                                <span class="flex items-center text-gray-600">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    Previsão:
+                                                </span>
+                                                <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($produto->data_prevista)->format('d/m/Y') }}</span>
+                                            </div>
+                                        @endif
+
+                                        @if($produto->anexos && $produto->anexos->count())
+                                            <div class="flex items-center justify-start space-x-1 pt-1 border-t border-dashed border-gray-200 mt-1">
+                                                <span class="text-xs text-gray-600 mr-1">Anexos:</span>
+                                                @foreach($produto->anexos as $anexo)
+                                                    @php
+                                                        $isFicha = stripos($anexo->descricao ?? '', 'ficha') !== false;
+                                                    @endphp
+                                                    <a href="{{ route('produtos.anexos.show', $anexo->id) }}"
+                                                       target="_blank"
+                                                       title="{{ $anexo->descricao }}"
+                                                       class="inline-flex items-center justify-center w-5 h-5 rounded-full border text-[10px]
+                                                              {{ $isFicha ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700' }}">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                                                        </svg>
+                                                    </a>
+                                                @endforeach
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -282,6 +316,16 @@
                     requestAnimationFrame(() => { isScrolling = false; });
                 }
             });
+
+            // Inicializar Select2 no filtro de Localização, se disponível
+            if (window.jQuery && jQuery.fn && jQuery.fn.select2) {
+                jQuery('.js-select2-localizacao').select2({
+                    width: '100%',
+                    placeholder: 'Selecione uma ou mais localizações',
+                    allowClear: true,
+                    language: 'pt-BR'
+                });
+            }
         });
     </script>
     @endpush

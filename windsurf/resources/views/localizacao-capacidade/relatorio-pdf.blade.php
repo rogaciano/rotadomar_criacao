@@ -44,7 +44,6 @@
 
         .localizacao-section {
             margin-bottom: 25px;
-            page-break-inside: avoid;
         }
 
         .localizacao-header {
