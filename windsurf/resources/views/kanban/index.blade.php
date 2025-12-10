@@ -135,7 +135,7 @@
                         <!-- Cards dos Produtos -->
                         <div class="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto p-4 pt-3 pr-2">
                             @forelse($dados['produtos'] as $produto)
-                                <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 border-{{ $produto->marca->cor_fundo ?? 'gray' }}-500">
+                                <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 {{ $produto->direcionamentoComercial ? 'border-blue-500' : 'border-' . ($produto->marca->cor_fundo ?? 'gray') . '-500' }}">
                                     <!-- Referência -->
                                     <div class="flex items-start justify-between mb-2">
                                         <a href="{{ route('produtos.show', $produto->id) }}"
@@ -146,13 +146,13 @@
                                     </div>
 
                                     <!-- Descrição -->
-                                    <p class="text-sm text-gray-700 mb-1 line-clamp-2">
+                                    <p class="text-md text-gray-700 mb-1 line-clamp-2">
                                         {{ $produto->descricao }}
                                     </p>
 
                                     <!-- Direcionamento Comercial (texto em negrito) -->
                                     @if($produto->direcionamentoComercial)
-                                        <p class="text-xs text-gray-800 font-semibold mb-2">
+                                        <p class="text-blue-600 hover:text-blue-800 font-bold text-md">
                                             {{ $produto->direcionamentoComercial->descricao }}
                                         </p>
                                     @endif
@@ -272,7 +272,7 @@
                         title="Preview do Anexo PDF">
                 </iframe>
             </div>
-            
+
             <!-- Grip de redimensionamento visual -->
             <div class="h-3 bg-gray-100 cursor-nwse-resize w-full flex-shrink-0 border-t border-gray-200" title="Arraste para redimensionar"></div>
         </div>
