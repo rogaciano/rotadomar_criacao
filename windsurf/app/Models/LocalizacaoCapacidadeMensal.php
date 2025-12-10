@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class LocalizacaoCapacidadeMensal extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $table = 'localizacao_capacidade_mensal';
 
@@ -79,5 +81,27 @@ class LocalizacaoCapacidadeMensal extends Model
         }
         
         return round(($this->getProdutosPrevistos() / $this->capacidade) * 100, 1);
+    }
+
+    /**
+     * Configuração do registro de atividades
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                $mes = $this->getMesAnoFormatadoAttribute();
+                $localizacao = $this->localizacao ? $this->localizacao->nome_localizacao : 'N/A';
+                
+                return match($eventName) {
+                    'created' => "Capacidade criada: {$localizacao} - {$mes}",
+                    'updated' => "Capacidade atualizada: {$localizacao} - {$mes}",
+                    'deleted' => "Capacidade excluída: {$localizacao} - {$mes}",
+                    default => "{$eventName} em capacidade: {$localizacao} - {$mes}"
+                };
+            });
     }
 }

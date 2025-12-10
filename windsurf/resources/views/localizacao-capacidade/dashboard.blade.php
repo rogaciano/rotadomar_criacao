@@ -359,24 +359,27 @@
                                                                             @foreach($obs as $observacao)
                                                                                 @php
                                                                                     // Processar observações (suporta HTML do Quill e tags customizadas)
-                                                                                    $obsTexto = $observacao->observacao;
-
-                                                                                    // Se não contém tags HTML do Quill, processar tags customizadas
-                                                                                    if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
-                                                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                    $obsTextoOriginal = $observacao->observacao;
+                                                                                    
+                                                                                    // Aplicar formatação de cores
+                                                                                    if (strpos($obsTextoOriginal, '<p>') === false && strpos($obsTextoOriginal, '<span') === false) {
+                                                                                        $obsTextoOriginal = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        $obsTextoOriginal = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        $obsTextoOriginal = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        $obsTextoOriginal = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        $obsTextoOriginal = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        $obsTextoOriginal = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        $obsTextoOriginal = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginal);
                                                                                     }
 
-                                                                                    // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
-                                                                                    $textoLimpo = strip_tags($obsTexto);
-                                                                                    $textoCompleto = $obsTexto; // Preservar formatação HTML com cores
+                                                                                    $textoCompleto = $obsTextoOriginal;
+                                                                                    
+                                                                                    // Extrair texto limpo para verificar tamanho
+                                                                                    $textoLimpo = strip_tags($textoCompleto);
                                                                                     $isTruncated = strlen($textoLimpo) > 80;
-                                                                                    $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoLimpo;
+                                                                                    
+                                                                                    // Para versão truncada, truncar o texto limpo e adicionar reticências
+                                                                                    $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoCompleto;
                                                                                 @endphp
                                                                                 @if($isTruncated)
                                                                                     <div class="text-xs text-gray-700 mb-1" x-data="{ expanded: false }">
@@ -428,20 +431,25 @@
                                                                                                 @if($loc->pivot->observacao)
                                                                                                     @php
                                                                                                         // Processar tags de cor nas observações
-                                                                                                        $obsTexto = $loc->pivot->observacao;
-                                                                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
-                                                                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
+                                                                                                        $obsTextoOriginalLoc = $loc->pivot->observacao;
+                                                                                                        
+                                                                                                        // Aplicar formatação de cores
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                        $obsTextoOriginalLoc = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
 
-                                                                                                        // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
-                                                                                                        $textoLimpo = strip_tags($obsTexto);
-                                                                                                        $textoCompletoLoc = $obsTexto; // Preservar formatação HTML com cores
-                                                                                                        $isTruncatedLoc = strlen($textoLimpo) > 80;
-                                                                                                        $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpo, 80) : $textoLimpo;
+                                                                                                        $textoCompletoLoc = $obsTextoOriginalLoc;
+                                                                                                        
+                                                                                                        // Extrair texto limpo para verificar tamanho
+                                                                                                        $textoLimpoLoc = strip_tags($textoCompletoLoc);
+                                                                                                        $isTruncatedLoc = strlen($textoLimpoLoc) > 80;
+                                                                                                        
+                                                                                                        // Para versão truncada, truncar o texto limpo e adicionar reticências
+                                                                                                        $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpoLoc, 80) : $textoCompletoLoc;
                                                                                                     @endphp
                                                                                                     @if($isTruncatedLoc)
                                                                                                         <span class="text-gray-600" x-data="{ expanded: false }">
