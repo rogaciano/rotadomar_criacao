@@ -83,22 +83,33 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 ->withInput();
         }
 
-        // Verificar se já existe capacidade para esta localização/mês/ano
-        $existente = LocalizacaoCapacidadeMensal::where('localizacao_id', $request->localizacao_id)
+        // Verificar se já existe capacidade (inclusive soft-deleted) para esta localização/mês/ano
+        $existente = LocalizacaoCapacidadeMensal::withTrashed()
+            ->where('localizacao_id', $request->localizacao_id)
             ->where('mes', $request->mes)
             ->where('ano', $request->ano)
             ->first();
 
+        $data = $request->only(['localizacao_id', 'mes', 'ano', 'capacidade', 'observacoes']);
+
+        if (empty(trim($data['observacoes'] ?? ''))) {
+            $data['observacoes'] = null;
+        }
+
         if ($existente) {
+            // Se já existe e está soft-deleted, restaurar e atualizar
+            if ($existente->trashed()) {
+                $existente->restore();
+                $existente->update($data);
+
+                return redirect()->route('localizacao-capacidade.index')
+                    ->with('success', 'Capacidade mensal restaurada e atualizada com sucesso!');
+            }
+
+            // Se já existe ativo, manter a validação atual de não duplicar
             return redirect()->route('localizacao-capacidade.create')
                 ->withErrors(['mes' => 'Já existe uma capacidade cadastrada para esta localização neste mês/ano.'])
                 ->withInput();
-        }
-
-        $data = $request->only(['localizacao_id', 'mes', 'ano', 'capacidade', 'observacoes']);
-        
-        if (empty(trim($data['observacoes'] ?? ''))) {
-            $data['observacoes'] = null;
         }
 
         LocalizacaoCapacidadeMensal::create($data);
@@ -113,7 +124,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
     public function show(string $id)
     {
         $capacidade = LocalizacaoCapacidadeMensal::with('localizacao')->findOrFail($id);
-        
+
         // Buscar produtos diretamente pela data_prevista_faccao
         $produtos = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade) {
             $query->where('localizacao_id', $capacidade->localizacao_id)
@@ -141,7 +152,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
     public function edit(string $id)
     {
         $capacidade = LocalizacaoCapacidadeMensal::findOrFail($id);
-        
+
         $localizacoes = Localizacao::where('ativo', true)
             ->orderBy('nome_localizacao')
             ->get();
@@ -194,7 +205,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         }
 
         $data = $request->only(['localizacao_id', 'mes', 'ano', 'capacidade', 'observacoes']);
-        
+
         if (empty(trim($data['observacoes'] ?? ''))) {
             $data['observacoes'] = null;
         }
@@ -240,12 +251,12 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $query = LocalizacaoCapacidadeMensal::with('localizacao')
             ->where('mes', $mes)
             ->where('ano', $ano);
-            
+
         // Aplicar filtro de localização se selecionado
         if ($localizacaoId) {
             $query->where('localizacao_id', $localizacaoId);
         }
-        
+
         $capacidades = $query->get();
 
         // Adicionar informações de produtos previstos
@@ -296,7 +307,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         return response()->json([
             'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
         ], 410);
-        
+
         /* CÓDIGO ANTIGO COMENTADO
         $localizacaoId = $request->localizacao_id;
         $mes = $request->mes;
@@ -342,7 +353,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
             // Calcula quanto ainda falta
             $quantidadeFaltante = $excedente - $quantidadeAcumulada;
-            
+
             if ($alocacao->quantidade <= $quantidadeFaltante) {
                 // Alocação cabe inteira - move tudo
                 $alocacoesSelecionadas[] = [
@@ -383,7 +394,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             'alocacoes' => collect($alocacoesSelecionadas)->map(function($item) {
                 $alocacao = $item['alocacao'];
                 $produto = $alocacao->produto;
-                
+
                 return [
                     'alocacao_id' => $alocacao->id,
                     'produto_id' => $produto->id,
@@ -413,7 +424,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         return response()->json([
             'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
         ], 410);
-        
+
         /* CÓDIGO ANTIGO COMENTADO
         $validator = Validator::make($request->all(), [
             'alocacoes' => 'required|array',
@@ -439,22 +450,22 @@ class LocalizacaoCapacidadeMensalController extends Controller
         try {
             foreach ($request->alocacoes as $alocacaoData) {
                 $alocacao = \App\Models\ProdutoAlocacaoMensal::find($alocacaoData['alocacao_id']);
-                
+
                 if (!$alocacao) {
                     $erros[] = "Alocação ID {$alocacaoData['alocacao_id']} não encontrada";
                     continue;
                 }
 
                 $quantidadeMover = $alocacaoData['quantidade_mover'];
-                
+
                 if ($quantidadeMover < $alocacao->quantidade) {
                     // DIVIDIR ALOCAÇÃO
                     $quantidadeFicar = $alocacao->quantidade - $quantidadeMover;
-                    
+
                     // Reduzir quantidade da alocação original
                     $alocacao->quantidade = $quantidadeFicar;
                     $alocacao->save();
-                    
+
                     // Criar nova alocação no mês destino
                     \App\Models\ProdutoAlocacaoMensal::create([
                         'produto_id' => $alocacao->produto_id,
@@ -466,9 +477,9 @@ class LocalizacaoCapacidadeMensalController extends Controller
                         'usuario_id' => auth()->id(),
                         'observacoes' => "Redistribuído de {$alocacao->mes_ano_formatado}. " . ($request->observacoes ?? '')
                     ]);
-                    
+
                     $divididos++;
-                    
+
                 } else {
                     // MOVER ALOCAÇÃO COMPLETA
                     $alocacao->mes = $request->mes_destino;
@@ -517,7 +528,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         } catch (\Exception $e) {
             \DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao redistribuir: ' . $e->getMessage()
@@ -565,13 +576,25 @@ class LocalizacaoCapacidadeMensalController extends Controller
             $erros = [];
 
             foreach ($localizacoes as $localizacao) {
-                // Verificar se já existe registro para este mês/ano
-                $existe = LocalizacaoCapacidadeMensal::where('localizacao_id', $localizacao->id)
+                // Verificar se já existe registro (inclusive soft-deleted) para este mês/ano
+                $registro = LocalizacaoCapacidadeMensal::withTrashed()
+                    ->where('localizacao_id', $localizacao->id)
                     ->where('mes', $mes)
                     ->where('ano', $ano)
-                    ->exists();
+                    ->first();
 
-                if ($existe) {
+                if ($registro) {
+                    // Se existir e estiver soft-deleted, restaurar e atualizar capacidade
+                    if ($registro->trashed()) {
+                        try {
+                            $registro->restore();
+                            $registro->capacidade = $localizacao->capacidade;
+                            $registro->save();
+                        } catch (\Exception $e) {
+                            $erros[] = "Erro ao restaurar capacidade para {$localizacao->nome_localizacao}: " . $e->getMessage();
+                        }
+                    }
+
                     $jaExistentes++;
                     continue;
                 }
@@ -592,11 +615,11 @@ class LocalizacaoCapacidadeMensalController extends Controller
             $mesesNomes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
             $mensagem = "Capacidades geradas para {$mesesNomes[$mes]}/{$ano}: ";
             $mensagem .= "{$criados} criada(s)";
-            
+
             if ($jaExistentes > 0) {
                 $mensagem .= ", {$jaExistentes} já existente(s)";
             }
-            
+
             if (!empty($erros)) {
                 $mensagem .= ". Alguns erros ocorreram.";
             }
@@ -626,7 +649,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         return response()->json([
             'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
         ], 410);
-        
+
         /* CÓDIGO ANTIGO COMENTADO
         $validator = Validator::make($request->all(), [
             'historico_id' => 'required|exists:produto_redistribuicao_historico,id'
@@ -692,7 +715,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         } catch (\Exception $e) {
             \DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao reverter redistribuição: ' . $e->getMessage()
@@ -742,12 +765,12 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $query = LocalizacaoCapacidadeMensal::with('localizacao')
             ->where('mes', $mes)
             ->where('ano', $ano);
-            
+
         // Aplicar filtro de localização se selecionado
         if ($localizacaoId) {
             $query->where('localizacao_id', $localizacaoId);
         }
-        
+
         $capacidades = $query->get();
 
         // Adicionar informações de produtos previstos
@@ -790,7 +813,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $mesNome = $meses[$mes] ?? '';
 
         $pdf = \PDF::loadView('localizacao-capacidade.relatorio-pdf', compact('dadosDashboard', 'mes', 'ano', 'mesNome'));
-        
+
         return $pdf->stream("Relatorio_Capacidade_{$mesNome}_{$ano}.pdf");
     }
 
@@ -826,17 +849,17 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         // Preparar dados dos filtros para exibição no PDF
         $filtros = [
-            'localizacao' => $request->filled('localizacao_id') 
+            'localizacao' => $request->filled('localizacao_id')
                 ? $localizacoes->firstWhere('id', $request->localizacao_id)->nome_localizacao ?? 'N/A'
                 : 'Todas',
-            'mes' => $request->filled('mes') 
+            'mes' => $request->filled('mes')
                 ? ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][$request->mes]
                 : 'Todos',
             'ano' => $request->filled('ano') ? $request->ano : 'Todos'
         ];
 
         $pdf = \PDF::loadView('localizacao-capacidade.listagem-pdf', compact('capacidades', 'filtros'));
-        
+
         return $pdf->stream("Listagem_Capacidades_Mensais_" . now()->format('d_m_Y_H_i') . ".pdf");
     }
 }
