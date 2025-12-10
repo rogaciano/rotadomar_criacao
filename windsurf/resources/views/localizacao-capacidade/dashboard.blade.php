@@ -374,13 +374,24 @@
 
                                                                                     // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
                                                                                     $textoLimpo = strip_tags($obsTexto);
-                                                                                    if (strlen($textoLimpo) > 120) {
-                                                                                        $obsTexto = Str::limit($textoLimpo, 120);
-                                                                                    }
+                                                                                    $textoCompleto = $textoLimpo;
+                                                                                    $isTruncated = strlen($textoLimpo) > 80;
+                                                                                    $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoLimpo;
                                                                                 @endphp
-                                                                                <div class="text-xs text-gray-700 mb-1">
-                                                                                    {!! $obsTexto !!}
-                                                                                </div>
+                                                                                @if($isTruncated)
+                                                                                    <div class="text-xs text-gray-700 mb-1" x-data="{ expanded: false }">
+                                                                                        <span x-show="!expanded">{!! $obsTextoTruncado !!}</span>
+                                                                                        <span x-show="expanded" x-cloak>{!! $textoCompleto !!}</span>
+                                                                                        <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
+                                                                                            <span x-show="!expanded">[+]</span>
+                                                                                            <span x-show="expanded" x-cloak>[-]</span>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                @else
+                                                                                    <div class="text-xs text-gray-700 mb-1">
+                                                                                        {!! $textoCompleto !!}
+                                                                                    </div>
+                                                                                @endif
                                                                             @endforeach
                                                                         @endif
 
@@ -428,11 +439,22 @@
 
                                                                                                         // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
                                                                                                         $textoLimpo = strip_tags($obsTexto);
-                                                                                                        if (strlen($textoLimpo) > 80) {
-                                                                                                            $obsTexto = Str::limit($textoLimpo, 80);
-                                                                                                        }
+                                                                                                        $textoCompletoLoc = $textoLimpo;
+                                                                                                        $isTruncatedLoc = strlen($textoLimpo) > 80;
+                                                                                                        $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpo, 80) : $textoLimpo;
                                                                                                     @endphp
-                                                                                                    <span class="text-gray-600">{!! $obsTexto !!}</span>
+                                                                                                    @if($isTruncatedLoc)
+                                                                                                        <span class="text-gray-600" x-data="{ expanded: false }">
+                                                                                                            <span x-show="!expanded">{!! $obsTextoTruncadoLoc !!}</span>
+                                                                                                            <span x-show="expanded" x-cloak>{!! $textoCompletoLoc !!}</span>
+                                                                                                            <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
+                                                                                                                <span x-show="!expanded">[+]</span>
+                                                                                                                <span x-show="expanded" x-cloak>[-]</span>
+                                                                                                            </button>
+                                                                                                        </span>
+                                                                                                    @else
+                                                                                                        <span class="text-gray-600">{!! $textoCompletoLoc !!}</span>
+                                                                                                    @endif
                                                                                                 @endif
                                                                                             </div>
                                                                                         </td>
