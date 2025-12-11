@@ -48,13 +48,14 @@
                         </select>
                     </div>
 
-                    <!-- Filtro de Direcionamento Comercial -->
+                    <!-- Filtro de Direcionamento Comercial (multi-select com Select2) -->
                     <div class="flex-1 min-w-[220px]">
-                        <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
-                        <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Todos</option>
+                        <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial (um ou mais)</label>
+                        <select name="direcionamento_comercial_id[]" id="direcionamento_comercial_id" multiple
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-direcionamento">
                             @foreach($direcionamentosComerciais as $direcionamento)
-                                <option value="{{ $direcionamento->id }}" {{ ($direcionamentoComercialId ?? null) == $direcionamento->id ? 'selected' : '' }}>
+                                <option value="{{ $direcionamento->id }}"
+                                    {{ !empty($direcionamentoComercialIds ?? []) && in_array($direcionamento->id, $direcionamentoComercialIds) ? 'selected' : '' }}>
                                     {{ $direcionamento->descricao }}
                                 </option>
                             @endforeach
@@ -81,15 +82,15 @@
                         <span>Exibindo produtos com previsão de facção em <strong>{{ $meses[$mes] }}/{{ $ano }}</strong></span>
                     </div>
 
-                    @if(!empty($direcionamentoComercialId))
+                    @if(!empty($direcionamentoComercialIds))
                         @php
-                            $direcionamentoAtual = $direcionamentosComerciais->firstWhere('id', $direcionamentoComercialId);
+                            $direcionamentosSelecionados = $direcionamentosComerciais->whereIn('id', $direcionamentoComercialIds);
                         @endphp
-                        @if($direcionamentoAtual)
+                        @foreach($direcionamentosSelecionados as $direcionamentoAtual)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                 Direcionamento: <span class="ml-1 font-semibold">{{ $direcionamentoAtual->descricao }}</span>
                             </span>
-                        @endif
+                        @endforeach
                     @endif
                 </div>
             </div>
@@ -357,11 +358,18 @@
                 }
             });
 
-            // Inicializar Select2 no filtro de Localização, se disponível
+            // Inicializar Select2 nos filtros, se disponível
             if (window.jQuery && jQuery.fn && jQuery.fn.select2) {
                 jQuery('.js-select2-localizacao').select2({
                     width: '100%',
                     placeholder: 'Selecione uma ou mais localizações',
+                    allowClear: true,
+                    language: 'pt-BR'
+                });
+
+                jQuery('.js-select2-direcionamento').select2({
+                    width: '100%',
+                    placeholder: 'Selecione um ou mais direcionamentos',
                     allowClear: true,
                     language: 'pt-BR'
                 });

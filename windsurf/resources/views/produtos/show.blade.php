@@ -943,7 +943,7 @@
                                     <label for="observacao" class="block text-sm font-medium text-gray-700 mb-2">Observação *</label>
 
                                     <!-- Editor Quill -->
-                                    <div id="editor-container" style="height: 150px; background: white; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
+                                    <div id="editor-container" style="height: 75px; background: white; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
                                     <textarea
                                         id="observacao"
                                         name="observacao"
@@ -952,7 +952,9 @@
 
                                     <div class="mt-2 text-xs text-gray-500">
                                         <p>💡 Use a barra de ferramentas acima para formatar o texto com cores, negrito, etc.</p>
-                                        <p class="mt-1 text-gray-400">Máximo de 1000 caracteres</p>
+                                        <p class="mt-1" id="char-counter">
+                                            <span id="char-count">0</span> / 255 caracteres
+                                        </p>
                                     </div>
                                 </div>
 
@@ -1566,12 +1568,33 @@
                 // Sincronizar conteúdo do editor com o textarea oculto
                 quillEditor.on('text-change', function() {
                     const html = quillEditor.root.innerHTML;
+                    const htmlLength = html.length;
+
+                    // Atualizar contador (validamos o HTML completo pois é isso que vai pro banco)
+                    const charCountEl = document.getElementById('char-count');
+                    const charCounterEl = document.getElementById('char-counter');
+                    charCountEl.textContent = htmlLength;
+
+                    // Mudar cor se exceder o limite
+                    if (htmlLength > 255) {
+                        charCounterEl.classList.add('text-red-600', 'font-semibold');
+                        charCounterEl.classList.remove('text-gray-500');
+                    } else {
+                        charCounterEl.classList.remove('text-red-600', 'font-semibold');
+                        charCounterEl.classList.add('text-gray-500');
+                    }
+
                     document.getElementById('observacao').value = html;
                 });
             } else {
                 // Limpar o editor se já existe
                 quillEditor.setText('');
             }
+
+            // Resetar contador
+            document.getElementById('char-count').textContent = '0';
+            document.getElementById('char-counter').classList.remove('text-red-600', 'font-semibold');
+            document.getElementById('char-counter').classList.add('text-gray-500');
         }
 
         function fecharModalObservacao() {
@@ -1617,22 +1640,33 @@
 
             // Validar se há conteúdo
             const observacaoValue = document.getElementById('observacao').value;
-            const textoLimpo = quillEditor ? quillEditor.getText().trim() : observacaoValue.trim();
+            const htmlLength = observacaoValue.length;
 
-            console.log('Valor do textarea:', observacaoValue);
+            // Verificar se há texto real (remover tags HTML para validação de conteúdo)
+            const text = quillEditor ? quillEditor.getText() : observacaoValue;
+            const textoLimpo = text.replace(/\n$/, '').trim();
+
+            console.log('HTML:', observacaoValue);
+            console.log('Tamanho do HTML:', htmlLength);
             console.log('Texto limpo:', textoLimpo);
             console.log('Produto ID:', document.querySelector('input[name="produto_id"]').value);
+
+            if (!textoLimpo || textoLimpo === '') {
+                alert('Por favor, digite uma observação.');
+                return;
+            }
+
+            // Validar limite de caracteres DO HTML (não do texto)
+            if (htmlLength > 255) {
+                alert('A observação não pode ter mais de 255 caracteres (incluindo formatação). Atualmente: ' + htmlLength + ' caracteres.\n\nDica: Use menos formatação de cores/fundos para reduzir o tamanho.');
+                return;
+            }
 
             // Criar FormData manualmente para garantir que os dados estão corretos
             const formData = new FormData();
             formData.append('produto_id', document.querySelector('input[name="produto_id"]').value);
             formData.append('observacao', observacaoValue);
             formData.append('_token', '{{ csrf_token() }}');
-
-            if (!textoLimpo || textoLimpo === '') {
-                alert('Por favor, digite uma observação.');
-                return;
-            }
 
             submitButton.disabled = true;
             submitButton.textContent = 'Salvando...';

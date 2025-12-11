@@ -19,10 +19,14 @@ class KanbanController extends Controller
         // Obter filtros
         $mes = $request->get('mes', now()->month);
         $ano = $request->get('ano', now()->year);
-        $direcionamentoComercialId = $request->get('direcionamento_comercial_id');
+
         // Pode vir string única ou array do multi-select; normalizar para array
         $localizacaoId = $request->get('localizacao_id');
         $localizacaoIds = collect($localizacaoId)->filter()->values()->all();
+
+        // Direcionamento Comercial - agora também multi-select
+        $direcionamentoComercialId = $request->get('direcionamento_comercial_id');
+        $direcionamentoComercialIds = collect($direcionamentoComercialId)->filter()->values()->all();
 
         // Lista completa de localizações ativas, com capacidade > 0 e que fazem movimentação (para o filtro)
         $todasLocalizacoes = Localizacao::where('ativo', true)
@@ -65,9 +69,9 @@ class KanbanController extends Controller
                           ->whereYear('data_prevista_faccao', $ano);
                 }
             ])
-            // Filtro opcional por Direcionamento Comercial
-            ->when($direcionamentoComercialId, function($query) use ($direcionamentoComercialId) {
-                $query->where('direcionamento_comercial_id', $direcionamentoComercialId);
+            // Filtro opcional por Direcionamento Comercial (agora multi-select)
+            ->when(!empty($direcionamentoComercialIds), function($query) use ($direcionamentoComercialIds) {
+                $query->whereIn('direcionamento_comercial_id', $direcionamentoComercialIds);
             })
             ->get()
             ->map(function($produto) {
@@ -119,7 +123,7 @@ class KanbanController extends Controller
             'todasLocalizacoes',
             'localizacaoIds',
             'direcionamentosComerciais',
-            'direcionamentoComercialId'
+            'direcionamentoComercialIds'
         ));
     }
 }
