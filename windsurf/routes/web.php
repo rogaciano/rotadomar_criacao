@@ -22,6 +22,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\DirecionamentoComercialController;
+use App\Http\Controllers\UiPreferenceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -142,6 +143,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('produtos-inconsistencias', [ProdutoController::class, 'inconsistencias'])->name('produtos.inconsistencias');
     Route::get('produtos-lista-pdf', [ProdutoController::class, 'generateListPdf'])->name('produtos.lista.pdf');
     Route::post('produtos/{id}/reprogramar', [ProdutoController::class, 'reprogramar'])->name('produtos.reprogramar');
+
+    // Preferências de UI (por usuário)
+    Route::post('ui/filters-visibility', [UiPreferenceController::class, 'setFiltersVisibility'])->name('ui.filters-visibility');
 
     // Routes para Anexos de Produtos
     Route::get('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'show'])->name('produtos.anexos.show');

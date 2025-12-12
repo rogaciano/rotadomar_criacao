@@ -37,15 +37,26 @@
                     <!-- Cabeçalho dos Filtros com Toggle -->
                     <div class="mb-4 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-800">Filtros</h3>
-                        <button type="button" id="toggle-filters-btn" class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            <svg id="filter-icon-show" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                            <svg id="filter-icon-hide" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                            </svg>
-                            <span id="filter-toggle-text">Ocultar Filtros</span>
-                        </button>
+                        <div class="flex flex-wrap items-center justify-end gap-2">
+                            <button type="submit" form="filter-form" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Filtrar
+                            </button>
+                            <a href="{{ route('produtos.index', ['limpar_filtros' => 1]) }}" id="btn-clear-filters" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                Limpar Filtros
+                            </a>
+                            <button type="button" id="toggle-filters-btn" class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                <svg id="filter-icon-show" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                                <svg id="filter-icon-hide" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                </svg>
+                                <span id="filter-toggle-text">Ocultar Filtros</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Filtros Ativos (visível quando filtros estão ocultos) -->
@@ -269,17 +280,6 @@
                                 </div>
                             </div>
 
-                            <div class="md:col-span-4 flex justify-end space-x-2">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                    Filtrar
-                                </button>
-                                <a href="{{ route('produtos.index', ['limpar_filtros' => 1]) }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                    Limpar Filtros
-                                </a>
-                            </div>
                         </form>
                     </div>
 
@@ -553,8 +553,9 @@
                 clearButton.addEventListener('click', function(e) {
                     e.preventDefault();
                     resetFiltersUI();
-                    // Submeter o formulário vazio para atualizar a listagem
-                    form.submit();
+                    const url = this.getAttribute('href');
+                    // Substitui a entrada no histórico para evitar back que traga filtros antigos
+                    window.location.replace(url);
                 });
             }
 
@@ -638,6 +639,26 @@
             }
 
             // Função para alternar visibilidade dos filtros
+            const initialFiltersVisible = @json($filtersVisible ?? true);
+
+            async function salvarPreferenciaFiltrosVisiveis(visible) {
+                try {
+                    await fetch('{{ route("ui.filters-visibility") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            page_type: 'produtos',
+                            filters_visible: !!visible
+                        })
+                    });
+                } catch (e) {
+                }
+            }
+
             function toggleFilters() {
                 const isHidden = filtersContainer.classList.contains('hidden');
 
@@ -648,7 +669,7 @@
                     filterToggleText.textContent = 'Ocultar Filtros';
                     filterIconShow.classList.remove('hidden');
                     filterIconHide.classList.add('hidden');
-                    localStorage.setItem('produtos_filters_visible', 'true');
+                    salvarPreferenciaFiltrosVisiveis(true);
                 } else {
                     // Ocultar filtros
                     filtersContainer.classList.add('hidden');
@@ -659,7 +680,7 @@
                     filterToggleText.textContent = 'Mostrar Filtros';
                     filterIconShow.classList.add('hidden');
                     filterIconHide.classList.remove('hidden');
-                    localStorage.setItem('produtos_filters_visible', 'false');
+                    salvarPreferenciaFiltrosVisiveis(false);
                 }
             }
 
@@ -668,9 +689,8 @@
                 toggleFiltersBtn.addEventListener('click', toggleFilters);
             }
 
-            // Restaurar estado dos filtros do localStorage
-            const filtersVisible = localStorage.getItem('produtos_filters_visible');
-            if (filtersVisible === 'false') {
+            // Restaurar estado dos filtros pelo valor salvo para o usuário
+            if (initialFiltersVisible === false) {
                 // Ocultar filtros na carga da página
                 filtersContainer.classList.add('hidden');
                 const hasFilters = updateActiveFilters();
@@ -685,13 +705,6 @@
             // Atualizar filtros ativos na carga inicial
             updateActiveFilters();
 
-            // Ao submeter o formulário de filtros, ocultar automaticamente
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    // Marcar que os filtros devem estar ocultos após o submit
-                    localStorage.setItem('produtos_filters_visible', 'false');
-                });
-            }
         });
     </script>
 

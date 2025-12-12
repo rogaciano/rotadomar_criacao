@@ -27,7 +27,7 @@ class MovimentacaoFilterController extends Controller
         if (!$statusDias) {
             return $query;
         }
-        
+
         // Expressão SQL para calcular DIAS ÚTEIS entre data_entrada e agora (para não concluídas)
         $bdaysNaoConcluidas = "(5 * (DATEDIFF(DATE(NOW()), DATE(data_entrada)) DIV 7) + GREATEST(LEAST(WEEKDAY(DATE(NOW())), 4) - LEAST(WEEKDAY(DATE(data_entrada)), 4), 0))";
         // Prazo com prioridade: situação > localização
@@ -44,10 +44,10 @@ class MovimentacaoFilterController extends Controller
                   ->orWhereRaw("$bdaysNaoConcluidas <= COALESCE($prazoPrioritario, 999999)");
             });
         }
-        
+
         return $query;
     }
-    
+
     /**
      * Filtra as movimentações por status de dias
      *
@@ -59,16 +59,21 @@ class MovimentacaoFilterController extends Controller
         if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
-        
+
+        $filtersUi = auth()->user()->getFilters('movimentacoes_ui');
+        $filtersVisible = array_key_exists('filters_visible', $filtersUi)
+            ? (bool) $filtersUi['filters_visible']
+            : true;
+
         // Verificar se é uma requisição de limpeza de filtros
         if ($request->has('limpar_filtros')) {
             auth()->user()->clearFilters('movimentacoes');
             return redirect()->route('movimentacoes.filtro.status-dias');
         }
-        
+
         // Iniciar a query com os relacionamentos
         $query = Movimentacao::with(['produto', 'produto.marca', 'tipo', 'situacao', 'localizacao']);
-        
+
         // Aplicar os filtros padrão
         if ($request->filled('referencia')) {
             $query->whereHas('produto', function($q) use ($request) {
@@ -91,7 +96,7 @@ class MovimentacaoFilterController extends Controller
                 $q->where('marca_id', $request->marca_id);
             });
         }
-        
+
         // Filtro por Grupo de Produto
         if ($request->filled('grupo_produto_id')) {
             $grupoProdutoIds = is_array($request->grupo_produto_id) ? $request->grupo_produto_id : [$request->grupo_produto_id];
@@ -105,7 +110,7 @@ class MovimentacaoFilterController extends Controller
                 $q->where('status_id', $request->status_id);
             });
         }
-        
+
         if ($request->filled('tecido_id')) {
             $tecidoIds = is_array($request->tecido_id) ? $request->tecido_id : [$request->tecido_id];
             $query->whereHas('produto', function($q) use ($tecidoIds) {
@@ -141,16 +146,16 @@ class MovimentacaoFilterController extends Controller
         if ($request->filled('comprometido')) {
             $query->where('comprometido', $request->comprometido);
         }
-        
+
         if ($request->filled('concluido')) {
             $query->where('concluido', $request->concluido);
         }
-        
+
         // Aplicar o filtro por status de dias
         if ($request->filled('status_dias')) {
             $query = self::applyStatusDiasFilter($query, $request->status_dias);
         }
-        
+
         // Ordenação
         if ($request->filled('sort') && $request->filled('direction')) {
             $sortField = $request->sort;
@@ -192,10 +197,10 @@ class MovimentacaoFilterController extends Controller
             // Ordenação padrão
             $query->orderBy('created_at', 'desc');
         }
-        
+
         // Paginar os resultados
         $movimentacoes = $query->paginate(15)->withQueryString();
-        
+
         // Carregar dados para os selects
         $situacoes = Situacao::orderBy('descricao')->get();
         $tipos = Tipo::orderBy('descricao')->get();
@@ -204,33 +209,33 @@ class MovimentacaoFilterController extends Controller
         $marcas = Marca::orderBy('nome_marca')->get();
         $tecidos = Tecido::orderBy('descricao')->get();
         $grupoProdutos = GrupoProduto::orderBy('descricao')->get();
-        
+
         // Lista de campos de filtro válidos
         $validFilters = [
-            'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 
+            'referencia', 'produto', 'produto_id', 'marca_id', 'status_id',
             'tecido_id', 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
             'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
         ];
-        
+
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
         if ($request->anyFilled($validFilters)) {
             $filterParams = $request->only($validFilters);
             auth()->user()->saveFilters('movimentacoes', $filterParams);
-        } 
+        }
         // Se não tem parâmetros na URL mas tem filtros salvos, redirecionar com os filtros salvos
         else if (!$request->hasAny($validFilters) && !$request->ajax()) {
             $savedFilters = auth()->user()->getFilters('movimentacoes');
-            
+
             if (!empty($savedFilters)) {
                 return redirect()->route('movimentacoes.filtro.status-dias', $savedFilters);
             }
         }
-        
+
         $filters = $request->all();
-        
+
         return view('movimentacoes.index', compact(
-            'movimentacoes', 'situacoes', 'tipos', 'localizacoes', 
-            'status', 'marcas', 'tecidos', 'grupoProdutos', 'filters'
+            'movimentacoes', 'situacoes', 'tipos', 'localizacoes',
+            'status', 'marcas', 'tecidos', 'grupoProdutos', 'filters', 'filtersVisible'
         ));
     }
 }

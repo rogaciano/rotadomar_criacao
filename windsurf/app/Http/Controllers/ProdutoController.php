@@ -23,6 +23,11 @@ class ProdutoController extends Controller
     {
         if (!auth()->user()->canRead('produtos')) { abort(403); }
 
+        $filtersUi = auth()->user()->getFilters('produtos_ui');
+        $filtersVisible = array_key_exists('filters_visible', $filtersUi)
+            ? (bool) $filtersUi['filters_visible']
+            : true;
+
         // Verificar se é uma requisição de limpeza de filtros
         if ($request->has('limpar_filtros')) {
             auth()->user()->clearFilters('produtos');
@@ -261,7 +266,7 @@ class ProdutoController extends Controller
 
         return view('produtos.index', compact(
             'produtos', 'marcas', 'tecidos', 'estilistas', 'grupos',
-            'statuses', 'direcionamentosComerciais', 'localizacoes', 'localizacoesPlanejamento', 'situacoes', 'filters'
+            'statuses', 'direcionamentosComerciais', 'localizacoes', 'localizacoesPlanejamento', 'situacoes', 'filters', 'filtersVisible'
         ));
     }
 
