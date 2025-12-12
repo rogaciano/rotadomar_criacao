@@ -21,7 +21,7 @@ class NotificacaoController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        
+
         if (!$user->localizacao_id) {
             return redirect()->back()->with('error', 'Usuário não possui localização definida.');
         }
@@ -54,13 +54,13 @@ class NotificacaoController extends Controller
     public function visualizar($id)
     {
         $user = auth()->user();
-        
+
         if (!$user->localizacao_id) {
             return redirect()->back()->with('error', 'Usuário não possui localização definida.');
         }
 
         $notificacao = Notificacao::find($id);
-        
+
         if (!$notificacao) {
             return redirect()->back()->with('error', 'Notificação não encontrada.');
         }
@@ -86,10 +86,21 @@ class NotificacaoController extends Controller
     /**
      * API para obter notificações não visualizadas (para o dropdown)
      */
-    public function naoVisualizadas()
+    public function naoVisualizadas(Request $request)
     {
+        $accept = (string) $request->header('Accept', '');
+        $secFetchDest = (string) $request->header('Sec-Fetch-Dest', '');
+
+        $aceitaHtml = strpos($accept, 'text/html') !== false;
+        $aceitaJson = strpos($accept, 'application/json') !== false;
+        $pareceNavegacaoPagina = ($secFetchDest === 'document') || ($aceitaHtml && !$aceitaJson);
+
+        if ($pareceNavegacaoPagina) {
+            return redirect()->route('dashboard');
+        }
+
         $user = auth()->user();
-        
+
         if (!$user->localizacao_id) {
             return response()->json(['notificacoes' => [], 'count' => 0]);
         }
@@ -123,7 +134,7 @@ class NotificacaoController extends Controller
     public function marcarTodasComoVisualizadas()
     {
         $user = auth()->user();
-        
+
         if (!$user->localizacao_id) {
             return response()->json(['success' => false, 'message' => 'Usuário não possui localização definida.']);
         }
@@ -133,12 +144,12 @@ class NotificacaoController extends Controller
         $podeVerTodas = $user->localizacao->pode_ver_todas_notificacoes ?? false;
 
         $query = Notificacao::naoVisualizadas();
-        
+
         // Se não pode ver todas, filtrar apenas pela sua localização
         if (!$podeVerTodas) {
             $query->porLocalizacao($user->localizacao_id);
         }
-        
+
         $notificacoes = $query->get();
 
         foreach ($notificacoes as $notificacao) {
