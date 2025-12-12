@@ -78,6 +78,8 @@ class KanbanController extends Controller
                 // Adicionar quantidade_alocada do pivot
                 $produto->quantidade_alocada = $produto->localizacoes->sum('pivot.quantidade');
                 $produto->data_prevista = $produto->localizacoes->first()->pivot->data_prevista_faccao ?? null;
+                $produto->data_envio_faccao = $produto->localizacoes->first()->pivot->data_envio_faccao ?? null;
+                $produto->data_retorno_faccao = $produto->localizacoes->first()->pivot->data_retorno_faccao ?? null;
                 return $produto;
             });
 

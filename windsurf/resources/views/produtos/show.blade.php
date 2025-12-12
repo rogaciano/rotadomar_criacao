@@ -267,9 +267,10 @@
                                         <tr>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordem Produção</th>
-                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mês/Ano</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Prev. Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Envio Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Retorno Facção</th>
                                             <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Concluído</th>
                                             @if(auth()->user()->canUpdate('produtos'))
                                                 <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -289,17 +290,24 @@
                                                         {{ $localizacao->pivot->ordem_producao ?? 'N/A' }}
                                                     </span>
                                                 </td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 font-medium">
-                                                    @if($localizacao->pivot->data_prevista_faccao)
-                                                        {{ is_string($localizacao->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_prevista_faccao)->format('m/Y') : $localizacao->pivot->data_prevista_faccao->format('m/Y') }}
-                                                    @else
-                                                        <span class="text-gray-400 italic">Sem data</span>
-                                                    @endif
-                                                </td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($localizacao->pivot->quantidade, 0, ',', '.') }}</td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                                                     @if($localizacao->pivot->data_prevista_faccao)
                                                         {{ is_string($localizacao->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_prevista_faccao)->format('d/m/Y') : $localizacao->pivot->data_prevista_faccao->format('d/m/Y') }}
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                    @if($localizacao->pivot->data_envio_faccao)
+                                                        {{ is_string($localizacao->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_envio_faccao)->format('d/m/Y') : $localizacao->pivot->data_envio_faccao->format('d/m/Y') }}
+                                                    @else
+                                                        N/A
+                                                    @endif
+                                                </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                    @if($localizacao->pivot->data_retorno_faccao)
+                                                        {{ is_string($localizacao->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_retorno_faccao)->format('d/m/Y') : $localizacao->pivot->data_retorno_faccao->format('d/m/Y') }}
                                                     @else
                                                         N/A
                                                     @endif
@@ -322,9 +330,21 @@
                                                                     ? $localizacao->pivot->data_prevista_faccao
                                                                     : $localizacao->pivot->data_prevista_faccao->format('Y-m-d');
                                                             }
+                                                            $dataEnvioFaccao = '';
+                                                            if($localizacao->pivot->data_envio_faccao) {
+                                                                $dataEnvioFaccao = is_string($localizacao->pivot->data_envio_faccao)
+                                                                    ? $localizacao->pivot->data_envio_faccao
+                                                                    : $localizacao->pivot->data_envio_faccao->format('Y-m-d');
+                                                            }
+                                                            $dataRetornoFaccao = '';
+                                                            if($localizacao->pivot->data_retorno_faccao) {
+                                                                $dataRetornoFaccao = is_string($localizacao->pivot->data_retorno_faccao)
+                                                                    ? $localizacao->pivot->data_retorno_faccao
+                                                                    : $localizacao->pivot->data_retorno_faccao->format('Y-m-d');
+                                                            }
                                                         @endphp
                                                         <button type="button"
-                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }})"
+                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }}, {{ json_encode($dataEnvioFaccao) }}, {{ json_encode($dataRetornoFaccao) }})"
                                                             class="text-indigo-600 hover:text-indigo-800 text-sm">
                                                             Editar
                                                         </button>
@@ -346,14 +366,14 @@
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia != 0 ? ($divergencia > 0 ? 'text-yellow-700' : 'text-red-700') : 'text-green-700' }}">
                                                 {{ number_format($totalLocalizacoes, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Quantidade Pretendida:</td>
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                                                 {{ number_format($quantidadeProduto, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2"></td>
                                         </tr>
                                         @if($divergencia != 0)
                                             <tr class="bg-gray-100">
@@ -363,7 +383,7 @@
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-700' : 'text-red-700' }}">
                                                     {{ $divergencia > 0 ? '+' : '' }}{{ number_format($divergencia, 0, ',', '.') }}
                                                 </td>
-                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
+                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
                                                     {{ $divergencia > 0 ? 'Excedente' : 'Faltante' }}
                                                 </td>
                                             </tr>
@@ -372,7 +392,7 @@
                                                 <td colspan="3" class="px-4 py-2 text-sm font-bold text-green-800">
                                                     Status:
                                                 </td>
-                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '4' : '3' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
+                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
                                                     ✓ Confere
                                                 </td>
                                             </tr>
@@ -788,6 +808,23 @@
                                             <input type="date" name="data_prevista_faccao" id="data_prevista_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                                             <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
                                         </div>
+                                        <div class="mb-4">
+                                            <label for="data_envio_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Envio à Facção</label>
+                                            <input type="date" name="data_envio_faccao" id="data_envio_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data de envio para a facção</p>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="flex items-center">
+                                                <input type="checkbox" name="concluido" id="concluido" value="1" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" onchange="toggleDataRetornoFaccao('add')">
+                                                <span class="ml-2 text-sm font-medium text-gray-700">Concluído</span>
+                                            </label>
+                                            <p class="mt-1 text-sm text-gray-500">Marque se esta ordem de produção foi concluída</p>
+                                        </div>
+                                        <div id="add-data-retorno-container" class="mb-4 hidden">
+                                            <label for="data_retorno_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Retorno da Facção *</label>
+                                            <input type="date" name="data_retorno_faccao" id="data_retorno_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
+                                        </div>
                                         <div>
                                             <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
                                             <textarea name="observacao" id="observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"></textarea>
@@ -857,16 +894,26 @@
                                             <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
-                                            <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                                            <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
+                                            <label for="edit-data-envio-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Envio à Facção</label>
+                                            <input type="date" name="data_envio_faccao" id="edit-data-envio-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data de envio para a facção</p>
                                         </div>
-                                        <div>
+                                        <div class="mb-4">
                                             <label class="flex items-center">
-                                                <input type="checkbox" name="concluido" id="edit-concluido" value="1" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50">
+                                                <input type="checkbox" name="concluido" id="edit-concluido" value="1" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" onchange="toggleDataRetornoFaccao('edit')">
                                                 <span class="ml-2 text-sm font-medium text-gray-700">Concluído</span>
                                             </label>
                                             <p class="mt-1 text-sm text-gray-500">Marque se esta ordem de produção foi concluída</p>
+                                        </div>
+                                        <div id="edit-data-retorno-container" class="mb-4 hidden">
+                                            <label for="edit-data-retorno-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Retorno da Facção *</label>
+                                            <input type="date" name="data_retorno_faccao" id="edit-data-retorno-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
+                                        </div>
+                                        <div>
+                                            <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
+                                            <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                                            <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
                                         </div>
                                     </div>
                                     <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
@@ -883,7 +930,22 @@
                     </div>
 
                     <script>
-                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido) {
+                        function toggleDataRetornoFaccao(mode) {
+                            const checkbox = document.getElementById(mode === 'add' ? 'concluido' : 'edit-concluido');
+                            const container = document.getElementById(mode === 'add' ? 'add-data-retorno-container' : 'edit-data-retorno-container');
+                            const input = document.getElementById(mode === 'add' ? 'data_retorno_faccao' : 'edit-data-retorno-faccao');
+
+                            if (checkbox.checked) {
+                                container.classList.remove('hidden');
+                                input.setAttribute('required', 'required');
+                            } else {
+                                container.classList.add('hidden');
+                                input.removeAttribute('required');
+                                input.value = '';
+                            }
+                        }
+
+                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao) {
                             try {
                                 console.log('Abrindo modal para editar localização:', {
                                     produtoLocalizacaoId,
@@ -893,7 +955,9 @@
                                     dataFaccao,
                                     ordemProducao,
                                     observacao,
-                                    concluido
+                                    concluido,
+                                    dataEnvioFaccao,
+                                    dataRetornoFaccao
                                 });
 
                                 document.getElementById('edit-localizacao-id').value = localizacaoId;
@@ -901,8 +965,13 @@
                                 document.getElementById('edit-ordem-producao').value = ordemProducao || '';
                                 document.getElementById('edit-quantidade').value = quantidade;
                                 document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
+                                document.getElementById('edit-data-envio-faccao').value = dataEnvioFaccao || '';
+                                document.getElementById('edit-data-retorno-faccao').value = dataRetornoFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
                                 document.getElementById('edit-concluido').checked = concluido == 1;
+
+                                // Mostrar/ocultar campo de data de retorno baseado no checkbox
+                                toggleDataRetornoFaccao('edit');
 
                                 // Atualizar action do formulário com o ID do registro produto_localizacao
                                 const form = document.getElementById('form-editar-localizacao');

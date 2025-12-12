@@ -10,7 +10,7 @@ class ProdutoLocalizacao extends Pivot
     use HasFactory;
 
     protected $table = 'produto_localizacao';
-    
+
     // Habilitar auto-incremento para ter acesso ao ID do pivot
     public $incrementing = true;
 
@@ -19,6 +19,8 @@ class ProdutoLocalizacao extends Pivot
         'localizacao_id',
         'quantidade',
         'data_prevista_faccao',
+        'data_envio_faccao',
+        'data_retorno_faccao',
         'ordem_producao',
         'observacao',
         'concluido'
@@ -27,6 +29,8 @@ class ProdutoLocalizacao extends Pivot
     protected $casts = [
         'quantidade' => 'integer',
         'data_prevista_faccao' => 'date',
+        'data_envio_faccao' => 'date',
+        'data_retorno_faccao' => 'date',
         'concluido' => 'integer'
     ];
 

@@ -100,7 +100,11 @@
                     if (this.loading) return;
                     this.loading = true;
                     try {
-                        const response = await fetch('{{ route("api.notificacoes.nao-visualizadas") }}');
+                        const response = await fetch('{{ route("api.notificacoes.nao-visualizadas") }}', {
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
                         const data = await response.json();
                         this.notificacoes = data.notificacoes;
                         this.count = data.count;

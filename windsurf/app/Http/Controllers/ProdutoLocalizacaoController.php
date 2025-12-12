@@ -21,6 +21,8 @@ class ProdutoLocalizacaoController extends Controller
             'localizacao_id' => 'required|exists:localizacoes,id',
             'quantidade' => 'required|integer|min:1',
             'data_prevista_faccao' => 'nullable|date',
+            'data_envio_faccao' => 'nullable|date',
+            'data_retorno_faccao' => 'nullable|date|required_if:concluido,1',
             'ordem_producao' => 'required|string|max:30',
             'observacao' => 'nullable|string|max:255',
             'concluido' => 'nullable|boolean'
@@ -45,6 +47,8 @@ class ProdutoLocalizacaoController extends Controller
             'localizacao_id' => $request->localizacao_id,
             'quantidade' => $request->quantidade,
             'data_prevista_faccao' => $request->data_prevista_faccao,
+            'data_envio_faccao' => $request->data_envio_faccao,
+            'data_retorno_faccao' => $request->data_retorno_faccao,
             'ordem_producao' => $request->ordem_producao,
             'observacao' => $request->observacao,
             'concluido' => $request->has('concluido') ? 1 : 0
@@ -66,6 +70,8 @@ class ProdutoLocalizacaoController extends Controller
         $request->validate([
             'quantidade' => 'required|integer|min:1',
             'data_prevista_faccao' => 'nullable|date',
+            'data_envio_faccao' => 'nullable|date',
+            'data_retorno_faccao' => 'nullable|date|required_if:concluido,1',
             'ordem_producao' => 'required|string|max:30',
             'observacao' => 'nullable|string|max:255',
             'concluido' => 'nullable|boolean'
@@ -92,6 +98,8 @@ class ProdutoLocalizacaoController extends Controller
         $produtoLocalizacao->update([
             'quantidade' => $request->quantidade,
             'data_prevista_faccao' => $request->data_prevista_faccao,
+            'data_envio_faccao' => $request->data_envio_faccao,
+            'data_retorno_faccao' => $request->data_retorno_faccao,
             'ordem_producao' => $request->ordem_producao,
             'observacao' => $request->observacao,
             'concluido' => $request->has('concluido') ? 1 : 0
@@ -118,10 +126,10 @@ class ProdutoLocalizacaoController extends Controller
         // Guardar ordem de produção para log
         $ordemProducao = $produtoLocalizacao->ordem_producao;
         $localizacaoId = $produtoLocalizacao->localizacao_id;
-        
+
         // Deletar o registro (isso vai disparar o Observer automaticamente)
         $produtoLocalizacao->delete();
-        
+
         // Log para debug
         \Log::info("Localização removida do produto", [
             'produto_id' => $produtoId,

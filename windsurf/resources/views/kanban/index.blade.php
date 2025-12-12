@@ -171,6 +171,12 @@
 
                                     <!-- Quantidade, Data Prevista e Anexos -->
                                     <div class="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                                        @php
+                                            $dataPrevistaCarbon = $produto->data_prevista ? \Carbon\Carbon::parse($produto->data_prevista)->startOfDay() : null;
+                                            $previstaVencida = $dataPrevistaCarbon && $dataPrevistaCarbon->lt(\Carbon\Carbon::today());
+                                            $envioVazio = empty($produto->data_envio_faccao);
+                                            $retornoVazio = empty($produto->data_retorno_faccao);
+                                        @endphp
                                         <div class="flex items-center justify-between text-xs">
                                             <span class="flex items-center text-gray-600">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,6 +197,48 @@
                                                 <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($produto->data_prevista)->format('d/m/Y') }}</span>
                                             </div>
                                         @endif
+
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="flex items-center text-gray-600">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                Envio Facção:
+                                            </span>
+                                            <span class="{{ $previstaVencida && $envioVazio ? 'text-red-700 font-bold' : 'font-semibold text-gray-900' }}">
+                                                @if(!$envioVazio)
+                                                    {{ \Carbon\Carbon::parse($produto->data_envio_faccao)->format('d/m/Y') }}
+                                                @else
+                                                    <span class="{{ $previstaVencida ? 'text-red-700 font-bold' : 'text-gray-400' }}">—</span>
+                                                    @if($previstaVencida)
+                                                        <svg class="w-4 h-4 inline-block ml-1 align-text-bottom text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        </svg>
+                                                    @endif
+                                                @endif
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="flex items-center text-gray-600">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                Retorno Facção:
+                                            </span>
+                                            <span class="{{ $previstaVencida && $retornoVazio ? 'text-red-700 font-bold' : 'font-semibold text-gray-900' }}">
+                                                @if(!$retornoVazio)
+                                                    {{ \Carbon\Carbon::parse($produto->data_retorno_faccao)->format('d/m/Y') }}
+                                                @else
+                                                    <span class="{{ $previstaVencida ? 'text-red-700 font-bold' : 'text-gray-400' }}">—</span>
+                                                    @if($previstaVencida)
+                                                        <svg class="w-4 h-4 inline-block ml-1 align-text-bottom text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        </svg>
+                                                    @endif
+                                                @endif
+                                            </span>
+                                        </div>
 
                                         @if($produto->anexos && $produto->anexos->count())
                                             <div class="flex items-center justify-start space-x-1 pt-1 border-t border-dashed border-gray-200 mt-1">
