@@ -267,13 +267,13 @@
                                                         <thead class="bg-gray-50">
                                                             <tr>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Referência</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 18%;">Descrição</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 12%;">Marca</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 12%;">Grupo</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 36%;">Observações</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 16%;">Descrição</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Marca</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Grupo</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 30%;">Observações</th>
                                                                 <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto" style="width: 8%;">Qtd Total</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Data Prevista</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 6%;">Status</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 14%;">DATAS</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 4%;">Status</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody class="bg-white divide-y divide-gray-200">
@@ -360,7 +360,7 @@
                                                                                 @php
                                                                                     // Processar observações (suporta HTML do Quill e tags customizadas)
                                                                                     $obsTextoOriginal = $observacao->observacao;
-                                                                                    
+
                                                                                     // Aplicar formatação de cores
                                                                                     if (strpos($obsTextoOriginal, '<p>') === false && strpos($obsTextoOriginal, '<span') === false) {
                                                                                         $obsTextoOriginal = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginal);
@@ -373,11 +373,11 @@
                                                                                     }
 
                                                                                     $textoCompleto = $obsTextoOriginal;
-                                                                                    
+
                                                                                     // Extrair texto limpo para verificar tamanho
                                                                                     $textoLimpo = strip_tags($textoCompleto);
                                                                                     $isTruncated = strlen($textoLimpo) > 80;
-                                                                                    
+
                                                                                     // Para versão truncada, truncar o texto limpo e adicionar reticências
                                                                                     $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoCompleto;
                                                                                 @endphp
@@ -432,7 +432,7 @@
                                                                                                     @php
                                                                                                         // Processar tags de cor nas observações
                                                                                                         $obsTextoOriginalLoc = $loc->pivot->observacao;
-                                                                                                        
+
                                                                                                         // Aplicar formatação de cores
                                                                                                         $obsTextoOriginalLoc = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
                                                                                                         $obsTextoOriginalLoc = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
@@ -443,11 +443,11 @@
                                                                                                         $obsTextoOriginalLoc = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
 
                                                                                                         $textoCompletoLoc = $obsTextoOriginalLoc;
-                                                                                                        
+
                                                                                                         // Extrair texto limpo para verificar tamanho
                                                                                                         $textoLimpoLoc = strip_tags($textoCompletoLoc);
                                                                                                         $isTruncatedLoc = strlen($textoLimpoLoc) > 80;
-                                                                                                        
+
                                                                                                         // Para versão truncada, truncar o texto limpo e adicionar reticências
                                                                                                         $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpoLoc, 80) : $textoCompletoLoc;
                                                                                                     @endphp
@@ -525,22 +525,56 @@
                                                                     <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900" title="Quantidade total do produto">
                                                                         {{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}
                                                                     </td>
-                                                                    <td class="px-3 py-2 text-sm text-gray-600">
+                                                                    <td class="px-3 py-2 text-xs text-gray-700">
                                                                         @php
                                                                             // Usar as localizações já carregadas (que já estão filtradas por mês/ano)
-                                                                            $primeiraData = $produtoPrincipal->localizacoes
+                                                                            $dataPrevista = $produtoPrincipal->localizacoes
                                                                                 ->whereNotNull('pivot.data_prevista_faccao')
                                                                                 ->sortBy('pivot.data_prevista_faccao')
                                                                                 ->first();
+
+                                                                            $dataEnvio = $produtoPrincipal->localizacoes
+                                                                                ->whereNotNull('pivot.data_envio_faccao')
+                                                                                ->sortBy('pivot.data_envio_faccao')
+                                                                                ->first();
+
+                                                                            $dataRetorno = $produtoPrincipal->localizacoes
+                                                                                ->whereNotNull('pivot.data_retorno_faccao')
+                                                                                ->sortBy('pivot.data_retorno_faccao')
+                                                                                ->first();
                                                                         @endphp
-                                                                        @if($primeiraData && $primeiraData->pivot->data_prevista_faccao)
-                                                                            {{ is_string($primeiraData->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('d/m/Y') : $primeiraData->pivot->data_prevista_faccao->format('d/m/Y') }}
-                                                                            @if($produtoPrincipal->localizacoes->whereNotNull('pivot.data_prevista_faccao')->count() > 1)
-                                                                                <span class="text-xs text-gray-400">(+{{ $produtoPrincipal->localizacoes->whereNotNull('pivot.data_prevista_faccao')->count() - 1 }})</span>
-                                                                            @endif
-                                                                        @else
-                                                                            <span class="text-gray-400">N/A</span>
-                                                                        @endif
+
+                                                                        <div class="space-y-0.5">
+                                                                            <div>
+                                                                                <span class="font-semibold text-gray-700">Prevista:</span>
+                                                                                @if($dataPrevista && $dataPrevista->pivot->data_prevista_faccao)
+                                                                                    {{ is_string($dataPrevista->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($dataPrevista->pivot->data_prevista_faccao)->format('d/m/Y') : $dataPrevista->pivot->data_prevista_faccao->format('d/m/Y') }}
+                                                                                    @if($produtoPrincipal->localizacoes->whereNotNull('pivot.data_prevista_faccao')->count() > 1)
+                                                                                        <span class="text-xs text-gray-400">(+{{ $produtoPrincipal->localizacoes->whereNotNull('pivot.data_prevista_faccao')->count() - 1 }})</span>
+                                                                                    @endif
+                                                                                @else
+                                                                                    <span class="text-gray-400 italic">N/A</span>
+                                                                                @endif
+                                                                            </div>
+
+                                                                            <div>
+                                                                                <span class="font-semibold text-gray-700">Envio:</span>
+                                                                                @if($dataEnvio && $dataEnvio->pivot->data_envio_faccao)
+                                                                                    {{ is_string($dataEnvio->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($dataEnvio->pivot->data_envio_faccao)->format('d/m/Y') : $dataEnvio->pivot->data_envio_faccao->format('d/m/Y') }}
+                                                                                @else
+                                                                                    <span class="text-gray-400 italic">N/A</span>
+                                                                                @endif
+                                                                            </div>
+
+                                                                            <div>
+                                                                                <span class="font-semibold text-gray-700">Retorno:</span>
+                                                                                @if($dataRetorno && $dataRetorno->pivot->data_retorno_faccao)
+                                                                                    {{ is_string($dataRetorno->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($dataRetorno->pivot->data_retorno_faccao)->format('d/m/Y') : $dataRetorno->pivot->data_retorno_faccao->format('d/m/Y') }}
+                                                                                @else
+                                                                                    <span class="text-gray-400 italic">N/A</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm">
                                                                         @if($produtoPrincipal->status)

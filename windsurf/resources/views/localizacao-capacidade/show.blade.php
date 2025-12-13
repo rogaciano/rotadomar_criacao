@@ -114,7 +114,7 @@
                                             Quantidade
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Data Prevista
+                                            DATAS
                                         </th>
                                     </tr>
                                 </thead>
@@ -242,19 +242,48 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold text-gray-900">
                                                 {{ number_format($produto->quantidade, 0, ',', '.') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-xs text-gray-700">
                                                 @php
                                                     // Buscar primeira data prevista das localizações
                                                     $primeiraData = $produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->sortBy('pivot.data_prevista_faccao')->first();
+
+                                                    // Buscar primeira data de envio das localizações
+                                                    $primeiroEnvio = $produto->localizacoes->whereNotNull('pivot.data_envio_faccao')->sortBy('pivot.data_envio_faccao')->first();
+
+                                                    // Buscar primeira data de retorno das localizações
+                                                    $primeiroRetorno = $produto->localizacoes->whereNotNull('pivot.data_retorno_faccao')->sortBy('pivot.data_retorno_faccao')->first();
                                                 @endphp
-                                                @if($primeiraData && $primeiraData->pivot->data_prevista_faccao)
-                                                    {{ is_string($primeiraData->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('d/m/Y') : $primeiraData->pivot->data_prevista_faccao->format('d/m/Y') }}
-                                                    @if($produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->count() > 1)
-                                                        <span class="text-xs text-gray-400">(+{{ $produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->count() - 1 }})</span>
-                                                    @endif
-                                                @else
-                                                    <span class="text-gray-400">N/A</span>
-                                                @endif
+                                                <div class="space-y-0.5">
+                                                    <div>
+                                                        <span class="font-semibold text-gray-700">Prevista:</span>
+                                                        @if($primeiraData && $primeiraData->pivot->data_prevista_faccao)
+                                                            {{ is_string($primeiraData->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($primeiraData->pivot->data_prevista_faccao)->format('d/m/Y') : $primeiraData->pivot->data_prevista_faccao->format('d/m/Y') }}
+                                                            @if($produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->count() > 1)
+                                                                <span class="text-xs text-gray-400">(+{{ $produto->localizacoes->where('pivot.data_prevista_faccao', '!=', null)->count() - 1 }})</span>
+                                                            @endif
+                                                        @else
+                                                            <span class="text-gray-400 italic">N/A</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div>
+                                                        <span class="font-semibold text-gray-700">Envio:</span>
+                                                        @if($primeiroEnvio && $primeiroEnvio->pivot->data_envio_faccao)
+                                                            {{ is_string($primeiroEnvio->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($primeiroEnvio->pivot->data_envio_faccao)->format('d/m/Y') : $primeiroEnvio->pivot->data_envio_faccao->format('d/m/Y') }}
+                                                        @else
+                                                            <span class="text-gray-400 italic">N/A</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div>
+                                                        <span class="font-semibold text-gray-700">Retorno:</span>
+                                                        @if($primeiroRetorno && $primeiroRetorno->pivot->data_retorno_faccao)
+                                                            {{ is_string($primeiroRetorno->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($primeiroRetorno->pivot->data_retorno_faccao)->format('d/m/Y') : $primeiroRetorno->pivot->data_retorno_faccao->format('d/m/Y') }}
+                                                        @else
+                                                            <span class="text-gray-400 italic">N/A</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
