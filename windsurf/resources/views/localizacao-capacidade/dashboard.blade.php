@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12 bg-gray-900">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-screen-2xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Botões de ação -->
             <div class="flex flex-wrap gap-2 mb-4">
