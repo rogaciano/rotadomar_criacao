@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produto;
+use App\Models\Localizacao;
 use App\Models\ProdutoLocalizacao;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class ProdutoLocalizacaoController extends Controller
      */
     public function store(Request $request, $produtoId)
     {
-        if (!auth()->user()->canUpdate('produtos')) {
+        if (!auth()->user()->canCreate('produto_localizacao')) {
             abort(403);
         }
 
@@ -30,6 +31,8 @@ class ProdutoLocalizacaoController extends Controller
 
         $produto = Produto::findOrFail($produtoId);
 
+        $localizacao = Localizacao::find($request->localizacao_id);
+
         // Verificar se já existe essa ordem de produção para este produto e localização
         $existe = ProdutoLocalizacao::where('produto_id', $produtoId)
             ->where('localizacao_id', $request->localizacao_id)
@@ -42,7 +45,7 @@ class ProdutoLocalizacaoController extends Controller
         }
 
         // Criar a associação
-        ProdutoLocalizacao::create([
+        $produtoLocalizacao = ProdutoLocalizacao::create([
             'produto_id' => $produtoId,
             'localizacao_id' => $request->localizacao_id,
             'quantidade' => $request->quantidade,
@@ -54,6 +57,26 @@ class ProdutoLocalizacaoController extends Controller
             'concluido' => $request->has('concluido') ? 1 : 0
         ]);
 
+        activity('produtos')
+            ->causedBy(auth()->user())
+            ->performedOn($produto)
+            ->withProperties([
+                'action' => 'produto_localizacao_created',
+                'produto_id' => $produto->id,
+                'produto_referencia' => $produto->referencia,
+                'produto_localizacao_id' => $produtoLocalizacao->id,
+                'localizacao_id' => $request->localizacao_id,
+                'localizacao_nome' => $localizacao?->nome_localizacao,
+                'ordem_producao' => $request->ordem_producao,
+                'quantidade' => (int) $request->quantidade,
+                'data_prevista_faccao' => $request->data_prevista_faccao,
+                'data_envio_faccao' => $request->data_envio_faccao,
+                'data_retorno_faccao' => $request->data_retorno_faccao,
+                'concluido' => $request->has('concluido') ? 1 : 0,
+            ])
+            ->event('created')
+            ->log('Movimentação cadastrada no produto');
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização adicionada com sucesso!');
     }
@@ -63,7 +86,7 @@ class ProdutoLocalizacaoController extends Controller
      */
     public function update(Request $request, $produtoId, $produtoLocalizacaoId)
     {
-        if (!auth()->user()->canUpdate('produtos')) {
+        if (!auth()->user()->canUpdate('produto_localizacao')) {
             abort(403);
         }
 
@@ -81,6 +104,10 @@ class ProdutoLocalizacaoController extends Controller
         $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
             ->where('produto_id', $produtoId)
             ->firstOrFail();
+
+        $produto = Produto::findOrFail($produtoId);
+        $localizacao = Localizacao::find($produtoLocalizacao->localizacao_id);
+        $before = $produtoLocalizacao->getOriginal();
 
         // Verificar se a nova ordem de produção cria duplicata com outro registro
         $existe = ProdutoLocalizacao::where('produto_id', $produtoId)
@@ -105,6 +132,22 @@ class ProdutoLocalizacaoController extends Controller
             'concluido' => $request->has('concluido') ? 1 : 0
         ]);
 
+        activity('produtos')
+            ->causedBy(auth()->user())
+            ->performedOn($produto)
+            ->withProperties([
+                'action' => 'produto_localizacao_updated',
+                'produto_id' => $produto->id,
+                'produto_referencia' => $produto->referencia,
+                'produto_localizacao_id' => $produtoLocalizacao->id,
+                'localizacao_id' => $produtoLocalizacao->localizacao_id,
+                'localizacao_nome' => $localizacao?->nome_localizacao,
+                'before' => $before,
+                'after' => $produtoLocalizacao->getAttributes(),
+            ])
+            ->event('updated')
+            ->log('Movimentação atualizada no produto');
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização atualizada com sucesso!');
     }
@@ -114,7 +157,7 @@ class ProdutoLocalizacaoController extends Controller
      */
     public function destroy($produtoId, $produtoLocalizacaoId)
     {
-        if (!auth()->user()->canUpdate('produtos')) {
+        if (!auth()->user()->canDelete('produto_localizacao')) {
             abort(403);
         }
 
@@ -123,12 +166,32 @@ class ProdutoLocalizacaoController extends Controller
             ->where('produto_id', $produtoId)
             ->firstOrFail();
 
+        $produto = Produto::findOrFail($produtoId);
+        $localizacao = Localizacao::find($produtoLocalizacao->localizacao_id);
+        $snapshot = $produtoLocalizacao->getAttributes();
+
         // Guardar ordem de produção para log
         $ordemProducao = $produtoLocalizacao->ordem_producao;
         $localizacaoId = $produtoLocalizacao->localizacao_id;
 
         // Deletar o registro (isso vai disparar o Observer automaticamente)
         $produtoLocalizacao->delete();
+
+        activity('produtos')
+            ->causedBy(auth()->user())
+            ->performedOn($produto)
+            ->withProperties([
+                'action' => 'produto_localizacao_deleted',
+                'produto_id' => $produto->id,
+                'produto_referencia' => $produto->referencia,
+                'produto_localizacao_id' => $produtoLocalizacaoId,
+                'localizacao_id' => $localizacaoId,
+                'localizacao_nome' => $localizacao?->nome_localizacao,
+                'ordem_producao' => $ordemProducao,
+                'snapshot' => $snapshot,
+            ])
+            ->event('deleted')
+            ->log('Movimentação removida do produto');
 
         // Log para debug
         \Log::info("Localização removida do produto", [

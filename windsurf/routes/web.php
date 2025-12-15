@@ -154,6 +154,10 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
 
     // Routes para Localizações de Produtos
     Route::post('produtos/{produto}/localizacoes', [ProdutoLocalizacaoController::class, 'store'])->name('produtos.localizacoes.store');
+    Route::get('produtos/{produto}/localizacoes/{produtoLocalizacao}', function ($produto, $produtoLocalizacao) {
+        return redirect()->route('produtos.show', $produto)
+            ->with('error', 'Ação inválida para localizações do produto.');
+    });
     Route::put('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'update'])->name('produtos.localizacoes.update');
     Route::delete('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'destroy'])->name('produtos.localizacoes.destroy');
 

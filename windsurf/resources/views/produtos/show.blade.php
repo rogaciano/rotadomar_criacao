@@ -200,9 +200,15 @@
 
                     <!-- Localizações -->
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+                        @php
+                            $canCreateProdutoLocalizacoes = auth()->user()->canCreate('produto_localizacao');
+                            $canUpdateProdutoLocalizacoes = auth()->user()->canUpdate('produto_localizacao');
+                            $canDeleteProdutoLocalizacoes = auth()->user()->canDelete('produto_localizacao');
+                            $canAnyProdutoLocalizacoes = $canUpdateProdutoLocalizacoes || $canDeleteProdutoLocalizacoes;
+                        @endphp
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-800">Localizações do Produto</h3>
-                            @if(auth()->user()->canUpdate('produtos'))
+                            @if($canCreateProdutoLocalizacoes)
                                 <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -272,7 +278,7 @@
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Envio Facção</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Retorno Facção</th>
                                             <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Concluído</th>
-                                            @if(auth()->user()->canUpdate('produtos'))
+                                            @if($canAnyProdutoLocalizacoes)
                                                 <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                             @endif
                                         </tr>
@@ -321,7 +327,7 @@
                                                         <span class="text-gray-400">-</span>
                                                     @endif
                                                 </td>
-                                                @if(auth()->user()->canUpdate('produtos'))
+                                                @if($canAnyProdutoLocalizacoes)
                                                     <td class="px-4 py-2 whitespace-nowrap text-sm space-x-3">
                                                         @php
                                                             $dataFaccao = '';
@@ -343,18 +349,22 @@
                                                                     : $localizacao->pivot->data_retorno_faccao->format('Y-m-d');
                                                             }
                                                         @endphp
-                                                        <button type="button"
-                                                            onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }}, {{ json_encode($dataEnvioFaccao) }}, {{ json_encode($dataRetornoFaccao) }})"
-                                                            class="text-indigo-600 hover:text-indigo-800 text-sm">
-                                                            Editar
-                                                        </button>
-                                                        <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta localização?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                                                Remover
+                                                        @if($canUpdateProdutoLocalizacoes)
+                                                            <button type="button"
+                                                                onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }}, {{ json_encode($dataEnvioFaccao) }}, {{ json_encode($dataRetornoFaccao) }})"
+                                                                class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                                                Editar
                                                             </button>
-                                                        </form>
+                                                        @endif
+                                                        @if($canDeleteProdutoLocalizacoes)
+                                                            <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta localização?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
+                                                                    Remover
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </td>
                                                 @endif
                                             </tr>
@@ -366,14 +376,14 @@
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia != 0 ? ($divergencia > 0 ? 'text-yellow-700' : 'text-red-700') : 'text-green-700' }}">
                                                 {{ number_format($totalLocalizacoes, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Quantidade Pretendida:</td>
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                                                 {{ number_format($quantidadeProduto, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2"></td>
                                         </tr>
                                         @if($divergencia != 0)
                                             <tr class="bg-gray-100">
@@ -383,7 +393,7 @@
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-700' : 'text-red-700' }}">
                                                     {{ $divergencia > 0 ? '+' : '' }}{{ number_format($divergencia, 0, ',', '.') }}
                                                 </td>
-                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
+                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
                                                     {{ $divergencia > 0 ? 'Excedente' : 'Faltante' }}
                                                 </td>
                                             </tr>
@@ -392,7 +402,7 @@
                                                 <td colspan="3" class="px-4 py-2 text-sm font-bold text-green-800">
                                                     Status:
                                                 </td>
-                                                <td colspan="{{ auth()->user()->canUpdate('produtos') ? '6' : '5' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
+                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
                                                     ✓ Confere
                                                 </td>
                                             </tr>
@@ -758,7 +768,7 @@
                     @endif
 
                     <!-- Modal para adicionar localização -->
-                    @if(auth()->user()->canUpdate('produtos'))
+                    @if($canCreateProdutoLocalizacoes)
                     <div id="modal-adicionar-localizacao" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
                         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                             <!-- Overlay de fundo -->
@@ -846,7 +856,7 @@
                     @endif
 
                     <!-- Modal para editar localização -->
-                    @if(auth()->user()->canUpdate('produtos'))
+                    @if($canUpdateProdutoLocalizacoes)
                     <div id="modal-editar-localizacao" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
                         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                             <!-- Overlay de fundo -->

@@ -20,12 +20,18 @@ class UserController extends Controller
 
         // Filtro por nome
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $name = trim((string) $request->name);
+            if ($name !== '') {
+                $query->where('name', 'like', '%' . $name . '%');
+            }
         }
 
         // Filtro por email
         if ($request->filled('email')) {
-            $query->where('email', 'like', '%' . $request->email . '%');
+            $email = trim((string) $request->email);
+            if ($email !== '') {
+                $query->where('email', 'like', '%' . $email . '%');
+            }
         }
 
         // Filtro por localização
@@ -40,7 +46,7 @@ class UserController extends Controller
 
         $users = $query->orderBy('name')->paginate(10)->withQueryString();
         $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
-        
+
         return view('users.index', compact('users', 'localizacoes'));
     }
 
