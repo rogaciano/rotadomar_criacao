@@ -75,7 +75,7 @@ class ProdutoLocalizacaoController extends Controller
                 'concluido' => $request->has('concluido') ? 1 : 0,
             ])
             ->event('created')
-            ->log('Movimentação cadastrada no produto');
+            ->log('Localizaçao com OP e quantidade cadastrada no produto');
 
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização adicionada com sucesso!');
@@ -191,7 +191,7 @@ class ProdutoLocalizacaoController extends Controller
                 'snapshot' => $snapshot,
             ])
             ->event('deleted')
-            ->log('Movimentação removida do produto');
+            ->log("Localização  $localizacao?->nome_localizacao da OP $ordemProducao removida do produto com Ref. {$produto->referencia}");
 
         // Log para debug
         \Log::info("Localização removida do produto", [

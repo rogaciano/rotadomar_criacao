@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DirecionamentoComercial;
 use App\Models\GrupoProduto;
 use App\Models\Localizacao;
 use App\Models\Marca;
@@ -120,6 +121,14 @@ class MovimentacaoFilterController extends Controller
             });
         }
 
+        // Filtro por Direcionamento Comercial do produto
+        if ($request->filled('direcionamento_comercial_id')) {
+            $direcionamentoIds = is_array($request->direcionamento_comercial_id) ? $request->direcionamento_comercial_id : [$request->direcionamento_comercial_id];
+            $query->whereHas('produto', function($q) use ($direcionamentoIds) {
+                $q->whereIn('direcionamento_comercial_id', $direcionamentoIds);
+            });
+        }
+
         if ($request->filled('tipo_id')) {
             $query->where('tipo_id', $request->tipo_id);
         }
@@ -209,12 +218,13 @@ class MovimentacaoFilterController extends Controller
         $marcas = Marca::orderBy('nome_marca')->get();
         $tecidos = Tecido::orderBy('descricao')->get();
         $grupoProdutos = GrupoProduto::orderBy('descricao')->get();
+        $direcionamentosComerciais = DirecionamentoComercial::where('ativo', true)->orderBy('descricao')->get();
 
         // Lista de campos de filtro válidos
         $validFilters = [
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id',
             'tecido_id', 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id', 'direcionamento_comercial_id'
         ];
 
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
@@ -235,7 +245,7 @@ class MovimentacaoFilterController extends Controller
 
         return view('movimentacoes.index', compact(
             'movimentacoes', 'situacoes', 'tipos', 'localizacoes',
-            'status', 'marcas', 'tecidos', 'grupoProdutos', 'filters', 'filtersVisible'
+            'status', 'marcas', 'tecidos', 'grupoProdutos', 'direcionamentosComerciais', 'filters', 'filtersVisible'
         ));
     }
 }

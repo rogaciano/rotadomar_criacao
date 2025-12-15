@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\MovimentacaoHelper;
 use App\Http\Controllers\MovimentacaoFilterController;
+use App\Models\DirecionamentoComercial;
 use App\Models\GrupoProduto;
 use App\Models\Localizacao;
 use App\Models\Marca;
@@ -90,12 +91,12 @@ class MovimentacaoController extends Controller
         if ($request->anyFilled([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
             'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id', 'direcionamento_comercial_id'
         ])) {
             $filterParams = $request->only([
                 'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
                 'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-                'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
+                'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id', 'direcionamento_comercial_id'
             ]);
 
             auth()->user()->saveFilters('movimentacoes', $filterParams);
@@ -104,7 +105,7 @@ class MovimentacaoController extends Controller
         else if (!$request->hasAny([
             'referencia', 'produto', 'produto_id', 'marca_id', 'status_id', 'tecido_id',
             'tipo_id', 'situacao_id', 'localizacao_id', 'data_inicio', 'data_fim',
-            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id'
+            'comprometido', 'concluido', 'sort', 'direction', 'status_dias', 'grupo_produto_id', 'direcionamento_comercial_id'
         ])) {
             $savedFilters = auth()->user()->getFilters('movimentacoes');
 
@@ -169,6 +170,14 @@ class MovimentacaoController extends Controller
                 $q->whereHas('tecidos', function($tq) use ($tecidoIds) {
                     $tq->whereIn('tecidos.id', $tecidoIds);
                 });
+            });
+        }
+
+        // Filtro por Direcionamento Comercial do produto
+        if ($request->filled('direcionamento_comercial_id')) {
+            $direcionamentoIds = is_array($request->direcionamento_comercial_id) ? $request->direcionamento_comercial_id : [$request->direcionamento_comercial_id];
+            $query->whereHas('produto', function($q) use ($direcionamentoIds) {
+                $q->whereIn('direcionamento_comercial_id', $direcionamentoIds);
             });
         }
 
@@ -288,7 +297,10 @@ class MovimentacaoController extends Controller
         // Carregar grupos de produtos para o filtro (incluindo ativo = NULL)
         $grupoProdutos = GrupoProduto::orderBy('descricao')->get();
 
-        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status', 'marcas', 'tecidos', 'grupoProdutos'));
+        // Carregar direcionamentos comerciais para o filtro
+        $direcionamentosComerciais = DirecionamentoComercial::where('ativo', true)->orderBy('descricao')->get();
+
+        return view('movimentacoes.index', compact('movimentacoes', 'produtos', 'situacoes', 'tipos', 'localizacoes', 'status', 'marcas', 'tecidos', 'grupoProdutos', 'direcionamentosComerciais'));
     }
 
     /**
@@ -641,6 +653,14 @@ class MovimentacaoController extends Controller
                 $q->whereHas('tecidos', function($tq) use ($tecidoIds) {
                     $tq->whereIn('tecidos.id', $tecidoIds);
                 });
+            });
+        }
+
+        // Filtro por Direcionamento Comercial do produto
+        if ($request->filled('direcionamento_comercial_id')) {
+            $direcionamentoIds = is_array($request->direcionamento_comercial_id) ? $request->direcionamento_comercial_id : [$request->direcionamento_comercial_id];
+            $query->whereHas('produto', function($q) use ($direcionamentoIds) {
+                $q->whereIn('direcionamento_comercial_id', $direcionamentoIds);
             });
         }
 

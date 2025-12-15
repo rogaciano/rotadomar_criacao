@@ -117,11 +117,10 @@
                             </div>
 
                             <div>
-                                <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido</label>
-                                <select name="tecido_id" id="tecido_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
+                                <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido (um ou mais)</label>
+                                <select name="tecido_id[]" id="tecido_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($tecidos as $tecido)
-                                        <option value="{{ $tecido->id }}" {{ ($filters['tecido_id'] ?? '') == $tecido->id ? 'selected' : '' }}>
+                                        <option value="{{ $tecido->id }}" {{ !empty($filters['tecido_id']) && in_array($tecido->id, (array)$filters['tecido_id']) ? 'selected' : '' }}>
                                             {{ $tecido->descricao }}
                                         </option>
                                     @endforeach
@@ -144,41 +143,32 @@
                             </div>
 
                             <div>
-                                <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-                                <select name="grupo_id" id="grupo_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
+                                <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo (um ou mais)</label>
+                                <select name="grupo_id[]" id="grupo_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($grupos as $grupo)
-                                        <option value="{{ $grupo->id }}" {{ (($filters['grupo_id'] ?? '') == $grupo->id || (($filters['grupo'] ?? '') == $grupo->descricao)) ? 'selected' : '' }}>
+                                        <option value="{{ $grupo->id }}" {{ !empty($filters['grupo_id']) && in_array($grupo->id, (array)$filters['grupo_id']) ? 'selected' : '' }}>
                                             {{ $grupo->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @if(request('grupo'))
-                                    <input type="hidden" name="grupo" value="{{ request('grupo') }}">
-                                @endif
                             </div>
 
                             <div>
-                                <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <select name="status_id" id="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
+                                <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status (um ou mais)</label>
+                                <select name="status_id[]" id="status_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($statuses as $status)
-                                        <option value="{{ $status->id }}" {{ (($filters['status_id'] ?? '') == $status->id || (($filters['status'] ?? '') == $status->descricao)) ? 'selected' : '' }}>
+                                        <option value="{{ $status->id }}" {{ !empty($filters['status_id']) && in_array($status->id, (array)$filters['status_id']) ? 'selected' : '' }}>
                                             {{ $status->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @if(request('status'))
-                                    <input type="hidden" name="status" value="{{ request('status') }}">
-                                @endif
                             </div>
 
                             <div>
-                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
-                                <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial (um ou mais)</label>
+                                <select name="direcionamento_comercial_id[]" id="direcionamento_comercial_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($direcionamentosComerciais as $direcionamento)
-                                        <option value="{{ $direcionamento->id }}" {{ ($filters['direcionamento_comercial_id'] ?? '') == $direcionamento->id ? 'selected' : '' }}>
+                                        <option value="{{ $direcionamento->id }}" {{ !empty($filters['direcionamento_comercial_id']) && in_array($direcionamento->id, (array)$filters['direcionamento_comercial_id']) ? 'selected' : '' }}>
                                             {{ $direcionamento->descricao }}
                                         </option>
                                     @endforeach
@@ -186,41 +176,32 @@
                             </div>
 
                             <div>
-                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                                <select name="localizacao_id" id="localizacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todas</option>
+                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização (uma ou mais)</label>
+                                <select name="localizacao_id[]" id="localizacao_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($localizacoes as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ (($filters['localizacao_id'] ?? '') == $localizacao->id || (($filters['localizacao'] ?? '') == $localizacao->nome_localizacao)) ? 'selected' : '' }}>
+                                        <option value="{{ $localizacao->id }}" {{ !empty($filters['localizacao_id']) && in_array($localizacao->id, (array)$filters['localizacao_id']) ? 'selected' : '' }}>
                                             {{ $localizacao->nome_localizacao }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @if(request('localizacao'))
-                                    <input type="hidden" name="localizacao" value="{{ request('localizacao') }}">
-                                @endif
                             </div>
 
                             <div>
-                                <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação</label>
-                                <select name="situacao_id" id="situacao_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todas</option>
+                                <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação (uma ou mais)</label>
+                                <select name="situacao_id[]" id="situacao_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($situacoes as $situacao)
-                                        <option value="{{ $situacao->id }}" {{ (($filters['situacao_id'] ?? '') == $situacao->id || (($filters['situacao'] ?? '') == $situacao->descricao)) ? 'selected' : '' }}>
+                                        <option value="{{ $situacao->id }}" {{ !empty($filters['situacao_id']) && in_array($situacao->id, (array)$filters['situacao_id']) ? 'selected' : '' }}>
                                             {{ $situacao->descricao }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @if(request('situacao'))
-                                    <input type="hidden" name="situacao" value="{{ request('situacao') }}">
-                                @endif
                             </div>
 
                             <div>
-                                <label for="localizacao_planejamento_id" class="block text-sm font-medium text-gray-700 mb-1">Localização Planejamento</label>
-                                <select name="localizacao_planejamento_id" id="localizacao_planejamento_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todas</option>
+                                <label for="localizacao_planejamento_id" class="block text-sm font-medium text-gray-700 mb-1">Localização Planejamento (uma ou mais)</label>
+                                <select name="localizacao_planejamento_id[]" id="localizacao_planejamento_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($localizacoesPlanejamento as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ ($filters['localizacao_planejamento_id'] ?? '') == $localizacao->id ? 'selected' : '' }}>
+                                        <option value="{{ $localizacao->id }}" {{ !empty($filters['localizacao_planejamento_id']) && in_array($localizacao->id, (array)$filters['localizacao_planejamento_id']) ? 'selected' : '' }}>
                                             {{ $localizacao->nome_localizacao }}
                                         </option>
                                     @endforeach
@@ -474,17 +455,32 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Inicialização do JavaScript
 
-            // Inicializar Select2 nos filtros
+            // Inicializar Select2 simples (single select)
             $('.select2').select2({
                 placeholder: "Selecione uma opção",
                 allowClear: true,
                 width: '100%'
             });
 
+            // Inicializar Select2 multi-select
+            $('.js-select2-multi').select2({
+                placeholder: "Selecione uma ou mais opções",
+                allowClear: true,
+                width: '100%',
+                language: 'pt-BR',
+                closeOnSelect: false
+            });
+
             // Ajustar estilo do Select2 para combinar com Tailwind
             $('.select2-container--default .select2-selection--single').css({
                 'height': '38px',
                 'padding': '5px',
+                'border-color': 'rgb(209, 213, 219)'
+            });
+
+            // Ajustar estilo do Select2 multi para combinar com Tailwind
+            $('.select2-container--default .select2-selection--multiple').css({
+                'min-height': '38px',
                 'border-color': 'rgb(209, 213, 219)'
             });
 
@@ -537,9 +533,13 @@
                 form.querySelectorAll('select').forEach(function(sel) {
                     sel.value = '';
                 });
-                // Resetar Select2 explicitamente
+                // Resetar Select2 simples explicitamente
                 if (typeof $ !== 'undefined' && $('.select2').length) {
                     $('.select2').val(null).trigger('change');
+                }
+                // Resetar Select2 multi explicitamente
+                if (typeof $ !== 'undefined' && $('.js-select2-multi').length) {
+                    $('.js-select2-multi').val(null).trigger('change');
                 }
             }
 
@@ -591,10 +591,19 @@
                 'data_prevista_faccao_fim': 'Data Prev. Facção (Até)'
             };
 
-            // Função para obter o texto de um select pelo valor
+            // Função para obter o texto de um select pelo valor (suporta arrays)
             function getSelectText(selectId, value) {
                 const select = document.getElementById(selectId);
-                if (!select) return value;
+                if (!select) return Array.isArray(value) ? value.join(', ') : value;
+                
+                // Se for array, mapear cada valor para o texto correspondente
+                if (Array.isArray(value)) {
+                    return value.map(v => {
+                        const option = select.querySelector(`option[value="${v}"]`);
+                        return option ? option.textContent.trim() : v;
+                    }).join(', ');
+                }
+                
                 const option = select.querySelector(`option[value="${value}"]`);
                 return option ? option.textContent.trim() : value;
             }
@@ -608,7 +617,10 @@
 
                 Object.keys(filters).forEach(key => {
                     const value = filters[key];
-                    if (value && value !== '' && key !== 'page') {
+                    // Verifica se tem valor (string não vazia ou array não vazio)
+                    const hasValue = Array.isArray(value) ? value.length > 0 : (value && value !== '');
+                    
+                    if (hasValue && key !== 'page') {
                         hasActiveFilters = true;
                         let displayValue = value;
 
@@ -623,6 +635,8 @@
                             // Formatar datas
                             const date = new Date(value + 'T00:00:00');
                             displayValue = date.toLocaleDateString('pt-BR');
+                        } else if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
                         }
 
                         const badge = document.createElement('span');

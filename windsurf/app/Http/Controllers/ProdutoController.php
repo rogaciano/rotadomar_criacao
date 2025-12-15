@@ -92,9 +92,11 @@ class ProdutoController extends Controller
             }
         }
 
+        // Filtro por tecido (suporta múltiplos valores)
         if (!empty($filters['tecido_id'])) {
-            $query->whereHas('tecidos', function($q) use ($filters) {
-                $q->where('tecidos.id', $filters['tecido_id']);
+            $tecidoIds = is_array($filters['tecido_id']) ? $filters['tecido_id'] : [$filters['tecido_id']];
+            $query->whereHas('tecidos', function($q) use ($tecidoIds) {
+                $q->whereIn('tecidos.id', $tecidoIds);
             });
         }
 
@@ -108,44 +110,31 @@ class ProdutoController extends Controller
             }
         }
 
-        // Filtro por grupo (aceita ID ou nome)
+        // Filtro por grupo (suporta múltiplos valores)
         if (!empty($filters['grupo_id'])) {
-            $query->where('grupo_id', $filters['grupo_id']);
-        } elseif (!empty($filters['grupo'])) {
-            $grupoId = GrupoProduto::where('descricao', $filters['grupo'])->value('id');
-            if ($grupoId) {
-                $query->where('grupo_id', $grupoId);
-            }
+            $grupoIds = is_array($filters['grupo_id']) ? $filters['grupo_id'] : [$filters['grupo_id']];
+            $query->whereIn('grupo_id', $grupoIds);
         }
 
-        // Filtro por status (aceita ID ou nome)
+        // Filtro por status (suporta múltiplos valores)
         if (!empty($filters['status_id'])) {
-            $query->where('status_id', $filters['status_id']);
-        } elseif (!empty($filters['status'])) {
-            $statusId = Status::where('descricao', $filters['status'])->value('id');
-            if ($statusId) {
-                $query->where('status_id', $statusId);
-            }
+            $statusIds = is_array($filters['status_id']) ? $filters['status_id'] : [$filters['status_id']];
+            $query->whereIn('status_id', $statusIds);
         }
 
-        // Filtro por direcionamento comercial (apenas por ID)
+        // Filtro por direcionamento comercial (suporta múltiplos valores)
         if (!empty($filters['direcionamento_comercial_id'])) {
-            $query->where('direcionamento_comercial_id', $filters['direcionamento_comercial_id']);
+            $direcionamentoIds = is_array($filters['direcionamento_comercial_id']) ? $filters['direcionamento_comercial_id'] : [$filters['direcionamento_comercial_id']];
+            $query->whereIn('direcionamento_comercial_id', $direcionamentoIds);
         }
 
-        // Filtro por localização (aceita ID ou nome)
-        $localizacaoId = null;
-
+        // Filtro por localização (suporta múltiplos valores)
         if (!empty($filters['localizacao_id'])) {
-            $localizacaoId = $filters['localizacao_id'];
-        } elseif (!empty($filters['localizacao'])) {
-            $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $filters['localizacao'])->value('id');
-        }
-
-        if ($localizacaoId) {
-            // Obter IDs dos produtos cuja última movimentação está na localização selecionada
+            $localizacaoIds = is_array($filters['localizacao_id']) ? $filters['localizacao_id'] : [$filters['localizacao_id']];
+            
+            // Obter IDs dos produtos cuja última movimentação está em uma das localizações selecionadas
             $subquery = \App\Models\Movimentacao::select('produto_id')
-                ->where('localizacao_id', $localizacaoId)
+                ->whereIn('localizacao_id', $localizacaoIds)
                 ->whereIn('id', function($q) {
                     $q->select(\DB::raw('MAX(id)'))
                       ->from('movimentacoes')
@@ -155,19 +144,13 @@ class ProdutoController extends Controller
             $query->whereIn('id', $subquery);
         }
 
-        // Filtro por situação (aceita ID ou nome)
-        $situacaoId = null;
-
+        // Filtro por situação (suporta múltiplos valores)
         if (!empty($filters['situacao_id'])) {
-            $situacaoId = $filters['situacao_id'];
-        } elseif (!empty($filters['situacao'])) {
-            $situacaoId = \App\Models\Situacao::where('descricao', $filters['situacao'])->value('id');
-        }
-
-        if ($situacaoId) {
-            // Obter IDs dos produtos cuja última movimentação está na situação selecionada
+            $situacaoIds = is_array($filters['situacao_id']) ? $filters['situacao_id'] : [$filters['situacao_id']];
+            
+            // Obter IDs dos produtos cuja última movimentação está em uma das situações selecionadas
             $subquery = \App\Models\Movimentacao::select('produto_id')
-                ->where('situacao_id', $situacaoId)
+                ->whereIn('situacao_id', $situacaoIds)
                 ->whereIn('id', function($q) {
                     $q->select(\DB::raw('MAX(id)'))
                       ->from('movimentacoes')
@@ -193,10 +176,11 @@ class ProdutoController extends Controller
             $query->whereIn('id', $subquery);
         }
 
-        // Filtro por localização de planejamento (produto_localizacao) - apenas não concluídos
+        // Filtro por localização de planejamento (suporta múltiplos valores) - apenas não concluídos
         if (!empty($filters['localizacao_planejamento_id'])) {
-            $query->whereHas('localizacoes', function($q) use ($filters) {
-                $q->where('localizacao_id', $filters['localizacao_planejamento_id'])
+            $localizacaoPlanejamentoIds = is_array($filters['localizacao_planejamento_id']) ? $filters['localizacao_planejamento_id'] : [$filters['localizacao_planejamento_id']];
+            $query->whereHas('localizacoes', function($q) use ($localizacaoPlanejamentoIds) {
+                $q->whereIn('localizacao_id', $localizacaoPlanejamentoIds)
                   ->where(function($q2) {
                       $q2->whereNull('concluido')
                          ->orWhere('concluido', 0);
@@ -936,9 +920,11 @@ class ProdutoController extends Controller
                 }
             }
 
+            // Filtro por tecido (suporta múltiplos valores)
             if (!empty($filters['tecido_id'])) {
-                $query->whereHas('tecidos', function($q) use ($filters) {
-                    $q->where('tecidos.id', $filters['tecido_id']);
+                $tecidoIds = is_array($filters['tecido_id']) ? $filters['tecido_id'] : [$filters['tecido_id']];
+                $query->whereHas('tecidos', function($q) use ($tecidoIds) {
+                    $q->whereIn('tecidos.id', $tecidoIds);
                 });
             }
 
@@ -952,39 +938,25 @@ class ProdutoController extends Controller
                 }
             }
 
-            // Filtro por grupo (aceita ID ou nome)
+            // Filtro por grupo (suporta múltiplos valores)
             if (!empty($filters['grupo_id'])) {
-                $query->where('grupo_id', $filters['grupo_id']);
-            } elseif (!empty($filters['grupo'])) {
-                $grupoId = GrupoProduto::where('descricao', $filters['grupo'])->value('id');
-                if ($grupoId) {
-                    $query->where('grupo_id', $grupoId);
-                }
+                $grupoIds = is_array($filters['grupo_id']) ? $filters['grupo_id'] : [$filters['grupo_id']];
+                $query->whereIn('grupo_id', $grupoIds);
             }
 
-            // Filtro por status (aceita ID ou nome)
+            // Filtro por status (suporta múltiplos valores)
             if (!empty($filters['status_id'])) {
-                $query->where('status_id', $filters['status_id']);
-            } elseif (!empty($filters['status'])) {
-                $statusId = Status::where('descricao', $filters['status'])->value('id');
-                if ($statusId) {
-                    $query->where('status_id', $statusId);
-                }
+                $statusIds = is_array($filters['status_id']) ? $filters['status_id'] : [$filters['status_id']];
+                $query->whereIn('status_id', $statusIds);
             }
 
-            // Filtro por localização
-            $localizacaoId = null;
-
+            // Filtro por localização (suporta múltiplos valores)
             if (!empty($filters['localizacao_id'])) {
-                $localizacaoId = $filters['localizacao_id'];
-            } elseif (!empty($filters['localizacao'])) {
-                $localizacaoId = \App\Models\Localizacao::where('nome_localizacao', $filters['localizacao'])->value('id');
-            }
-
-            if ($localizacaoId) {
-                // Obter IDs dos produtos cuja última movimentação está na localização selecionada
+                $localizacaoIds = is_array($filters['localizacao_id']) ? $filters['localizacao_id'] : [$filters['localizacao_id']];
+                
+                // Obter IDs dos produtos cuja última movimentação está em uma das localizações selecionadas
                 $subquery = \App\Models\Movimentacao::select('produto_id')
-                    ->where('localizacao_id', $localizacaoId)
+                    ->whereIn('localizacao_id', $localizacaoIds)
                     ->whereIn('id', function($q) {
                         $q->select(\DB::raw('MAX(id)'))
                           ->from('movimentacoes')
@@ -994,19 +966,13 @@ class ProdutoController extends Controller
                 $query->whereIn('id', $subquery);
             }
 
-            // Filtro por situação
-            $situacaoId = null;
-
+            // Filtro por situação (suporta múltiplos valores)
             if (!empty($filters['situacao_id'])) {
-                $situacaoId = $filters['situacao_id'];
-            } elseif (!empty($filters['situacao'])) {
-                $situacaoId = \App\Models\Situacao::where('descricao', $filters['situacao'])->value('id');
-            }
-
-            if ($situacaoId) {
-                // Obter IDs dos produtos cuja última movimentação está na situação selecionada
+                $situacaoIds = is_array($filters['situacao_id']) ? $filters['situacao_id'] : [$filters['situacao_id']];
+                
+                // Obter IDs dos produtos cuja última movimentação está em uma das situações selecionadas
                 $subquery = \App\Models\Movimentacao::select('produto_id')
-                    ->where('situacao_id', $situacaoId)
+                    ->whereIn('situacao_id', $situacaoIds)
                     ->whereIn('id', function($q) {
                         $q->select(\DB::raw('MAX(id)'))
                           ->from('movimentacoes')

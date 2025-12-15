@@ -214,6 +214,15 @@
                                 </select>
                             </div>
 
+                            <div>
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
+                                <select name="direcionamento_comercial_id[]" id="direcionamento_comercial_id" class="select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" multiple>
+                                    @foreach($direcionamentosComerciais ?? [] as $direcionamento)
+                                        <option value="{{ $direcionamento->id }}" {{ in_array($direcionamento->id, (array)request('direcionamento_comercial_id', [])) ? 'selected' : '' }}>{{ $direcionamento->descricao }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                         </form>
                     </div>
 
@@ -862,6 +871,11 @@
                 placeholder: "Selecione tecidos"
             });
 
+            $('#direcionamento_comercial_id').select2({
+                ...select2Config,
+                placeholder: "Selecione direcionamentos"
+            });
+
             // Limpar o campo de busca após selecionar um item (comportamento melhorado)
             $('.select2-multi').on('select2:select', function(e) {
                 // Limpar o texto de busca após a seleção
@@ -954,6 +968,7 @@
                 'status_id': 'Status',
                 'tecido_id': 'Tecido',
                 'grupo_produto_id': 'Grupo de Produto',
+                'direcionamento_comercial_id': 'Direcionamento Comercial',
                 'data_inicio': 'Data (De)',
                 'data_fim': 'Data (Até)',
                 'comprometido': 'Comprometido',
