@@ -377,49 +377,6 @@
                                                                             $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                                                         @endphp
 
-                                                                        {{-- Observações do Produto (apenas uma vez) --}}
-                                                                        @if($obs->count() > 0)
-                                                                            @foreach($obs as $observacao)
-                                                                                @php
-                                                                                    // Processar observações (suporta HTML do Quill e tags customizadas)
-                                                                                    $obsTextoOriginal = $observacao->observacao;
-
-                                                                                    // Aplicar formatação de cores
-                                                                                    if (strpos($obsTextoOriginal, '<p>') === false && strpos($obsTextoOriginal, '<span') === false) {
-                                                                                        $obsTextoOriginal = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                        $obsTextoOriginal = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                        $obsTextoOriginal = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                        $obsTextoOriginal = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                        $obsTextoOriginal = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                        $obsTextoOriginal = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                        $obsTextoOriginal = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginal);
-                                                                                    }
-
-                                                                                    $textoCompleto = $obsTextoOriginal;
-
-                                                                                    // Extrair texto limpo para verificar tamanho
-                                                                                    $textoLimpo = strip_tags($textoCompleto);
-                                                                                    $isTruncated = strlen($textoLimpo) > 80;
-
-                                                                                    // Para versão truncada, truncar o texto limpo e adicionar reticências
-                                                                                    $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoCompleto;
-                                                                                @endphp
-                                                                                @if($isTruncated)
-                                                                                    <div class="text-xs text-gray-700 mb-1" x-data="{ expanded: false }">
-                                                                                        <span x-show="!expanded">{!! $obsTextoTruncado !!}</span>
-                                                                                        <span x-show="expanded" x-cloak>{!! $textoCompleto !!}</span>
-                                                                                        <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
-                                                                                            <span x-show="!expanded">[+]</span>
-                                                                                            <span x-show="expanded" x-cloak>[-]</span>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                @else
-                                                                                    <div class="text-xs text-gray-700 mb-1">
-                                                                                        {!! $textoCompleto !!}
-                                                                                    </div>
-                                                                                @endif
-                                                                            @endforeach
-                                                                        @endif
 
                                                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                                                         @if($todasObsLocalizacoes->count() > 0)
@@ -579,6 +536,55 @@
                                                                                     <span class="font-semibold text-purple-700">Dir. Comercial:</span>
                                                                                     <span class="text-gray-600">{{ $direcionamentoComercial->descricao }}</span>
                                                                                 </div>
+                                                                            </div>
+                                                                        @endif
+
+                                                                        {{-- Observações do Produto (movidas para o final) --}}
+                                                                        @if($obs->count() > 0)
+                                                                            <div class="mt-2 pt-2 border-t border-dashed border-gray-300">
+                                                                                <div class="text-xs mb-1">
+                                                                                    <span class="font-semibold text-gray-700">📝 Observações:</span>
+                                                                                </div>
+                                                                                @foreach($obs as $observacao)
+                                                                                    @php
+                                                                                        // Processar observações (suporta HTML do Quill e tags customizadas)
+                                                                                        $obsTextoOriginal = $observacao->observacao;
+
+                                                                                        // Aplicar formatação de cores
+                                                                                        if (strpos($obsTextoOriginal, '<p>') === false && strpos($obsTextoOriginal, '<span') === false) {
+                                                                                            $obsTextoOriginal = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                            $obsTextoOriginal = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                            $obsTextoOriginal = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                            $obsTextoOriginal = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                            $obsTextoOriginal = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                            $obsTextoOriginal = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                            $obsTextoOriginal = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginal);
+                                                                                        }
+
+                                                                                        $textoCompleto = $obsTextoOriginal;
+
+                                                                                        // Extrair texto limpo para verificar tamanho
+                                                                                        $textoLimpo = strip_tags($textoCompleto);
+                                                                                        $isTruncated = strlen($textoLimpo) > 80;
+
+                                                                                        // Para versão truncada, truncar o texto limpo e adicionar reticências
+                                                                                        $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoCompleto;
+                                                                                    @endphp
+                                                                                    @if($isTruncated)
+                                                                                        <div class="text-xs text-gray-700 mb-1" x-data="{ expanded: false }">
+                                                                                            <span x-show="!expanded">{!! $obsTextoTruncado !!}</span>
+                                                                                            <span x-show="expanded" x-cloak>{!! $textoCompleto !!}</span>
+                                                                                            <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
+                                                                                                <span x-show="!expanded">[+]</span>
+                                                                                                <span x-show="expanded" x-cloak>[-]</span>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    @else
+                                                                                        <div class="text-xs text-gray-700 mb-1">
+                                                                                            {!! $textoCompleto !!}
+                                                                                        </div>
+                                                                                    @endif
+                                                                                @endforeach
                                                                             </div>
                                                                         @endif
 

@@ -41,7 +41,7 @@ class ProdutoController extends Controller
             'status', 'direcionamento_comercial_id', 'localizacao_id', 'localizacao', 'localizacao_planejamento_id', 'incluir_excluidos',
             'data_inicio', 'data_fim', 'data_prevista_inicio', 'data_prevista_fim',
             'data_prevista_faccao_inicio', 'data_prevista_faccao_fim',
-            'concluido', 'situacao_id', 'situacao', 'sort', 'direction', 'page'
+            'concluido', 'situacao_id', 'situacao', 'status_concluido', 'sort', 'direction', 'page'
         ];
 
         // Se tem parâmetros de filtro na URL, salvar como filtros do usuário
@@ -226,6 +226,43 @@ class ProdutoController extends Controller
         // Filtro por data prevista de produção (fim)
         if (!empty($filters['data_prevista_fim'])) {
             $query->whereDate('data_prevista_producao', '<=', $filters['data_prevista_fim']);
+        }
+
+        // Filtro por Status de Conclusão (baseado na última movimentação)
+        if (!empty($filters['status_concluido'])) {
+            switch ($filters['status_concluido']) {
+                case 'todos_em_processo':
+                    // Produtos que têm pelo menos uma movimentação (exclui os sem movimentação)
+                    $query->has('movimentacoes');
+                    break;
+                case 'concluido':
+                    // Produtos com última movimentação marcada como concluída
+                    $query->whereHas('movimentacoes', function($q) {
+                        $q->where('id', function($subquery) {
+                            $subquery->selectRaw('MAX(id)')
+                                     ->from('movimentacoes as m2')
+                                     ->whereColumn('m2.produto_id', 'movimentacoes.produto_id');
+                        })->where('concluido', true);
+                    });
+                    break;
+                case 'nao_concluido':
+                    // Produtos com movimentações, mas a última NÃO está concluída
+                    $query->whereHas('movimentacoes', function($q) {
+                        $q->where('id', function($subquery) {
+                            $subquery->selectRaw('MAX(id)')
+                                     ->from('movimentacoes as m2')
+                                     ->whereColumn('m2.produto_id', 'movimentacoes.produto_id');
+                        })->where(function($q2) {
+                            $q2->where('concluido', false)
+                               ->orWhereNull('concluido');
+                        });
+                    });
+                    break;
+                case 'sem_movimentacao':
+                    // Produtos que nunca tiveram movimentação
+                    $query->doesntHave('movimentacoes');
+                    break;
+            }
         }
 
         $produtos = $query->orderBy('referencia')->paginate(10);

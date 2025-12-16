@@ -322,10 +322,10 @@
                         <thead>
                             <tr>
                                 <th style="width: 8%;">Ref</th>
-                                <th style="width: 20%;">Descrição</th>
-                                <th style="width: 12%;">Marca</th>
-                                <th style="width: 12%;">Grupo</th>
-                                <th style="width: 36%;">Observações</th>
+                                <th style="width: 16%;">Descrição</th>
+                                <th style="width: 10%;">Marca</th>
+                                <th style="width: 10%;">Grupo</th>
+                                <th style="width: 44%;">Localizações e Informações</th>
                                 <th style="width: 8%;" class="text-center">Qtd Total</th>
                                 <th style="width: 4%;">Status</th>
                             </tr>
@@ -336,7 +336,28 @@
                                     $produtoPrincipal = $produtosGrupo->first();
                                 @endphp
                                 <tr>
-                                    <td class="font-semibold">{{ $produtoPrincipal->referencia }}</td>
+                                    <td class="font-semibold">
+                                        {{ $produtoPrincipal->referencia }}
+                                        @php
+                                            // Buscar a data prevista para produção
+                                            $dataPrevista = null;
+                                            foreach($produtosGrupo as $produto) {
+                                                $locComData = $produto->localizacoes
+                                                    ->whereNotNull('pivot.data_prevista_faccao')
+                                                    ->sortBy('pivot.data_prevista_faccao')
+                                                    ->first();
+                                                if ($locComData && $locComData->pivot->data_prevista_faccao) {
+                                                    $dataPrevista = is_string($locComData->pivot->data_prevista_faccao)
+                                                        ? \Carbon\Carbon::parse($locComData->pivot->data_prevista_faccao)->format('d/m/Y')
+                                                        : $locComData->pivot->data_prevista_faccao->format('d/m/Y');
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
+                                        @if($dataPrevista)
+                                            <div style="font-size: 7px; color: #6B7280; margin-top: 2px;">📅 Prev: {{ $dataPrevista }}</div>
+                                        @endif
+                                    </td>
                                     <td>{{ $produtoPrincipal->descricao }}</td>
                                     <td>
                                         @if($produtoPrincipal->marca)
@@ -375,39 +396,19 @@
                                             $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                         @endphp
 
-                                        {{-- Observações do Produto (apenas uma vez) --}}
-                                        @if($obs->count() > 0)
-                                            @foreach($obs as $observacao)
-                                                @php
-                                                    // Processar observações (suporta HTML do Quill e tags customizadas)
-                                                    $obsTexto = $observacao->observacao;
-
-                                                    // Se não contém tags HTML do Quill, processar tags customizadas
-                                                    if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
-                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
-                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
-                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
-                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
-                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
-                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
-                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
-                                                    }
-
-                                                    // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
-                                                    $textoLimpo = strip_tags($obsTexto);
-                                                    if (strlen($textoLimpo) > 100) {
-                                                        $obsTexto = Str::limit($textoLimpo, 100);
-                                                    }
-                                                @endphp
-                                                <div class="observacao">
-                                                    {!! $obsTexto !!}
-                                                </div>
-                                            @endforeach
-                                        @endif
-
                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                         @if($todasObsLocalizacoes->count() > 0)
-                                            <table class="obs-table">
+                                            <table class="obs-table" style="margin-bottom: 8px;">
+                                                <thead style="background-color: #F3F4F6;">
+                                                    <tr>
+                                                        <th style="width: 20%; font-size: 7px; padding: 3px;">OP</th>
+                                                        <th style="width: 12%; font-size: 7px; padding: 3px; text-align: center;">Qtd</th>
+                                                        <th style="width: 18%; font-size: 7px; padding: 3px; text-align: center;">Envio</th>
+                                                        <th style="width: 18%; font-size: 7px; padding: 3px; text-align: center;">Retorno</th>
+                                                        <th style="width: 32%; font-size: 7px; padding: 3px;">Obs</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
                                                 @php
                                                     $totalQuantidades = 0;
                                                 @endphp
@@ -425,43 +426,63 @@
                                                             }
                                                         }
                                                         $totalQuantidades += $qtdAlocada;
+
+                                                        // Formatar datas de envio e retorno
+                                                        $dataEnvio = $loc->pivot->data_envio_faccao
+                                                            ? (is_string($loc->pivot->data_envio_faccao)
+                                                                ? \Carbon\Carbon::parse($loc->pivot->data_envio_faccao)->format('d/m/Y')
+                                                                : $loc->pivot->data_envio_faccao->format('d/m/Y'))
+                                                            : null;
+                                                        $dataRetorno = $loc->pivot->data_retorno_faccao
+                                                            ? (is_string($loc->pivot->data_retorno_faccao)
+                                                                ? \Carbon\Carbon::parse($loc->pivot->data_retorno_faccao)->format('d/m/Y')
+                                                                : $loc->pivot->data_retorno_faccao->format('d/m/Y'))
+                                                            : null;
                                                     @endphp
                                                     <tr>
-                                                        <td class="obs-info">
-                                                            <div class="observacao" style="margin: 0;">
-                                                                @if($loc->pivot->ordem_producao)
-                                                                    <strong style="color: #1E40AF;">OP: {{ $loc->pivot->ordem_producao }}</strong>
-                                                                @endif
-                                                                @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
-                                                                    <span> - </span>
-                                                                @endif
-                                                                @if($loc->pivot->observacao)
-                                                                    @php
-                                                                        // Processar tags de cor nas observações
-                                                                        $obsTexto = $loc->pivot->observacao;
-                                                                        $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTexto);
-                                                                        $obsTexto = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTexto);
-
-                                                                        // Limitar texto de forma segura para HTML - extrai texto puro, limita e mantém formatação
-                                                                        $textoLimpo = strip_tags($obsTexto);
-                                                                        if (strlen($textoLimpo) > 80) {
-                                                                            $obsTexto = Str::limit($textoLimpo, 80);
-                                                                        }
-                                                                    @endphp
-                                                                    {!! $obsTexto !!}
-                                                                @endif
-                                                            </div>
-                                                        </td>
-                                                        <td class="obs-qtd">
+                                                        <td style="font-size: 8px; padding: 3px;">
                                                             @if($loc->pivot->concluido == 1)
-                                                                <span class="check-icon"></span>
+                                                                <span style="color: #059669;">✓</span>
                                                             @endif
+                                                            @if($loc->pivot->ordem_producao)
+                                                                <strong style="color: #1E40AF;">{{ $loc->pivot->ordem_producao }}</strong>
+                                                            @else
+                                                                <span style="color: #9CA3AF;">-</span>
+                                                            @endif
+                                                        </td>
+                                                        <td style="font-size: 8px; padding: 3px; text-align: center;">
                                                             <span class="qtd-alocada">{{ number_format($qtdAlocada, 0, ',', '.') }}</span>
+                                                        </td>
+                                                        <td style="font-size: 7px; padding: 3px; text-align: center;">
+                                                            @if($dataEnvio)
+                                                                <span style="background-color: #FEF3C7; color: #92400E; padding: 1px 4px; border-radius: 3px;">🚚 {{ $dataEnvio }}</span>
+                                                            @else
+                                                                <span style="color: #9CA3AF;">N/A</span>
+                                                            @endif
+                                                        </td>
+                                                        <td style="font-size: 7px; padding: 3px; text-align: center;">
+                                                            @if($dataRetorno)
+                                                                <span style="background-color: #D1FAE5; color: #065F46; padding: 1px 4px; border-radius: 3px;">✓ {{ $dataRetorno }}</span>
+                                                            @else
+                                                                <span style="color: #9CA3AF;">N/A</span>
+                                                            @endif
+                                                        </td>
+                                                        <td style="font-size: 7px; padding: 3px;">
+                                                            @if($loc->pivot->observacao)
+                                                                @php
+                                                                    $obsTexto = $loc->pivot->observacao;
+                                                                    $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                                    $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                                    $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                                    $textoLimpo = strip_tags($obsTexto);
+                                                                    if (strlen($textoLimpo) > 40) {
+                                                                        $obsTexto = Str::limit($textoLimpo, 40);
+                                                                    }
+                                                                @endphp
+                                                                {!! $obsTexto !!}
+                                                            @else
+                                                                <span style="color: #9CA3AF;">-</span>
+                                                            @endif
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -469,20 +490,58 @@
                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                 @if($todasObsLocalizacoes->count() > 1)
                                                     <tr style="border-top: 2px solid #6B7280; background-color: #F9FAFB;">
-                                                        <td class="obs-info" style="text-align: right; padding: 6px 8px;">
-                                                            <strong style="font-size: 8px; color: #1F2937;">TOTAL:</strong>
+                                                        <td style="font-size: 8px; padding: 3px;"><strong>TOTAL:</strong></td>
+                                                        <td style="font-size: 8px; padding: 3px; text-align: center;">
+                                                            <span style="display: inline-block; background-color: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700;">{{ number_format($totalQuantidades, 0, ',', '.') }}</span>
                                                         </td>
-                                                        <td class="obs-qtd" style="padding: 6px 8px;">
-                                                            <span style="display: inline-block; background-color: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 700;">
-                                                                {{ number_format($totalQuantidades, 0, ',', '.') }}
-                                                            </span>
-                                                        </td>
+                                                        <td colspan="3"></td>
                                                     </tr>
                                                 @endif
+                                                </tbody>
                                             </table>
                                         @endif
 
-                                        @if(!$temObservacoes)
+                                        {{-- Direcionamento Comercial --}}
+                                        @php
+                                            $direcionamentoComercial = null;
+                                            foreach($produtosGrupo as $produto) {
+                                                if($produto->direcionamentoComercial) {
+                                                    $direcionamentoComercial = $produto->direcionamentoComercial;
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
+
+                                        @if($direcionamentoComercial)
+                                            <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid #E5E7EB;">
+                                                <span style="font-size: 7px; font-weight: 600; color: #7C3AED;">Dir. Comercial:</span>
+                                                <span style="font-size: 7px; color: #4B5563;">{{ $direcionamentoComercial->descricao }}</span>
+                                            </div>
+                                        @endif
+
+                                        {{-- Observações do Produto (movidas para o final) --}}
+                                        @if($obs->count() > 0)
+                                            <div style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #D1D5DB;">
+                                                <span style="font-size: 7px; font-weight: 600; color: #374151;">📝 Observações:</span>
+                                                @foreach($obs as $observacao)
+                                                    @php
+                                                        $obsTexto = $observacao->observacao;
+                                                        if (strpos($obsTexto, '<p>') === false && strpos($obsTexto, '<span') === false) {
+                                                            $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
+                                                            $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
+                                                        }
+                                                        $textoLimpo = strip_tags($obsTexto);
+                                                        if (strlen($textoLimpo) > 100) {
+                                                            $obsTexto = Str::limit($textoLimpo, 100);
+                                                        }
+                                                    @endphp
+                                                    <div class="observacao" style="margin-top: 2px;">{!! $obsTexto !!}</div>
+                                                @endforeach
+                                            </div>
+                                        @endif
+
+                                        @if(!$temObservacoes && !$direcionamentoComercial)
                                             <div class="observacao" style="color: #9CA3AF; font-style: italic;">-</div>
                                         @endif
                                     </td>

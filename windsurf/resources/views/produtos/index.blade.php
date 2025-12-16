@@ -86,22 +86,6 @@
                             </div>
 
                             <div>
-                                <label for="concluido" class="block text-sm font-medium text-gray-700 mb-1">Status de Conclusão</label>
-                                <select name="concluido" id="concluido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                    <option value="">Todos</option>
-                                    <option value="1" {{ ($filters['concluido'] ?? '') === '1' ? 'selected' : '' }}>Concluídos</option>
-                                    <option value="0" {{ ($filters['concluido'] ?? '') === '0' ? 'selected' : '' }}>Não Concluídos</option>
-                                </select>
-                            </div>
-
-                            <div class="md:col-span-1 flex items-end pb-2">
-                                <div class="flex items-center">
-                                    <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ isset($filters['incluir_excluidos']) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
-                                    <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Incluir excluídos</label>
-                                </div>
-                            </div>
-
-                            <div>
                                 <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
                                 <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
@@ -207,6 +191,25 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                            <div>
+                                <label for="status_concluido" class="block text-sm font-medium text-gray-700 mb-1">Status de Conclusão</label>
+                                <select name="status_concluido" id="status_concluido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Todos</option>
+                                    <option value="todos_em_processo" {{ ($filters['status_concluido'] ?? '') == 'todos_em_processo' ? 'selected' : '' }}>🔄 Todos em Processo</option>
+                                    <option value="concluido" {{ ($filters['status_concluido'] ?? '') == 'concluido' ? 'selected' : '' }}>✅ Concluídos</option>
+                                    <option value="nao_concluido" {{ ($filters['status_concluido'] ?? '') == 'nao_concluido' ? 'selected' : '' }}>⏳ Não Concluídos</option>
+                                    <option value="sem_movimentacao" {{ ($filters['status_concluido'] ?? '') == 'sem_movimentacao' ? 'selected' : '' }}>📋 Sem Movimentação</option>
+                                </select>
+                            </div>
+
+                                                        <div class="md:col-span-1 flex items-end pb-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ isset($filters['incluir_excluidos']) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                                    <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Incluir excluídos</label>
+                                </div>
+                            </div>
+
 
                             <!-- Seção de Filtros por Data -->
                             <div class="md:col-span-4 border-t pt-4 mt-2">
@@ -573,6 +576,7 @@
                 'referencia': 'Referência',
                 'descricao': 'Descrição',
                 'concluido': 'Status de Conclusão',
+                'status_concluido': 'Status de Conclusão',
                 'incluir_excluidos': 'Incluir Excluídos',
                 'marca_id': 'Marca',
                 'tecido_id': 'Tecido',
@@ -627,6 +631,14 @@
                         // Formatar valor baseado no tipo de filtro
                         if (key === 'concluido') {
                             displayValue = value === '1' ? 'Concluídos' : 'Não Concluídos';
+                        } else if (key === 'status_concluido') {
+                            const statusMap = {
+                                'todos_em_processo': '🔄 Todos em Processo',
+                                'concluido': '✅ Concluídos',
+                                'nao_concluido': '⏳ Não Concluídos',
+                                'sem_movimentacao': '📋 Sem Movimentação'
+                            };
+                            displayValue = statusMap[value] || value;
                         } else if (key === 'incluir_excluidos') {
                             displayValue = 'Sim';
                         } else if (key.endsWith('_id')) {
@@ -718,6 +730,88 @@
 
             // Atualizar filtros ativos na carga inicial
             updateActiveFilters();
+
+            // Função para destacar campos de filtro com valores preenchidos
+            function highlightFilledFilters() {
+                const filterForm = document.getElementById('filter-form');
+                if (!filterForm) return;
+
+                // Selecionar todos os inputs de texto e data
+                const textInputs = filterForm.querySelectorAll('input[type="text"], input[type="date"]');
+                textInputs.forEach(field => {
+                    const hasValue = field.value && field.value.trim() !== '';
+                    if (hasValue) {
+                        field.classList.add('bg-yellow-100', 'border-yellow-400');
+                        field.classList.remove('bg-white');
+                    } else {
+                        field.classList.remove('bg-yellow-100', 'border-yellow-400');
+                    }
+                });
+
+                // Selecionar todos os selects (simples e múltiplos)
+                const selects = filterForm.querySelectorAll('select');
+                selects.forEach(select => {
+                    let hasValue = false;
+                    
+                    if (select.multiple) {
+                        // Select múltiplo - verificar se tem alguma opção selecionada
+                        hasValue = select.selectedOptions.length > 0;
+                    } else {
+                        // Select simples - verificar se o valor não é vazio
+                        hasValue = select.value !== '' && select.value !== null;
+                    }
+                    
+                    // Verificar se usa Select2
+                    const select2Container = select.nextElementSibling;
+                    if (select2Container && select2Container.classList.contains('select2-container')) {
+                        // Aplicar estilo ao container do Select2
+                        const selection = select2Container.querySelector('.select2-selection');
+                        if (selection) {
+                            if (hasValue) {
+                                selection.style.backgroundColor = '#fef9c3'; // yellow-100
+                                selection.style.borderColor = '#facc15'; // yellow-400
+                            } else {
+                                selection.style.backgroundColor = '';
+                                selection.style.borderColor = '';
+                            }
+                        }
+                    } else {
+                        // Select normal sem Select2
+                        if (hasValue) {
+                            select.classList.add('bg-yellow-100', 'border-yellow-400');
+                            select.classList.remove('bg-white');
+                        } else {
+                            select.classList.remove('bg-yellow-100', 'border-yellow-400');
+                        }
+                    }
+                });
+
+                // Destacar checkboxes marcados
+                const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    const label = checkbox.closest('div');
+                    if (checkbox.checked && label) {
+                        label.classList.add('bg-yellow-100', 'rounded', 'px-2', 'py-1');
+                    } else if (label) {
+                        label.classList.remove('bg-yellow-100', 'rounded', 'px-2', 'py-1');
+                    }
+                });
+            }
+
+            // Chamar função de destaque na inicialização (com delay para Select2 carregar)
+            setTimeout(highlightFilledFilters, 100);
+
+            // Atualizar destaque quando campos mudarem
+            const filterForm = document.getElementById('filter-form');
+            if (filterForm) {
+                filterForm.addEventListener('change', highlightFilledFilters);
+                filterForm.addEventListener('input', highlightFilledFilters);
+            }
+
+            // Escutar eventos do Select2
+            $(document).on('select2:select select2:unselect select2:clear', function() {
+                highlightFilledFilters();
+            });
 
         });
     </script>
