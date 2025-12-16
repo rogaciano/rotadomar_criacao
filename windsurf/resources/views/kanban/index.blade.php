@@ -206,39 +206,52 @@
                                             <div class="border-t border-gray-200 my-1"></div>
                                         @endif
 
-                                        <div class="flex items-start justify-between text-xs">
-                                            <span class="flex items-center text-gray-600">
+                                        <div class="text-xs">
+                                            <div class="flex items-center text-gray-600 mb-1">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 104 0 2 2 0 00-4 0zM3 13V9a2 2 0 012-2h10a2 2 0 012 2v4m-2 4h4a1 1 0 001-1v-2.586a1 1 0 00-.293-.707l-2.414-2.414A1 1 0 0016.586 10H15"></path>
                                                 </svg>
                                                 Envio Facção:
-                                            </span>
-                                            <span class="{{ $previstaVencida && $envioVazio ? 'text-red-700 font-bold' : 'font-semibold text-gray-900' }}">
-                                                @if(!$envioVazio)
-                                                    @php
-                                                        $datasEnvioFormatadas = $datasEnvio
-                                                            ->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m/Y'))
-                                                            ->values();
-                                                        $datasEnvioParaExibir = $datasEnvioFormatadas->take(3);
-                                                        $datasEnvioRestantes = max(0, $datasEnvioFormatadas->count() - $datasEnvioParaExibir->count());
-                                                    @endphp
-                                                    <div class="flex flex-col items-end leading-tight">
-                                                        @foreach($datasEnvioParaExibir as $dataEnvio)
-                                                            <span>{{ $dataEnvio }}</span>
-                                                        @endforeach
-                                                        @if($datasEnvioRestantes > 0)
-                                                            <span class="text-[11px] text-gray-500 font-semibold">(+{{ $datasEnvioRestantes }})</span>
-                                                        @endif
-                                                    </div>
-                                                @else
-                                                    <span class="{{ $previstaVencida ? 'text-red-700 font-bold' : 'text-gray-400' }}">—</span>
+                                            </div>
+                                            @if(!$envioVazio)
+                                                @php
+                                                    // Mapear data de envio com ordem de produção e quantidade
+                                                    $localizacoesComEnvio = $produto->localizacoes
+                                                        ->filter(fn($loc) => $loc->pivot->data_envio_faccao)
+                                                        ->take(3);
+                                                    $totalLocalizacoes = $produto->localizacoes->filter(fn($loc) => $loc->pivot->data_envio_faccao)->count();
+                                                    $restantes = max(0, $totalLocalizacoes - 3);
+                                                @endphp
+                                                <table class="w-full text-xs {{ $previstaVencida && $envioVazio ? 'text-red-700' : 'text-gray-900' }}">
+                                                    @foreach($localizacoesComEnvio as $loc)
+                                                        @php
+                                                            $data = $loc->pivot->data_envio_faccao;
+                                                            $dataFormatada = is_string($data) ? \Carbon\Carbon::parse($data)->format('d/m/Y') : $data->format('d/m/Y');
+                                                            $op = $loc->pivot->ordem_producao;
+                                                            $qtd = $loc->pivot->quantidade ?? 0;
+                                                        @endphp
+                                                        <tr>
+                                                            <td class="text-blue-700 font-semibold pr-1 whitespace-nowrap">{{ $op ? "OP: {$op}" : '' }}</td>
+                                                            <td class="text-center px-1 whitespace-nowrap font-semibold">{{ $dataFormatada }}</td>
+                                                            <td class="text-right whitespace-nowrap"><span class="bg-blue-100 text-blue-800 px-1 rounded">{{ number_format($qtd, 0, ',', '.') }}</span></td>
+                                                        </tr>
+                                                    @endforeach
+                                                    @if($restantes > 0)
+                                                        <tr>
+                                                            <td colspan="3" class="text-right text-[11px] text-gray-500 font-semibold">(+{{ $restantes }})</td>
+                                                        </tr>
+                                                    @endif
+                                                </table>
+                                            @else
+                                                <div class="{{ $previstaVencida ? 'text-red-700 font-bold' : 'text-gray-400' }}">
+                                                    <span>—</span>
                                                     @if($previstaVencida)
                                                         <svg class="w-4 h-4 inline-block ml-1 align-text-bottom text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                         </svg>
                                                     @endif
-                                                @endif
-                                            </span>
+                                                </div>
+                                            @endif
                                         </div>
 
                                         @if($produto->anexos && $produto->anexos->count())

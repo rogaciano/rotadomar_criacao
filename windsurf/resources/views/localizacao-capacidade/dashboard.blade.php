@@ -270,9 +270,8 @@
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 16%;">Descrição</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Marca</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Grupo</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 30%;">Observações</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 44%;">Localizações e Informações</th>
                                                                 <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto" style="width: 8%;">Qtd Total</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 14%;">DATAS</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 4%;">Status</th>
                                                             </tr>
                                                         </thead>
@@ -313,6 +312,30 @@
                                                                         <a href="{{ route('produtos.show', $produtoPrincipal->id) }}" class="text-blue-600 hover:text-blue-900 hover:underline" target="_blank">
                                                                             {{ $produtoPrincipal->referencia }}
                                                                         </a>
+                                                                        @php
+                                                                            // Buscar a data prevista para produção
+                                                                            $dataPrevista = null;
+                                                                            foreach($produtosGrupo as $produto) {
+                                                                                $locComData = $produto->localizacoes
+                                                                                    ->whereNotNull('pivot.data_prevista_faccao')
+                                                                                    ->sortBy('pivot.data_prevista_faccao')
+                                                                                    ->first();
+                                                                                if ($locComData && $locComData->pivot->data_prevista_faccao) {
+                                                                                    $dataPrevista = is_string($locComData->pivot->data_prevista_faccao)
+                                                                                        ? \Carbon\Carbon::parse($locComData->pivot->data_prevista_faccao)->format('d/m/Y')
+                                                                                        : $locComData->pivot->data_prevista_faccao->format('d/m/Y');
+                                                                                    break;
+                                                                                }
+                                                                            }
+                                                                        @endphp
+                                                                        @if($dataPrevista)
+                                                                            <div class="text-xs text-gray-500 mt-1">
+                                                                                <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                                                </svg>
+                                                                                Prev: {{ $dataPrevista }}
+                                                                            </div>
+                                                                        @endif
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-gray-700">{{ $produtoPrincipal->descricao }}</td>
                                                                     <td class="px-3 py-2 text-sm">
@@ -400,7 +423,7 @@
 
                                                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                                                         @if($todasObsLocalizacoes->count() > 0)
-                                                                            <table class="w-full border-collapse">
+                                                                            <table class="w-full text-xs">
                                                                                 @php
                                                                                     $totalQuantidades = 0;
                                                                                 @endphp
@@ -418,65 +441,107 @@
                                                                                             }
                                                                                         }
                                                                                         $totalQuantidades += $qtdAlocada;
+                                                                                        
+                                                                                        // Formatar datas
+                                                                                        $dataEnvio = $loc->pivot->data_envio_faccao 
+                                                                                            ? (is_string($loc->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_envio_faccao)->format('d/m/Y') : $loc->pivot->data_envio_faccao->format('d/m/Y'))
+                                                                                            : null;
+                                                                                        $dataRetorno = $loc->pivot->data_retorno_faccao 
+                                                                                            ? (is_string($loc->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_retorno_faccao)->format('d/m/Y') : $loc->pivot->data_retorno_faccao->format('d/m/Y'))
+                                                                                            : null;
                                                                                     @endphp
                                                                                     <tr class="{{ !$loop->last ? 'border-b border-gray-200' : '' }}">
-                                                                                        <td class="py-1 pr-2 align-top" style="width: 70%;">
-                                                                                            <div class="text-xs text-gray-700">
-                                                                                                @if($loc->pivot->ordem_producao)
-                                                                                                    <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
-                                                                                                @endif
-                                                                                                @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
-                                                                                                    <span class="text-gray-500"> - </span>
-                                                                                                @endif
-                                                                                                @if($loc->pivot->observacao)
-                                                                                                    @php
-                                                                                                        // Processar tags de cor nas observações
-                                                                                                        $obsTextoOriginalLoc = $loc->pivot->observacao;
-
-                                                                                                        // Aplicar formatação de cores
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-                                                                                                        $obsTextoOriginalLoc = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
-
-                                                                                                        $textoCompletoLoc = $obsTextoOriginalLoc;
-
-                                                                                                        // Extrair texto limpo para verificar tamanho
-                                                                                                        $textoLimpoLoc = strip_tags($textoCompletoLoc);
-                                                                                                        $isTruncatedLoc = strlen($textoLimpoLoc) > 80;
-
-                                                                                                        // Para versão truncada, truncar o texto limpo e adicionar reticências
-                                                                                                        $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpoLoc, 80) : $textoCompletoLoc;
-                                                                                                    @endphp
-                                                                                                    @if($isTruncatedLoc)
-                                                                                                        <span class="text-gray-600" x-data="{ expanded: false }">
-                                                                                                            <span x-show="!expanded">{!! $obsTextoTruncadoLoc !!}</span>
-                                                                                                            <span x-show="expanded" x-cloak>{!! $textoCompletoLoc !!}</span>
-                                                                                                            <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
-                                                                                                                <span x-show="!expanded">[+]</span>
-                                                                                                                <span x-show="expanded" x-cloak>[-]</span>
-                                                                                                            </button>
-                                                                                                        </span>
-                                                                                                    @else
-                                                                                                        <span class="text-gray-600">{!! $textoCompletoLoc !!}</span>
-                                                                                                    @endif
-                                                                                                @endif
-                                                                                            </div>
+                                                                                        {{-- Coluna 1: OP --}}
+                                                                                        <td class="py-1 pr-2 align-top whitespace-nowrap">
+                                                                                            @if($loc->pivot->ordem_producao)
+                                                                                                <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                                            @endif
+                                                                                            @if($loc->pivot->concluido == 1)
+                                                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600 inline-block ml-1" viewBox="0 0 20 20" fill="currentColor" title="Concluído">
+                                                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                                                                </svg>
+                                                                                            @endif
                                                                                         </td>
-                                                                                        <td class="py-1 pl-2 text-right align-top" style="width: 30%;">
-                                                                                            <div class="inline-flex items-center gap-1 justify-end">
-                                                                                                @if($loc->pivot->concluido == 1)
-                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor" title="Concluído">
-                                                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                                                        {{-- Coluna 2: Qtd --}}
+                                                                                        <td class="py-1 px-2 align-top text-center whitespace-nowrap">
+                                                                                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">
+                                                                                                {{ number_format($qtdAlocada, 0, ',', '.') }}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                        {{-- Coluna 3: Envio --}}
+                                                                                        <td class="py-1 px-2 align-top whitespace-nowrap">
+                                                                                            @if($dataEnvio)
+                                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 104 0 2 2 0 00-4 0zM3 13V9a2 2 0 012-2h10a2 2 0 012 2v4m-2 4h4a1 1 0 001-1v-2.586a1 1 0 00-.293-.707l-2.414-2.414A1 1 0 0016.586 10H15" />
                                                                                                     </svg>
-                                                                                                @endif
-                                                                                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800">
-                                                                                                    {{ number_format($qtdAlocada, 0, ',', '.') }}
+                                                                                                    {{ $dataEnvio }}
                                                                                                 </span>
-                                                                                            </div>
+                                                                                            @else
+                                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-500">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 104 0 2 2 0 00-4 0zM3 13V9a2 2 0 012-2h10a2 2 0 012 2v4m-2 4h4a1 1 0 001-1v-2.586a1 1 0 00-.293-.707l-2.414-2.414A1 1 0 0016.586 10H15" />
+                                                                                                    </svg>
+                                                                                                    N/A
+                                                                                                </span>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        {{-- Coluna 4: Retorno --}}
+                                                                                        <td class="py-1 px-2 align-top whitespace-nowrap">
+                                                                                            @if($dataRetorno)
+                                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-green-800">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                                    </svg>
+                                                                                                    {{ $dataRetorno }}
+                                                                                                </span>
+                                                                                            @else
+                                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-500">
+                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                                    </svg>
+                                                                                                    N/A
+                                                                                                </span>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        {{-- Coluna 5: Observação --}}
+                                                                                        <td class="py-1 pl-2 align-top">
+                                                                                            @if($loc->pivot->observacao)
+                                                                                                @php
+                                                                                                    // Processar tags de cor nas observações
+                                                                                                    $obsTextoOriginalLoc = $loc->pivot->observacao;
+
+                                                                                                    // Aplicar formatação de cores
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<yellow>(.*?)<\/yellow>/i', '<span style="color: #CA8A04; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<orange>(.*?)<\/orange>/i', '<span style="color: #EA580C; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<purple>(.*?)<\/purple>/i', '<span style="color: #9333EA; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+                                                                                                    $obsTextoOriginalLoc = preg_replace('/<pink>(.*?)<\/pink>/i', '<span style="color: #DB2777; font-weight: 600;">$1</span>', $obsTextoOriginalLoc);
+
+                                                                                                    $textoCompletoLoc = $obsTextoOriginalLoc;
+
+                                                                                                    // Extrair texto limpo para verificar tamanho
+                                                                                                    $textoLimpoLoc = strip_tags($textoCompletoLoc);
+                                                                                                    $isTruncatedLoc = strlen($textoLimpoLoc) > 40;
+
+                                                                                                    // Para versão truncada, truncar o texto limpo e adicionar reticências
+                                                                                                    $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpoLoc, 40) : $textoCompletoLoc;
+                                                                                                @endphp
+                                                                                                @if($isTruncatedLoc)
+                                                                                                    <span class="text-gray-600" x-data="{ expanded: false }">
+                                                                                                        <span x-show="!expanded">{!! $obsTextoTruncadoLoc !!}</span>
+                                                                                                        <span x-show="expanded" x-cloak>{!! $textoCompletoLoc !!}</span>
+                                                                                                        <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
+                                                                                                            <span x-show="!expanded">[+]</span>
+                                                                                                            <span x-show="expanded" x-cloak>[-]</span>
+                                                                                                        </button>
+                                                                                                    </span>
+                                                                                                @else
+                                                                                                    <span class="text-gray-600">{!! $textoCompletoLoc !!}</span>
+                                                                                                @endif
+                                                                                            @endif
                                                                                         </td>
                                                                                     </tr>
                                                                                 @endforeach
@@ -484,14 +549,13 @@
                                                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                                                 @if($todasObsLocalizacoes->count() > 1)
                                                                                     <tr class="border-t-2 border-gray-300 bg-gray-50">
-                                                                                        <td class="py-2 pr-2 text-right" style="width: 70%;">
-                                                                                            <span class="text-xs font-bold text-gray-800">TOTAL:</span>
-                                                                                        </td>
-                                                                                        <td class="py-2 pl-2 text-right" style="width: 30%;">
-                                                                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-600 text-white">
+                                                                                        <td class="py-2 pr-2 font-bold text-gray-800 whitespace-nowrap">TOTAL:</td>
+                                                                                        <td class="py-2 px-2 text-center">
+                                                                                            <span class="inline-flex items-center px-2 py-1 rounded-md font-bold bg-green-600 text-white">
                                                                                                 {{ number_format($totalQuantidades, 0, ',', '.') }}
                                                                                             </span>
                                                                                         </td>
+                                                                                        <td colspan="3"></td>
                                                                                     </tr>
                                                                                 @endif
                                                                             </table>
@@ -524,57 +588,6 @@
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900" title="Quantidade total do produto">
                                                                         {{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}
-                                                                    </td>
-                                                                    <td class="px-3 py-2 text-xs text-gray-700">
-                                                                        @php
-                                                                            // Usar as localizações já carregadas (que já estão filtradas por mês/ano)
-                                                                            $dataPrevista = $produtoPrincipal->localizacoes
-                                                                                ->whereNotNull('pivot.data_prevista_faccao')
-                                                                                ->sortBy('pivot.data_prevista_faccao')
-                                                                                ->first();
-
-                                                                            $dataEnvio = $produtoPrincipal->localizacoes
-                                                                                ->whereNotNull('pivot.data_envio_faccao')
-                                                                                ->sortBy('pivot.data_envio_faccao')
-                                                                                ->first();
-
-                                                                            $dataRetorno = $produtoPrincipal->localizacoes
-                                                                                ->whereNotNull('pivot.data_retorno_faccao')
-                                                                                ->sortBy('pivot.data_retorno_faccao')
-                                                                                ->first();
-                                                                        @endphp
-
-                                                                        <div class="space-y-0.5">
-                                                                            <div>
-                                                                                <span class="font-semibold text-gray-700">Prevista:</span>
-                                                                                @if($dataPrevista && $dataPrevista->pivot->data_prevista_faccao)
-                                                                                    {{ is_string($dataPrevista->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($dataPrevista->pivot->data_prevista_faccao)->format('d/m/Y') : $dataPrevista->pivot->data_prevista_faccao->format('d/m/Y') }}
-                                                                                    @if($produtoPrincipal->localizacoes->whereNotNull('pivot.data_prevista_faccao')->count() > 1)
-                                                                                        <span class="text-xs text-gray-400">(+{{ $produtoPrincipal->localizacoes->whereNotNull('pivot.data_prevista_faccao')->count() - 1 }})</span>
-                                                                                    @endif
-                                                                                @else
-                                                                                    <span class="text-gray-400 italic">N/A</span>
-                                                                                @endif
-                                                                            </div>
-
-                                                                            <div>
-                                                                                <span class="font-semibold text-gray-700">Envio:</span>
-                                                                                @if($dataEnvio && $dataEnvio->pivot->data_envio_faccao)
-                                                                                    {{ is_string($dataEnvio->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($dataEnvio->pivot->data_envio_faccao)->format('d/m/Y') : $dataEnvio->pivot->data_envio_faccao->format('d/m/Y') }}
-                                                                                @else
-                                                                                    <span class="text-gray-400 italic">N/A</span>
-                                                                                @endif
-                                                                            </div>
-
-                                                                            <div>
-                                                                                <span class="font-semibold text-gray-700">Retorno:</span>
-                                                                                @if($dataRetorno && $dataRetorno->pivot->data_retorno_faccao)
-                                                                                    {{ is_string($dataRetorno->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($dataRetorno->pivot->data_retorno_faccao)->format('d/m/Y') : $dataRetorno->pivot->data_retorno_faccao->format('d/m/Y') }}
-                                                                                @else
-                                                                                    <span class="text-gray-400 italic">N/A</span>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
                                                                     </td>
                                                                     <td class="px-3 py-2 text-sm">
                                                                         @if($produtoPrincipal->status)
