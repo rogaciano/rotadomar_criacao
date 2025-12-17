@@ -1079,6 +1079,88 @@
             // Atualizar filtros ativos na carga inicial
             updateActiveFilters();
 
+            // Função para destacar campos de filtro com valores preenchidos
+            function highlightFilledFilters() {
+                const filterForm = document.getElementById('filters-form');
+                if (!filterForm) return;
+
+                // Selecionar todos os inputs de texto e data
+                const textInputs = filterForm.querySelectorAll('input[type="text"], input[type="date"]');
+                textInputs.forEach(field => {
+                    const hasValue = field.value && field.value.trim() !== '';
+                    if (hasValue) {
+                        field.classList.add('bg-yellow-100', 'border-yellow-400');
+                        field.classList.remove('bg-white');
+                    } else {
+                        field.classList.remove('bg-yellow-100', 'border-yellow-400');
+                    }
+                });
+
+                // Selecionar todos os selects (simples e múltiplos)
+                const selects = filterForm.querySelectorAll('select');
+                selects.forEach(select => {
+                    let hasValue = false;
+                    
+                    if (select.multiple) {
+                        // Select múltiplo - verificar se tem alguma opção selecionada
+                        hasValue = select.selectedOptions.length > 0;
+                    } else {
+                        // Select simples - verificar se o valor não é vazio
+                        hasValue = select.value !== '' && select.value !== null;
+                    }
+                    
+                    // Verificar se usa Select2
+                    const select2Container = select.nextElementSibling;
+                    if (select2Container && select2Container.classList.contains('select2-container')) {
+                        // Aplicar estilo ao container do Select2
+                        const selection = select2Container.querySelector('.select2-selection');
+                        if (selection) {
+                            if (hasValue) {
+                                selection.style.backgroundColor = '#fef9c3'; // yellow-100
+                                selection.style.borderColor = '#facc15'; // yellow-400
+                            } else {
+                                selection.style.backgroundColor = '';
+                                selection.style.borderColor = '';
+                            }
+                        }
+                    } else {
+                        // Select normal sem Select2
+                        if (hasValue) {
+                            select.classList.add('bg-yellow-100', 'border-yellow-400');
+                            select.classList.remove('bg-white');
+                        } else {
+                            select.classList.remove('bg-yellow-100', 'border-yellow-400');
+                        }
+                    }
+                });
+
+                // Destacar checkboxes marcados
+                const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    const label = checkbox.closest('div');
+                    if (checkbox.checked && label) {
+                        label.classList.add('bg-yellow-100', 'rounded', 'px-2', 'py-1');
+                    } else if (label) {
+                        label.classList.remove('bg-yellow-100', 'rounded', 'px-2', 'py-1');
+                    }
+                });
+            }
+
+            // Chamar função de destaque na inicialização (com delay para Select2 carregar)
+            setTimeout(highlightFilledFilters, 100);
+
+            // Atualizar destaque quando campos mudarem
+            const filtersForm = document.getElementById('filters-form');
+            if (filtersForm) {
+                filtersForm.addEventListener('change', highlightFilledFilters);
+                filtersForm.addEventListener('input', highlightFilledFilters);
+            }
+
+            // Escutar eventos do Select2
+            $(document).on('select2:select select2:unselect select2:clear', function() {
+                highlightFilledFilters();
+            });
+
             // Funções para o modal de imagem
             window.openImageModal = function(imageUrl, id) {
                 const modal = document.getElementById('imageModal');

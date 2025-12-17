@@ -293,18 +293,19 @@
                     <tr>
                         <th width="3%" class="text-center">ID</th>
                         <th width="7%">Referência</th>
-                        <th width="11%">Produto</th>
-                        <th width="7%">Status</th>
-                        <th width="5%" class="text-center">Concl.</th>
-                        <th width="9%">Localização</th>
-                        <th width="7%">Tipo</th>
+                        <th width="10%">Produto</th>
+                        <th width="5%">Marca</th>
+                        <th width="6%">Status</th>
+                        <th width="4%" class="text-center">Concl.</th>
+                        <th width="8%">Localização</th>
+                        <th width="6%">Tipo</th>
                         <th width="7%">Situação</th>
-                        <th width="7%" class="text-center">Dt. Entrada</th>
-                        <th width="7%" class="text-center">Dt. Conclusão</th>
-                        <th width="7%" class="text-center">Dt. Devolução</th>
-                        <th width="5%" class="text-center">Comp.</th>
-                        <th width="14%">Observação</th>
-                        <th width="11%" class="text-center">Dias</th>
+                        <th width="6%" class="text-center">Dt. Entrada</th>
+                        <th width="6%" class="text-center">Dt. Concl.</th>
+                        <th width="6%" class="text-center">Dt. Devol.</th>
+                        <th width="4%" class="text-center">Comp.</th>
+                        <th width="12%">Obs / Dir. Comercial</th>
+                        <th width="10%" class="text-center">Dias</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -334,32 +335,50 @@
                         @endphp
                         <tr>
                             <td class="text-center">{{ $movimentacao->id }}</td>
-                            <td>{{ $movimentacao->produto->referencia ?? 'N/A' }}</td>
-                            <td>{{ Str::limit($movimentacao->produto->descricao ?? 'N/A', 25) }}</td>
+                            <td>
+                                {{ $movimentacao->produto->referencia ?? 'N/A' }}
+                                @if($movimentacao->produto && $movimentacao->produto->data_prevista_producao)
+                                    <div style="font-size: 6px; color: #2563EB; margin-top: 1px;">Dt.Prod: {{ $movimentacao->produto->data_prevista_producao->format('m/Y') }}</div>
+                                @endif
+                            </td>
+                            <td>{{ Str::limit($movimentacao->produto->descricao ?? 'N/A', 20) }}</td>
+                            <td style="font-size: 6px;">{{ $movimentacao->produto->marca->nome_marca ?? 'N/A' }}</td>
                             <td>
                                 @if($movimentacao->produto && $movimentacao->produto->status)
                                     <span class="status-badge {{ $movimentacao->produto->status->descricao == 'Ativo' ? 'status-concluido' : 'status-pendente' }}">
-                                        {{ $movimentacao->produto->status->descricao }}
+                                        {{ Str::limit($movimentacao->produto->status->descricao, 10) }}
                                     </span>
                                 @else
                                     N/A
                                 @endif
                             </td>
                             <td class="text-center">
-                                @if($movimentacao->data_saida)
+                                @if($movimentacao->concluido)
                                     <span class="status-badge status-concluido">Sim</span>
                                 @else
                                     <span class="status-badge status-pendente">Não</span>
                                 @endif
                             </td>
-                            <td>{{ $movimentacao->localizacao->nome_localizacao ?? 'N/A' }}</td>
-                            <td>{{ $movimentacao->tipo->descricao ?? 'N/A' }}</td>
-                            <td>{{ $movimentacao->situacao->descricao ?? 'N/A' }}</td>
+                            <td style="font-size: 6px;">{{ Str::limit($movimentacao->localizacao->nome_localizacao ?? 'N/A', 15) }}</td>
+                            <td style="font-size: 6px;">{{ $movimentacao->tipo->descricao ?? 'N/A' }}</td>
+                            <td style="font-size: 6px;">{{ Str::limit($movimentacao->situacao->descricao ?? 'N/A', 12) }}</td>
                             <td class="text-center">{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : 'N/A' }}</td>
                             <td class="text-center">{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : '-' }}</td>
                             <td class="text-center">{{ $movimentacao->data_devolucao ? $movimentacao->data_devolucao->format('d/m/Y') : '-' }}</td>
                             <td class="text-center">{{ $movimentacao->comprometido ? 'Sim' : 'Não' }}</td>
-                            <td>{{ Str::limit($movimentacao->observacao, 25, '...') ?: '-' }}</td>
+                            <td>
+                                @if($movimentacao->observacao)
+                                    <div style="font-size: 6px;">{{ Str::limit($movimentacao->observacao, 20, '...') }}</div>
+                                @endif
+                                @if($movimentacao->produto && $movimentacao->produto->direcionamentoComercial)
+                                    <div style="font-size: 6px; color: #7C3AED; margin-top: 1px; font-weight: 600;">
+                                        {{ Str::limit($movimentacao->produto->direcionamentoComercial->descricao, 18) }}
+                                    </div>
+                                @endif
+                                @if(!$movimentacao->observacao && !($movimentacao->produto && $movimentacao->produto->direcionamentoComercial))
+                                    <span style="color: #9CA3AF;">-</span>
+                                @endif
+                            </td>
                             <td class="text-center">
                                 @if($diasEntre !== null)
                                     <div>
