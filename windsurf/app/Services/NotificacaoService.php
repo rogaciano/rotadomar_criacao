@@ -28,6 +28,25 @@ class NotificacaoService
     }
 
     /**
+     * Criar notificação para atribuição de localização a um produto
+     */
+    public function criarNotificacaoAtribuicaoLocalizacao(\App\Models\ProdutoLocalizacao $produtoLocalizacao): Notificacao
+    {
+        $produto = $produtoLocalizacao->produto;
+        $localizacao = $produtoLocalizacao->localizacao;
+        $criador = auth()->user() ? auth()->user()->name : 'Sistema';
+        
+        return Notificacao::create([
+            'movimentacao_id' => null,
+            'localizacao_id' => $localizacao->id,
+            'tipo' => 'atribuicao_localizacao',
+            'titulo' => 'Novo Produto Atribuído',
+            'mensagem' => "O produto {$produto->referencia} foi vinculado ao seu setor por {$criador}. Ordem: {$produtoLocalizacao->ordem_producao}",
+            'link' => route('produtos.show', $produto->id)
+        ]);
+    }
+
+    /**
      * Criar notificação para mudança de etapa de produção
      */
     public function criarNotificacaoMudancaEtapa(\App\Models\ProdutoLocalizacao $produtoLocalizacao): ?Notificacao
@@ -175,13 +194,15 @@ class NotificacaoService
         $novas = (clone $query)->porTipo('nova_movimentacao')->count();
         $concluidas = (clone $query)->porTipo('movimentacao_concluida')->count();
         $mudancasEtapa = (clone $query)->porTipo('mudanca_etapa')->count();
+        $atribuicoes = (clone $query)->porTipo('atribuicao_localizacao')->count();
         
         return [
             'total' => $total,
             'nao_lidas' => $naoLidas,
             'novas' => $novas,
             'concluidas' => $concluidas,
-            'mudancas_etapa' => $mudancasEtapa
+            'mudancas_etapa' => $mudancasEtapa,
+            'atribuicoes' => $atribuicoes
         ];
     }
 }

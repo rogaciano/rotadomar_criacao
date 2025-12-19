@@ -462,6 +462,7 @@
                                                                         {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
                                                                         @if($todasObsLocalizacoes->count() > 0)
                                                                             <table class="w-full text-xs">
+
                                                                                 @php
                                                                                     $totalQuantidades = 0;
                                                                                 @endphp
@@ -528,12 +529,9 @@
                                                                                         {{-- Coluna 3: Envio --}}
                                                                                         <td class="py-1 px-2 align-top whitespace-nowrap">
                                                                                             @if($dataEnvio)
-                                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800">
-                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 104 0 2 2 0 00-4 0zM3 13V9a2 2 0 012-2h10a2 2 0 012 2v4m-2 4h4a1 1 0 001-1v-2.586a1 1 0 00-.293-.707l-2.414-2.414A1 1 0 0016.586 10H15" />
-                                                                                                    </svg>
-                                                                                                    {{ $dataEnvio }}
-                                                                                                </span>
+                                                                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200 uppercase">
+                                                                                                     ENVIO: {{ $dataEnvio }}
+                                                                                                 </span>
                                                                                             @else
                                                                                                 <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-500">
                                                                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -546,12 +544,9 @@
                                                                                         {{-- Coluna 4: Retorno --}}
                                                                                         <td class="py-1 px-2 align-top whitespace-nowrap">
                                                                                             @if($dataRetorno)
-                                                                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-green-100 text-green-800">
-                                                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                                                    </svg>
-                                                                                                    {{ $dataRetorno }}
-                                                                                                </span>
+                                                                                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800 border border-green-200 uppercase">
+                                                                                                     RETORNO: {{ $dataRetorno }}
+                                                                                                 </span>
                                                                                             @else
                                                                                                 <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-500">
                                                                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -565,36 +560,16 @@
                                                                                         <td class="py-1 px-2 align-top whitespace-nowrap">
                                                                                             <div class="flex items-center space-x-1">
                                                                                                 @if($dataEntrega)
-                                                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">
-                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                                                        </svg>
-                                                                                                        {{ $dataEntrega }}
-                                                                                                    </span>
+                                                                                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 uppercase">
+                                                                                                         ENTREGA: {{ $dataEntrega }}
+                                                                                                     </span>
                                                                                                 @else
                                                                                                     <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-50 text-gray-400 italic">
                                                                                                         Sem Data
                                                                                                     </span>
                                                                                                 @endif
 
-                                                                                                @php
-                                                                                                    $userLocal = auth()->user()->localizacao;
-                                                                                                    $podeEditarEntrega = auth()->user()->isAdmin() || (
-                                                                                                        $userLocal && 
-                                                                                                        $userLocal->capacidade > 0 && 
-                                                                                                        $userLocal->id == $loc->id
-                                                                                                    );
-                                                                                                @endphp
 
-                                                                                                @if($podeEditarEntrega)
-                                                                                                    <button type="button" 
-                                                                                                        onclick="abrirModalDataEntrega({{ $loc->pivot->id }}, '{{ $loc->pivot->data_entrega_faccao ? (is_string($loc->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('Y-m-d') : $loc->pivot->data_entrega_faccao->format('Y-m-d')) : '' }}', '{{ $loc->nome_localizacao }}', {{ $loc->pivot->produto_id }})"
-                                                                                                        class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Informar Data de Entrega">
-                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                                                        </svg>
-                                                                                                    </button>
-                                                                                                @endif
                                                                                             </div>
                                                                                         </td>
                                                                                         {{-- Coluna 5: Observação --}}

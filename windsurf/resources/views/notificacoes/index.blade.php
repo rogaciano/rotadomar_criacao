@@ -144,6 +144,33 @@
                         </div>
                     </div>
                 </a>
+
+                <!-- Card Atribuição de Localização -->
+                @php
+                    $atribParams = request()->all();
+                    if (request('tipo') === 'atribuicao_localizacao') {
+                        unset($atribParams['tipo']);
+                    } else {
+                        $atribParams['tipo'] = 'atribuicao_localizacao';
+                    }
+                @endphp
+                <a href="{{ route('notificacoes.index', $atribParams) }}" 
+                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'atribuicao_localizacao' ? 'ring-2 ring-indigo-500' : '' }}">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Atribuições</p>
+                                <p class="text-3xl font-bold text-indigo-600">{{ $stats['atribuicoes'] ?? 0 }}</p>
+                            </div>
+                            <div class="p-3 bg-indigo-100 rounded-full">
+                                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
             <!-- Lista de Notificações -->
@@ -180,6 +207,11 @@
                                             Mudanças de Etapa
                                         </span>
                                     @endif
+                                    @if(request('tipo') === 'atribuicao_localizacao')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                            Atribuições de Localização
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                             <a href="{{ route('notificacoes.index') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap">
@@ -205,6 +237,10 @@
                                                 @elseif($notificacao->tipo === 'mudanca_etapa')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                                         Etapa
+                                                    </span>
+                                                @elseif($notificacao->tipo === 'atribuicao_localizacao')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                        Atribuição
                                                     </span>
                                                 @else
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -232,7 +268,7 @@
                                         <div class="ml-4">
                                             <a href="{{ route('notificacoes.visualizar', $notificacao->id) }}" 
                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                {{ $notificacao->tipo === 'mudanca_etapa' ? 'Ver Produto' : 'Ver Movimentação' }}
+                                                {{ in_array($notificacao->tipo, ['mudanca_etapa', 'atribuicao_localizacao']) ? 'Ver Produto' : 'Ver Movimentação' }}
                                             </a>
                                         </div>
                                     </div>

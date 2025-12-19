@@ -85,6 +85,13 @@ class ProdutoLocalizacaoController extends Controller
             ->event('created')
             ->log('Localizaçao com OP e quantidade cadastrada no produto');
 
+        // Notificar usuários da localização destino
+        try {
+            $this->notificacaoService->criarNotificacaoAtribuicaoLocalizacao($produtoLocalizacao);
+        } catch (\Exception $e) {
+            \Log::error("Erro ao criar notificação de atribuição: " . $e->getMessage());
+        }
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização adicionada com sucesso!');
     }
@@ -240,6 +247,11 @@ class ProdutoLocalizacaoController extends Controller
             return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
         }
 
+        // Validação: Apenas se data_entrega_faccao estiver preenchida
+        if (!$produtoLocalizacao->data_entrega_faccao) {
+            return redirect()->back()->with('error', 'Para iniciar ou avançar uma etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
+        }
+
         $produtoLocalizacao->avancarEtapa(
             $request->etapa_id,
             auth()->id(),
@@ -315,6 +327,11 @@ class ProdutoLocalizacaoController extends Controller
 
         if (!$podeGerenciar) {
             return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
+        }
+
+        // Validação: Apenas se data_entrega_faccao estiver preenchida
+        if (!$produtoLocalizacao->data_entrega_faccao) {
+            return redirect()->back()->with('error', 'Para definir a etapa inicial, você deve primeiro preencher a "Entrega Prevista Facção".');
         }
 
         $produtoLocalizacao->definirEtapaInicial(

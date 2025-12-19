@@ -274,10 +274,10 @@
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordem Produção</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
-                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Prev. Facção</th>
-                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Envio Facção</th>
-                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Retorno Facção</th>
-                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Entrega Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prev. Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Envio Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retorno Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrega Prevista Facção</th>
                                             <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Concluído</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Etapa Atual</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximas Etapas</th>
@@ -396,6 +396,10 @@
                                                             $userLoc && 
                                                             $userLoc->id == $localizacao->id
                                                         );
+
+                                                        // Validação robusta para habilitar mudança de etapa (agora baseada na Entrega Prevista)
+                                                        $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
+                                                        $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
                                                     @endphp
                                                     
                                                     @if($etapaAtual)
@@ -428,7 +432,10 @@
                                                         {{-- Sem etapa definida - mostrar botão para definir --}}
                                                         <div class="relative" @click.away="showEtapaMenu = false">
                                                             @if($podeGerenciarEtapa)
-                                                                <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded text-gray-600 border border-dashed border-gray-300">
+                                                                <button type="button" 
+                                                                    @click="{{ $possuiDataEntrega ? 'showEtapaMenu = !showEtapaMenu' : 'alert(\'Por favor, preencha a Entrega Prevista Facção antes de definir a etapa.\')' }}" 
+                                                                    class="px-2 py-1 text-xs rounded border border-dashed transition-all {{ $possuiDataEntrega ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-300 shadow-sm' : 'bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed opacity-40 grayscale' }}"
+                                                                    title="{{ $possuiDataEntrega ? 'Definir etapa inicial' : 'Preencha a \"Entrega Prevista Facção\" para definir a etapa' }}">
                                                                     + Definir
                                                                 </button>
                                                             @else
@@ -457,7 +464,10 @@
                                                                 <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
                                                                     @csrf
                                                                     <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                                    <button type="submit" class="w-full text-left px-3 py-1 rounded text-xs font-medium transition-colors {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white' }}" title="Avançar para {{ $transicao->etapaDestino->nome ?? 'próxima etapa' }}">
+                                                                    <button type="submit" 
+                                                                        {{ !$possuiDataEntrega ? 'disabled' : '' }}
+                                                                        class="w-full text-left px-3 py-1 rounded text-xs font-medium transition-all {{ $possuiDataEntrega ? ($btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white') : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-40 grayscale pointer-events-none' }}" 
+                                                                        title="{{ $possuiDataEntrega ? 'Avançar para ' . ($transicao->etapaDestino->nome ?? 'próxima etapa') : 'Preencha a \"Entrega Prevista Facção\" para avançar' }}">
                                                                         → {{ $transicao->label_botao ?: ($transicao->etapaDestino->nome ?? 'Próxima') }}
                                                                     </button>
                                                                 </form>
@@ -981,11 +991,6 @@
                                             <input type="date" name="data_retorno_faccao" id="data_retorno_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                                             <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
                                         </div>
-                                        <div class="mb-4">
-                                            <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Entrega da Facção</label>
-                                            <input type="date" name="data_entrega_faccao" id="data_entrega_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data efetiva de entrega pela facção</p>
-                                        </div>
                                         <div>
                                             <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
                                             <textarea name="observacao" id="observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"></textarea>
@@ -1071,11 +1076,6 @@
                                             <input type="date" name="data_retorno_faccao" id="edit-data-retorno-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                             <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
                                         </div>
-                                        <div class="mb-4">
-                                            <label for="edit-data-entrega-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Entrega da Facção</label>
-                                            <input type="date" name="data_entrega_faccao" id="edit-data-entrega-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data efetiva de entrega pela facção</p>
-                                        </div>
                                         <div>
                                             <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
                                             <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
@@ -1111,7 +1111,7 @@
                             }
                         }
 
-                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao, dataEntregaFaccao) {
+                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao) {
                             try {
                                 console.log('Abrindo modal para editar localização:', {
                                     produtoLocalizacaoId,
@@ -1123,8 +1123,7 @@
                                     observacao,
                                     concluido,
                                     dataEnvioFaccao,
-                                    dataRetornoFaccao,
-                                    dataEntregaFaccao
+                                    dataRetornoFaccao
                                 });
  
                                 document.getElementById('edit-localizacao-id').value = localizacaoId;
@@ -1134,7 +1133,6 @@
                                 document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
                                 document.getElementById('edit-data-envio-faccao').value = dataEnvioFaccao || '';
                                 document.getElementById('edit-data-retorno-faccao').value = dataRetornoFaccao || '';
-                                document.getElementById('edit-data-entrega-faccao').value = dataEntregaFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
                                 document.getElementById('edit-concluido').checked = concluido == 1;
 
