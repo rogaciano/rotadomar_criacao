@@ -36,14 +36,28 @@ class EtapaProducaoController extends Controller
     }
 
     /**
+     * Visualizar fluxo de etapas em página cheia
+     */
+    public function visualizarFluxo()
+    {
+        $etapasFluxo = EtapaProducao::where('ativo', true)
+            ->with(['transicoesOrigem.etapaDestino'])
+            ->orderBy('ordem')
+            ->get();
+
+        return view('etapas-producao.fluxo', compact('etapasFluxo'));
+    }
+
+    /**
      * Formulário de criação
      */
     public function create()
     {
         $cores = EtapaProducao::coresDisponiveis();
         $etapas = EtapaProducao::where('ativo', true)->orderBy('ordem')->get();
+        $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         
-        return view('etapas-producao.create', compact('cores', 'etapas'));
+        return view('etapas-producao.create', compact('cores', 'etapas', 'localizacoes'));
     }
 
     /**
@@ -56,6 +70,7 @@ class EtapaProducaoController extends Controller
             'descricao' => 'nullable|string|max:255',
             'cor' => 'required|string|max:20',
             'icone' => 'nullable|string|max:50',
+            'localizacao_id' => 'nullable|exists:localizacoes,id',
             'ativo' => 'boolean',
             'ordem' => 'required|integer|min:0',
             'transicoes' => 'nullable|array',
@@ -69,6 +84,7 @@ class EtapaProducaoController extends Controller
             'descricao' => $validated['descricao'] ?? null,
             'cor' => $validated['cor'],
             'icone' => $validated['icone'] ?? null,
+            'localizacao_id' => $validated['localizacao_id'] ?? null,
             'ativo' => $request->has('ativo'),
             'ordem' => $validated['ordem']
         ]);
@@ -115,11 +131,13 @@ class EtapaProducaoController extends Controller
             ->orderBy('ordem')
             ->get();
         $etapasProducao->load('transicoesOrigem.etapaDestino');
+        $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         
         return view('etapas-producao.edit', [
             'etapa' => $etapasProducao,
             'cores' => $cores,
-            'etapas' => $etapas
+            'etapas' => $etapas,
+            'localizacoes' => $localizacoes
         ]);
     }
 
@@ -133,6 +151,7 @@ class EtapaProducaoController extends Controller
             'descricao' => 'nullable|string|max:255',
             'cor' => 'required|string|max:20',
             'icone' => 'nullable|string|max:50',
+            'localizacao_id' => 'nullable|exists:localizacoes,id',
             'ativo' => 'boolean',
             'ordem' => 'required|integer|min:0',
             'transicoes' => 'nullable|array',
@@ -146,6 +165,7 @@ class EtapaProducaoController extends Controller
             'descricao' => $validated['descricao'] ?? null,
             'cor' => $validated['cor'],
             'icone' => $validated['icone'] ?? null,
+            'localizacao_id' => $validated['localizacao_id'] ?? null,
             'ativo' => $request->has('ativo'),
             'ordem' => $validated['ordem']
         ]);

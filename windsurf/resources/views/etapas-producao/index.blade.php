@@ -16,12 +16,12 @@
                     Adicionar Etapa
                 </a>
                 
-                <button onclick="openFlowModal()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('etapas-producao.visualizar-fluxo') }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     Visualizar Fluxo
-                </button>
+                </a>
             </div>
 
             @if (session('success'))
@@ -194,165 +194,9 @@
         </div>
     </div>
 
-    <!-- Modal de Visualização do Fluxo com Mermaid.js -->
-    <div id="flowModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-5 mx-auto p-5 border w-11/12 max-w-5xl shadow-lg rounded-lg bg-white mb-10">
-            <div class="flex justify-between items-center pb-4 border-b">
-                <h3 class="text-xl font-bold text-gray-900 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Fluxo de Etapas de Produção
-                </h3>
-                <button onclick="closeFlowModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <div class="mt-4">
-                <!-- Container do Diagrama Mermaid -->
-                <div class="overflow-auto bg-white rounded-lg p-4 min-h-[400px] max-h-[70vh] flex flex-col items-center" id="flowContainer">
-                    @if(isset($etapasFluxo) && $etapasFluxo->count() > 0)
-                        @php
-                            // Gerar a sintaxe Mermaid
-                            $mermaidCode = "graph TD\n";
-                            
-                            // Cores hex para estilos
-                            $corHex = [
-                                'blue' => '#3B82F6',
-                                'green' => '#22C55E',
-                                'yellow' => '#FACC15',
-                                'red' => '#EF4444',
-                                'purple' => '#A855F7',
-                                'gray' => '#6B7280',
-                                'indigo' => '#6366F1',
-                                'pink' => '#EC4899',
-                                'orange' => '#F97316',
-                            ];
-                            
-                            // Identificar primeira e últimas etapas
-                            $primeiraOrdem = $etapasFluxo->min('ordem');
-                            $etapasFinaisIds = $etapasFluxo->filter(fn($e) => $e->transicoesOrigem->count() == 0)->pluck('id')->toArray();
-                            
-                            // Criar nós
-                            foreach ($etapasFluxo as $etapa) {
-                                $nodeId = 'E' . $etapa->id;
-                                $icone = $etapa->icone ? $etapa->icone . ' ' : '';
-                                $nome = str_replace('"', "'", $icone . $etapa->nome);
-                                
-                                // Usar formato especial para primeira e última etapa
-                                if ($etapa->ordem == $primeiraOrdem) {
-                                    $mermaidCode .= "    {$nodeId}([\"🚀 {$nome}\"])\n";
-                                } elseif (in_array($etapa->id, $etapasFinaisIds)) {
-                                    $mermaidCode .= "    {$nodeId}[[\"🏁 {$nome}\"]]\n";
-                                } else {
-                                    $mermaidCode .= "    {$nodeId}[\"{$nome}\"]\n";
-                                }
-                            }
-                            
-                            $mermaidCode .= "\n";
-                            
-                            // Criar conexões
-                            foreach ($etapasFluxo as $etapa) {
-                                $origemId = 'E' . $etapa->id;
-                                foreach ($etapa->transicoesOrigem as $transicao) {
-                                    if ($transicao->etapaDestino) {
-                                        $destinoId = 'E' . $transicao->etapaDestino->id;
-                                        $label = str_replace('"', "'", $transicao->label_botao ?: '');
-                                        
-                                        if ($label) {
-                                            $mermaidCode .= "    {$origemId} -->|\"{$label}\"| {$destinoId}\n";
-                                        } else {
-                                            $mermaidCode .= "    {$origemId} --> {$destinoId}\n";
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            $mermaidCode .= "\n";
-                            
-                            // Aplicar estilos por cor
-                            foreach ($etapasFluxo as $etapa) {
-                                $nodeId = 'E' . $etapa->id;
-                                $cor = $corHex[$etapa->cor] ?? '#6B7280';
-                                $textColor = in_array($etapa->cor, ['yellow']) ? '#1F2937' : '#FFFFFF';
-                                $mermaidCode .= "    style {$nodeId} fill:{$cor},stroke:{$cor},color:{$textColor}\n";
-                            }
-                        @endphp
-                        
-                        <div class="mermaid" id="mermaidDiagram">
-{{ $mermaidCode }}
-                        </div>
-                    @else
-                        <div class="flex flex-col items-center justify-center h-[400px] text-gray-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <p class="text-lg font-medium">Nenhuma etapa de produção ativa encontrada</p>
-                            <p class="text-sm">Adicione etapas para visualizar o fluxo</p>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <div class="mt-4 pt-4 border-t flex justify-end gap-3">
-                <button onclick="closeFlowModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors">
-                    Fechar
-                </button>
-            </div>
-        </div>
-    </div>
-
     @push('scripts')
-    <!-- Mermaid.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <script>
-        // Inicializar Mermaid
-        mermaid.initialize({
-            startOnLoad: false,
-            theme: 'default',
-            flowchart: {
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: 'basis',
-                padding: 20
-            },
-            securityLevel: 'loose'
-        });
-
-        function openFlowModal() {
-            document.getElementById('flowModal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-            
-            // Re-renderizar o diagrama Mermaid
-            const mermaidDiv = document.getElementById('mermaidDiagram');
-            if (mermaidDiv && !mermaidDiv.querySelector('svg')) {
-                mermaid.run({
-                    nodes: [mermaidDiv]
-                });
-            }
-        }
-
-        function closeFlowModal() {
-            document.getElementById('flowModal').classList.add('hidden');
-            document.body.style.overflow = '';
-        }
-
-        // Fechar ao clicar fora do modal
-        document.getElementById('flowModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeFlowModal();
-            }
-        });
-
-        // Fechar com ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && !document.getElementById('flowModal').classList.contains('hidden')) {
-                closeFlowModal();
-            }
-        });
+        // Scripts removidos pois o fluxo agora abre em nova aba
     </script>
     @endpush
 </x-app-layout>

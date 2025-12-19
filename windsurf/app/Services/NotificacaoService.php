@@ -28,6 +28,33 @@ class NotificacaoService
     }
 
     /**
+     * Criar notificação para mudança de etapa de produção
+     */
+    public function criarNotificacaoMudancaEtapa(\App\Models\ProdutoLocalizacao $produtoLocalizacao): ?Notificacao
+    {
+        // Recarregar etapa atual para garantir que temos os dados
+        $produtoLocalizacao->load('etapaAtual.setor');
+        $etapaAtual = $produtoLocalizacao->etapaAtual;
+        
+        // Se a etapa não tem setor configurado, não notifica
+        if (!$etapaAtual || !$etapaAtual->localizacao_id) {
+            return null;
+        }
+
+        $produto = $produtoLocalizacao->produto;
+        $localizacaoOrigem = $produtoLocalizacao->localizacao;
+        
+        return Notificacao::create([
+            'movimentacao_id' => null,
+            'localizacao_id' => $etapaAtual->localizacao_id,
+            'tipo' => 'mudanca_etapa',
+            'titulo' => 'Mudança de Etapa de Produção',
+            'mensagem' => "O produto {$produto->referencia} entrou na etapa {$etapaAtual->nome} em {$localizacaoOrigem->nome_localizacao}",
+            'link' => route('produtos.show', $produto->id)
+        ]);
+    }
+
+    /**
      * Criar notificação para movimentação concluída
      */
     public function criarNotificacaoMovimentacaoConcluida(Movimentacao $movimentacao): Notificacao
@@ -147,12 +174,14 @@ class NotificacaoService
         $naoLidas = (clone $query)->naoVisualizadas()->count();
         $novas = (clone $query)->porTipo('nova_movimentacao')->count();
         $concluidas = (clone $query)->porTipo('movimentacao_concluida')->count();
+        $mudancasEtapa = (clone $query)->porTipo('mudanca_etapa')->count();
         
         return [
             'total' => $total,
             'nao_lidas' => $naoLidas,
             'novas' => $novas,
-            'concluidas' => $concluidas
+            'concluidas' => $concluidas,
+            'mudancas_etapa' => $mudancasEtapa
         ];
     }
 }

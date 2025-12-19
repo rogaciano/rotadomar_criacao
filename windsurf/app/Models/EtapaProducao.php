@@ -18,13 +18,23 @@ class EtapaProducao extends Model
         'cor',
         'icone',
         'ativo',
+        'localizacao_id',
         'ordem'
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
+        'localizacao_id' => 'integer',
         'ordem' => 'integer'
     ];
+
+    /**
+     * Setor (Localização) que deve ser notificado nesta etapa
+     */
+    public function setor()
+    {
+        return $this->belongsTo(Localizacao::class, 'localizacao_id');
+    }
 
     /**
      * Transições que partem desta etapa (próximas etapas possíveis)

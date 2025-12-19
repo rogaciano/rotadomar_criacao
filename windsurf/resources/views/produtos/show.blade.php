@@ -400,9 +400,18 @@
                                                     
                                                     @if($etapaAtual)
                                                         {{-- Badge da etapa atual --}}
-                                                        <span class="inline-block px-2 py-1 rounded-full text-xs font-medium border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
-                                                            {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
-                                                        </span>
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="inline-block px-2 py-1 rounded-full text-xs font-medium border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                                                                {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
+                                                            </span>
+                                                            <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}" 
+                                                               class="text-gray-400 hover:text-indigo-600 transition-colors" 
+                                                               title="Ver histórico de mudanças">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
                                                         
                                                         {{-- Link para voltar etapa --}}
                                                         @if($etapaAnteriorId && $podeGerenciarEtapa)

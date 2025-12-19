@@ -61,6 +61,21 @@
                                     placeholder="Ex: 📦 ⚙️ ✅ 🎨">
                             </div>
 
+                            <!-- Setor para Notificação -->
+                            <div class="md:col-span-2">
+                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Setor para Notificação (Opcional)</label>
+                                <select name="localizacao_id" id="localizacao_id" 
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="">Nenhum setor (sem notificação)</option>
+                                    @foreach($localizacoes as $loc)
+                                        <option value="{{ $loc->id }}" {{ old('localizacao_id') == $loc->id ? 'selected' : '' }}>
+                                            {{ $loc->nome_localizacao }} ({{ $loc->nome_reduzido }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Os usuários vinculados a este setor receberão uma notificação quando um produto entrar nesta etapa.</p>
+                            </div>
+
                             <!-- Ativo -->
                             <div class="md:col-span-2">
                                 <label class="flex items-center">

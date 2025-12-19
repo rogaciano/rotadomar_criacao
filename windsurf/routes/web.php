@@ -135,6 +135,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('direcionamentos-comerciais/{id}/restore', [DirecionamentoComercialController::class, 'restore'])->name('direcionamentos-comerciais.restore');
 
     // Routes para Etapas de Produção
+    Route::get('etapas-producao/fluxo', [EtapaProducaoController::class, 'visualizarFluxo'])->name('etapas-producao.visualizar-fluxo');
     Route::resource('etapas-producao', EtapaProducaoController::class);
 
     // Routes para Status

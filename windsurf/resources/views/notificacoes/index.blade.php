@@ -118,6 +118,32 @@
                         </div>
                     </div>
                 </a>
+
+                <!-- Card Mudança de Etapa -->
+                @php
+                    $etapaParams = request()->all();
+                    if (request('tipo') === 'mudanca_etapa') {
+                        unset($etapaParams['tipo']);
+                    } else {
+                        $etapaParams['tipo'] = 'mudanca_etapa';
+                    }
+                @endphp
+                <a href="{{ route('notificacoes.index', $etapaParams) }}" 
+                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'mudanca_etapa' ? 'ring-2 ring-purple-500' : '' }}">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Mudança Etapa</p>
+                                <p class="text-3xl font-bold text-purple-600">{{ $stats['mudancas_etapa'] ?? 0 }}</p>
+                            </div>
+                            <div class="p-3 bg-purple-100 rounded-full">
+                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
 
             <!-- Lista de Notificações -->
@@ -149,6 +175,11 @@
                                             Movimentações Concluídas
                                         </span>
                                     @endif
+                                    @if(request('tipo') === 'mudanca_etapa')
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            Mudanças de Etapa
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                             <a href="{{ route('notificacoes.index') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium whitespace-nowrap">
@@ -170,6 +201,10 @@
                                                 @if($notificacao->tipo === 'nova_movimentacao')
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                         Nova
+                                                    </span>
+                                                @elseif($notificacao->tipo === 'mudanca_etapa')
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                        Etapa
                                                     </span>
                                                 @else
                                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -197,7 +232,7 @@
                                         <div class="ml-4">
                                             <a href="{{ route('notificacoes.visualizar', $notificacao->id) }}" 
                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                Ver Movimentação
+                                                {{ $notificacao->tipo === 'mudanca_etapa' ? 'Ver Produto' : 'Ver Movimentação' }}
                                             </a>
                                         </div>
                                     </div>

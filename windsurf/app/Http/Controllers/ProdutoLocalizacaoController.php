@@ -9,6 +9,12 @@ use Illuminate\Http\Request;
 
 class ProdutoLocalizacaoController extends Controller
 {
+    protected $notificacaoService;
+
+    public function __construct(\App\Services\NotificacaoService $notificacaoService)
+    {
+        $this->notificacaoService = $notificacaoService;
+    }
     /**
      * Adicionar uma localização ao produto
      */
@@ -240,6 +246,9 @@ class ProdutoLocalizacaoController extends Controller
             $request->observacao
         );
 
+        // Notificar setor
+        $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa avançada com sucesso!');
     }
@@ -277,6 +286,9 @@ class ProdutoLocalizacaoController extends Controller
             $request->observacao
         );
 
+        // Notificar setor
+        $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa revertida com sucesso!');
     }
@@ -311,6 +323,9 @@ class ProdutoLocalizacaoController extends Controller
             $request->observacao
         );
 
+        // Notificar setor
+        $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa definida com sucesso!');
     }
@@ -326,6 +341,7 @@ class ProdutoLocalizacaoController extends Controller
             ->firstOrFail();
 
         $historico = $produtoLocalizacao->historicoEtapas()
+            ->reorder('created_at', 'asc')
             ->with(['etapaAnterior', 'etapaNova', 'usuario'])
             ->get();
 
