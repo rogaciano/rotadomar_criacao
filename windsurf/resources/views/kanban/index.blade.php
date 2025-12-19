@@ -36,16 +36,36 @@
 
                     <!-- Filtro de Localização (multi-select com Select2) -->
                     <div class="flex-1 min-w-[220px]">
-                        <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização (uma ou mais)</label>
-                        <select name="localizacao_id[]" id="localizacao_id" multiple
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-localizacao">
-                            @foreach($todasLocalizacoes as $localizacao)
-                                <option value="{{ $localizacao->id }}"
-                                    {{ !empty($localizacaoIds ?? []) && in_array($localizacao->id, $localizacaoIds) ? 'selected' : '' }}>
-                                    {{ $localizacao->nome_localizacao }}
+                        <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">
+                            Localização (uma ou mais)
+                            @if($usuarioRestrito ?? false)
+                                <span class="text-xs text-gray-500">(Seu acesso)</span>
+                            @endif
+                        </label>
+                        @if($usuarioRestrito ?? false)
+                            {{-- Usuário restrito: mostrar apenas a localização dele --}}
+                            @php
+                                $localizacaoSelecionada = $todasLocalizacoes->firstWhere('id', $localizacaoIds[0] ?? null);
+                            @endphp
+                            <select name="localizacao_id[]" id="localizacao_id"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-100 h-10" disabled>
+                                <option value="{{ $localizacaoIds[0] ?? '' }}" selected>
+                                    {{ $localizacaoSelecionada->nome_localizacao ?? 'Localização' }}
                                 </option>
-                            @endforeach
-                        </select>
+                            </select>
+                            <input type="hidden" name="localizacao_id[]" value="{{ $localizacaoIds[0] ?? '' }}">
+                        @else
+                            {{-- Usuário normal: pode ver todas com multi-select --}}
+                            <select name="localizacao_id[]" id="localizacao_id" multiple
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-localizacao">
+                                @foreach($todasLocalizacoes as $localizacao)
+                                    <option value="{{ $localizacao->id }}"
+                                        {{ !empty($localizacaoIds ?? []) && in_array($localizacao->id, $localizacaoIds) ? 'selected' : '' }}>
+                                        {{ $localizacao->nome_localizacao }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
 
                     <!-- Filtro de Direcionamento Comercial (multi-select com Select2) -->
@@ -139,9 +159,8 @@
                                 <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 {{ $produto->direcionamentoComercial ? 'border-blue-500' : 'border-' . ($produto->marca->cor_fundo ?? 'gray') . '-500' }}">
                                     <!-- Referência -->
                                     <div class="flex items-start justify-between mb-2">
-                                        <a href="{{ route('produtos.show', $produto->id) }}"
-                                           class="text-blue-600 hover:text-blue-800 font-bold text-lg"
-                                           target="_blank">
+                                        <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(request()->fullUrl()) }}"
+                                           class="text-blue-600 hover:text-blue-800 font-bold text-lg">
                                             {{ $produto->referencia }}
                                         </a>
                                     </div>

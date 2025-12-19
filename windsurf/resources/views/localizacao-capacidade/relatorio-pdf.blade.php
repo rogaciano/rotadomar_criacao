@@ -321,19 +321,39 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 8%;">Ref</th>
-                                <th style="width: 16%;">Descrição</th>
+                                <th style="width: 10%;">Ref</th>
+                                <th style="width: 18%;">Descrição</th>
                                 <th style="width: 10%;">Marca</th>
                                 <th style="width: 10%;">Grupo</th>
-                                <th style="width: 44%;">Localizações e Informações</th>
-                                <th style="width: 8%;" class="text-center">Qtd Total</th>
+                                <th style="width: 44%;">Produção e Detalhes</th>
+                                <th style="width: 6%;" class="text-center">Qtd Total</th>
                                 <th style="width: 4%;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $corHex = [
+                                    'blue' => '#EFF6FF', 'blue-text' => '#1E40AF', 'blue-border' => '#BFDBFE',
+                                    'green' => '#F0FDF4', 'green-text' => '#166534', 'green-border' => '#BBF7D0',
+                                    'yellow' => '#FEFCE8', 'yellow-text' => '#854D0E', 'yellow-border' => '#FEF08A',
+                                    'red' => '#FEF2F2', 'red-text' => '#991B1B', 'red-border' => '#FECACA',
+                                    'purple' => '#FAF5FF', 'purple-text' => '#6B21A8', 'purple-border' => '#E9D5FF',
+                                    'gray' => '#F9FAFB', 'gray-text' => '#374151', 'gray-border' => '#E5E7EB',
+                                    'indigo' => '#EEF2FF', 'indigo-text' => '#3730A3', 'indigo-border' => '#C3DAFE',
+                                    'pink' => '#FDF2F8', 'pink-text' => '#9D174D', 'pink-border' => '#FBCFE8',
+                                    'orange' => '#FFF7ED', 'orange-text' => '#9A3412', 'orange-border' => '#FED7AA',
+                                ];
+                            @endphp
                             @foreach($produtosAgrupados as $chave => $produtosGrupo)
                                 @php
                                     $produtoPrincipal = $produtosGrupo->first();
+                                    
+                                    // Identificar todas as etapas presentes neste grupo de produtos
+                                    $etapaIdsNoGrupo = $produtosGrupo->flatMap(function($p) {
+                                        return $p->localizacoes->pluck('pivot.etapa_atual_id');
+                                    })->unique()->filter()->toArray();
+                                    
+                                    $etapasNoGrupo = $etapasProducao->whereIn('id', $etapaIdsNoGrupo);
                                 @endphp
                                 <tr>
                                     <td class="font-semibold">
@@ -355,14 +375,14 @@
                                             }
                                         @endphp
                                         @if($dataPrevista)
-                                            <div style="font-size: 7px; color: #6B7280; margin-top: 2px;">📅 Prev: {{ $dataPrevista }}</div>
+                                            <div style="font-size: 7px; color: #111; font-weight: bold; margin-top: 2px;">PREV: {{ $dataPrevista }}</div>
                                         @endif
                                     </td>
                                     <td>{{ $produtoPrincipal->descricao }}</td>
                                     <td>
                                         @if($produtoPrincipal->marca)
                                             @if($produtoPrincipal->marca->cor_fundo && $produtoPrincipal->marca->cor_fonte)
-                                                <span style="background-color: {{ $produtoPrincipal->marca->cor_fundo }}; color: {{ $produtoPrincipal->marca->cor_fonte }}; padding: 2px 8px; border-radius: 12px; font-size: 8px; font-weight: 600; white-space: nowrap; display: inline-block;">
+                                                <span style="background-color: {{ $produtoPrincipal->marca->cor_fundo }}; color: {{ $produtoPrincipal->marca->cor_fonte }}; padding: 2px 6px; border-radius: 12px; font-size: 8px; font-weight: 600; white-space: nowrap; display: inline-block;">
                                                     {{ $produtoPrincipal->marca->nome_marca }}
                                                 </span>
                                             @else
@@ -379,7 +399,6 @@
                                             $obs = \App\Models\ProdutoObservacao::where('produto_id', $produtoPrincipal->id)->get();
 
                                             // Carregar todas as observações das localizações de todas as alocações
-                                            // USAR localizacoes (sem parênteses) para pegar a collection já filtrada
                                             $todasObsLocalizacoes = collect();
                                             foreach($produtosGrupo as $produto) {
                                                 $obsLoc = $produto->localizacoes->filter(function($loc) {
@@ -396,16 +415,18 @@
                                             $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
                                         @endphp
 
-                                        {{-- Observações das Localizações (Ordem de Produção) - sem duplicatas --}}
+                                        {{-- Observações das Localizações (Ordem de Produção) --}}
                                         @if($todasObsLocalizacoes->count() > 0)
                                             <table class="obs-table" style="margin-bottom: 8px;">
                                                 <thead style="background-color: #F3F4F6;">
                                                     <tr>
-                                                        <th style="width: 20%; font-size: 7px; padding: 3px;">OP</th>
-                                                        <th style="width: 12%; font-size: 7px; padding: 3px; text-align: center;">Qtd</th>
-                                                        <th style="width: 18%; font-size: 7px; padding: 3px; text-align: center;">Envio</th>
-                                                        <th style="width: 18%; font-size: 7px; padding: 3px; text-align: center;">Retorno</th>
-                                                        <th style="width: 32%; font-size: 7px; padding: 3px;">Obs</th>
+                                                        <th style="width: 12%; font-size: 7px; padding: 2px;">OP</th>
+                                                        <th style="width: 12%; font-size: 7px; padding: 2px;">Etapa</th>
+                                                        <th style="width: 10%; font-size: 7px; padding: 2px; text-align: center;">Qtd</th>
+                                                        <th style="width: 12%; font-size: 7px; padding: 2px; text-align: center;">Envio</th>
+                                                        <th style="width: 12%; font-size: 7px; padding: 2px; text-align: center;">Retorno</th>
+                                                        <th style="width: 12%; font-size: 7px; padding: 2px; text-align: center;">Entrega</th>
+                                                        <th style="width: 28%; font-size: 7px; padding: 2px;">Obs</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -414,7 +435,7 @@
                                                 @endphp
                                                 @foreach($todasObsLocalizacoes as $loc)
                                                     @php
-                                                        // Buscar a quantidade alocada para esta ordem de produção
+                                                        // Buscar a quantidade alocada
                                                         $qtdAlocada = 0;
                                                         foreach($produtosGrupo as $produto) {
                                                             $localizacaoAtual = $produto->localizacoes
@@ -427,59 +448,62 @@
                                                         }
                                                         $totalQuantidades += $qtdAlocada;
 
-                                                        // Formatar datas de envio e retorno
+                                                        // Etapa desta linha
+                                                        $etapaLinhaId = $loc->pivot->etapa_atual_id;
+                                                        $etapaL = $etapaLinhaId ? $etapasProducao->firstWhere('id', $etapaLinhaId) : null;
+
+                                                        // Datas
                                                         $dataEnvio = $loc->pivot->data_envio_faccao
-                                                            ? (is_string($loc->pivot->data_envio_faccao)
-                                                                ? \Carbon\Carbon::parse($loc->pivot->data_envio_faccao)->format('d/m/Y')
-                                                                : $loc->pivot->data_envio_faccao->format('d/m/Y'))
+                                                            ? (is_string($loc->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_envio_faccao)->format('d/m/Y') : $loc->pivot->data_envio_faccao->format('d/m/Y'))
                                                             : null;
                                                         $dataRetorno = $loc->pivot->data_retorno_faccao
-                                                            ? (is_string($loc->pivot->data_retorno_faccao)
-                                                                ? \Carbon\Carbon::parse($loc->pivot->data_retorno_faccao)->format('d/m/Y')
-                                                                : $loc->pivot->data_retorno_faccao->format('d/m/Y'))
+                                                            ? (is_string($loc->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_retorno_faccao)->format('d/m/Y') : $loc->pivot->data_retorno_faccao->format('d/m/Y'))
+                                                            : null;
+                                                        $dataEntrega = $loc->pivot->data_entrega_faccao
+                                                            ? (is_string($loc->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('d/m/Y') : $loc->pivot->data_entrega_faccao->format('d/m/Y'))
                                                             : null;
                                                     @endphp
                                                     <tr>
-                                                        <td style="font-size: 8px; padding: 3px;">
+                                                        <td style="font-size: 8px; padding: 2px;">
                                                             @if($loc->pivot->concluido == 1)
                                                                 <span style="color: #059669;">✓</span>
                                                             @endif
-                                                            @if($loc->pivot->ordem_producao)
-                                                                <strong style="color: #1E40AF;">{{ $loc->pivot->ordem_producao }}</strong>
+                                                            <strong>{{ $loc->pivot->ordem_producao ?: '-' }}</strong>
+                                                        </td>
+                                                        <td style="font-size: 7px; padding: 2px;">
+                                                            @if($etapaL)
+                                                                <span style="color: {{ $corHex[$etapaL->cor.'-text'] ?? '#333' }}; font-weight: bold; text-transform: uppercase;">{{ $etapaL->nome }}</span>
                                                             @else
                                                                 <span style="color: #9CA3AF;">-</span>
                                                             @endif
                                                         </td>
-                                                        <td style="font-size: 8px; padding: 3px; text-align: center;">
-                                                            <span class="qtd-alocada">{{ number_format($qtdAlocada, 0, ',', '.') }}</span>
+                                                        <td style="font-size: 8px; padding: 2px; text-align: center;">
+                                                            <span class="qtd-alocada" style="margin:0;">{{ number_format($qtdAlocada, 0, ',', '.') }}</span>
                                                         </td>
-                                                        <td style="font-size: 7px; padding: 3px; text-align: center;">
+                                                        <td style="font-size: 7px; padding: 2px; text-align: center;">
                                                             @if($dataEnvio)
-                                                                <span style="background-color: #FEF3C7; color: #92400E; padding: 1px 4px; border-radius: 3px;">🚚 {{ $dataEnvio }}</span>
+                                                                <span style="background-color: #FEF3C7; color: #92400E; padding: 1px 3px; border-radius: 2px;">{{ $dataEnvio }}</span>
                                                             @else
-                                                                <span style="color: #9CA3AF;">N/A</span>
+                                                                <span style="color: #9CA3AF;">-</span>
                                                             @endif
                                                         </td>
-                                                        <td style="font-size: 7px; padding: 3px; text-align: center;">
+                                                        <td style="font-size: 7px; padding: 2px; text-align: center;">
                                                             @if($dataRetorno)
-                                                                <span style="background-color: #D1FAE5; color: #065F46; padding: 1px 4px; border-radius: 3px;">✓ {{ $dataRetorno }}</span>
+                                                                <span style="background-color: #D1FAE5; color: #065F46; padding: 1px 3px; border-radius: 2px;">{{ $dataRetorno }}</span>
                                                             @else
-                                                                <span style="color: #9CA3AF;">N/A</span>
+                                                                <span style="color: #9CA3AF;">-</span>
                                                             @endif
                                                         </td>
-                                                        <td style="font-size: 7px; padding: 3px;">
+                                                        <td style="font-size: 7px; padding: 2px; text-align: center;">
+                                                            @if($dataEntrega)
+                                                                <span style="background-color: #F3E8FF; color: #6B21A8; padding: 1px 3px; border-radius: 2px;">{{ $dataEntrega }}</span>
+                                                            @else
+                                                                <span style="color: #9CA3AF;">-</span>
+                                                            @endif
+                                                        </td>
+                                                        <td style="font-size: 7px; padding: 2px;">
                                                             @if($loc->pivot->observacao)
-                                                                @php
-                                                                    $obsTexto = $loc->pivot->observacao;
-                                                                    $obsTexto = preg_replace('/<red>(.*?)<\/red>/i', '<span style="color: #DC2626; font-weight: 600;">$1</span>', $obsTexto);
-                                                                    $obsTexto = preg_replace('/<blue>(.*?)<\/blue>/i', '<span style="color: #2563EB; font-weight: 600;">$1</span>', $obsTexto);
-                                                                    $obsTexto = preg_replace('/<green>(.*?)<\/green>/i', '<span style="color: #16A34A; font-weight: 600;">$1</span>', $obsTexto);
-                                                                    $textoLimpo = strip_tags($obsTexto);
-                                                                    if (strlen($textoLimpo) > 40) {
-                                                                        $obsTexto = Str::limit($textoLimpo, 40);
-                                                                    }
-                                                                @endphp
-                                                                {!! $obsTexto !!}
+                                                                {{ strip_tags($loc->pivot->observacao) }}
                                                             @else
                                                                 <span style="color: #9CA3AF;">-</span>
                                                             @endif
@@ -489,12 +513,12 @@
 
                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                 @if($todasObsLocalizacoes->count() > 1)
-                                                    <tr style="border-top: 2px solid #6B7280; background-color: #F9FAFB;">
-                                                        <td style="font-size: 8px; padding: 3px;"><strong>TOTAL:</strong></td>
-                                                        <td style="font-size: 8px; padding: 3px; text-align: center;">
-                                                            <span style="display: inline-block; background-color: #059669; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 700;">{{ number_format($totalQuantidades, 0, ',', '.') }}</span>
+                                                    <tr style="border-top: 1px solid #9CA3AF; background-color: #F9FAFB;">
+                                                        <td colspan="2" style="font-size: 8px; padding: 2px;"><strong>TOTAL:</strong></td>
+                                                        <td style="font-size: 8px; padding: 2px; text-align: center;">
+                                                            <span style="display: inline-block; background-color: #059669; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 700;">{{ number_format($totalQuantidades, 0, ',', '.') }}</span>
                                                         </td>
-                                                        <td colspan="3"></td>
+                                                        <td colspan="4"></td>
                                                     </tr>
                                                 @endif
                                                 </tbody>

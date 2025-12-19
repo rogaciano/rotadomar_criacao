@@ -22,6 +22,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\DirecionamentoComercialController;
+use App\Http\Controllers\EtapaProducaoController;
 use App\Http\Controllers\UiPreferenceController;
 use Illuminate\Support\Facades\Route;
 
@@ -133,6 +134,9 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::resource('direcionamentos-comerciais', DirecionamentoComercialController::class);
     Route::post('direcionamentos-comerciais/{id}/restore', [DirecionamentoComercialController::class, 'restore'])->name('direcionamentos-comerciais.restore');
 
+    // Routes para Etapas de Produção
+    Route::resource('etapas-producao', EtapaProducaoController::class);
+
     // Routes para Status
     Route::resource('status', StatusController::class);
 
@@ -160,6 +164,13 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     });
     Route::put('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'update'])->name('produtos.localizacoes.update');
     Route::delete('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'destroy'])->name('produtos.localizacoes.destroy');
+    
+    // Routes para Etapas de Localizações de Produtos
+    Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/avancar-etapa', [ProdutoLocalizacaoController::class, 'avancarEtapa'])->name('produtos.localizacoes.avancar-etapa');
+    Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/voltar-etapa', [ProdutoLocalizacaoController::class, 'voltarEtapa'])->name('produtos.localizacoes.voltar-etapa');
+    Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/definir-etapa', [ProdutoLocalizacaoController::class, 'definirEtapa'])->name('produtos.localizacoes.definir-etapa');
+    Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/update-data-entrega', [ProdutoLocalizacaoController::class, 'updateDataEntrega'])->name('produtos.localizacoes.update-data-entrega');
+    Route::get('produtos/{produto}/localizacoes/{produtoLocalizacao}/historico-etapas', [ProdutoLocalizacaoController::class, 'historicoEtapas'])->name('produtos.localizacoes.historico-etapas');
 
     // Routes para Observações de Produtos
     Route::post('produtos/observacoes', [ProdutoObservacaoController::class, 'store'])->name('produtos.observacoes.store');

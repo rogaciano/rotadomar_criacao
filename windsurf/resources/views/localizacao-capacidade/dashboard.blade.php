@@ -42,17 +42,37 @@
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
                 <div class="p-6">
-                    <form action="{{ route('localizacao-capacidade.dashboard') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <form action="{{ route('localizacao-capacidade.dashboard') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div>
-                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                            <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                <option value="">Todas as Localizações</option>
-                                @foreach($localizacoes as $localizacao)
-                                    <option value="{{ $localizacao->id }}" {{ ($localizacaoId ?? '') == $localizacao->id ? 'selected' : '' }}>
-                                        {{ $localizacao->nome_localizacao }}
+                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">
+                                Localização
+                                @if($usuarioRestrito ?? false)
+                                    <span class="text-xs text-gray-500">(Seu acesso)</span>
+                                @endif
+                            </label>
+                            <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 {{ ($usuarioRestrito ?? false) ? 'bg-gray-100' : '' }}" {{ ($usuarioRestrito ?? false) ? 'disabled' : '' }}>
+                                @if($usuarioRestrito ?? false)
+                                    {{-- Usuário restrito: mostrar apenas a localização dele --}}
+                                    @php
+                                        $localizacaoSelecionada = $localizacoes->firstWhere('id', $localizacaoId);
+                                    @endphp
+                                    <option value="{{ $localizacaoId }}" selected>
+                                        {{ $localizacaoSelecionada->nome_localizacao ?? 'Localização' }}
                                     </option>
-                                @endforeach
+                                @else
+                                    {{-- Usuário normal: pode ver todas --}}
+                                    <option value="">Todas as Localizações</option>
+                                    @foreach($localizacoes as $localizacao)
+                                        <option value="{{ $localizacao->id }}" {{ ($localizacaoId ?? '') == $localizacao->id ? 'selected' : '' }}>
+                                            {{ $localizacao->nome_localizacao }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
+                            @if($usuarioRestrito ?? false)
+                                {{-- Hidden input para manter o valor mesmo com o select disabled --}}
+                                <input type="hidden" name="localizacao_id" value="{{ $localizacaoId }}">
+                            @endif
                         </div>
 
                         <div>
@@ -80,8 +100,20 @@
                             </select>
                         </div>
 
-                        <div class="flex items-end">
-                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <div>
+                            <label for="etapa_id" class="block text-sm font-medium text-gray-700 mb-1">Etapa de Produção</label>
+                            <select name="etapa_id" id="etapa_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <option value="">Todas as Etapas</option>
+                                @foreach($etapasProducao as $etapa)
+                                    <option value="{{ $etapa->id }}" {{ ($etapaId ?? '') == $etapa->id ? 'selected' : '' }}>
+                                        {{ $etapa->icone ?? '' }} {{ $etapa->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex items-end gap-2">
+                            <button type="submit" class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
@@ -89,6 +121,21 @@
                             </button>
                         </div>
                     </form>
+                    
+                    <!-- Botão de Toggle Global para Produtos Previstos -->
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <button type="button" id="toggleAllProducts" onclick="toggleAllProductsVisibility()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <svg id="toggleIconShow" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <svg id="toggleIconHide" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                            <span id="toggleText">Mostrar Todos os Produtos</span>
+                        </button>
+                        <span class="ml-3 text-sm text-gray-500">Expande ou recolhe todas as listas de produtos previstos</span>
+                    </div>
                 </div>
             </div>
 
@@ -245,33 +292,37 @@
 
                                     <!-- Lista de Produtos Previstos -->
                                     @if($dado['produtos']->count() > 0)
-                                        <div class="mt-4 border-t pt-4" x-data="{ open: false }">
-                                            <button @click="open = !open" class="w-full flex items-center justify-between text-left p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                        <div class="mt-4 border-t pt-4 produtos-previstos-section" 
+                                             x-data="{ open: {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }} }" 
+                                             x-on:toggle-all.window="open = $event.detail.show"
+                                             x-init="$watch('open', value => $el.dataset.open = value)" 
+                                             data-open="{{ ($usuarioRestrito ?? false) ? 'true' : 'false' }}">
+                                            <button @click="open = !open" class="produtos-toggle-btn w-full flex items-center justify-between text-left p-2 hover:bg-gray-50 rounded-lg transition-colors">
                                                 <div class="flex items-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                                     </svg>
                                                     <span class="font-semibold text-gray-700">Produtos Previstos ({{ $dado['produtos']->count() }})</span>
                                                 </div>
-                                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 icon-expand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                 </svg>
-                                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 icon-collapse" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                                                 </svg>
                                             </button>
 
-                                            <div x-show="open" x-transition class="mt-3" style="display: none;">
+                                            <div x-show="open" x-transition class="mt-3 produtos-content" style="display: none;">
                                                 <div class="overflow-x-auto">
                                                     <table class="min-w-full divide-y divide-gray-200">
                                                         <thead class="bg-gray-50">
                                                             <tr>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 8%;">Referência</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Referência</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 16%;">Descrição</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Marca</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Grupo</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 44%;">Localizações e Informações</th>
-                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto" style="width: 8%;">Qtd Total</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 40%;">Produção e Detalhes</th>
+                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto" style="width: 10%;">Qtd Total</th>
                                                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 4%;">Status</th>
                                                             </tr>
                                                         </thead>
@@ -303,13 +354,35 @@
                                                                 });
                                                             @endphp
 
+                                                            @php
+                                                                $corClasses = [
+                                                                    'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                                    'green' => 'bg-green-100 text-green-800 border-green-200',
+                                                                    'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                                                    'red' => 'bg-red-100 text-red-800 border-red-200',
+                                                                    'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                                                    'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                                                    'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                                                    'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                                                    'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                                ];
+                                                            @endphp
+
                                                             @foreach($produtosAgrupados as $chave => $produtosGrupo)
                                                                 @php
                                                                     $produtoPrincipal = $produtosGrupo->first();
+                                                                    
+                                                                    // Identificar todas as etapas presentes neste grupo de produtos
+                                                                    $etapaIdsNoGrupo = $produtosGrupo->flatMap(function($p) {
+                                                                        return $p->localizacoes->pluck('pivot.etapa_atual_id');
+                                                                    })->unique()->filter()->toArray();
+                                                                    
+                                                                    $etapasNoGrupo = $etapasProducao->whereIn('id', $etapaIdsNoGrupo);
                                                                 @endphp
                                                                 <tr class="hover:bg-gray-50">
+                                                                    {{-- Coluna 1: Referência --}}
                                                                     <td class="px-3 py-2 text-sm font-medium text-gray-900">
-                                                                        <a href="{{ route('produtos.show', $produtoPrincipal->id) }}" class="text-blue-600 hover:text-blue-900 hover:underline" target="_blank">
+                                                                        <a href="{{ route('produtos.show', $produtoPrincipal->id) }}?back_url={{ urlencode(request()->fullUrl()) }}" class="text-blue-600 hover:text-blue-900 hover:underline">
                                                                             {{ $produtoPrincipal->referencia }}
                                                                         </a>
                                                                         @php
@@ -329,15 +402,19 @@
                                                                             }
                                                                         @endphp
                                                                         @if($dataPrevista)
-                                                                            <div class="text-xs text-gray-500 mt-1">
-                                                                                <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <div class="text-xs text-gray-500 mt-1 uppercase font-bold tracking-tighter">
+                                                                                <svg class="w-3 h-3 inline-block mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                                                 </svg>
-                                                                                Prev: {{ $dataPrevista }}
+                                                                                PREV: {{ $dataPrevista }}
                                                                             </div>
                                                                         @endif
                                                                     </td>
+                                                                    
+                                                                    {{-- Coluna 3: Descrição --}}
                                                                     <td class="px-3 py-2 text-sm text-gray-700">{{ $produtoPrincipal->descricao }}</td>
+                                                                    
+                                                                    {{-- Coluna 4: Marca --}}
                                                                     <td class="px-3 py-2 text-sm">
                                                                         @if($produtoPrincipal->marca)
                                                                             @if($produtoPrincipal->marca->cor_fundo && $produtoPrincipal->marca->cor_fonte)
@@ -350,10 +427,14 @@
                                                                                 </span>
                                                                             @endif
                                                                         @else
-                                                                            <span class="text-gray-400 italic">N/A</span>
+                                                                            <span class="text-gray-400 italic text-xs">N/A</span>
                                                                         @endif
                                                                     </td>
+                                                                    
+                                                                    {{-- Coluna 5: Grupo --}}
                                                                     <td class="px-3 py-2 text-sm text-gray-600">{{ $produtoPrincipal->grupoProduto->descricao ?? 'N/A' }}</td>
+                                                                    
+                                                                    {{-- Coluna 6: Produção e Detalhes --}}
                                                                     <td class="px-3 py-2 text-sm text-gray-600">
                                                                         @php
                                                                             // Carregar observações do produto (apenas uma vez)
@@ -406,12 +487,17 @@
                                                                                         $dataRetorno = $loc->pivot->data_retorno_faccao 
                                                                                             ? (is_string($loc->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_retorno_faccao)->format('d/m/Y') : $loc->pivot->data_retorno_faccao->format('d/m/Y'))
                                                                                             : null;
+                                                                                        $dataEntrega = $loc->pivot->data_entrega_faccao
+                                                                                            ? (is_string($loc->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('d/m/Y') : $loc->pivot->data_entrega_faccao->format('d/m/Y'))
+                                                                                            : null;
                                                                                     @endphp
                                                                                     <tr class="{{ !$loop->last ? 'border-b border-gray-200' : '' }}">
                                                                                         {{-- Coluna 1: OP --}}
                                                                                         <td class="py-1 pr-2 align-top whitespace-nowrap">
                                                                                             @if($loc->pivot->ordem_producao)
                                                                                                 <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                                            @else
+                                                                                                <span class="text-gray-400">Sem OP</span>
                                                                                             @endif
                                                                                             @if($loc->pivot->concluido == 1)
                                                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600 inline-block ml-1" viewBox="0 0 20 20" fill="currentColor" title="Concluído">
@@ -419,7 +505,21 @@
                                                                                                 </svg>
                                                                                             @endif
                                                                                         </td>
-                                                                                        {{-- Coluna 2: Qtd --}}
+                                                                                        {{-- Coluna 2: Etapa Específica --}}
+                                                                                        <td class="py-1 px-2 align-top whitespace-nowrap">
+                                                                                            @php
+                                                                                                $etapaLinhaId = $loc->pivot->etapa_atual_id;
+                                                                                                $etapaLinha = $etapaLinhaId ? $etapasProducao->firstWhere('id', $etapaLinhaId) : null;
+                                                                                            @endphp
+                                                                                            @if($etapaLinha)
+                                                                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-800' }} uppercase">
+                                                                                                    {{ $etapaLinha->icone ?? '' }} {{ $etapaLinha->nome }}
+                                                                                                </span>
+                                                                                            @else
+                                                                                                <span class="text-gray-400 text-[9px]">—</span>
+                                                                                            @endif
+                                                                                        </td>
+                                                                                        {{-- Coluna 3: Qtd --}}
                                                                                         <td class="py-1 px-2 align-top text-center whitespace-nowrap">
                                                                                             <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">
                                                                                                 {{ number_format($qtdAlocada, 0, ',', '.') }}
@@ -460,6 +560,42 @@
                                                                                                     N/A
                                                                                                 </span>
                                                                                             @endif
+                                                                                        </td>
+                                                                                        {{-- Coluna 5: Entrega (NOVO) --}}
+                                                                                        <td class="py-1 px-2 align-top whitespace-nowrap">
+                                                                                            <div class="flex items-center space-x-1">
+                                                                                                @if($dataEntrega)
+                                                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-medium">
+                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                                                        </svg>
+                                                                                                        {{ $dataEntrega }}
+                                                                                                    </span>
+                                                                                                @else
+                                                                                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-50 text-gray-400 italic">
+                                                                                                        Sem Data
+                                                                                                    </span>
+                                                                                                @endif
+
+                                                                                                @php
+                                                                                                    $userLocal = auth()->user()->localizacao;
+                                                                                                    $podeEditarEntrega = auth()->user()->isAdmin() || (
+                                                                                                        $userLocal && 
+                                                                                                        $userLocal->capacidade > 0 && 
+                                                                                                        $userLocal->id == $loc->id
+                                                                                                    );
+                                                                                                @endphp
+
+                                                                                                @if($podeEditarEntrega)
+                                                                                                    <button type="button" 
+                                                                                                        onclick="abrirModalDataEntrega({{ $loc->pivot->id }}, '{{ $loc->pivot->data_entrega_faccao ? (is_string($loc->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('Y-m-d') : $loc->pivot->data_entrega_faccao->format('Y-m-d')) : '' }}', '{{ $loc->nome_localizacao }}', {{ $loc->pivot->produto_id }})"
+                                                                                                        class="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors" title="Informar Data de Entrega">
+                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                                                        </svg>
+                                                                                                    </button>
+                                                                                                @endif
+                                                                                            </div>
                                                                                         </td>
                                                                                         {{-- Coluna 5: Observação --}}
                                                                                         <td class="py-1 pl-2 align-top">
@@ -506,7 +642,7 @@
                                                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                                                 @if($todasObsLocalizacoes->count() > 1)
                                                                                     <tr class="border-t-2 border-gray-300 bg-gray-50">
-                                                                                        <td class="py-2 pr-2 font-bold text-gray-800 whitespace-nowrap">TOTAL:</td>
+                                                                                        <td colspan="2" class="py-2 pr-2 font-bold text-gray-800 whitespace-nowrap">TOTAL:</td>
                                                                                         <td class="py-2 px-2 text-center">
                                                                                             <span class="inline-flex items-center px-2 py-1 rounded-md font-bold bg-green-600 text-white">
                                                                                                 {{ number_format($totalQuantidades, 0, ',', '.') }}
@@ -755,6 +891,95 @@
                 fecharModalGerarCapacidades();
             }
         });
+
+        // ===== TOGGLE GLOBAL DE PRODUTOS PREVISTOS =====
+        let allProductsVisible = {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }};
+
+        function toggleAllProductsVisibility() {
+            allProductsVisible = !allProductsVisible;
+            
+            // Disparar evento global para todos os componentes Alpine
+            window.dispatchEvent(new CustomEvent('toggle-all', { detail: { show: allProductsVisible } }));
+            
+            const toggleText = document.getElementById('toggleText');
+            const toggleIconShow = document.getElementById('toggleIconShow');
+            const toggleIconHide = document.getElementById('toggleIconHide');
+            
+            // Atualizar texto e ícone do botão
+            if (allProductsVisible) {
+                toggleText.textContent = 'Ocultar Todos os Produtos';
+                toggleIconShow.classList.add('hidden');
+                toggleIconHide.classList.remove('hidden');
+            } else {
+                toggleText.textContent = 'Mostrar Todos os Produtos';
+                toggleIconShow.classList.remove('hidden');
+                toggleIconHide.classList.add('hidden');
+            }
+        }
+
+        // Inicializar estado do botão baseado no estado inicial (usuário restrito)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (allProductsVisible) {
+                const toggleText = document.getElementById('toggleText');
+                const toggleIconShow = document.getElementById('toggleIconShow');
+                const toggleIconHide = document.getElementById('toggleIconHide');
+                
+                if (toggleText) {
+                    toggleText.textContent = 'Ocultar Todos os Produtos';
+                    toggleIconShow.classList.add('hidden');
+                    toggleIconHide.classList.remove('hidden');
+                }
+            }
+        });
     </script>
     @endpush
+    <script>
+        function abrirModalDataEntrega(produtoLocalizacaoId, dataAtual, nomeLocalizacao, produtoId) {
+            const modal = document.getElementById('modal-data-entrega');
+            const form = document.getElementById('form-data-entrega');
+            const input = document.getElementById('input_data_entrega_faccao');
+            const titulo = document.getElementById('modal-data-entrega-titulo');
+            
+            titulo.textContent = 'Data de Entrega: ' + nomeLocalizacao;
+            input.value = dataAtual;
+            
+            // Gerar URL dinamicamente
+            let url = "{{ route('produtos.localizacoes.update-data-entrega', ['produto' => 'PRODUTO_ID', 'produtoLocalizacao' => 'PLACEHOLDER']) }}";
+            url = url.replace('PRODUTO_ID', produtoId).replace('PLACEHOLDER', produtoLocalizacaoId);
+            form.action = url;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function fecharModalDataEntrega() {
+            document.getElementById('modal-data-entrega').classList.add('hidden');
+        }
+    </script>
+
+    <!-- Modal Data Entrega Facção -->
+    <div id="modal-data-entrega" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-data-entrega-titulo">Data de Entrega</h3>
+                <form id="form-data-entrega" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-2">Selecione a Data *</label>
+                        <input type="date" name="data_entrega_faccao" id="input_data_entrega_faccao" required
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="fecharModalDataEntrega()" 
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-sm">
+                            Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </x-app-layout>

@@ -277,7 +277,10 @@
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Prev. Facção</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Envio Facção</th>
                                             <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Retorno Facção</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Entrega Facção</th>
                                             <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Concluído</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Etapa Atual</th>
+                                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximas Etapas</th>
                                             @if($canAnyProdutoLocalizacoes)
                                                 <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                             @endif
@@ -318,6 +321,36 @@
                                                         N/A
                                                     @endif
                                                 </td>
+                                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                                    <div class="flex items-center space-x-2">
+                                                        @if($localizacao->pivot->data_entrega_faccao)
+                                                            <span class="text-gray-900 font-medium bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">
+                                                                {{ is_string($localizacao->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_entrega_faccao)->format('d/m/Y') : $localizacao->pivot->data_entrega_faccao->format('d/m/Y') }}
+                                                            </span>
+                                                        @else
+                                                            <span class="text-gray-400 italic">N/A</span>
+                                                        @endif
+                                                        
+                                                        @php
+                                                            $userLocal = auth()->user()->localizacao;
+                                                            $podeEditarEntrega = auth()->user()->isAdmin() || (
+                                                                $userLocal && 
+                                                                $userLocal->capacidade > 0 && 
+                                                                $userLocal->id == $localizacao->id
+                                                            );
+                                                        @endphp
+                                                        
+                                                        @if($podeEditarEntrega)
+                                                            <button type="button" 
+                                                                onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, '{{ $localizacao->pivot->data_entrega_faccao ? (is_string($localizacao->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_entrega_faccao)->format('Y-m-d') : $localizacao->pivot->data_entrega_faccao->format('Y-m-d')) : '' }}', '{{ $localizacao->nome_localizacao }}')"
+                                                                class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar Data de Entrega">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                                </svg>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-center">
                                                     @if($localizacao->pivot->concluido == 1)
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 inline-block" viewBox="0 0 20 20" fill="currentColor" title="Concluído">
@@ -325,6 +358,104 @@
                                                         </svg>
                                                     @else
                                                         <span class="text-gray-400">-</span>
+                                                    @endif
+                                                </td>
+                                                {{-- Coluna: Etapa Atual (apenas o badge) --}}
+                                                <td class="px-4 py-2 text-sm" x-data="{ showEtapaMenu: false }">
+                                                    @php
+                                                        $etapaAtualId = $localizacao->pivot->etapa_atual_id;
+                                                        $etapaAnteriorId = $localizacao->pivot->etapa_anterior_id;
+                                                        $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
+                                                        $corClasses = [
+                                                            'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                            'green' => 'bg-green-100 text-green-800 border-green-200',
+                                                            'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                                            'red' => 'bg-red-100 text-red-800 border-red-200',
+                                                            'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                                            'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                                            'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                                            'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                                            'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                        ];
+                                                        $btnCorClasses = [
+                                                            'blue' => 'bg-blue-500 hover:bg-blue-600 text-white',
+                                                            'green' => 'bg-green-500 hover:bg-green-600 text-white',
+                                                            'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white',
+                                                            'red' => 'bg-red-500 hover:bg-red-600 text-white',
+                                                            'purple' => 'bg-purple-500 hover:bg-purple-600 text-white',
+                                                            'gray' => 'bg-gray-500 hover:bg-gray-600 text-white',
+                                                            'indigo' => 'bg-indigo-500 hover:bg-indigo-600 text-white',
+                                                            'pink' => 'bg-pink-500 hover:bg-pink-600 text-white',
+                                                            'orange' => 'bg-orange-500 hover:bg-orange-600 text-white',
+                                                        ];
+                                                        $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
+                                                        
+                                                        // Verificar se o usuário pode gerenciar etapas para esta localização
+                                                        $userLoc = auth()->user()->localizacao;
+                                                        $podeGerenciarEtapa = auth()->user()->isAdmin() || (
+                                                            $userLoc && 
+                                                            $userLoc->id == $localizacao->id
+                                                        );
+                                                    @endphp
+                                                    
+                                                    @if($etapaAtual)
+                                                        {{-- Badge da etapa atual --}}
+                                                        <span class="inline-block px-2 py-1 rounded-full text-xs font-medium border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                                                            {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
+                                                        </span>
+                                                        
+                                                        {{-- Link para voltar etapa --}}
+                                                        @if($etapaAnteriorId && $podeGerenciarEtapa)
+                                                            <div class="mt-1">
+                                                                <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                                    @csrf
+                                                                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Deseja voltar para a etapa anterior?')">
+                                                                        ← Voltar
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        @endif
+                                                    @else
+                                                        {{-- Sem etapa definida - mostrar botão para definir --}}
+                                                        <div class="relative" @click.away="showEtapaMenu = false">
+                                                            @if($podeGerenciarEtapa)
+                                                                <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded text-gray-600 border border-dashed border-gray-300">
+                                                                    + Definir
+                                                                </button>
+                                                            @else
+                                                                <span class="text-xs text-gray-400 italic">Sem Etapa</span>
+                                                            @endif
+                                                            <div x-show="showEtapaMenu" x-transition class="absolute z-20 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200">
+                                                                @foreach($etapasProducao as $etapa)
+                                                                    <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
+                                                                        @csrf
+                                                                        <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
+                                                                        <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1 border-b border-gray-100 last:border-b-0">
+                                                                            <span>{{ $etapa->icone ?? '' }}</span>
+                                                                            <span>{{ $etapa->nome }}</span>
+                                                                        </button>
+                                                                    </form>
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                {{-- Coluna: Próximas Etapas (botões em vertical) --}}
+                                                <td class="px-4 py-2 text-sm">
+                                                    @if($transicoes->count() > 0 && $podeGerenciarEtapa)
+                                                        <div class="space-y-1">
+                                                            @foreach($transicoes as $transicao)
+                                                                <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
+                                                                    <button type="submit" class="w-full text-left px-3 py-1 rounded text-xs font-medium transition-colors {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white' }}" title="Avançar para {{ $transicao->etapaDestino->nome ?? 'próxima etapa' }}">
+                                                                        → {{ $transicao->label_botao ?: ($transicao->etapaDestino->nome ?? 'Próxima') }}
+                                                                    </button>
+                                                                </form>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <span class="text-xs text-gray-400 italic">—</span>
                                                     @endif
                                                 </td>
                                                 @if($canAnyProdutoLocalizacoes)
@@ -348,10 +479,16 @@
                                                                     ? $localizacao->pivot->data_retorno_faccao
                                                                     : $localizacao->pivot->data_retorno_faccao->format('Y-m-d');
                                                             }
+                                                            $dataEntregaFaccao = '';
+                                                            if($localizacao->pivot->data_entrega_faccao) {
+                                                                $dataEntregaFaccao = is_string($localizacao->pivot->data_entrega_faccao)
+                                                                    ? $localizacao->pivot->data_entrega_faccao
+                                                                    : $localizacao->pivot->data_entrega_faccao->format('Y-m-d');
+                                                            }
                                                         @endphp
                                                         @if($canUpdateProdutoLocalizacoes)
                                                             <button type="button"
-                                                                onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }}, {{ json_encode($dataEnvioFaccao) }}, {{ json_encode($dataRetornoFaccao) }})"
+                                                                onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }}, {{ json_encode($dataEnvioFaccao) }}, {{ json_encode($dataRetornoFaccao) }}, {{ json_encode($dataEntregaFaccao) }})"
                                                                 class="text-indigo-600 hover:text-indigo-800 text-sm">
                                                                 Editar
                                                             </button>
@@ -376,14 +513,14 @@
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia != 0 ? ($divergencia > 0 ? 'text-yellow-700' : 'text-red-700') : 'text-green-700' }}">
                                                 {{ number_format($totalLocalizacoes, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2"></td>
                                         </tr>
                                         <tr>
                                             <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Quantidade Pretendida:</td>
                                             <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
                                                 {{ number_format($quantidadeProduto, 0, ',', '.') }}
                                             </td>
-                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2"></td>
+                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2"></td>
                                         </tr>
                                         @if($divergencia != 0)
                                             <tr class="bg-gray-100">
@@ -393,7 +530,7 @@
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-700' : 'text-red-700' }}">
                                                     {{ $divergencia > 0 ? '+' : '' }}{{ number_format($divergencia, 0, ',', '.') }}
                                                 </td>
-                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
+                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
                                                     {{ $divergencia > 0 ? 'Excedente' : 'Faltante' }}
                                                 </td>
                                             </tr>
@@ -402,7 +539,7 @@
                                                 <td colspan="3" class="px-4 py-2 text-sm font-bold text-green-800">
                                                     Status:
                                                 </td>
-                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '6' : '5' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
+                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
                                                     ✓ Confere
                                                 </td>
                                             </tr>
@@ -835,6 +972,11 @@
                                             <input type="date" name="data_retorno_faccao" id="data_retorno_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
                                             <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
                                         </div>
+                                        <div class="mb-4">
+                                            <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Entrega da Facção</label>
+                                            <input type="date" name="data_entrega_faccao" id="data_entrega_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data efetiva de entrega pela facção</p>
+                                        </div>
                                         <div>
                                             <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
                                             <textarea name="observacao" id="observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"></textarea>
@@ -920,6 +1062,11 @@
                                             <input type="date" name="data_retorno_faccao" id="edit-data-retorno-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                             <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
                                         </div>
+                                        <div class="mb-4">
+                                            <label for="edit-data-entrega-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Entrega da Facção</label>
+                                            <input type="date" name="data_entrega_faccao" id="edit-data-entrega-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                            <p class="mt-1 text-sm text-gray-500">Data efetiva de entrega pela facção</p>
+                                        </div>
                                         <div>
                                             <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
                                             <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
@@ -955,7 +1102,7 @@
                             }
                         }
 
-                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao) {
+                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao, dataEntregaFaccao) {
                             try {
                                 console.log('Abrindo modal para editar localização:', {
                                     produtoLocalizacaoId,
@@ -967,9 +1114,10 @@
                                     observacao,
                                     concluido,
                                     dataEnvioFaccao,
-                                    dataRetornoFaccao
+                                    dataRetornoFaccao,
+                                    dataEntregaFaccao
                                 });
-
+ 
                                 document.getElementById('edit-localizacao-id').value = localizacaoId;
                                 document.getElementById('edit-localizacao-nome').textContent = nomeLocalizacao;
                                 document.getElementById('edit-ordem-producao').value = ordemProducao || '';
@@ -977,6 +1125,7 @@
                                 document.getElementById('edit-data-prevista-faccao').value = dataFaccao || '';
                                 document.getElementById('edit-data-envio-faccao').value = dataEnvioFaccao || '';
                                 document.getElementById('edit-data-retorno-faccao').value = dataRetornoFaccao || '';
+                                document.getElementById('edit-data-entrega-faccao').value = dataEntregaFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
                                 document.getElementById('edit-concluido').checked = concluido == 1;
 
@@ -1866,4 +2015,52 @@
     <!-- Quill.js JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     @endpush
+    <script>
+        function abrirModalDataEntrega(produtoLocalizacaoId, dataAtual, nomeLocalizacao) {
+            const modal = document.getElementById('modal-data-entrega');
+            const form = document.getElementById('form-data-entrega');
+            const input = document.getElementById('input_data_entrega_faccao');
+            const titulo = document.getElementById('modal-data-entrega-titulo');
+            
+            titulo.textContent = 'Data de Entrega: ' + nomeLocalizacao;
+            input.value = dataAtual;
+            
+            let url = "{{ route('produtos.localizacoes.update-data-entrega', [$produto->id, 'PLACEHOLDER']) }}";
+            form.action = url.replace('PLACEHOLDER', produtoLocalizacaoId);
+            
+            modal.classList.remove('hidden');
+        }
+
+        function fecharModalDataEntrega() {
+            document.getElementById('modal-data-entrega').classList.add('hidden');
+        }
+    </script>
+
+    <!-- Modal Data Entrega Facção -->
+    <div id="modal-data-entrega" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-data-entrega-titulo">Data de Entrega</h3>
+                <form id="form-data-entrega" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-2">Selecione a Data *</label>
+                        <input type="date" name="data_entrega_faccao" id="input_data_entrega_faccao" required
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" onclick="fecharModalDataEntrega()" 
+                            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
+                            Cancelar
+                    </button>
+                    <button type="submit" 
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-sm">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 </x-app-layout>

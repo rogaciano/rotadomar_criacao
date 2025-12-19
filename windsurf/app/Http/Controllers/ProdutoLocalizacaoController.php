@@ -26,7 +26,8 @@ class ProdutoLocalizacaoController extends Controller
             'data_retorno_faccao' => 'nullable|date|required_if:concluido,1',
             'ordem_producao' => 'required|string|max:30',
             'observacao' => 'nullable|string|max:255',
-            'concluido' => 'nullable|boolean'
+            'concluido' => 'nullable|boolean',
+            'data_entrega_faccao' => 'nullable|date'
         ]);
 
         $produto = Produto::findOrFail($produtoId);
@@ -54,7 +55,8 @@ class ProdutoLocalizacaoController extends Controller
             'data_retorno_faccao' => $request->data_retorno_faccao,
             'ordem_producao' => $request->ordem_producao,
             'observacao' => $request->observacao,
-            'concluido' => $request->has('concluido') ? 1 : 0
+            'concluido' => $request->has('concluido') ? 1 : 0,
+            'data_entrega_faccao' => $request->data_entrega_faccao
         ]);
 
         activity('produtos')
@@ -97,7 +99,8 @@ class ProdutoLocalizacaoController extends Controller
             'data_retorno_faccao' => 'nullable|date|required_if:concluido,1',
             'ordem_producao' => 'required|string|max:30',
             'observacao' => 'nullable|string|max:255',
-            'concluido' => 'nullable|boolean'
+            'concluido' => 'nullable|boolean',
+            'data_entrega_faccao' => 'nullable|date'
         ]);
 
         // Buscar o registro na tabela pivot pelo ID
@@ -129,7 +132,8 @@ class ProdutoLocalizacaoController extends Controller
             'data_retorno_faccao' => $request->data_retorno_faccao,
             'ordem_producao' => $request->ordem_producao,
             'observacao' => $request->observacao,
-            'concluido' => $request->has('concluido') ? 1 : 0
+            'concluido' => $request->has('concluido') ? 1 : 0,
+            'data_entrega_faccao' => $request->data_entrega_faccao
         ]);
 
         activity('produtos')
@@ -204,5 +208,162 @@ class ProdutoLocalizacaoController extends Controller
 
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização removida com sucesso!');
+    }
+
+    /**
+     * Avançar para uma nova etapa de produção
+     */
+    public function avancarEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
+    {
+        $request->validate([
+            'etapa_id' => 'required|exists:etapas_producao,id',
+            'observacao' => 'nullable|string|max:255'
+        ]);
+
+        $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
+            ->where('produto_id', $produtoId)
+            ->firstOrFail();
+
+        // Verificar autorização
+        $user = auth()->user();
+        $podeGerenciar = $user->isAdmin() || (
+            $user->localizacao_id == $produtoLocalizacao->localizacao_id
+        );
+
+        if (!$podeGerenciar) {
+            return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
+        }
+
+        $produtoLocalizacao->avancarEtapa(
+            $request->etapa_id,
+            auth()->id(),
+            $request->observacao
+        );
+
+        return redirect()->route('produtos.show', $produtoId)
+            ->with('success', 'Etapa avançada com sucesso!');
+    }
+
+    /**
+     * Voltar para a etapa anterior
+     */
+    public function voltarEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
+    {
+        $request->validate([
+            'observacao' => 'nullable|string|max:255'
+        ]);
+
+        $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
+            ->where('produto_id', $produtoId)
+            ->firstOrFail();
+
+        // Verificar autorização
+        $user = auth()->user();
+        $podeGerenciar = $user->isAdmin() || (
+            $user->localizacao_id == $produtoLocalizacao->localizacao_id
+        );
+
+        if (!$podeGerenciar) {
+            return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
+        }
+
+        if (!$produtoLocalizacao->etapa_anterior_id) {
+            return redirect()->route('produtos.show', $produtoId)
+                ->with('error', 'Não há etapa anterior para voltar.');
+        }
+
+        $produtoLocalizacao->voltarEtapa(
+            auth()->id(),
+            $request->observacao
+        );
+
+        return redirect()->route('produtos.show', $produtoId)
+            ->with('success', 'Etapa revertida com sucesso!');
+    }
+
+    /**
+     * Definir etapa inicial
+     */
+    public function definirEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
+    {
+        $request->validate([
+            'etapa_id' => 'required|exists:etapas_producao,id',
+            'observacao' => 'nullable|string|max:255'
+        ]);
+
+        $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
+            ->where('produto_id', $produtoId)
+            ->firstOrFail();
+
+        // Verificar autorização
+        $user = auth()->user();
+        $podeGerenciar = $user->isAdmin() || (
+            $user->localizacao_id == $produtoLocalizacao->localizacao_id
+        );
+
+        if (!$podeGerenciar) {
+            return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
+        }
+
+        $produtoLocalizacao->definirEtapaInicial(
+            $request->etapa_id,
+            auth()->id(),
+            $request->observacao
+        );
+
+        return redirect()->route('produtos.show', $produtoId)
+            ->with('success', 'Etapa definida com sucesso!');
+    }
+
+    /**
+     * Ver histórico de etapas
+     */
+    public function historicoEtapas($produtoId, $produtoLocalizacaoId)
+    {
+        $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
+            ->where('produto_id', $produtoId)
+            ->with(['produto', 'localizacao'])
+            ->firstOrFail();
+
+        $historico = $produtoLocalizacao->historicoEtapas()
+            ->with(['etapaAnterior', 'etapaNova', 'usuario'])
+            ->get();
+
+        return view('produtos.partials.historico-etapas', compact('produtoLocalizacao', 'historico'));
+    }
+
+    /**
+     * Atualizar a data de entrega da facção
+     */
+    public function updateDataEntrega(Request $request, $produtoId, $produtoLocalizacaoId)
+    {
+        $request->validate([
+            'data_entrega_faccao' => 'required|date'
+        ]);
+
+        $user = auth()->user();
+        $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
+            ->where('produto_id', $produtoId)
+            ->firstOrFail();
+
+        // Verificar se o usuário está logado em uma localização com capacidade > 0
+        // E se é a mesma localização do registro ou se é admin
+        $localizacaoUsuario = $user->localizacao;
+        
+        $podeEditar = $user->isAdmin() || (
+            $localizacaoUsuario && 
+            $localizacaoUsuario->capacidade > 0 && 
+            $localizacaoUsuario->id == $produtoLocalizacao->localizacao_id
+        );
+
+        if (!$podeEditar) {
+            return redirect()->back()->with('error', 'Você não tem permissão para editar esta data de entrega.');
+        }
+
+        $produtoLocalizacao->update([
+            'data_entrega_faccao' => $request->data_entrega_faccao
+        ]);
+
+        return redirect()->back()->with('success', 'Data de entrega atualizada com sucesso!');
     }
 }

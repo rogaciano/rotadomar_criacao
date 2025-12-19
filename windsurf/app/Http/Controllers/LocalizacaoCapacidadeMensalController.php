@@ -246,13 +246,25 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $mes = $request->filled('mes') ? $request->mes : now()->month;
         $ano = $request->filled('ano') ? $request->ano : now()->year;
         $localizacaoId = $request->filled('localizacao_id') ? $request->localizacao_id : null;
+        $etapaId = $request->filled('etapa_id') ? $request->etapa_id : null;
+
+        // Verificar se o usuário está vinculado a uma localização com capacidade > 0
+        $user = auth()->user();
+        $localizacaoUsuario = $user->localizacao;
+        $usuarioRestrito = false;
+        
+        if ($localizacaoUsuario && $localizacaoUsuario->capacidade > 0) {
+            // Usuário está vinculado a uma localização com capacidade - forçar visualização apenas da localização dele
+            $localizacaoId = $localizacaoUsuario->id;
+            $usuarioRestrito = true;
+        }
 
         // Buscar capacidades do período
         $query = LocalizacaoCapacidadeMensal::with('localizacao')
             ->where('mes', $mes)
             ->where('ano', $ano);
 
-        // Aplicar filtro de localização se selecionado
+        // Aplicar filtro de localização se selecionado (ou forçado por restrição de usuário)
         if ($localizacaoId) {
             $query->where('localizacao_id', $localizacaoId);
         }
@@ -260,19 +272,30 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $capacidades = $query->get();
 
         // Adicionar informações de produtos previstos
-        $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano) {
+        $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano, $etapaId) {
             // Buscar produtos diretamente pela data_prevista_faccao em produto_localizacao
-            $produtos = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade, $mes, $ano) {
+            $produtosQuery = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade, $mes, $ano, $etapaId) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
+                
+                // Filtrar por etapa se selecionada
+                if ($etapaId) {
+                    $query->where('etapa_atual_id', $etapaId);
+                }
             })
-            ->with(['marca', 'grupoProduto', 'status', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade, $mes, $ano) {
+            ->with(['marca', 'grupoProduto', 'status', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade, $mes, $ano, $etapaId) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
-            }])
-            ->get()
+                
+                // Filtrar por etapa se selecionada
+                if ($etapaId) {
+                    $query->where('etapa_atual_id', $etapaId);
+                }
+            }]);
+            
+            $produtos = $produtosQuery->get()
             ->map(function($produto) {
                 // Adicionar quantidade_alocada do pivot
                 $produto->quantidade_alocada = $produto->localizacoes->sum('pivot.quantidade');
@@ -295,7 +318,12 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->orderBy('nome_localizacao')
             ->get();
 
-        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId'));
+        // Etapas de Produção para filtro
+        $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
+            ->orderBy('ordem')
+            ->get();
+
+        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'usuarioRestrito'));
     }
 
     /**
@@ -812,9 +840,14 @@ class LocalizacaoCapacidadeMensalController extends Controller
         ];
         $mesNome = $meses[$mes] ?? '';
 
-        $pdf = \PDF::loadView('localizacao-capacidade.relatorio-pdf', compact('dadosDashboard', 'mes', 'ano', 'mesNome'));
+        // Etapas de Produção para cores e ícones no PDF
+        $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
+            ->orderBy('ordem')
+            ->get();
 
-        return $pdf->stream("Relatorio_Capacidade_{$mesNome}_{$ano}.pdf");
+        $pdf = \PDF::loadView('localizacao-capacidade.relatorio-pdf', compact('dadosDashboard', 'mes', 'ano', 'mesNome', 'etapasProducao'));
+
+        return $pdf->stream("Relatorio_Planejamento_{$mesNome}_{$ano}.pdf");
     }
 
     /**

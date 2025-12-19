@@ -28,6 +28,17 @@ class KanbanController extends Controller
         $direcionamentoComercialId = $request->get('direcionamento_comercial_id');
         $direcionamentoComercialIds = collect($direcionamentoComercialId)->filter()->values()->all();
 
+        // Verificar se o usuário está vinculado a uma localização com capacidade > 0
+        $user = auth()->user();
+        $localizacaoUsuario = $user->localizacao;
+        $usuarioRestrito = false;
+        
+        if ($localizacaoUsuario && $localizacaoUsuario->capacidade > 0) {
+            // Usuário está vinculado a uma localização com capacidade - forçar visualização apenas da localização dele
+            $localizacaoIds = [$localizacaoUsuario->id];
+            $usuarioRestrito = true;
+        }
+
         // Lista completa de localizações ativas, com capacidade > 0 e que fazem movimentação (para o filtro)
         $todasLocalizacoes = Localizacao::where('ativo', true)
             ->where('faz_movimentacao', true)
@@ -125,7 +136,8 @@ class KanbanController extends Controller
             'todasLocalizacoes',
             'localizacaoIds',
             'direcionamentosComerciais',
-            'direcionamentoComercialIds'
+            'direcionamentoComercialIds',
+            'usuarioRestrito'
         ));
     }
 }

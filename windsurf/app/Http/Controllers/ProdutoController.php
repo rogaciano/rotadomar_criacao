@@ -510,7 +510,15 @@ class ProdutoController extends Controller
             $coresEnriquecidas->push($corInfo);
         }
 
-        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes'));
+        // Carregar etapas de produção ativas para a seção de localizações
+        $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
+            ->with(['transicoesOrigem' => function($query) {
+                $query->where('ativo', true)->with('etapaDestino')->orderBy('ordem');
+            }])
+            ->orderBy('ordem')
+            ->get();
+
+        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao'));
     }
 
     /**

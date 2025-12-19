@@ -32,6 +32,10 @@
                         {{ __('Kanban') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')">
+                        {{ __('Planejamento') }}
+                    </x-nav-link>
+
                     <!-- Cadastros Dropdown -->
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
                         <div class="relative">
@@ -55,7 +59,7 @@
                                     <a href="{{ route('situacoes.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('situacoes.*') ? 'bg-gray-100' : '' }}">{{ __('Situações') }}</a>
                                     <a href="{{ route('localizacoes.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('localizacoes.*') && !request()->routeIs('localizacao-capacidade.*') ? 'bg-gray-100' : '' }}">{{ __('Localizações') }}</a>
                                     <a href="{{ route('direcionamentos-comerciais.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('direcionamentos-comerciais.*') ? 'bg-gray-100' : '' }}">{{ __('Direcionamentos Comerciais') }}</a>
-                                    <a href="{{ route('localizacao-capacidade.dashboard') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('localizacao-capacidade.*') ? 'bg-gray-100' : '' }}">{{ __('Capacidade Mensal') }}</a>
+                                    <a href="{{ route('etapas-producao.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out {{ request()->routeIs('etapas-producao.*') ? 'bg-gray-100' : '' }}">{{ __('Etapas de Produção') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -294,6 +298,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('direcionamentos-comerciais.index')" :active="request()->routeIs('direcionamentos-comerciais.*')" class="pl-6">
                     {{ __('Direcionamentos Comerciais') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('etapas-producao.index')" :active="request()->routeIs('etapas-producao.*')" class="pl-6">
+                    {{ __('Etapas de Produção') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')" class="pl-6">
                     {{ __('Capacidade Mensal') }}
