@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EtapaProducao;
 use App\Models\EtapaTransicao;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EtapaProducaoController extends Controller
 {
@@ -46,6 +47,35 @@ class EtapaProducaoController extends Controller
             ->get();
 
         return view('etapas-producao.fluxo', compact('etapasFluxo'));
+    }
+
+    /**
+     * Visualizar fluxo de etapas com as quantidades de produtos em cada etapa
+     */
+    public function visualizarFluxoQuantidades()
+    {
+        // Carregar todas as etapas ativas com transições
+        $etapasFluxo = EtapaProducao::where('ativo', true)
+            ->with(['transicoesOrigem.etapaDestino'])
+            ->orderBy('ordem')
+            ->get();
+
+        // Contar as quantidades de produtos por etapa atual
+        // Ignora os que não tiverem etapas (etapa_atual_id null)
+        $quantidadesPorEtapa = DB::table('produto_localizacao')
+            ->select('etapa_atual_id', DB::raw('SUM(quantidade) as total_quantidade'))
+            ->whereNotNull('etapa_atual_id')
+            ->whereNull('deleted_at') // Tabela pivot pode ter soft deletes se configurada
+            ->groupBy('etapa_atual_id')
+            ->pluck('total_quantidade', 'etapa_atual_id')
+            ->toArray();
+
+        // Adicionar a quantidade a cada etapa para facilitar na view
+        foreach ($etapasFluxo as $etapa) {
+            $etapa->quantidade_produtos = $quantidadesPorEtapa[$etapa->id] ?? 0;
+        }
+
+        return view('etapas-producao.fluxo-quantidades', compact('etapasFluxo'));
     }
 
     /**

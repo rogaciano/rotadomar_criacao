@@ -346,6 +346,7 @@ class ProdutoController extends Controller
             'status_id' => 'required|exists:status,id',
             'ficha_producao' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'catalogo_vendas' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'foto_principal' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ], $messages);
 
         if ($validator->fails()) {
@@ -384,6 +385,21 @@ class ProdutoController extends Controller
 
             $catalogoPath = $catalogo->storeAs('catalogos', $catalogoName, 'public');
             $data['anexo_catalogo_vendas'] = $catalogoPath;
+        }
+
+        // Upload da foto principal, se fornecida
+        if ($request->hasFile('foto_principal')) {
+            $foto = $request->file('foto_principal');
+            $fotoName = time() . '_foto_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $foto->getClientOriginalName());
+
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/produtos');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            $fotoPath = $foto->storeAs('produtos', $fotoName, 'public');
+            $data['foto_principal'] = $fotoPath;
         }
 
         // Criar o produto
@@ -584,6 +600,7 @@ class ProdutoController extends Controller
             'status_id' => 'required|exists:status,id',
             'ficha_producao' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
             'catalogo_vendas' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'foto_principal' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'numero_reprogramacao' => 'nullable|integer|min:1|max:99',
         ];
 
@@ -659,6 +676,32 @@ class ProdutoController extends Controller
 
             $catalogoPath = $catalogo->storeAs('catalogos', $catalogoName, 'public');
             $data['anexo_catalogo_vendas'] = $catalogoPath;
+        }
+
+        // Upload da foto principal, se fornecida
+        if ($request->hasFile('foto_principal')) {
+            // Remover foto anterior, se existir
+            if ($produto->foto_principal) {
+                Storage::disk('public')->delete($produto->foto_principal);
+            }
+
+            $foto = $request->file('foto_principal');
+            $fotoName = time() . '_foto_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $foto->getClientOriginalName());
+
+            // Criar diretório se não existir
+            $directory = storage_path('app/public/produtos');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            $fotoPath = $foto->storeAs('produtos', $fotoName, 'public');
+            $data['foto_principal'] = $fotoPath;
+        } elseif ($request->boolean('remover_foto_principal')) {
+            // Remover foto se o checkbox foi marcado
+            if ($produto->foto_principal) {
+                Storage::disk('public')->delete($produto->foto_principal);
+            }
+            $data['foto_principal'] = null;
         }
 
         // Atualizar o produto

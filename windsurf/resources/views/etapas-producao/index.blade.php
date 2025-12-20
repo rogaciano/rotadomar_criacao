@@ -22,6 +22,14 @@
                     </svg>
                     Visualizar Fluxo
                 </a>
+
+                <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3a1 1 0 10-2 0M15 8l-1.333-2.001L12 4.001l-1.667 1.999L9 8m6 0v8a2 2 0 01-2 2H9a2 2 0 01-2-2V8m8 0h-6" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10" />
+                    </svg>
+                    Fluxo com Quantidades
+                </a>
             </div>
 
             @if (session('success'))

@@ -29,6 +29,7 @@ class Produto extends Model
         'localizacao_id',
         'anexo_ficha_producao',
         'anexo_catalogo_vendas',
+        'foto_principal',
         'produto_original_id',
         'numero_reprogramacao'
     ];
@@ -324,6 +325,18 @@ class Produto extends Model
     public function situacao_atual()
     {
         return $this->belongsTo(\App\Models\Situacao::class, 'situacao_atual_id');
+    }
+
+    /**
+     * Retorna a URL da foto principal do produto
+     */
+    public function getFotoPrincipalUrlAttribute()
+    {
+        if ($this->foto_principal) {
+            return asset('storage/' . $this->foto_principal);
+        }
+
+        return asset('img/no-image.png'); // Ou uma imagem default
     }
 
     /**

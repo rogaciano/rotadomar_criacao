@@ -47,119 +47,139 @@
                     <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h3>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Referência</span>
-                                <span class="block mt-1 text-sm text-gray-900">
-                                    {{ $produto->referencia }}
-                                    @if($produto->isReprogramacao())
-                                        <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800" title="Este produto é uma reprogramação">
-                                            📋 Reprogramação #{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}
-                                        </span>
-                                    @endif
-                                    @if(!$produto->isReprogramacao() && $produto->reprogramacoes()->count() > 0)
-                                        <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800" title="Este produto possui reprogramações">
-                                            🔄 {{ $produto->reprogramacoes()->count() }} {{ $produto->reprogramacoes()->count() == 1 ? 'reprogramação' : 'reprogramações' }}
-                                        </span>
-                                    @endif
-                                </span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Descrição</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->descricao }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Data de Cadastro</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_cadastro ? $produto->data_cadastro->format('d/m/Y') : 'N/A' }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Data Prevista para Produção</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_producao_mes_ano ? $produto->data_prevista_producao_mes_ano : 'N/A' }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Marca</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Estilista</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Grupo</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Direcionamento Comercial</span>
-                                <span class="block mt-1 text-sm text-gray-900">
-                                    @if($produto->direcionamentoComercial)
-                                        <span class="font-semibold">
-                                            {{ $produto->direcionamentoComercial->descricao }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400 italic">Sem direcionamento</span>
-                                    @endif
-                                </span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Quantidade</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Status</span>
-                                <span class="block mt-1">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                        {{ $produto->status ? $produto->status->descricao : 'N/A' }}
-                                    </span>
-                                </span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Localização Atual</span>
-                                <span class="block mt-1">
-                                    @if($produto->localizacao_atual)
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {{ $produto->localizacao_atual->nome_localizacao }}
-                                        </span>
-                                    @else
-                                        <span class="text-gray-400 text-sm italic">Não localizado</span>
-                                    @endif
-                                </span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
-                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Preço Varejo</span>
-                                <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Criado em</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
-                            </div>
-
-                            <div>
-                                <span class="block text-sm font-medium text-gray-500">Última atualização</span>
-                                <span class="block mt-1 text-sm text-gray-900">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
-                            </div>
-
-                            @if($produto->deleted_at)
+                        <div class="flex flex-col lg:flex-row gap-8">
+                            <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500">Excluído em</span>
-                                    <span class="block mt-1 text-sm text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
+                                    <span class="block text-sm font-medium text-gray-500">Referência</span>
+                                    <span class="block mt-1 text-sm text-gray-900">
+                                        {{ $produto->referencia }}
+                                        @if($produto->isReprogramacao())
+                                            <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800" title="Este produto é uma reprogramação">
+                                                📋 Reprogramação #{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}
+                                            </span>
+                                        @endif
+                                        @if(!$produto->isReprogramacao() && $produto->reprogramacoes()->count() > 0)
+                                            <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800" title="Este produto possui reprogramações">
+                                                🔄 {{ $produto->reprogramacoes()->count() }} {{ $produto->reprogramacoes()->count() == 1 ? 'reprogramação' : 'reprogramações' }}
+                                            </span>
+                                        @endif
+                                    </span>
                                 </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Descrição</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->descricao }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Data de Cadastro</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_cadastro ? $produto->data_cadastro->format('d/m/Y') : 'N/A' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Data Prevista para Produção</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_producao_mes_ano ? $produto->data_prevista_producao_mes_ano : 'N/A' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Marca</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Estilista</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Grupo</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Direcionamento Comercial</span>
+                                    <span class="block mt-1 text-sm text-gray-900">
+                                        @if($produto->direcionamentoComercial)
+                                            <span class="font-semibold">
+                                                {{ $produto->direcionamentoComercial->descricao }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400 italic">Sem direcionamento</span>
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Quantidade</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Status</span>
+                                    <span class="block mt-1">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                            {{ $produto->status ? $produto->status->descricao : 'N/A' }}
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Localização Atual</span>
+                                    <span class="block mt-1">
+                                        @if($produto->localizacao_atual)
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                {{ $produto->localizacao_atual->nome_localizacao }}
+                                            </span>
+                                        @else
+                                            <span class="text-gray-400 text-sm italic">Não localizado</span>
+                                        @endif
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
+                                    <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Preço Varejo</span>
+                                    <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Criado em</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
+                                </div>
+
+                                <div>
+                                    <span class="block text-sm font-medium text-gray-500">Última atualização</span>
+                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
+                                </div>
+
+                                @if($produto->deleted_at)
+                                    <div>
+                                        <span class="block text-sm font-medium text-gray-500">Excluído em</span>
+                                        <span class="block mt-1 text-sm text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if($produto->foto_principal)
+                            <div class="lg:w-80 shrink-0">
+                                <span class="block text-sm font-medium text-gray-500 mb-2">Foto Principal</span>
+                                <div class="relative group">
+                                    <img src="{{ asset('storage/' . $produto->foto_principal) }}" 
+                                         alt="Foto do Produto" 
+                                         class="w-full rounded-lg shadow-lg border-2 border-white object-cover cursor-pointer hover:scale-[1.02] transition-all duration-300"
+                                         style="aspect-ratio: 3/4;"
+                                         onclick="this.style.transform = (this.style.transform.includes('rotate(90deg)') ? 'rotate(0deg)' : 'rotate(90deg)')">
+                                    <div class="absolute top-2 right-2 bg-white/80 rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
                             @endif
                         </div>
                     </div>

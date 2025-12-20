@@ -136,6 +136,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
 
     // Routes para Etapas de Produção
     Route::get('etapas-producao/fluxo', [EtapaProducaoController::class, 'visualizarFluxo'])->name('etapas-producao.visualizar-fluxo');
+    Route::get('etapas-producao/fluxo-quantidades', [EtapaProducaoController::class, 'visualizarFluxoQuantidades'])->name('etapas-producao.visualizar-fluxo-quantidades');
     Route::resource('etapas-producao', EtapaProducaoController::class);
 
     // Routes para Status
