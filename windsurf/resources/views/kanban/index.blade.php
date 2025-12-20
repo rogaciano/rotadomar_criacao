@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8" style="max-width: 96%;">
             <!-- Filtros -->
             <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
                 <form method="GET" action="{{ route('kanban.index') }}" class="flex flex-wrap items-end gap-4">
@@ -136,7 +136,7 @@
                 </div>
 
                 <!-- Container do Kanban -->
-                <div id="kanban-container" class="flex gap-4 pb-4 kanban-scroll">
+                <div id="kanban-container" class="flex gap-4 pb-4 kanban-scroll mx-auto" style="max-width: 100%;">
                     @forelse($produtosPorLocalizacao as $dados)
                     <!-- Coluna da Localização -->
                     <div class="flex-shrink-0 w-80 bg-gray-100 rounded-lg overflow-hidden">
@@ -158,11 +158,21 @@
                             @forelse($dados['produtos'] as $produto)
                                 <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 {{ $produto->direcionamentoComercial ? 'border-blue-500' : 'border-' . ($produto->marca->cor_fundo ?? 'gray') . '-500' }}">
                                     <!-- Referência -->
-                                    <div class="flex items-start justify-between mb-2">
-                                        <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(request()->fullUrl()) }}"
-                                           class="text-blue-600 hover:text-blue-800 font-bold text-lg">
-                                            {{ $produto->referencia }}
-                                        </a>
+                                    <div class="flex items-start justify-between mb-2 gap-2">
+                                        <div class="flex-grow">
+                                            <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(request()->fullUrl()) }}"
+                                               class="text-blue-600 hover:text-blue-800 font-bold text-lg block">
+                                                {{ $produto->referencia }}
+                                            </a>
+                                        </div>
+                                        @if($produto->foto_principal)
+                                            <div class="flex-shrink-0">
+                                                <img src="{{ asset('storage/' . $produto->foto_principal) }}" 
+                                                     alt="" 
+                                                     class="h-14 w-14 rounded-md object-cover border border-gray-200 shadow-sm transition-transform hover:scale-110 cursor-pointer"
+                                                     onclick="abrirModalFoto('{{ asset('storage/' . $produto->foto_principal) }}', '{{ $produto->referencia }} - {{ $produto->descricao }}')">
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <!-- Descrição -->
@@ -360,6 +370,52 @@
         </div>
     </div>
 
+    {{-- Modal de preview de Foto (Estilo Flutuante / Quick Look) --}}
+    <div id="modal-preview-foto"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 transition-all duration-300 backdrop-blur-sm bg-gray-900/40"
+         style="display: none;"
+         onclick="fecharModalFoto()">
+        
+        <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0" 
+             id="modal-foto-container"
+             onclick="event.stopPropagation()"
+             style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            
+            <!-- Barra Superior Discreta -->
+            <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                    <span id="modal-foto-titulo-header" class="ml-4 text-xs font-bold text-gray-500 uppercase tracking-widest"></span>
+                </div>
+                <button type="button" onclick="fecharModalFoto()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Área da Imagem -->
+            <div class="relative bg-gray-50 flex-1 overflow-hidden">
+                <img id="modal-foto-img"
+                     src=""
+                     alt="Preview"
+                     class="max-w-full max-h-[75vh] object-contain mx-auto display-block">
+                
+                <!-- Overlay de Informação Inferior -->
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">
+                    <h4 id="modal-foto-titulo" class="text-white font-bold text-lg"></h4>
+                </div>
+            </div>
+            
+            <!-- Barra de Ações Inferior -->
+            <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-center">
+                <span class="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Quick Look Preview • Pressione ESC para sair</span>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -509,6 +565,57 @@
                 modalContent.style.height = '1640px';
             }
         }
+
+        // Funções para Modal de Foto
+        function abrirModalFoto(url, titulo) {
+            const modal = document.getElementById('modal-preview-foto');
+            const container = document.getElementById('modal-foto-container');
+            const img = document.getElementById('modal-foto-img');
+            const tituloElement = document.getElementById('modal-foto-titulo');
+            const headerTitle = document.getElementById('modal-foto-titulo-header');
+
+            img.src = url;
+            if (tituloElement) tituloElement.textContent = titulo;
+            if (headerTitle) headerTitle.textContent = titulo.split(' - ')[0];
+
+            modal.style.display = 'flex';
+            
+            // Animação de entrada
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            document.body.style.overflow = 'hidden';
+        }
+
+        function fecharModalFoto() {
+            const modal = document.getElementById('modal-preview-foto');
+            const container = document.getElementById('modal-foto-container');
+            
+            container.classList.add('scale-95', 'opacity-0');
+            container.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }, 200);
+        }
+
+        // Fechar modal de foto ao clicar fora
+        document.getElementById('modal-preview-foto').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModalFoto();
+            }
+        });
+
+        // Adicionar ESC para fechar modal de foto (global listener já existe para o outro modal, vamos integrar)
+        const originalEscHandler = document.onkeydown;
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                fecharModalFoto();
+            }
+        });
     </script>
     @endpush
 
