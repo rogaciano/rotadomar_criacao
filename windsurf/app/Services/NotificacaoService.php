@@ -47,6 +47,43 @@ class NotificacaoService
     }
 
     /**
+     * Criar notificação para alteração de atribuição de localização
+     */
+    public function criarNotificacaoAlteracaoAtribuicaoLocalizacao(\App\Models\ProdutoLocalizacao $produtoLocalizacao): Notificacao
+    {
+        $produto = $produtoLocalizacao->produto;
+        $localizacao = $produtoLocalizacao->localizacao;
+        $criador = auth()->user() ? auth()->user()->name : 'Sistema';
+        
+        return Notificacao::create([
+            'movimentacao_id' => null,
+            'localizacao_id' => $localizacao->id,
+            'tipo' => 'alteracao_atribuicao',
+            'titulo' => 'Atribuição Alterada',
+            'mensagem' => "A atribuição do produto {$produto->referencia} (OP: {$produtoLocalizacao->ordem_producao}) foi alterada por {$criador}.",
+            'link' => route('produtos.show', $produto->id)
+        ]);
+    }
+
+    /**
+     * Criar notificação para remoção de atribuição de localização
+     */
+    public function criarNotificacaoRemocaoAtribuicaoLocalizacao(array $snapshot, \App\Models\Localizacao $localizacao, \App\Models\Produto $produto): Notificacao
+    {
+        $criador = auth()->user() ? auth()->user()->name : 'Sistema';
+        $ordemProducao = $snapshot['ordem_producao'] ?? 'N/A';
+        
+        return Notificacao::create([
+            'movimentacao_id' => null,
+            'localizacao_id' => $localizacao->id,
+            'tipo' => 'remocao_atribuicao',
+            'titulo' => 'Vínculo Removido',
+            'mensagem' => "O produto {$produto->referencia} (OP: {$ordemProducao}) foi removido do seu setor por {$criador}.",
+            'link' => route('produtos.index')
+        ]);
+    }
+
+    /**
      * Criar notificação para mudança de etapa de produção
      */
     public function criarNotificacaoMudancaEtapa(\App\Models\ProdutoLocalizacao $produtoLocalizacao): ?Notificacao
@@ -202,7 +239,9 @@ class NotificacaoService
             'novas' => $novas,
             'concluidas' => $concluidas,
             'mudancas_etapa' => $mudancasEtapa,
-            'atribuicoes' => $atribuicoes
+            'atribuicoes' => $atribuicoes,
+            'alteracoes' => (clone $query)->porTipo('alteracao_atribuicao')->count(),
+            'remocoes' => (clone $query)->porTipo('remocao_atribuicao')->count()
         ];
     }
 }

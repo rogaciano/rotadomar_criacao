@@ -561,7 +561,7 @@
                                                                                             <div class="flex items-center space-x-1">
                                                                                                 @if($dataEntrega)
                                                                                                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 uppercase">
-                                                                                                         ENTREGA: {{ $dataEntrega }}
+                                                                                                         P.ENTREGA: {{ $dataEntrega }}
                                                                                                      </span>
                                                                                                 @else
                                                                                                     <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-50 text-gray-400 italic">

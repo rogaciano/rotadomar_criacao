@@ -165,6 +165,13 @@ class ProdutoLocalizacaoController extends Controller
             ->event('updated')
             ->log('Movimentação atualizada no produto');
 
+        // Notificar alteração
+        try {
+            $this->notificacaoService->criarNotificacaoAlteracaoAtribuicaoLocalizacao($produtoLocalizacao);
+        } catch (\Exception $e) {
+            \Log::error("Erro ao criar notificação de alteração de atribuição: " . $e->getMessage());
+        }
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização atualizada com sucesso!');
     }
@@ -218,6 +225,15 @@ class ProdutoLocalizacaoController extends Controller
             'pivot_id' => $produtoLocalizacaoId,
             'user_id' => auth()->id()
         ]);
+
+        // Notificar remoção
+        try {
+            if ($localizacao) {
+                $this->notificacaoService->criarNotificacaoRemocaoAtribuicaoLocalizacao($snapshot, $localizacao, $produto);
+            }
+        } catch (\Exception $e) {
+            \Log::error("Erro ao criar notificação de remoção de atribuição: " . $e->getMessage());
+        }
 
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Localização removida com sucesso!');
@@ -396,6 +412,13 @@ class ProdutoLocalizacaoController extends Controller
         $produtoLocalizacao->update([
             'data_entrega_faccao' => $request->data_entrega_faccao
         ]);
+
+        // Notificar alteração de data de entrega
+        try {
+            $this->notificacaoService->criarNotificacaoAlteracaoAtribuicaoLocalizacao($produtoLocalizacao);
+        } catch (\Exception $e) {
+            \Log::error("Erro ao criar notificação de alteração de data de entrega: " . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Data de entrega atualizada com sucesso!');
     }
