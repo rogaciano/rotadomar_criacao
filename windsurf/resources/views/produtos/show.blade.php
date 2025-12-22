@@ -48,120 +48,132 @@
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h3>
 
                         <div class="flex flex-col lg:flex-row gap-8">
-                            <div class="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                            <div class="flex-grow space-y-8">
+                                <!-- Identificação e Estilo -->
                                 <div>
-                                    <span class="block text-sm font-medium text-gray-500">Referência</span>
-                                    <span class="block mt-1 text-sm text-gray-900">
-                                        {{ $produto->referencia }}
-                                        @if($produto->isReprogramacao())
-                                            <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800" title="Este produto é uma reprogramação">
-                                                📋 Reprogramação #{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}
-                                            </span>
-                                        @endif
-                                        @if(!$produto->isReprogramacao() && $produto->reprogramacoes()->count() > 0)
-                                            <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800" title="Este produto possui reprogramações">
-                                                🔄 {{ $produto->reprogramacoes()->count() }} {{ $produto->reprogramacoes()->count() == 1 ? 'reprogramação' : 'reprogramações' }}
-                                            </span>
-                                        @endif
-                                    </span>
-                                </div>
+                                    <h4 class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                                        Identificação e Estilo
+                                    </h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-8">
+                                        <div class="sm:col-span-1">
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Referência</span>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-sm font-black text-gray-900">{{ $produto->referencia }}</span>
+                                                @if($produto->isReprogramacao())
+                                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-orange-100 text-orange-700">#{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
 
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Descrição</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->descricao }}</span>
-                                </div>
+                                        <div class="sm:col-span-1 lg:col-span-2">
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Descrição</span>
+                                            <span class="block mt-1 text-sm font-semibold text-gray-900 leading-tight">{{ $produto->descricao }}</span>
+                                        </div>
 
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Data de Cadastro</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_cadastro ? $produto->data_cadastro->format('d/m/Y') : 'N/A' }}</span>
-                                </div>
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Marca</span>
+                                            <span class="block mt-1 text-sm font-medium text-gray-800">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
+                                        </div>
 
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Data Prevista para Produção</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->data_prevista_producao_mes_ano ? $produto->data_prevista_producao_mes_ano : 'N/A' }}</span>
-                                </div>
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Estilista</span>
+                                            <span class="block mt-1 text-sm font-medium text-gray-800">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
+                                        </div>
 
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Marca</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Estilista</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Grupo</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Direcionamento Comercial</span>
-                                    <span class="block mt-1 text-sm text-gray-900">
-                                        @if($produto->direcionamentoComercial)
-                                            <span class="font-semibold">
-                                                {{ $produto->direcionamentoComercial->descricao }}
-                                            </span>
-                                        @else
-                                            <span class="text-gray-400 italic">Sem direcionamento</span>
-                                        @endif
-                                    </span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Quantidade</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->quantidade }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Status</span>
-                                    <span class="block mt-1">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                            {{ $produto->status ? $produto->status->descricao : 'N/A' }}
-                                        </span>
-                                    </span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Localização Atual</span>
-                                    <span class="block mt-1">
-                                        @if($produto->localizacao_atual)
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                {{ $produto->localizacao_atual->nome_localizacao }}
-                                            </span>
-                                        @else
-                                            <span class="text-gray-400 text-sm italic">Não localizado</span>
-                                        @endif
-                                    </span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Preço Atacado</span>
-                                    <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Preço Varejo</span>
-                                    <span class="block mt-1 text-sm text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Criado em</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
-                                </div>
-
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-500">Última atualização</span>
-                                    <span class="block mt-1 text-sm text-gray-900">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
-                                </div>
-
-                                @if($produto->deleted_at)
-                                    <div>
-                                        <span class="block text-sm font-medium text-gray-500">Excluído em</span>
-                                        <span class="block mt-1 text-sm text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Grupo</span>
+                                            <span class="block mt-1 text-sm font-medium text-gray-800">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
+                                        </div>
                                     </div>
-                                @endif
+                                </div>
+
+                                <!-- Comercial e Produção -->
+                                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                    <h4 class="text-[10px] font-extrabold text-blue-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                                        Comercial e Produção
+                                    </h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-4">
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Quantidade</span>
+                                            <span class="block mt-1 text-base font-black text-gray-900 tracking-tighter">{{ number_format($produto->quantidade, 0, ',', '.') }}</span>
+                                        </div>
+
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Status</span>
+                                            <div class="mt-1">
+                                                <span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-600 border border-gray-200' }}">
+                                                    {{ $produto->status ? $produto->status->descricao : 'N/A' }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Localização Atual</span>
+                                            <div class="mt-1">
+                                                @if($produto->localizacao_atual)
+                                                    <span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                                                        {{ $produto->localizacao_atual->nome_localizacao }}
+                                                    </span>
+                                                @else
+                                                    <span class="text-gray-400 text-[10px] italic">Não localizado</span>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <div class="col-span-2 sm:col-span-1">
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Direcionamento</span>
+                                            <span class="block mt-1 text-xs font-bold text-gray-700 uppercase">{{ $produto->direcionamentoComercial ? $produto->direcionamentoComercial->descricao : 'Sem info' }}</span>
+                                        </div>
+
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Preço Atacado</span>
+                                            <span class="block mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
+                                        </div>
+
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Preço Varejo</span>
+                                            <span class="block mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Cronograma e Datas -->
+                                <div>
+                                    <h4 class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        Cronograma e Registro
+                                    </h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Data de Cadastro</span>
+                                            <span class="block mt-1 text-xs font-semibold text-gray-700">{{ $produto->data_cadastro ? $produto->data_cadastro->format('d/m/Y') : '—' }}</span>
+                                        </div>
+
+                                        <div>
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Produção Prevista</span>
+                                            <span class="block mt-1 text-xs font-bold text-purple-700">{{ $produto->data_prevista_producao_mes_ano ?: '—' }}</span>
+                                        </div>
+
+                                        <div class="col-span-1">
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Criado em</span>
+                                            <span class="block mt-1 text-[11px] text-gray-600">{{ $produto->created_at->format('d/m/Y H:i') }}</span>
+                                        </div>
+
+                                        <div class="col-span-1">
+                                            <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Última Atualização</span>
+                                            <span class="block mt-1 text-[11px] text-gray-600">{{ $produto->updated_at->format('d/m/Y H:i') }}</span>
+                                        </div>
+
+                                        @if($produto->deleted_at)
+                                            <div class="col-span-2">
+                                                <span class="block text-[10px] font-bold text-red-400 uppercase tracking-tight">Excluído em</span>
+                                                <span class="block mt-1 text-xs font-bold text-red-600">{{ $produto->deleted_at->format('d/m/Y H:i') }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
 
                             @if($produto->foto_principal)
@@ -189,7 +201,8 @@
                         <h3 class="text-lg font-semibold text-gray-800 mb-4">Tecidos</h3>
 
                         @if($produto->tecidos->count() > 0)
-                                    <div class="overflow-x-auto">
+                                    <!-- Vista Desktop -->
+                                    <div class="hidden md:block overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200">
                                             <thead class="bg-gray-50">
                                                 <tr>
@@ -212,6 +225,28 @@
                                                 @endforeach
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    <!-- Vista Mobile (Cards) -->
+                                    <div class="md:hidden space-y-4">
+                                        @foreach($produto->tecidos as $tecido)
+                                            <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                                <div class="flex justify-between items-start mb-2">
+                                                    <a href="{{ route('tecidos.show', $tecido->id) }}" class="text-blue-600 font-bold text-sm hover:underline">
+                                                        {{ $tecido->descricao }}
+                                                    </a>
+                                                </div>
+                                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                                    <div class="text-gray-500 uppercase tracking-wider font-semibold">Referência</div>
+                                                    <div class="text-gray-900">{{ $tecido->referencia }}</div>
+                                                    
+                                                    <div class="text-gray-500 uppercase tracking-wider font-semibold">Consumo</div>
+                                                    <div class="text-gray-900 font-bold bg-gray-50 px-2 py-0.5 rounded-md inline-block">
+                                                        {{ $tecido->pivot->consumo ?? 'N/A' }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 @else
                                     <span class="text-gray-400 italic">Nenhum tecido associado a este produto</span>
@@ -269,7 +304,7 @@
                                 </div>
                             </div>
                         @elseif($produto->localizacoes->count() > 0 && $divergencia == 0)
-                            <div class="mb-4 rounded-md bg-green-50 border-l-4 border-green-400 p-4">
+                            <div class="hidden md:block mb-4 rounded-md bg-green-50 border-l-4 border-green-400 p-4">
                                 <div class="flex">
                                     <div class="flex-shrink-0">
                                         <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -287,7 +322,8 @@
                         @endif
 
                         @if($produto->localizacoes->count() > 0)
-                            <div class="overflow-x-auto">
+                            <!-- Vista Desktop -->
+                            <div class="hidden lg:block overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -308,6 +344,31 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200">
                                         @foreach($produto->localizacoes as $localizacao)
+                                            @php
+                                                $etapaAtualId = $localizacao->pivot->etapa_atual_id;
+                                                $etapaAnteriorId = $localizacao->pivot->etapa_anterior_id;
+                                                $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
+                                                $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
+                                                $userLoc = auth()->user()->localizacao;
+                                                $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
+                                                $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
+                                                $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
+                                                
+                                                $corClasses = [
+                                                    'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
+                                                    'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'red' => 'bg-red-100 text-red-800 border-red-200',
+                                                    'purple' => 'bg-purple-100 text-purple-800 border-purple-200', 'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                                    'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200', 'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                                    'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                ];
+                                                $btnCorClasses = [
+                                                    'blue' => 'bg-blue-500 hover:bg-blue-600 text-white', 'green' => 'bg-green-500 hover:bg-green-600 text-white',
+                                                    'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white', 'red' => 'bg-red-500 hover:bg-red-600 text-white',
+                                                    'purple' => 'bg-purple-500 hover:bg-purple-600 text-white', 'gray' => 'bg-gray-500 hover:bg-gray-600 text-white',
+                                                    'indigo' => 'bg-indigo-500 hover:bg-indigo-600 text-white', 'pink' => 'bg-pink-500 hover:bg-pink-600 text-white',
+                                                    'orange' => 'bg-orange-500 hover:bg-orange-600 text-white',
+                                                ];
+                                            @endphp
                                             <tr>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
@@ -362,9 +423,9 @@
                                                         
                                                         @if($podeEditarEntrega)
                                                             <button type="button" 
-                                                                onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, '{{ $localizacao->pivot->data_entrega_faccao ? (is_string($localizacao->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_entrega_faccao)->format('Y-m-d') : $localizacao->pivot->data_entrega_faccao->format('Y-m-d')) : '' }}', '{{ $localizacao->nome_localizacao }}')"
-                                                                class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar Data de Entrega">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->nome_localizacao) }})"
+                                                                class="text-blue-600 hover:text-blue-800 transition-colors p-1" title="Editar Data de Entrega">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                                 </svg>
                                                             </button>
@@ -380,103 +441,44 @@
                                                         <span class="text-gray-400">-</span>
                                                     @endif
                                                 </td>
-                                                {{-- Coluna: Etapa Atual (apenas o badge) --}}
                                                 <td class="px-4 py-2 text-sm" x-data="{ showEtapaMenu: false }">
-                                                    @php
-                                                        $etapaAtualId = $localizacao->pivot->etapa_atual_id;
-                                                        $etapaAnteriorId = $localizacao->pivot->etapa_anterior_id;
-                                                        $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
-                                                        $corClasses = [
-                                                            'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                                            'green' => 'bg-green-100 text-green-800 border-green-200',
-                                                            'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                                            'red' => 'bg-red-100 text-red-800 border-red-200',
-                                                            'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
-                                                            'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
-                                                            'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
-                                                            'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
-                                                            'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
-                                                        ];
-                                                        $btnCorClasses = [
-                                                            'blue' => 'bg-blue-500 hover:bg-blue-600 text-white',
-                                                            'green' => 'bg-green-500 hover:bg-green-600 text-white',
-                                                            'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white',
-                                                            'red' => 'bg-red-500 hover:bg-red-600 text-white',
-                                                            'purple' => 'bg-purple-500 hover:bg-purple-600 text-white',
-                                                            'gray' => 'bg-gray-500 hover:bg-gray-600 text-white',
-                                                            'indigo' => 'bg-indigo-500 hover:bg-indigo-600 text-white',
-                                                            'pink' => 'bg-pink-500 hover:bg-pink-600 text-white',
-                                                            'orange' => 'bg-orange-500 hover:bg-orange-600 text-white',
-                                                        ];
-                                                        $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
-                                                        
-                                                        // Verificar se o usuário pode gerenciar etapas para esta localização
-                                                        $userLoc = auth()->user()->localizacao;
-                                                        $podeGerenciarEtapa = auth()->user()->isAdmin() || (
-                                                            $userLoc && 
-                                                            $userLoc->id == $localizacao->id
-                                                        );
-
-                                                        // Validação robusta para habilitar mudança de etapa (agora baseada na Entrega Prevista)
-                                                        $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
-                                                        $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
-                                                    @endphp
-                                                    
                                                     @if($etapaAtual)
-                                                        {{-- Badge da etapa atual --}}
                                                         <div class="flex items-center gap-1">
                                                             <span class="inline-block px-2 py-1 rounded-full text-xs font-medium border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
                                                                 {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
                                                             </span>
                                                             <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}" 
-                                                               class="text-gray-400 hover:text-indigo-600 transition-colors" 
-                                                               title="Ver histórico de mudanças">
+                                                               class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                                 </svg>
                                                             </a>
                                                         </div>
-                                                        
-                                                        {{-- Link para voltar etapa --}}
                                                         @if($etapaAnteriorId && $podeGerenciarEtapa)
                                                             <div class="mt-1">
                                                                 <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
                                                                     @csrf
-                                                                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Deseja voltar para a etapa anterior?')">
-                                                                        ← Voltar
-                                                                    </button>
+                                                                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Voltar etapa?')">← Voltar</button>
                                                                 </form>
                                                             </div>
                                                         @endif
                                                     @else
-                                                        {{-- Sem etapa definida - mostrar botão para definir --}}
                                                         <div class="relative" @click.away="showEtapaMenu = false">
                                                             @if($podeGerenciarEtapa)
-                                                                <button type="button" 
-                                                                    @click="{{ $possuiDataEntrega ? 'showEtapaMenu = !showEtapaMenu' : 'alert(\'Por favor, preencha a Entrega Prevista Facção antes de definir a etapa.\')' }}" 
-                                                                    class="px-2 py-1 text-xs rounded border border-dashed transition-all {{ $possuiDataEntrega ? 'bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-300 shadow-sm' : 'bg-gray-100 text-gray-300 border-gray-200 cursor-not-allowed opacity-40 grayscale' }}"
-                                                                    title="{{ $possuiDataEntrega ? 'Definir etapa inicial' : 'Preencha a \"Entrega Prevista Facção\" para definir a etapa' }}">
-                                                                    + Definir
-                                                                </button>
-                                                            @else
-                                                                <span class="text-xs text-gray-400 italic">Sem Etapa</span>
+                                                                <button type="button" @click="{{ $possuiDataEntrega ? 'showEtapaMenu = !showEtapaMenu' : 'alert(\'Preencha a Entrega Prevista Facção.\')' }}" class="px-2 py-1 text-xs rounded border border-dashed {{ $possuiDataEntrega ? 'bg-gray-100 hover:bg-gray-200 border-gray-300' : 'bg-gray-100 text-gray-300 border-gray-200 opacity-40 grayscale' }}">+ Definir</button>
                                                             @endif
                                                             <div x-show="showEtapaMenu" x-transition class="absolute z-20 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200">
                                                                 @foreach($etapasProducao as $etapa)
                                                                     <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
                                                                         @csrf
                                                                         <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
-                                                                        <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1 border-b border-gray-100 last:border-b-0">
-                                                                            <span>{{ $etapa->icone ?? '' }}</span>
-                                                                            <span>{{ $etapa->nome }}</span>
-                                                                        </button>
+                                                                        <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1">{{ $etapa->icone ?? '' }} {{ $etapa->nome }}</button>
                                                                     </form>
                                                                 @endforeach
                                                             </div>
                                                         </div>
                                                     @endif
                                                 </td>
-                                                {{-- Coluna: Próximas Etapas (botões em vertical) --}}
                                                 <td class="px-4 py-2 text-sm">
                                                     @if($transicoes->count() > 0 && $podeGerenciarEtapa)
                                                         <div class="space-y-1">
@@ -484,61 +486,21 @@
                                                                 <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
                                                                     @csrf
                                                                     <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                                    <button type="submit" 
-                                                                        {{ !$possuiDataEntrega ? 'disabled' : '' }}
-                                                                        class="w-full text-left px-3 py-1 rounded text-xs font-medium transition-all {{ $possuiDataEntrega ? ($btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white') : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-40 grayscale pointer-events-none' }}" 
-                                                                        title="{{ $possuiDataEntrega ? 'Avançar para ' . ($transicao->etapaDestino->nome ?? 'próxima etapa') : 'Preencha a \"Entrega Prevista Facção\" para avançar' }}">
-                                                                        → {{ $transicao->label_botao ?: ($transicao->etapaDestino->nome ?? 'Próxima') }}
-                                                                    </button>
+                                                                    <button type="submit" {{ !$possuiDataEntrega ? 'disabled' : '' }} class="w-full text-left px-3 py-1 rounded text-xs font-medium {{ $possuiDataEntrega ? ($btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white') : 'bg-gray-200 opacity-40' }}">→ {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</button>
                                                                 </form>
                                                             @endforeach
                                                         </div>
-                                                    @else
-                                                        <span class="text-xs text-gray-400 italic">—</span>
                                                     @endif
                                                 </td>
                                                 @if($canAnyProdutoLocalizacoes)
                                                     <td class="px-4 py-2 whitespace-nowrap text-sm space-x-3">
-                                                        @php
-                                                            $dataFaccao = '';
-                                                            if($localizacao->pivot->data_prevista_faccao) {
-                                                                $dataFaccao = is_string($localizacao->pivot->data_prevista_faccao)
-                                                                    ? $localizacao->pivot->data_prevista_faccao
-                                                                    : $localizacao->pivot->data_prevista_faccao->format('Y-m-d');
-                                                            }
-                                                            $dataEnvioFaccao = '';
-                                                            if($localizacao->pivot->data_envio_faccao) {
-                                                                $dataEnvioFaccao = is_string($localizacao->pivot->data_envio_faccao)
-                                                                    ? $localizacao->pivot->data_envio_faccao
-                                                                    : $localizacao->pivot->data_envio_faccao->format('Y-m-d');
-                                                            }
-                                                            $dataRetornoFaccao = '';
-                                                            if($localizacao->pivot->data_retorno_faccao) {
-                                                                $dataRetornoFaccao = is_string($localizacao->pivot->data_retorno_faccao)
-                                                                    ? $localizacao->pivot->data_retorno_faccao
-                                                                    : $localizacao->pivot->data_retorno_faccao->format('Y-m-d');
-                                                            }
-                                                            $dataEntregaFaccao = '';
-                                                            if($localizacao->pivot->data_entrega_faccao) {
-                                                                $dataEntregaFaccao = is_string($localizacao->pivot->data_entrega_faccao)
-                                                                    ? $localizacao->pivot->data_entrega_faccao
-                                                                    : $localizacao->pivot->data_entrega_faccao->format('Y-m-d');
-                                                            }
-                                                        @endphp
                                                         @if($canUpdateProdutoLocalizacoes)
-                                                            <button type="button"
-                                                                onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ json_encode($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ json_encode($dataFaccao) }}, {{ json_encode($localizacao->pivot->ordem_producao ?? '') }}, {{ json_encode($localizacao->pivot->observacao ?? '') }}, {{ $localizacao->pivot->concluido ?? 0 }}, {{ json_encode($dataEnvioFaccao) }}, {{ json_encode($dataRetornoFaccao) }}, {{ json_encode($dataEntregaFaccao) }})"
-                                                                class="text-indigo-600 hover:text-indigo-800 text-sm">
-                                                                Editar
-                                                            </button>
+                                                            <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 hover:text-indigo-800">Editar</button>
                                                         @endif
                                                         @if($canDeleteProdutoLocalizacoes)
-                                                            <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja remover esta localização?')">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="text-red-600 hover:text-red-800 text-sm">
-                                                                    Remover
-                                                                </button>
+                                                            <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Remover?')">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" class="text-red-600 hover:text-red-800">Remover</button>
                                                             </form>
                                                         @endif
                                                     </td>
@@ -548,47 +510,161 @@
                                     </tbody>
                                     <tfoot class="bg-gray-50">
                                         <tr class="border-t-2 border-gray-300">
-                                            <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Total nas Localizações:</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia != 0 ? ($divergencia > 0 ? 'text-yellow-700' : 'text-red-700') : 'text-green-700' }}">
-                                                {{ number_format($totalLocalizacoes, 0, ',', '.') }}
-                                            </td>
-                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2"></td>
+                                            <td colspan="2" class="px-4 py-2 text-sm font-medium">Total:</td>
+                                            <td class="px-4 py-2 text-sm font-bold">{{ number_format($totalLocalizacoes, 0, ',', '.') }}</td>
+                                            <td colspan="8"></td>
                                         </tr>
-                                        <tr>
-                                            <td colspan="3" class="px-4 py-2 text-sm font-medium text-gray-700">Quantidade Pretendida:</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
-                                                {{ number_format($quantidadeProduto, 0, ',', '.') }}
-                                            </td>
-                                            <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2"></td>
-                                        </tr>
-                                        @if($divergencia != 0)
-                                            <tr class="bg-gray-100">
-                                                <td colspan="3" class="px-4 py-2 text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-800' : 'text-red-800' }}">
-                                                    Diferença:
-                                                </td>
-                                                <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ $divergencia > 0 ? 'text-yellow-700' : 'text-red-700' }}">
-                                                    {{ $divergencia > 0 ? '+' : '' }}{{ number_format($divergencia, 0, ',', '.') }}
-                                                </td>
-                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2 text-xs italic {{ $divergencia > 0 ? 'text-yellow-600' : 'text-red-600' }}">
-                                                    {{ $divergencia > 0 ? 'Excedente' : 'Faltante' }}
-                                                </td>
-                                            </tr>
-                                        @else
-                                            <tr class="bg-green-50">
-                                                <td colspan="3" class="px-4 py-2 text-sm font-bold text-green-800">
-                                                    Status:
-                                                </td>
-                                                <td colspan="{{ $canAnyProdutoLocalizacoes ? '7' : '6' }}" class="px-4 py-2 whitespace-nowrap text-sm font-medium text-green-700">
-                                                    ✓ Confere
-                                                </td>
-                                            </tr>
-                                        @endif
                                     </tfoot>
                                 </table>
                             </div>
-                        @else
-                            <div class="text-center py-4 text-gray-500 italic">
-                                Nenhuma localização associada. Clique em "Adicionar Localização" para incluir.
+
+                            <!-- Vista Mobile (Cards) -->
+                            <div class="lg:hidden space-y-4">
+                                @foreach($produto->localizacoes as $localizacao)
+                                    @php
+                                        $etapaAtualId = $localizacao->pivot->etapa_atual_id;
+                                        $etapaAnteriorId = $localizacao->pivot->etapa_anterior_id;
+                                        $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
+                                        $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
+                                        $userLoc = auth()->user()->localizacao;
+                                        $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
+                                        $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
+                                        $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
+                                        
+                                        $corClasses = [
+                                            'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
+                                            'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'red' => 'bg-red-100 text-red-800 border-red-200',
+                                            'purple' => 'bg-purple-100 text-purple-800 border-purple-200', 'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                            'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200', 'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                            'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                        ];
+                                        $btnCorClasses = [
+                                            'blue' => 'bg-blue-500 text-white', 'green' => 'bg-green-500 text-white', 'yellow' => 'bg-yellow-500 text-white', 
+                                            'red' => 'bg-red-500 text-white', 'purple' => 'bg-purple-500 text-white', 'gray' => 'bg-gray-500 text-white', 
+                                            'indigo' => 'bg-indigo-500 text-white', 'pink' => 'bg-pink-500 text-white', 'orange' => 'bg-orange-500 text-white',
+                                        ];
+                                    @endphp
+                                    <div x-data="{ showEtapaMenu: false }" class="bg-white border rounded-xl shadow-sm overflow-hidden border-purple-100">
+                                        <!-- Header do Card -->
+                                        <div class="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
+                                            <div>
+                                                <span class="text-xs font-bold text-purple-700 uppercase tracking-wider block">Localização</span>
+                                                <span class="font-bold text-gray-900">{{ $localizacao->nome_localizacao }}</span>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-xs font-bold text-blue-700 uppercase tracking-wider block">OP</span>
+                                                <span class="font-bold text-blue-800">{{ $localizacao->pivot->ordem_producao ?? '—' }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Corpo do Card -->
+                                        <div class="p-4 space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Quantidade</span>
+                                                    <span class="text-lg font-bold text-gray-900">{{ number_format($localizacao->pivot->quantidade, 0, ',', '.') }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Etapa Atual</span>
+                                                    @if($etapaAtual)
+                                                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 border-gray-200' }}">
+                                                            {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
+                                                        </span>
+                                                    @else
+                                                        <span class="text-gray-400 text-xs italic">Não definida</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <!-- Datas -->
+                                            <div class="bg-gray-50 rounded-lg p-3 grid grid-cols-2 gap-y-3 gap-x-4">
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Prev. Facção</span>
+                                                    <span class="text-xs text-gray-700">{{ $localizacao->pivot->data_prevista_faccao ? \Carbon\Carbon::parse($localizacao->pivot->data_prevista_faccao)->format('d/m/Y') : '—' }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Envio</span>
+                                                    <span class="text-xs text-gray-700">{{ $localizacao->pivot->data_envio_faccao ? \Carbon\Carbon::parse($localizacao->pivot->data_envio_faccao)->format('d/m/Y') : '—' }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Entrega Prevista</span>
+                                                    <div class="flex items-center gap-1">
+                                                        <span class="text-xs font-bold text-yellow-700">{{ $localizacao->pivot->data_entrega_faccao ? \Carbon\Carbon::parse($localizacao->pivot->data_entrega_faccao)->format('d/m/Y') : '—' }}</span>
+                                                        @if($podeEditarEntrega)
+                                                            <button type="button" onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->nome_localizacao) }})" class="text-blue-500 p-1.5 bg-blue-50 rounded-lg border border-blue-100 shadow-sm active:scale-95 transition">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Status</span>
+                                                    @if($localizacao->pivot->concluido == 1)
+                                                        <span class="text-[10px] font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded">CONCLUÍDO</span>
+                                                    @else
+                                                        <span class="text-[10px] font-bold text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">EM ANDAMENTO</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+
+                                            <!-- Ações de Etapa -->
+                                            @if($podeGerenciarEtapa)
+                                                <div class="border-t pt-3 flex flex-col gap-2 relative">
+                                                    @if($transicoes->count() > 0)
+                                                        @foreach($transicoes as $transicao)
+                                                            <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
+                                                                <button type="submit" {{ !$possuiDataEntrega ? 'disabled' : '' }} class="w-full py-2.5 rounded-lg text-xs font-bold {{ $possuiDataEntrega ? ($btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white') : 'bg-gray-100 text-gray-300 cursor-not-allowed text-center' }}">
+                                                                    → {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
+                                                                </button>
+                                                            </form>
+                                                        @endforeach
+                                                    @elseif(!$etapaAtual)
+                                                        <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="w-full py-2.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-100 transition inline-flex items-center justify-center gap-1">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                                            Definir Etapa Inicial
+                                                        </button>
+                                                        
+                                                        <div x-show="showEtapaMenu" @click.away="showEtapaMenu = false" class="absolute left-0 bottom-full mb-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden divide-y divide-gray-100">
+                                                            @foreach($etapasProducao as $etapa)
+                                                                <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
+                                                                    <button type="submit" class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 flex items-center gap-2 font-medium">
+                                                                        <span class="shrink-0">{{ $etapa->icone ?? '•' }}</span>
+                                                                        <span>{{ $etapa->nome }}</span>
+                                                                    </button>
+                                                                </form>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <!-- Rodapé Ações CRUD -->
+                                        @if($canAnyProdutoLocalizacoes)
+                                            <div class="bg-gray-50 px-4 py-3 border-t flex justify-end gap-6">
+                                                @if($canUpdateProdutoLocalizacoes)
+                                                    <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 font-bold text-xs uppercase tracking-tighter hover:text-indigo-800">Editar</button>
+                                                @endif
+                                                @if($canDeleteProdutoLocalizacoes)
+                                                    <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" onsubmit="return confirm('Remover?')">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="text-red-600 font-bold text-xs uppercase tracking-tighter hover:text-red-800">Remover</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+
+                                <!-- Total Mobile Localizações -->
+                                <div class="bg-indigo-50 border-2 border-indigo-100 rounded-xl p-4 shadow-sm flex justify-between items-center">
+                                    <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Total em Produção</span>
+                                    <span class="text-xl font-black text-indigo-900">{{ number_format($totalLocalizacoes, 0, ',', '.') }}</span>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -607,7 +683,8 @@
                          @endphp
 
                          @if($produto->cores->count() > 0)
-                            <div class="overflow-x-auto">
+                            <!-- Vista Desktop -->
+                            <div class="hidden lg:block overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -659,72 +736,97 @@
                                             </tr>
                                         @endforeach
                                      </tbody>
-                                     <tfoot class="bg-gray-50">
+                                     <tfoot class="bg-gray-50 font-bold">
                                         <tr>
-                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Variações:</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
-                                                {{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}
-                                            </td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('estoque'), 2, ',', '.') }}</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('necessidade'), 2, ',', '.') }}</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('consumo_deste_produto'), 2, ',', '.') }}</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ collect($coresEnriquecidas)->sum('saldo') >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            <td colspan="2" class="px-4 py-2 text-sm text-gray-700">Total Variações:</td>
+                                            <td class="px-4 py-2 text-sm">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</td>
+                                            <td class="px-4 py-2 text-sm">{{ number_format(collect($coresEnriquecidas)->sum('estoque'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 text-sm">{{ number_format(collect($coresEnriquecidas)->sum('necessidade'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 text-sm">{{ number_format(collect($coresEnriquecidas)->sum('consumo_deste_produto'), 2, ',', '.') }}</td>
+                                            <td class="px-4 py-2 text-sm {{ collect($coresEnriquecidas)->sum('saldo') >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                                 {{ number_format(collect($coresEnriquecidas)->sum('saldo'), 2, ',', '.') }}
                                             </td>
                                             <td></td>
                                         </tr>
-                                        <tr>
-                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700">Total Combinações:</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">
-                                                {{ number_format($totalCombinacoes, 0, ',', '.') }}
-                                            </td>
-                                            <td colspan="5"></td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="2" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100">Total Geral:</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900 bg-gray-100">
-                                                <div class="flex items-center">
-                                                    <span class="mr-2">{{ number_format($totalGeral, 0, ',', '.') }}</span>
-                                                    @if($isEqual)
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor" title="Total geral (cores + combinações) está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
-                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                                        </svg>
-                                                    @else
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" viewBox="0 0 20 20" fill="currentColor" title="Total geral (cores + combinações) não está igual à quantidade do produto ({{ number_format($quantidadeProduto, 0, ',', '.') }})">
-                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                        </svg>
-                                                    @endif
-                                                </div>
-                                            </td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('estoque'), 2, ',', '.') }}</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('necessidade'), 2, ',', '.') }}</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('consumo_deste_produto'), 2, ',', '.') }}</td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold {{ collect($coresEnriquecidas)->sum('saldo') >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ number_format(collect($coresEnriquecidas)->sum('saldo'), 2, ',', '.') }}
-                                            </td>
-                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-bold text-gray-900"></td>
-                                        </tr>
-                                        @if(!$isEqual)
-                                             <tr>
-                                                 <td colspan="8" class="px-4 py-2 text-xs text-gray-600 bg-yellow-50">
-                                                     <div class="flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        <span>
-                                                            Quantidade do produto: {{ number_format($quantidadeProduto, 0, ',', '.') }} |
-                                                            Variações de cores: {{ number_format($totalCores, 0, ',', '.') }} |
-                                                            Combinações: {{ number_format($totalCombinacoes, 0, ',', '.') }} |
-                                                            Total geral: {{ number_format($totalGeral, 0, ',', '.') }} |
-                                                            Diferença: {{ number_format(abs($totalGeral - $quantidadeProduto), 0, ',', '.') }}
-                                                        </span>
-                                                     </div>
-                                                 </td>
-                                             </tr>
-                                         @endif
                                      </tfoot>
-                                 </table>
-                             </div>
+                                </table>
+                            </div>
+
+                            <!-- Vista Mobile (Cards) -->
+                            <div class="lg:hidden space-y-4">
+                                @foreach($coresEnriquecidas as $cor)
+                                    <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center">
+                                                <div class="w-5 h-5 rounded-full mr-2 border border-gray-200" style="background-color: {{ $cor['codigo_cor'] ?? '#eee' }}"></div>
+                                                <span class="font-bold text-gray-900">{{ $cor['cor'] }}</span>
+                                            </div>
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ $cor['codigo_cor'] ?? 'S/ CÓDIGO' }}</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-y-3 gap-x-6">
+                                            <div>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase block">Qtd. Pretendida</span>
+                                                <span class="text-sm font-bold text-gray-900">{{ number_format($cor['quantidade'], 0, ',', '.') }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase block">Produção Possível</span>
+                                                <span class="text-sm font-bold {{ $cor['producao_possivel'] > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                    {{ number_format($cor['producao_possivel'], 0, ',', '.') }}
+                                                </span>
+                                            </div>
+                                            <div class="col-span-2 h-px bg-gray-50 my-1"></div>
+                                            <div>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase block">Estoque (m)</span>
+                                                <span class="text-xs font-semibold text-gray-700">{{ number_format($cor['estoque'], 2, ',', '.') }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase block">Saldo (m)</span>
+                                                <span class="text-xs font-bold {{ $cor['saldo'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                    {{ number_format($cor['saldo'], 2, ',', '.') }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase block">Consumo Prod.</span>
+                                                <span class="text-xs font-semibold text-gray-600">{{ number_format($cor['consumo_deste_produto'], 2, ',', '.') }}</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[10px] font-bold text-gray-400 uppercase block">Necessidade Total</span>
+                                                <span class="text-xs font-semibold text-gray-600">{{ number_format($cor['necessidade'], 2, ',', '.') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+
+                                <!-- Totais Mobile -->
+                                <div class="bg-gray-100 rounded-xl p-4 mt-6 border-2 border-gray-200">
+                                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">Resumo de Produção</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center bg-white p-2 rounded-lg">
+                                            <span class="text-xs text-gray-600 font-medium">Total Variações</span>
+                                            <span class="text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-white p-2 rounded-lg">
+                                            <span class="text-xs text-gray-600 font-medium">Total Combinações</span>
+                                            <span class="text-sm font-bold text-gray-900">{{ number_format($totalCombinacoes, 0, ',', '.') }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-purple-600 p-3 rounded-lg text-white shadow-md">
+                                            <div class="flex items-center">
+                                                <span class="text-xs font-bold uppercase tracking-wider mr-2">Total Geral</span>
+                                                @if($isEqual)
+                                                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                @endif
+                                            </div>
+                                            <span class="text-lg font-black">{{ number_format($totalGeral, 0, ',', '.') }}</span>
+                                        </div>
+                                        @if(!$isEqual)
+                                            <div class="bg-yellow-100 border-l-4 border-yellow-500 p-2 rounded-r-lg mt-2 font-medium text-[10px] text-yellow-800">
+                                                ⚠️ A soma das cores e combinações difere da quantidade pretendida ({{ number_format($quantidadeProduto, 0, ',', '.') }}).
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
                          @else
                              <span class="text-gray-400 italic">Nenhuma variação de cor definida para este produto</span>
                          @endif
@@ -786,25 +888,28 @@
                                                                 @endphp
 
                                                                 <div class="mt-3 pt-3 border-t border-gray-200">
-                                                                    <table class="w-full text-sm">
-                                                                        <tr>
-                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Estoque:</span></td>
-                                                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium text-gray-900">{{ number_format($estoque, 2, ',', '.') }} m</span></td>
-                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Necessidade Total:</span></td>
-                                                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium text-gray-900">{{ number_format($necessidade, 2, ',', '.') }} m</span></td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Necessidade do Produto:</span></td>
-                                                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium text-gray-900">{{ number_format($necessidadeProduto, 2, ',', '.') }} m</span></td>
-                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Saldo:</span></td>
-                                                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium {{ $saldo < 0 ? 'text-red-600' : 'text-green-600' }}">{{ number_format($saldo, 2, ',', '.') }} m</span></td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600">Produção possível:</span></td>
-                                                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span class="font-medium {{ $producaoPossivel <= 0 ? 'text-red-600' : 'text-green-600' }}">{{ $producaoPossivel }} unidades</span></td>
-                                                                            <td colspan="2"></td>
-                                                                        </tr>
-                                                                    </table>
+                                                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                                                        <div class="flex justify-between sm:justify-start gap-2">
+                                                                            <span class="text-gray-600 text-xs">Estoque:</span>
+                                                                            <span class="font-medium text-gray-900">{{ number_format($estoque, 2, ',', '.') }} m</span>
+                                                                        </div>
+                                                                        <div class="flex justify-between sm:justify-start gap-2 border-b border-gray-100 sm:border-0 pb-1 sm:pb-0">
+                                                                            <span class="text-gray-600 text-xs">Nec. Total:</span>
+                                                                            <span class="font-medium text-gray-900">{{ number_format($necessidade, 2, ',', '.') }} m</span>
+                                                                        </div>
+                                                                        <div class="flex justify-between sm:justify-start gap-2">
+                                                                            <span class="text-gray-600 text-xs">Nec. Produto:</span>
+                                                                            <span class="font-medium text-gray-900">{{ number_format($necessidadeProduto, 2, ',', '.') }} m</span>
+                                                                        </div>
+                                                                        <div class="flex justify-between sm:justify-start gap-2 border-b border-gray-100 sm:border-0 pb-1 sm:pb-0">
+                                                                            <span class="text-gray-600 text-xs">Saldo:</span>
+                                                                            <span class="font-medium {{ $saldo < 0 ? 'text-red-600' : 'text-green-600' }}">{{ number_format($saldo, 2, ',', '.') }} m</span>
+                                                                        </div>
+                                                                        <div class="flex justify-between sm:justify-start gap-2 col-span-1 sm:col-span-2 pt-1">
+                                                                            <span class="text-gray-600 text-xs uppercase font-bold">Produção possível:</span>
+                                                                            <span class="font-bold {{ $producaoPossivel <= 0 ? 'text-red-600' : 'text-green-600' }}">{{ $producaoPossivel }} unidades</span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             @endif
                                                         </div>
@@ -1131,7 +1236,7 @@
                             }
                         }
 
-                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao) {
+                        function abrirModalEditarLocalizacao(produtoLocalizacaoId, localizacaoId, nomeLocalizacao, quantidade, dataFaccao, ordemProducao, observacao, concluido, dataEnvioFaccao, dataRetornoFaccao, dataEntregaFaccao) {
                             try {
                                 console.log('Abrindo modal para editar localização:', {
                                     produtoLocalizacaoId,
@@ -1155,6 +1260,9 @@
                                 document.getElementById('edit-data-retorno-faccao').value = dataRetornoFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
                                 document.getElementById('edit-concluido').checked = concluido == 1;
+                                
+                                const dataEntregaInput = document.getElementById('edit-data-entrega-faccao');
+                                if (dataEntregaInput) dataEntregaInput.value = dataEntregaFaccao || '';
 
                                 // Mostrar/ocultar campo de data de retorno baseado no checkbox
                                 toggleDataRetornoFaccao('edit');
@@ -1407,28 +1515,28 @@
                                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                         <div class="space-y-3">
                                             @foreach($produto->reprogramacoes as $reprogramacao)
-                                                <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200 hover:shadow-md transition">
-                                                    <div class="flex items-center space-x-3">
+                                                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-3 rounded-lg border border-blue-200 hover:shadow-md transition gap-4">
+                                                    <div class="flex items-center space-x-3 w-full">
                                                         <div class="flex-shrink-0">
                                                             <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600 font-bold">
                                                                 #{{ str_pad($reprogramacao->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}
                                                             </span>
                                                         </div>
-                                                        <div>
-                                                            <p class="text-sm font-semibold text-gray-900">{{ $reprogramacao->referencia }}</p>
+                                                        <div class="min-w-0 flex-1">
+                                                            <p class="text-sm font-semibold text-gray-900 truncate">{{ $reprogramacao->referencia }}</p>
                                                             <p class="text-xs text-gray-500">
                                                                 Criado em {{ $reprogramacao->data_cadastro->format('d/m/Y') }}
                                                                 @if($reprogramacao->status)
-                                                                    • <span class="px-2 py-0.5 rounded-full text-xs {{ $reprogramacao->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                                                    • <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $reprogramacao->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                                                         {{ $reprogramacao->status->descricao }}
                                                                     </span>
                                                                 @endif
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div>
+                                                    <div class="w-full sm:w-auto">
                                                         <a href="{{ route('produtos.show', $reprogramacao->id) }}"
-                                                           class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition">
+                                                           class="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-md transition shadow-sm uppercase tracking-tighter">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                                                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                                                 <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
@@ -1455,7 +1563,8 @@
                         </div>
 
                         @if($movimentacoes->count() > 0)
-                            <div class="overflow-x-auto">
+                            <!-- Vista Desktop -->
+                            <div class="hidden md:block overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
@@ -1517,18 +1626,12 @@
                                                         $diasEntre = null;
                                                         $prazoExcedido = false;
                                                         $prazoSetor = null;
-
-                                                        // Calcular dias úteis entre DATA ENTRADA e DATA SAIDA (ou data atual se não houver saída)
                                                         if ($movimentacao->data_entrada) {
                                                             if ($movimentacao->data_saida) {
-                                                                // Se tem data de saída, calcular dias úteis entre entrada e saída
                                                                 $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
                                                             } else {
-                                                                // Se não tem data de saída, calcular dias úteis entre entrada e data atual
                                                                 $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
                                                             }
-
-                                                            // Verificar se excede o prazo do setor
                                                             if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
                                                                 $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
                                                                 $prazoSetor = $movimentacao->localizacao->prazo;
@@ -1585,6 +1688,97 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <!-- Vista Mobile Cards -->
+                            <div class="md:hidden space-y-4">
+                                @foreach($movimentacoes as $movimentacao)
+                                    @php
+                                        $diasEntre = null;
+                                        $prazoExcedido = false;
+                                        $prazoSetor = null;
+                                        if ($movimentacao->data_entrada) {
+                                            if ($movimentacao->data_saida) {
+                                                $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
+                                            } else {
+                                                $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
+                                            }
+                                            if ($movimentacao->localizacao && $movimentacao->localizacao->prazo) {
+                                                $prazoExcedido = $diasEntre > $movimentacao->localizacao->prazo;
+                                                $prazoSetor = $movimentacao->localizacao->prazo;
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="bg-white border rounded-xl shadow-sm overflow-hidden border-indigo-100">
+                                        <!-- Header -->
+                                        <div class="bg-indigo-50 px-4 py-3 border-b border-indigo-100 flex justify-between items-center">
+                                            <div>
+                                                <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider block">Setor / Localização</span>
+                                                <span class="font-bold text-gray-900">{{ $movimentacao->localizacao ? $movimentacao->localizacao->nome_localizacao : 'N/A' }}</span>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $movimentacao->tipo && $movimentacao->tipo->descricao == 'Entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- Body -->
+                                        <div class="p-4 space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Entrada</span>
+                                                    <span class="text-xs font-bold text-gray-900">{{ $movimentacao->data_entrada ? $movimentacao->data_entrada->format('d/m/Y') : '—' }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Conclusão</span>
+                                                    <span class="text-xs font-bold text-gray-900">{{ $movimentacao->data_saida ? $movimentacao->data_saida->format('d/m/Y') : 'Em andamento' }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Tempo Gasto</span>
+                                                    @if($diasEntre !== null)
+                                                        <span class="px-2 py-0.5 inline-block text-[10px] font-bold {{ $prazoExcedido ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }} rounded-full">
+                                                            {{ $diasEntre }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
+                                                        </span>
+                                                        @if($prazoExcedido && isset($prazoSetor))
+                                                            <span class="text-[9px] block text-red-500 font-medium">Prazo: {{ $prazoSetor }}d</span>
+                                                        @endif
+                                                    @else
+                                                        <span class="text-gray-400 text-xs">-</span>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Comprometido</span>
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {{ $movimentacao->comprometido ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
+                                                        {{ $movimentacao->comprometido ? 'Sim' : 'Não' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            @if($movimentacao->situacao)
+                                                <div class="bg-gray-50 rounded-lg p-2 text-center">
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Situação Atual</span>
+                                                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 text-gray-800' }}">
+                                                        {{ $movimentacao->situacao->descricao ?? 'N/A' }}
+                                                    </span>
+                                                </div>
+                                            @endif
+
+                                            @if($movimentacao->observacao)
+                                                <div class="border-t pt-2">
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Observação</span>
+                                                    <p class="text-xs text-gray-600 italic leading-relaxed">{{ $movimentacao->observacao }}</p>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <!-- Footer Action -->
+                                        <div class="bg-gray-50 px-4 py-2 border-t flex justify-end">
+                                            <a href="{{ route('movimentacoes.show', ['movimentacao' => $movimentacao->id, 'back_url' => route('produtos.show', $produto->id)]) }}" class="text-indigo-600 font-bold text-xs uppercase tracking-tighter flex items-center gap-1">
+                                                Detalhes Completos
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         @else
                             <div class="text-gray-500 italic">
@@ -1654,7 +1848,7 @@
                             max="99"
                             placeholder="{{ $proximoNumero }}"
                             class="w-full text-xs border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 rounded-md shadow-sm"
-                            onkeyup="atualizarPreviewReferencia('{{ $produto->referencia }}', {{ $proximoNumero }})"
+                            onkeyup="atualizarPreviewReferencia({{ Js::from($produto->referencia) }}, {{ $proximoNumero }})"
                         >
                         <p class="text-xs text-yellow-700 mt-1">
                             Deixe em branco para usar o número sugerido ({{ $proximoNumero }}). Use este campo apenas para reprogramações iniciadas em sistemas antigos.
@@ -2090,4 +2284,30 @@
     </div>
 </div>
 
+    <script>
+        // Manter posição do scroll após recarregar a página (comum em formulários)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Se houver uma posição salva, rola até ela
+            const scrollPos = sessionStorage.getItem('scrollPos');
+            if (scrollPos) {
+                // Pequeno delay para garantir que o conteúdo carregou
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: parseInt(scrollPos),
+                        behavior: 'instant'
+                    });
+                    sessionStorage.removeItem('scrollPos');
+                }, 50);
+            }
+
+            // Captura o submit de todos os formulários da página
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    // Salva a posição atual do scroll
+                    sessionStorage.setItem('scrollPos', window.scrollY);
+                });
+            });
+        });
+    </script>
 </x-app-layout>

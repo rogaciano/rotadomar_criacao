@@ -269,78 +269,102 @@
                 {{ __('Kanban') }}
             </x-responsive-nav-link>
 
-            <!-- Responsive Cadastros -->
-            <div class="pt-2 pb-3 space-y-1">
-                <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Cadastros') }}</div>
-                <x-responsive-nav-link :href="route('tecidos.index')" :active="request()->routeIs('tecidos.*')" class="pl-6">
-                    {{ __('Tecidos') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('estilistas.index')" :active="request()->routeIs('estilistas.*')" class="pl-6">
-                    {{ __('Estilistas') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('marcas.index')" :active="request()->routeIs('marcas.*')" class="pl-6">
-                    {{ __('Marcas') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('grupo_produtos.index')" :active="request()->routeIs('grupo_produtos.*')" class="pl-6">
-                    {{ __('Grupos de Produtos') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('tipos.index')" :active="request()->routeIs('tipos.*')" class="pl-6">
-                    {{ __('Tipos') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('status.index')" :active="request()->routeIs('status.*')" class="pl-6">
-                    {{ __('Status') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('situacoes.index')" :active="request()->routeIs('situacoes.*')" class="pl-6">
-                    {{ __('Situações') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('localizacoes.index')" :active="request()->routeIs('localizacoes.*') && !request()->routeIs('localizacao-capacidade.*')" class="pl-6">
-                    {{ __('Localizações') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('direcionamentos-comerciais.index')" :active="request()->routeIs('direcionamentos-comerciais.*')" class="pl-6">
-                    {{ __('Direcionamentos Comerciais') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('etapas-producao.index')" :active="request()->routeIs('etapas-producao.*')" class="pl-6">
-                    {{ __('Etapas de Produção') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')" class="pl-6">
-                    {{ __('Capacidade Mensal') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')">
+                {{ __('Planejamento') }}
+            </x-responsive-nav-link>
 
+            <!-- Responsive Cadastros -->
+            <div x-data="{ open: {{ request()->routeIs('tecidos.*') || request()->routeIs('estilistas.*') || request()->routeIs('marcas.*') || request()->routeIs('grupo_produtos.*') || request()->routeIs('tipos.*') || request()->routeIs('status.*') || request()->routeIs('situacoes.*') || request()->routeIs('localizacoes.*') || request()->routeIs('direcionamentos-comerciais.*') || request()->routeIs('etapas-producao.*') || request()->routeIs('localizacao-capacidade.*') ? 'true' : 'false' }} }" class="pt-2">
+                <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
+                    <span>{{ __('Cadastros') }}</span>
+                    <svg class="h-4 w-4 transition-transform duration-200" :class="{'rotate-180': open}" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div x-show="open" style="display: none;" class="space-y-1 bg-gray-50/50 pb-2">
+                    <x-responsive-nav-link :href="route('tecidos.index')" :active="request()->routeIs('tecidos.*')" class="pl-6">
+                        {{ __('Tecidos') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('estilistas.index')" :active="request()->routeIs('estilistas.*')" class="pl-6">
+                        {{ __('Estilistas') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('marcas.index')" :active="request()->routeIs('marcas.*')" class="pl-6">
+                        {{ __('Marcas') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('grupo_produtos.index')" :active="request()->routeIs('grupo_produtos.*')" class="pl-6">
+                        {{ __('Grupos de Produtos') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('tipos.index')" :active="request()->routeIs('tipos.*')" class="pl-6">
+                        {{ __('Tipos') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('status.index')" :active="request()->routeIs('status.*')" class="pl-6">
+                        {{ __('Status') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('situacoes.index')" :active="request()->routeIs('situacoes.*')" class="pl-6">
+                        {{ __('Situações') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('localizacoes.index')" :active="request()->routeIs('localizacoes.*') && !request()->routeIs('localizacao-capacidade.*')" class="pl-6">
+                        {{ __('Localizações') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('direcionamentos-comerciais.index')" :active="request()->routeIs('direcionamentos-comerciais.*')" class="pl-6">
+                        {{ __('Direcionamentos Comerciais') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('etapas-producao.index')" :active="request()->routeIs('etapas-producao.*')" class="pl-6">
+                        {{ __('Etapas de Produção') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')" class="pl-6">
+                        {{ __('Capacidade Mensal') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
 
             <!-- Responsive Consultas Menu -->
-            <div class="pt-2 pb-3 space-y-1">
-                <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Consultas') }}</div>
-                <x-responsive-nav-link :href="route('consultas.produtos-ativos-por-localizacao')" :active="request()->routeIs('consultas.produtos-ativos-por-localizacao')" class="pl-6">
-                    {{ __('Produtos por Localização') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('consultas.media-dias-atraso')" :active="request()->routeIs('consultas.media-dias-atraso')" class="pl-6">
-                    {{ __('Média de Dias por Localização') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('dashboard.produtos-por-estilista')" :active="request()->routeIs('dashboard.produtos-por-estilista')" class="pl-6">
-                    {{ __('Gráfico por Estilista') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('consultas.pivot-estilistas-status')" :active="request()->routeIs('consultas.pivot-estilistas-status')" class="pl-6">
-                    {{ __('Tabela Estilistas x Status') }}
-                </x-responsive-nav-link>
+            <div x-data="{ open: {{ request()->routeIs('consultas.*') || request()->routeIs('dashboard.produtos-por-estilista') ? 'true' : 'false' }} }" class="pt-2">
+                <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
+                    <span>{{ __('Consultas') }}</span>
+                    <svg class="h-4 w-4 transition-transform duration-200" :class="{'rotate-180': open}" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div x-show="open" style="display: none;" class="space-y-1 bg-gray-50/50 pb-2">
+                    <x-responsive-nav-link :href="route('consultas.produtos-ativos-por-localizacao')" :active="request()->routeIs('consultas.produtos-ativos-por-localizacao')" class="pl-6">
+                        {{ __('Produtos por Localização') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('consultas.media-dias-atraso')" :active="request()->routeIs('consultas.media-dias-atraso')" class="pl-6">
+                        {{ __('Média de Dias por Localização') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('dashboard.produtos-por-estilista')" :active="request()->routeIs('dashboard.produtos-por-estilista')" class="pl-6">
+                        {{ __('Gráfico por Estilista') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('consultas.pivot-estilistas-status')" :active="request()->routeIs('consultas.pivot-estilistas-status')" class="pl-6">
+                        {{ __('Tabela Estilistas x Status') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
 
             <!-- Responsive Admin Menu (visível apenas para administradores) -->
             @if(auth()->user()->isAdmin())
-            <div class="pt-2 pb-3 space-y-1">
-                <div class="pl-3 pr-4 py-2 font-medium text-base text-gray-600">{{ __('Admin') }}</div>
-                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="pl-6">
-                    {{ __('Usuários') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')" class="pl-6">
-                    {{ __('Permissões') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('logs.index')" :active="request()->routeIs('logs.*')" class="pl-6">
-                    {{ __('Logs') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')" class="pl-6">
-                    {{ __('Log de Atividades') }}
-                </x-responsive-nav-link>
+            <div x-data="{ open: {{ request()->routeIs('users.*') || request()->routeIs('permissions.*') || request()->routeIs('logs.*') || request()->routeIs('activity-log.*') ? 'true' : 'false' }} }" class="pt-2">
+                <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
+                    <span>{{ __('Admin') }}</span>
+                    <svg class="h-4 w-4 transition-transform duration-200" :class="{'rotate-180': open}" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div x-show="open" style="display: none;" class="space-y-1 bg-gray-50/50 pb-2">
+                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="pl-6">
+                        {{ __('Usuários') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')" class="pl-6">
+                        {{ __('Permissões') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('logs.index')" :active="request()->routeIs('logs.*')" class="pl-6">
+                        {{ __('Logs') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')" class="pl-6">
+                        {{ __('Log de Atividades') }}
+                    </x-responsive-nav-link>
+                </div>
             </div>
             @endif
         </div>
