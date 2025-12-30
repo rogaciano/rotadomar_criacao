@@ -87,12 +87,12 @@ class ProdutoLocalizacao extends Pivot
     public function avancarEtapa(int $novaEtapaId, int $userId, ?string $observacao = null): bool
     {
         $etapaAnteriorId = $this->etapa_atual_id;
-        
+
         $this->update([
             'etapa_anterior_id' => $etapaAnteriorId,
             'etapa_atual_id' => $novaEtapaId
         ]);
-        
+
         // Registrar no histórico
         ProdutoLocalizacaoHistoricoEtapa::create([
             'produto_localizacao_id' => $this->id,
@@ -102,7 +102,7 @@ class ProdutoLocalizacao extends Pivot
             'acao' => 'avancar',
             'observacao' => $observacao
         ]);
-        
+
         return true;
     }
 
@@ -114,22 +114,22 @@ class ProdutoLocalizacao extends Pivot
         if (!$this->etapa_anterior_id) {
             return false;
         }
-        
+
         $etapaAtualId = $this->etapa_atual_id;
         $etapaAnteriorId = $this->etapa_anterior_id;
-        
+
         // Buscar a etapa anterior da anterior (se existir no histórico)
         $historicoAnterior = $this->historicoEtapas()
             ->where('etapa_nova_id', $etapaAnteriorId)
             ->first();
-        
+
         $novaEtapaAnteriorId = $historicoAnterior?->etapa_anterior_id;
-        
+
         $this->update([
             'etapa_atual_id' => $etapaAnteriorId,
             'etapa_anterior_id' => $novaEtapaAnteriorId
         ]);
-        
+
         // Registrar no histórico
         ProdutoLocalizacaoHistoricoEtapa::create([
             'produto_localizacao_id' => $this->id,
@@ -139,7 +139,7 @@ class ProdutoLocalizacao extends Pivot
             'acao' => 'voltar',
             'observacao' => $observacao
         ]);
-        
+
         return true;
     }
 
@@ -152,7 +152,7 @@ class ProdutoLocalizacao extends Pivot
             'etapa_atual_id' => $etapaId,
             'etapa_anterior_id' => null
         ]);
-        
+
         // Registrar no histórico
         ProdutoLocalizacaoHistoricoEtapa::create([
             'produto_localizacao_id' => $this->id,
@@ -162,8 +162,20 @@ class ProdutoLocalizacao extends Pivot
             'acao' => 'definir_inicial',
             'observacao' => $observacao
         ]);
-        
+
         return true;
+    }
+
+    /**
+     * Obter a URL da ordem de produção
+     */
+    public function getOrdemProducaoUrlAttribute(): ?string
+    {
+        if (!$this->ordem_producao) {
+            return null;
+        }
+
+        return "https://dapic.webpic.com.br/admin/ordemproducao#codigo/{$this->ordem_producao}";
     }
 
     /**
@@ -174,7 +186,7 @@ class ProdutoLocalizacao extends Pivot
         if (!$this->etapa_atual_id) {
             return collect();
         }
-        
+
         return $this->etapaAtual?->getTransicoesParaBotoes() ?? collect();
     }
 }

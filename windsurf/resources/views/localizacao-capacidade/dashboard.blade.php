@@ -129,7 +129,7 @@
                             </button>
                         </div>
                     </form>
-                    
+
                     <!-- Botão de Toggle Global para Produtos Previstos -->
                     <div class="mt-4 pt-4 border-t border-gray-200">
                         <button type="button" id="toggleAllProducts" onclick="toggleAllProductsVisibility()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -300,10 +300,10 @@
 
                                     <!-- Lista de Produtos Previstos -->
                                     @if($dado['produtos']->count() > 0)
-                                        <div class="mt-4 border-t pt-4 produtos-previstos-section" 
-                                             x-data="{ open: {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }} }" 
+                                        <div class="mt-4 border-t pt-4 produtos-previstos-section"
+                                             x-data="{ open: {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }} }"
                                              x-on:toggle-all.window="open = $event.detail.show"
-                                             x-init="$watch('open', value => $el.dataset.open = value)" 
+                                             x-init="$watch('open', value => $el.dataset.open = value)"
                                              data-open="{{ ($usuarioRestrito ?? false) ? 'true' : 'false' }}">
                                             <button @click="open = !open" class="produtos-toggle-btn w-full flex items-center justify-between text-left p-2 hover:bg-gray-50 rounded-lg transition-colors">
                                                 <div class="flex items-center">
@@ -438,14 +438,18 @@
                                                                                         $etapaLinha = $loc->pivot->etapa_atual_id ? $etapasProducao->firstWhere('id', $loc->pivot->etapa_atual_id) : null;
                                                                                     @endphp
                                                                                     <div class="flex items-center gap-3 text-xs p-2 bg-gray-50 rounded-lg border border-gray-100">
-                                                                                        <span class="font-black text-indigo-700 w-20">OP: {{ $loc->pivot->ordem_producao ?: 'N/A' }}</span>
+                                                                                        @if($loc->pivot->ordem_producao)
+                                                                                            <a href="{{ $loc->pivot->ordem_producao_url }}" target="_blank" class="font-black text-indigo-700 w-20 hover:text-indigo-900 hover:underline">OP: {{ $loc->pivot->ordem_producao }}</a>
+                                                                                        @else
+                                                                                            <span class="font-black text-gray-400 w-20">OP: N/A</span>
+                                                                                        @endif
                                                                                         @if($etapaLinha)
                                                                                             <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-700' }}">
                                                                                                 {{ $etapaLinha->icone }} {{ $etapaLinha->nome }}
                                                                                             </span>
                                                                                         @endif
                                                                                         <span class="font-black text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200">{{ number_format($qtdAlocada, 0, ',', '.') }}</span>
-                                                                                       
+
                                                                                         @if($loc->pivot->data_entrega_faccao)
                                                                                             <span class="text-[9px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded border border-purple-100">ENT: {{ \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('d/m') }}</span>
                                                                                         @endif
@@ -554,12 +558,16 @@
                                                                     @endphp
                                                                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
                                                                         <div class="flex justify-between items-center mb-2">
-                                                                            <span class="text-xs font-black text-indigo-700">OP: {{ $loc->pivot->ordem_producao ?: 'N/A' }}</span>
+                                                                            @if($loc->pivot->ordem_producao)
+                                                                                <a href="{{ $loc->pivot->ordem_producao_url }}" target="_blank" class="text-xs font-black text-indigo-700 hover:text-indigo-900 hover:underline">OP: {{ $loc->pivot->ordem_producao }}</a>
+                                                                            @else
+                                                                                <span class="text-xs font-black text-gray-400">OP: N/A</span>
+                                                                            @endif
                                                                             <span class="px-2 py-0.5 bg-white border border-indigo-100 text-indigo-700 text-[10px] font-black rounded-lg">
                                                                                 {{ number_format($qtdAlocada, 0, ',', '.') }} un
                                                                             </span>
                                                                         </div>
-                                                                        
+
                                                                         @if($etapaLinha)
                                                                             <div class="flex items-center gap-2 mb-2">
                                                                                 <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-700' }}">
@@ -617,7 +625,7 @@
                                                                     @endif
                                                                 </div>
                                                             @endif
-                                                            
+
                                                             <div class="mt-4">
                                                                 <a href="{{ route('produtos.show', $produtoPrincipal->id) }}?back_url={{ urlencode(request()->fullUrl()) }}" class="flex items-center justify-center w-full py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
                                                                     Ver Detalhes do Produto
@@ -781,14 +789,14 @@
 
         function toggleAllProductsVisibility() {
             allProductsVisible = !allProductsVisible;
-            
+
             // Disparar evento global para todos os componentes Alpine
             window.dispatchEvent(new CustomEvent('toggle-all', { detail: { show: allProductsVisible } }));
-            
+
             const toggleText = document.getElementById('toggleText');
             const toggleIconShow = document.getElementById('toggleIconShow');
             const toggleIconHide = document.getElementById('toggleIconHide');
-            
+
             // Atualizar texto e ícone do botão
             if (allProductsVisible) {
                 toggleText.textContent = 'Ocultar Todos os Produtos';
@@ -807,7 +815,7 @@
                 const toggleText = document.getElementById('toggleText');
                 const toggleIconShow = document.getElementById('toggleIconShow');
                 const toggleIconHide = document.getElementById('toggleIconHide');
-                
+
                 if (toggleText) {
                     toggleText.textContent = 'Ocultar Todos os Produtos';
                     toggleIconShow.classList.add('hidden');
@@ -823,15 +831,15 @@
             const form = document.getElementById('form-data-entrega');
             const input = document.getElementById('input_data_entrega_faccao');
             const titulo = document.getElementById('modal-data-entrega-titulo');
-            
+
             titulo.textContent = 'Data de Entrega: ' + nomeLocalizacao;
             input.value = dataAtual;
-            
+
             // Gerar URL dinamicamente
             let url = "{{ route('produtos.localizacoes.update-data-entrega', ['produto' => 'PRODUTO_ID', 'produtoLocalizacao' => 'PLACEHOLDER']) }}";
             url = url.replace('PRODUTO_ID', produtoId).replace('PLACEHOLDER', produtoLocalizacaoId);
             form.action = url;
-            
+
             modal.classList.remove('hidden');
         }
 
@@ -853,11 +861,11 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                     <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="fecharModalDataEntrega()" 
+                        <button type="button" onclick="fecharModalDataEntrega()"
                             class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
                             Cancelar
                         </button>
-                        <button type="submit" 
+                        <button type="submit"
                             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-sm">
                             Salvar
                         </button>

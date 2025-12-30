@@ -167,8 +167,8 @@
                                         </div>
                                         @if($produto->foto_principal)
                                             <div class="flex-shrink-0">
-                                                <img src="{{ asset('storage/' . $produto->foto_principal) }}" 
-                                                     alt="" 
+                                                <img src="{{ asset('storage/' . $produto->foto_principal) }}"
+                                                     alt=""
                                                      class="h-14 w-14 rounded-md object-cover border border-gray-200 shadow-sm transition-transform hover:scale-110 cursor-pointer"
                                                      onclick="abrirModalFoto('{{ asset('storage/' . $produto->foto_principal) }}', '{{ $produto->referencia }} - {{ $produto->descricao }}')">
                                             </div>
@@ -257,10 +257,15 @@
                                                             $data = $loc->pivot->data_envio_faccao;
                                                             $dataFormatada = is_string($data) ? \Carbon\Carbon::parse($data)->format('d/m/Y') : $data->format('d/m/Y');
                                                             $op = $loc->pivot->ordem_producao;
+                                                            $opUrl = $loc->pivot->ordem_producao_url;
                                                             $qtd = $loc->pivot->quantidade ?? 0;
                                                         @endphp
                                                         <tr>
-                                                            <td class="text-blue-700 font-semibold pr-1 whitespace-nowrap">{{ $op ? "OP: {$op}" : '' }}</td>
+                                                            <td class="text-blue-700 font-semibold pr-1 whitespace-nowrap">
+                                                                @if($op)
+                                                                    <a href="{{ $opUrl }}" target="_blank" class="hover:underline">OP: {{ $op }}</a>
+                                                                @endif
+                                                            </td>
                                                             <td class="text-center px-1 whitespace-nowrap font-semibold">{{ $dataFormatada }}</td>
                                                             <td class="text-right whitespace-nowrap"><span class="bg-blue-100 text-blue-800 px-1 rounded">{{ number_format($qtd, 0, ',', '.') }}</span></td>
                                                         </tr>
@@ -375,12 +380,12 @@
          class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 transition-all duration-300 backdrop-blur-sm bg-gray-900/40"
          style="display: none;"
          onclick="fecharModalFoto()">
-        
-        <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0" 
+
+        <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0"
              id="modal-foto-container"
              onclick="event.stopPropagation()"
              style="box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-            
+
             <!-- Barra Superior Discreta -->
             <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 flex-shrink-0">
                 <div class="flex items-center gap-2">
@@ -402,13 +407,13 @@
                      src=""
                      alt="Preview"
                      class="max-w-full max-h-[75vh] object-contain mx-auto display-block">
-                
+
                 <!-- Overlay de Informação Inferior -->
                 <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12">
                     <h4 id="modal-foto-titulo" class="text-white font-bold text-lg"></h4>
                 </div>
             </div>
-            
+
             <!-- Barra de Ações Inferior -->
             <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-center">
                 <span class="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">Quick Look Preview • Pressione ESC para sair</span>
@@ -579,23 +584,23 @@
             if (headerTitle) headerTitle.textContent = titulo.split(' - ')[0];
 
             modal.style.display = 'flex';
-            
+
             // Animação de entrada
             setTimeout(() => {
                 container.classList.remove('scale-95', 'opacity-0');
                 container.classList.add('scale-100', 'opacity-100');
             }, 10);
-            
+
             document.body.style.overflow = 'hidden';
         }
 
         function fecharModalFoto() {
             const modal = document.getElementById('modal-preview-foto');
             const container = document.getElementById('modal-foto-container');
-            
+
             container.classList.add('scale-95', 'opacity-0');
             container.classList.remove('scale-100', 'opacity-100');
-            
+
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.body.style.overflow = '';

@@ -180,8 +180,8 @@
                             <div class="lg:w-80 shrink-0">
                                 <span class="block text-sm font-medium text-gray-500 mb-2">Foto Principal</span>
                                 <div class="relative group">
-                                    <img src="{{ asset('storage/' . $produto->foto_principal) }}" 
-                                         alt="Foto do Produto" 
+                                    <img src="{{ asset('storage/' . $produto->foto_principal) }}"
+                                         alt="Foto do Produto"
                                          class="w-full rounded-lg shadow-lg border-2 border-white object-cover cursor-pointer hover:scale-[1.02] transition-all duration-300"
                                          style="aspect-ratio: 3/4;"
                                          onclick="this.style.transform = (this.style.transform.includes('rotate(90deg)') ? 'rotate(0deg)' : 'rotate(90deg)')">
@@ -239,7 +239,7 @@
                                                 <div class="grid grid-cols-2 gap-2 text-xs">
                                                     <div class="text-gray-500 uppercase tracking-wider font-semibold">Referência</div>
                                                     <div class="text-gray-900">{{ $tecido->referencia }}</div>
-                                                    
+
                                                     <div class="text-gray-500 uppercase tracking-wider font-semibold">Consumo</div>
                                                     <div class="text-gray-900 font-bold bg-gray-50 px-2 py-0.5 rounded-md inline-block">
                                                         {{ $tecido->pivot->consumo ?? 'N/A' }}
@@ -353,7 +353,7 @@
                                                 $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
                                                 $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
                                                 $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
-                                                
+
                                                 $corClasses = [
                                                     'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
                                                     'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'red' => 'bg-red-100 text-red-800 border-red-200',
@@ -376,9 +376,15 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                                        {{ $localizacao->pivot->ordem_producao ?? 'N/A' }}
-                                                    </span>
+                                                    @if($localizacao->pivot->ordem_producao)
+                                                        <a href="{{ $localizacao->pivot->ordem_producao_url }}" target="_blank" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors">
+                                                            {{ $localizacao->pivot->ordem_producao }}
+                                                        </a>
+                                                    @else
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-500">
+                                                            N/A
+                                                        </span>
+                                                    @endif
                                                 </td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($localizacao->pivot->quantidade, 0, ',', '.') }}</td>
                                                 <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
@@ -411,18 +417,18 @@
                                                         @else
                                                             <span class="text-gray-400 italic">N/A</span>
                                                         @endif
-                                                        
+
                                                         @php
                                                             $userLocal = auth()->user()->localizacao;
                                                             $podeEditarEntrega = auth()->user()->isAdmin() || (
-                                                                $userLocal && 
-                                                                $userLocal->capacidade > 0 && 
+                                                                $userLocal &&
+                                                                $userLocal->capacidade > 0 &&
                                                                 $userLocal->id == $localizacao->id
                                                             );
                                                         @endphp
-                                                        
+
                                                         @if($podeEditarEntrega)
-                                                            <button type="button" 
+                                                            <button type="button"
                                                                 onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->nome_localizacao) }})"
                                                                 class="text-blue-600 hover:text-blue-800 transition-colors p-1" title="Editar Data de Entrega">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -447,7 +453,7 @@
                                                             <span class="inline-block px-2 py-1 rounded-full text-xs font-medium border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
                                                                 {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
                                                             </span>
-                                                            <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}" 
+                                                            <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}"
                                                                class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -530,7 +536,7 @@
                                         $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
                                         $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
                                         $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
-                                        
+
                                         $corClasses = [
                                             'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
                                             'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'red' => 'bg-red-100 text-red-800 border-red-200',
@@ -539,8 +545,8 @@
                                             'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
                                         ];
                                         $btnCorClasses = [
-                                            'blue' => 'bg-blue-500 text-white', 'green' => 'bg-green-500 text-white', 'yellow' => 'bg-yellow-500 text-white', 
-                                            'red' => 'bg-red-500 text-white', 'purple' => 'bg-purple-500 text-white', 'gray' => 'bg-gray-500 text-white', 
+                                            'blue' => 'bg-blue-500 text-white', 'green' => 'bg-green-500 text-white', 'yellow' => 'bg-yellow-500 text-white',
+                                            'red' => 'bg-red-500 text-white', 'purple' => 'bg-purple-500 text-white', 'gray' => 'bg-gray-500 text-white',
                                             'indigo' => 'bg-indigo-500 text-white', 'pink' => 'bg-pink-500 text-white', 'orange' => 'bg-orange-500 text-white',
                                         ];
                                     @endphp
@@ -625,7 +631,7 @@
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
                                                             Definir Etapa Inicial
                                                         </button>
-                                                        
+
                                                         <div x-show="showEtapaMenu" @click.away="showEtapaMenu = false" class="absolute left-0 bottom-full mb-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden divide-y divide-gray-100">
                                                             @foreach($etapasProducao as $etapa)
                                                                 <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
@@ -1250,7 +1256,7 @@
                                     dataEnvioFaccao,
                                     dataRetornoFaccao
                                 });
- 
+
                                 document.getElementById('edit-localizacao-id').value = localizacaoId;
                                 document.getElementById('edit-localizacao-nome').textContent = nomeLocalizacao;
                                 document.getElementById('edit-ordem-producao').value = ordemProducao || '';
@@ -1260,7 +1266,7 @@
                                 document.getElementById('edit-data-retorno-faccao').value = dataRetornoFaccao || '';
                                 document.getElementById('edit-observacao').value = observacao || '';
                                 document.getElementById('edit-concluido').checked = concluido == 1;
-                                
+
                                 const dataEntregaInput = document.getElementById('edit-data-entrega-faccao');
                                 if (dataEntregaInput) dataEntregaInput.value = dataEntregaFaccao || '';
 
@@ -2242,13 +2248,13 @@
             const form = document.getElementById('form-data-entrega');
             const input = document.getElementById('input_data_entrega_faccao');
             const titulo = document.getElementById('modal-data-entrega-titulo');
-            
+
             titulo.textContent = 'Data de Entrega: ' + nomeLocalizacao;
             input.value = dataAtual;
-            
+
             let url = "{{ route('produtos.localizacoes.update-data-entrega', [$produto->id, 'PLACEHOLDER']) }}";
             form.action = url.replace('PLACEHOLDER', produtoLocalizacaoId);
-            
+
             modal.classList.remove('hidden');
         }
 
@@ -2270,11 +2276,11 @@
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                     <div class="flex justify-end space-x-2">
-                        <button type="button" onclick="fecharModalDataEntrega()" 
+                        <button type="button" onclick="fecharModalDataEntrega()"
                             class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
                             Cancelar
                     </button>
-                    <button type="submit" 
+                    <button type="submit"
                         class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-sm">
                         Salvar
                     </button>

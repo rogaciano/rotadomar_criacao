@@ -202,7 +202,7 @@
                                                         @foreach($obsLocalizacoes as $loc)
                                                             <div class="mb-1 text-xs {{ !$loop->last || $produto->direcionamentoComercial ? 'border-b border-gray-200 pb-1' : '' }}">
                                                                 @if($loc->pivot->ordem_producao)
-                                                                    <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                    <a href="{{ $loc->pivot->ordem_producao_url }}" target="_blank" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline">OP: {{ $loc->pivot->ordem_producao }}</a>
                                                                 @endif
                                                                 @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
                                                                     <span class="text-gray-500"> - </span>
