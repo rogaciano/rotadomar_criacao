@@ -252,7 +252,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $user = auth()->user();
         $localizacaoUsuario = $user->localizacao;
         $usuarioRestrito = false;
-        
+
         if ($localizacaoUsuario && $localizacaoUsuario->capacidade > 0) {
             // Usuário está vinculado a uma localização com capacidade - forçar visualização apenas da localização dele
             $localizacaoId = $localizacaoUsuario->id;
@@ -278,7 +278,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
-                
+
                 // Filtrar por etapa se selecionada
                 if ($etapaId) {
                     $query->where('etapa_atual_id', $etapaId);
@@ -288,13 +288,13 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
-                
+
                 // Filtrar por etapa se selecionada
                 if ($etapaId) {
                     $query->where('etapa_atual_id', $etapaId);
                 }
             }]);
-            
+
             $produtos = $produtosQuery->get()
             ->map(function($produto) {
                 // Adicionar quantidade_alocada do pivot
@@ -305,6 +305,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             return [
                 'localizacao' => $capacidade->localizacao,
                 'capacidade' => $capacidade->capacidade,
+                'observacoes' => $capacidade->observacoes,
                 'produtos_previstos' => $capacidade->getProdutosPrevistos(),
                 'produtos' => $produtos,
                 'saldo' => $capacidade->getSaldo(),
@@ -824,6 +825,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             return [
                 'localizacao' => $capacidade->localizacao,
                 'capacidade' => $capacidade->capacidade,
+                'observacoes' => $capacidade->observacoes,
                 'produtos_previstos' => $capacidade->getProdutosPrevistos(),
                 'produtos' => $produtos,
                 'saldo' => $capacidade->getSaldo(),
@@ -894,5 +896,161 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $pdf = \PDF::loadView('localizacao-capacidade.listagem-pdf', compact('capacidades', 'filtros'));
 
         return $pdf->stream("Listagem_Capacidades_Mensais_" . now()->format('d_m_Y_H_i') . ".pdf");
+    }
+
+    /**
+     * Exibir calendário de produção
+     */
+    public function calendario(Request $request)
+    {
+        $mes = $request->input('mes', now()->month);
+        $ano = $request->input('ano', now()->year);
+        $localizacaoId = $request->input('localizacao_id');
+
+        // Buscar todas as alocações do mês com suas datas
+        $query = \DB::table('produto_localizacao')
+            ->join('produtos', 'produto_localizacao.produto_id', '=', 'produtos.id')
+            ->join('localizacoes', 'produto_localizacao.localizacao_id', '=', 'localizacoes.id')
+            ->select(
+                'produtos.id as produto_id',
+                'produtos.referencia',
+                'localizacoes.nome_localizacao',
+                'localizacoes.nome_reduzido',
+                'produto_localizacao.data_prevista_faccao',
+                'produto_localizacao.data_envio_faccao',
+                'produto_localizacao.data_retorno_faccao',
+                'produto_localizacao.data_entrega_faccao',
+                'produto_localizacao.quantidade'
+            )
+            ->whereNull('produto_localizacao.deleted_at')
+            ->whereNull('produtos.deleted_at')
+            ->where(function($q) use ($mes, $ano) {
+                $q->where(function($sub) use ($mes, $ano) {
+                    $sub->whereMonth('produto_localizacao.data_prevista_faccao', $mes)
+                        ->whereYear('produto_localizacao.data_prevista_faccao', $ano);
+                })
+                ->orWhere(function($sub) use ($mes, $ano) {
+                    $sub->whereMonth('produto_localizacao.data_envio_faccao', $mes)
+                        ->whereYear('produto_localizacao.data_envio_faccao', $ano);
+                })
+                ->orWhere(function($sub) use ($mes, $ano) {
+                    $sub->whereMonth('produto_localizacao.data_retorno_faccao', $mes)
+                        ->whereYear('produto_localizacao.data_retorno_faccao', $ano);
+                })
+                ->orWhere(function($sub) use ($mes, $ano) {
+                    $sub->whereMonth('produto_localizacao.data_entrega_faccao', $mes)
+                        ->whereYear('produto_localizacao.data_entrega_faccao', $ano);
+                });
+            });
+
+        if ($localizacaoId) {
+            $query->where('produto_localizacao.localizacao_id', $localizacaoId);
+        }
+
+        $alocacoes = $query->get();
+
+        // Organizar eventos por dia
+        $eventos = [];
+        $tiposCores = [
+            'previsao' => ['cor' => '#3B82F6', 'label' => 'Previsão'],
+            'envio' => ['cor' => '#F59E0B', 'label' => 'Envio'],
+            'retorno' => ['cor' => '#10B981', 'label' => 'Retorno'],
+            'entrega' => ['cor' => '#8B5CF6', 'label' => 'Entrega'],
+        ];
+
+        foreach ($alocacoes as $alocacao) {
+            $nomeLocal = $alocacao->nome_reduzido ?: mb_substr($alocacao->nome_localizacao, 0, 10);
+
+            // Data Previsão
+            if ($alocacao->data_prevista_faccao) {
+                $data = \Carbon\Carbon::parse($alocacao->data_prevista_faccao);
+                if ($data->month == $mes && $data->year == $ano) {
+                    $dia = $data->day;
+                    $eventos[$dia][] = [
+                        'produto_id' => $alocacao->produto_id,
+                        'referencia' => $alocacao->referencia,
+                        'localizacao' => $nomeLocal,
+                        'tipo' => 'previsao',
+                        'cor' => $tiposCores['previsao']['cor'],
+                        'quantidade' => $alocacao->quantidade,
+                        'data' => $data->format('d/m/Y'),
+                    ];
+                }
+            }
+
+            // Data Envio
+            if ($alocacao->data_envio_faccao) {
+                $data = \Carbon\Carbon::parse($alocacao->data_envio_faccao);
+                if ($data->month == $mes && $data->year == $ano) {
+                    $dia = $data->day;
+                    $eventos[$dia][] = [
+                        'produto_id' => $alocacao->produto_id,
+                        'referencia' => $alocacao->referencia,
+                        'localizacao' => $nomeLocal,
+                        'tipo' => 'envio',
+                        'cor' => $tiposCores['envio']['cor'],
+                        'quantidade' => $alocacao->quantidade,
+                        'data' => $data->format('d/m/Y'),
+                    ];
+                }
+            }
+
+            // Data Retorno
+            if ($alocacao->data_retorno_faccao) {
+                $data = \Carbon\Carbon::parse($alocacao->data_retorno_faccao);
+                if ($data->month == $mes && $data->year == $ano) {
+                    $dia = $data->day;
+                    $eventos[$dia][] = [
+                        'produto_id' => $alocacao->produto_id,
+                        'referencia' => $alocacao->referencia,
+                        'localizacao' => $nomeLocal,
+                        'tipo' => 'retorno',
+                        'cor' => $tiposCores['retorno']['cor'],
+                        'quantidade' => $alocacao->quantidade,
+                        'data' => $data->format('d/m/Y'),
+                    ];
+                }
+            }
+
+            // Data Entrega
+            if ($alocacao->data_entrega_faccao) {
+                $data = \Carbon\Carbon::parse($alocacao->data_entrega_faccao);
+                if ($data->month == $mes && $data->year == $ano) {
+                    $dia = $data->day;
+                    $eventos[$dia][] = [
+                        'produto_id' => $alocacao->produto_id,
+                        'referencia' => $alocacao->referencia,
+                        'localizacao' => $nomeLocal,
+                        'tipo' => 'entrega',
+                        'cor' => $tiposCores['entrega']['cor'],
+                        'quantidade' => $alocacao->quantidade,
+                        'data' => $data->format('d/m/Y'),
+                    ];
+                }
+            }
+        }
+
+        // Localizações para filtro
+        $localizacoes = Localizacao::where('ativo', true)
+            ->orderBy('nome_localizacao')
+            ->get();
+
+        // Dados do calendário
+        $primeiroDia = \Carbon\Carbon::createFromDate($ano, $mes, 1);
+        $ultimoDia = $primeiroDia->copy()->endOfMonth();
+        $diasNoMes = $ultimoDia->day;
+        $diaSemanaInicio = $primeiroDia->dayOfWeek; // 0 = Domingo
+
+        $meses = [
+            1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
+            5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
+            9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
+        ];
+        $mesNome = $meses[$mes];
+
+        return view('localizacao-capacidade.calendario', compact(
+            'eventos', 'tiposCores', 'mes', 'ano', 'mesNome',
+            'localizacoes', 'localizacaoId', 'diasNoMes', 'diaSemanaInicio'
+        ));
     }
 }

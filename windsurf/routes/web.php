@@ -110,6 +110,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
 
     // Routes para Capacidade Mensal das Localizações
     Route::get('localizacao-capacidade/dashboard', [LocalizacaoCapacidadeMensalController::class, 'dashboard'])->name('localizacao-capacidade.dashboard');
+    Route::get('localizacao-capacidade/calendario', [LocalizacaoCapacidadeMensalController::class, 'calendario'])->name('localizacao-capacidade.calendario');
     Route::get('localizacao-capacidade/relatorio-pdf', [LocalizacaoCapacidadeMensalController::class, 'gerarRelatorioPDF'])->name('localizacao-capacidade.relatorio-pdf');
     Route::get('localizacao-capacidade/listagem-pdf', [LocalizacaoCapacidadeMensalController::class, 'gerarPDFListagem'])->name('localizacao-capacidade.listagem-pdf');
     // DESABILITADO - Redistribuições usavam produto_alocacao_mensal (removido)
@@ -166,7 +167,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     });
     Route::put('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'update'])->name('produtos.localizacoes.update');
     Route::delete('produtos/{produto}/localizacoes/{produtoLocalizacao}', [ProdutoLocalizacaoController::class, 'destroy'])->name('produtos.localizacoes.destroy');
-    
+
     // Routes para Etapas de Localizações de Produtos
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/avancar-etapa', [ProdutoLocalizacaoController::class, 'avancarEtapa'])->name('produtos.localizacoes.avancar-etapa');
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/voltar-etapa', [ProdutoLocalizacaoController::class, 'voltarEtapa'])->name('produtos.localizacoes.voltar-etapa');

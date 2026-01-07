@@ -60,6 +60,18 @@
             margin-bottom: 5px;
         }
 
+        .localizacao-obs {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 500;
+            color: #92400E;
+            background-color: #FEF3C7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            border: 1px solid #FCD34D;
+        }
+
         .stats-grid {
             display: table;
             width: 100%;
@@ -260,7 +272,12 @@
     @forelse($dadosDashboard as $dado)
         <div class="localizacao-section">
             <div class="localizacao-header">
-                <div class="localizacao-title">{{ $dado['localizacao']->nome_localizacao }}</div>
+                <div class="localizacao-title">
+                    {{ $dado['localizacao']->nome_localizacao }}
+                    @if(!empty($dado['observacoes']))
+                        <span class="localizacao-obs">{{ $dado['observacoes'] }}</span>
+                    @endif
+                </div>
             </div>
 
             <div class="stats-grid">
@@ -347,12 +364,12 @@
                             @foreach($produtosAgrupados as $chave => $produtosGrupo)
                                 @php
                                     $produtoPrincipal = $produtosGrupo->first();
-                                    
+
                                     // Identificar todas as etapas presentes neste grupo de produtos
                                     $etapaIdsNoGrupo = $produtosGrupo->flatMap(function($p) {
                                         return $p->localizacoes->pluck('pivot.etapa_atual_id');
                                     })->unique()->filter()->toArray();
-                                    
+
                                     $etapasNoGrupo = $etapasProducao->whereIn('id', $etapaIdsNoGrupo);
                                 @endphp
                                 <tr>
