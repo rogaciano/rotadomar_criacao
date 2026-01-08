@@ -175,7 +175,7 @@ class ProdutoLocalizacao extends Pivot
             return null;
         }
 
-        return "https://dapic.webpic.com.br/admin/ordemproducao#codigo/{$this->ordem_producao}";
+        return "https://dapic.app/admin/ordemproducao#codigo/{$this->ordem_producao}";
     }
 
     /**
