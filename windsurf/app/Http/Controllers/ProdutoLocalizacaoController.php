@@ -322,6 +322,45 @@ class ProdutoLocalizacaoController extends Controller
     }
 
     /**
+     * Limpar a etapa atual (resetar para Não Definida)
+     */
+    public function limparEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
+    {
+        $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
+            ->where('produto_id', $produtoId)
+            ->firstOrFail();
+
+        // Verificar autorização
+        $user = auth()->user();
+        $podeGerenciar = $user->isAdmin() || (
+            $user->localizacao_id == $produtoLocalizacao->localizacao_id
+        );
+
+        if (!$podeGerenciar) {
+            return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
+        }
+
+        // Limpar os campos de etapa
+        $produtoLocalizacao->etapa_atual_id = null;
+        $produtoLocalizacao->etapa_anterior_id = null;
+        $produtoLocalizacao->save();
+
+        // Registrar no log de atividades
+        activity('produtos')
+            ->causedBy(auth()->user())
+            ->performedOn(Produto::find($produtoId))
+            ->withProperties([
+                'action' => 'produto_localizacao_etapa_cleared',
+                'produto_id' => $produtoId,
+                'produto_localizacao_id' => $produtoLocalizacaoId,
+            ])
+            ->log('Etapa da localização limpa (resetada)');
+
+        return redirect()->route('produtos.show', $produtoId)
+            ->with('success', 'Etapa limpa com sucesso!');
+    }
+
+    /**
      * Definir etapa inicial
      */
     public function definirEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
@@ -398,10 +437,10 @@ class ProdutoLocalizacaoController extends Controller
         // Verificar se o usuário está logado em uma localização com capacidade > 0
         // E se é a mesma localização do registro ou se é admin
         $localizacaoUsuario = $user->localizacao;
-        
+
         $podeEditar = $user->isAdmin() || (
-            $localizacaoUsuario && 
-            $localizacaoUsuario->capacidade > 0 && 
+            $localizacaoUsuario &&
+            $localizacaoUsuario->capacidade > 0 &&
             $localizacaoUsuario->id == $produtoLocalizacao->localizacao_id
         );
 

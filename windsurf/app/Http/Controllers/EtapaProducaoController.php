@@ -86,7 +86,7 @@ class EtapaProducaoController extends Controller
         $cores = EtapaProducao::coresDisponiveis();
         $etapas = EtapaProducao::where('ativo', true)->orderBy('ordem')->get();
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
-        
+
         return view('etapas-producao.create', compact('cores', 'etapas', 'localizacoes'));
     }
 
@@ -100,21 +100,21 @@ class EtapaProducaoController extends Controller
             'descricao' => 'nullable|string|max:255',
             'cor' => 'required|string|max:20',
             'icone' => 'nullable|string|max:50',
-            'localizacao_id' => 'nullable|exists:localizacoes,id',
-            'ativo' => 'boolean',
+            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
+            'ativo' => 'sometimes|boolean',
             'ordem' => 'required|integer|min:0',
             'transicoes' => 'nullable|array',
-            'transicoes.*.etapa_destino_id' => 'nullable|exists:etapas_producao,id',
+            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
             'transicoes.*.label_botao' => 'nullable|string|max:50',
             'transicoes.*.cor_botao' => 'nullable|string|max:20'
         ]);
 
         $etapa = EtapaProducao::create([
             'nome' => $validated['nome'],
-            'descricao' => $validated['descricao'] ?? null,
+            'descricao' => $validated['descricao'] ?: null,
             'cor' => $validated['cor'],
-            'icone' => $validated['icone'] ?? null,
-            'localizacao_id' => $validated['localizacao_id'] ?? null,
+            'icone' => $validated['icone'] ?: null,
+            'localizacao_id' => $validated['localizacao_id'] ?: null,
             'ativo' => $request->has('ativo'),
             'ordem' => $validated['ordem']
         ]);
@@ -146,7 +146,7 @@ class EtapaProducaoController extends Controller
     public function show(EtapaProducao $etapasProducao)
     {
         $etapasProducao->load(['transicoesOrigem.etapaDestino', 'transicoesDestino.etapaOrigem']);
-        
+
         return view('etapas-producao.show', ['etapa' => $etapasProducao]);
     }
 
@@ -162,7 +162,7 @@ class EtapaProducaoController extends Controller
             ->get();
         $etapasProducao->load('transicoesOrigem.etapaDestino');
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
-        
+
         return view('etapas-producao.edit', [
             'etapa' => $etapasProducao,
             'cores' => $cores,
@@ -181,28 +181,28 @@ class EtapaProducaoController extends Controller
             'descricao' => 'nullable|string|max:255',
             'cor' => 'required|string|max:20',
             'icone' => 'nullable|string|max:50',
-            'localizacao_id' => 'nullable|exists:localizacoes,id',
-            'ativo' => 'boolean',
+            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
+            'ativo' => 'sometimes|boolean',
             'ordem' => 'required|integer|min:0',
             'transicoes' => 'nullable|array',
-            'transicoes.*.etapa_destino_id' => 'nullable|exists:etapas_producao,id',
+            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
             'transicoes.*.label_botao' => 'nullable|string|max:50',
             'transicoes.*.cor_botao' => 'nullable|string|max:20'
         ]);
 
         $etapasProducao->update([
             'nome' => $validated['nome'],
-            'descricao' => $validated['descricao'] ?? null,
+            'descricao' => $validated['descricao'] ?: null,
             'cor' => $validated['cor'],
-            'icone' => $validated['icone'] ?? null,
-            'localizacao_id' => $validated['localizacao_id'] ?? null,
+            'icone' => $validated['icone'] ?: null,
+            'localizacao_id' => $validated['localizacao_id'] ?: null,
             'ativo' => $request->has('ativo'),
             'ordem' => $validated['ordem']
         ]);
 
         // Atualizar transições
         $etapasProducao->transicoesOrigem()->delete();
-        
+
         if (!empty($validated['transicoes'])) {
             $ordem = 0;
             foreach ($validated['transicoes'] as $transicao) {

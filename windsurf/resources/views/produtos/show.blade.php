@@ -460,11 +460,18 @@
                                                                 </svg>
                                                             </a>
                                                         </div>
-                                                        @if($etapaAnteriorId && $podeGerenciarEtapa)
-                                                            <div class="mt-1">
-                                                                <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                        @if($podeGerenciarEtapa)
+                                                            <div class="mt-1 flex flex-wrap gap-2">
+                                                                @if($etapaAnteriorId)
+                                                                    <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                                        @csrf
+                                                                        <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Voltar etapa?')">← Voltar</button>
+                                                                    </form>
+                                                                @endif
+
+                                                                <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
                                                                     @csrf
-                                                                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Voltar etapa?')">← Voltar</button>
+                                                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline" onclick="return confirm('Isso irá resetar a etapa atual para Não Definida, mas manterá as quantidades e datas. Confirmar?')">Limpar Etapa</button>
                                                                 </form>
                                                             </div>
                                                         @endif
@@ -504,9 +511,9 @@
                                                             <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 hover:text-indigo-800">Editar</button>
                                                         @endif
                                                         @if($canDeleteProdutoLocalizacoes)
-                                                            <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Remover?')">
+                                                            <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja REMOVER COMPLETAMENTE esta fábrica e todos os seus dados de produção?')">
                                                                 @csrf @method('DELETE')
-                                                                <button type="submit" class="text-red-600 hover:text-red-800">Remover</button>
+                                                                <button type="submit" class="text-red-600 hover:text-red-800" title="Excluir toda a alocação">Remover Fábrica</button>
                                                             </form>
                                                         @endif
                                                     </td>
@@ -559,7 +566,13 @@
                                             </div>
                                             <div class="text-right">
                                                 <span class="text-xs font-bold text-blue-700 uppercase tracking-wider block">OP</span>
-                                                <span class="font-bold text-blue-800">{{ $localizacao->pivot->ordem_producao ?? '—' }}</span>
+                                                @if($localizacao->pivot->ordem_producao)
+                                                    <a href="{{ $localizacao->pivot->ordem_producao_url }}" target="_blank" class="font-bold text-blue-800 hover:underline">
+                                                        {{ $localizacao->pivot->ordem_producao }}
+                                                    </a>
+                                                @else
+                                                    <span class="font-bold text-blue-800">—</span>
+                                                @endif
                                             </div>
                                         </div>
 
@@ -616,6 +629,15 @@
                                             <!-- Ações de Etapa -->
                                             @if($podeGerenciarEtapa)
                                                 <div class="border-t pt-3 flex flex-col gap-2 relative">
+                                                    @if($etapaAtual)
+                                                        <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="w-full">
+                                                            @csrf
+                                                            <button type="submit" class="w-full py-2 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs font-bold hover:bg-red-100 transition" onclick="return confirm('Isso irá resetar a etapa atual para Não Definida, mas manterá as quantidades e datas. Confirmar?')">
+                                                                Limpar Etapa (Recomeçar)
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
                                                     @if($transicoes->count() > 0)
                                                         @foreach($transicoes as $transicao)
                                                             <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
@@ -656,9 +678,9 @@
                                                     <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 font-bold text-xs uppercase tracking-tighter hover:text-indigo-800">Editar</button>
                                                 @endif
                                                 @if($canDeleteProdutoLocalizacoes)
-                                                    <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" onsubmit="return confirm('Remover?')">
+                                                    <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja REMOVER COMPLETAMENTE esta fábrica e todos os seus dados de produção?')">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit" class="text-red-600 font-bold text-xs uppercase tracking-tighter hover:text-red-800">Remover</button>
+                                                        <button type="submit" class="text-red-600 font-bold text-xs uppercase tracking-tighter hover:text-red-800">Remover Fábrica</button>
                                                     </form>
                                                 @endif
                                             </div>

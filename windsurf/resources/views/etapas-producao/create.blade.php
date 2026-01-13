@@ -9,6 +9,29 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    <!-- Exibição de Erros de Validação -->
+                    @if ($errors->any())
+                        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">
+                                        Existem erros no formulário:
+                                    </h3>
+                                    <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <form action="{{ route('etapas-producao.store') }}" method="POST">
                         @csrf
 
@@ -46,26 +69,32 @@
                             <div>
                                 <label for="cor" class="block text-sm font-medium text-gray-700 mb-1">Cor *</label>
                                 <select name="cor" id="cor" required
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('cor') border-red-500 @enderror">
                                     @foreach($cores as $valor => $nome)
                                         <option value="{{ $valor }}" {{ old('cor', 'blue') === $valor ? 'selected' : '' }}>{{ $nome }}</option>
                                     @endforeach
                                 </select>
+                                @error('cor')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <!-- Ícone -->
                             <div>
                                 <label for="icone" class="block text-sm font-medium text-gray-700 mb-1">Ícone (emoji)</label>
                                 <input type="text" name="icone" id="icone" value="{{ old('icone') }}"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('icone') border-red-500 @enderror"
                                     placeholder="Ex: 📦 ⚙️ ✅ 🎨">
+                                @error('icone')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <!-- Setor para Notificação -->
                             <div class="md:col-span-2">
                                 <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Setor para Notificação (Opcional)</label>
-                                <select name="localizacao_id" id="localizacao_id" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <select name="localizacao_id" id="localizacao_id"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('localizacao_id') border-red-500 @enderror">
                                     <option value="">Nenhum setor (sem notificação)</option>
                                     @foreach($localizacoes as $loc)
                                         <option value="{{ $loc->id }}" {{ old('localizacao_id') == $loc->id ? 'selected' : '' }}>
@@ -73,6 +102,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                @error('localizacao_id')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                                 <p class="mt-1 text-xs text-gray-500">Os usuários vinculados a este setor receberão uma notificação quando um produto entrar nesta etapa.</p>
                             </div>
 
@@ -129,7 +161,7 @@
                 </select>
             </div>
             <div class="w-40">
-                <input type="text" name="transicoes[INDEX][label_botao]" placeholder="Texto do botão" 
+                <input type="text" name="transicoes[INDEX][label_botao]" placeholder="Texto do botão"
                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm">
             </div>
             <div class="w-32">

@@ -24,7 +24,15 @@
                         {{ $produtoLocalizacao->produto->referencia ?? 'Produto' }} - {{ $produtoLocalizacao->localizacao->nome_localizacao ?? 'Localização' }}
                     </h3>
                     <p class="text-sm text-gray-600">
-                        OP: <strong>{{ $produtoLocalizacao->ordem_producao ?? 'N/A' }}</strong> | 
+                        OP: <strong>
+                            @if($produtoLocalizacao->ordem_producao)
+                                <a href="{{ $produtoLocalizacao->ordem_producao_url }}" target="_blank" class="text-blue-600 hover:underline">
+                                    {{ $produtoLocalizacao->ordem_producao }}
+                                </a>
+                            @else
+                                N/A
+                            @endif
+                        </strong> |
                         Quantidade: <strong>{{ number_format($produtoLocalizacao->quantidade, 0, ',', '.') }}</strong>
                     </p>
                 </div>
@@ -34,7 +42,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <h4 class="text-lg font-semibold text-gray-800 mb-4">Histórico de Mudanças de Etapa</h4>
-                    
+
                     @if($historico->count() > 0)
                         <div class="flow-root">
                             <ul role="list" class="-mb-8">

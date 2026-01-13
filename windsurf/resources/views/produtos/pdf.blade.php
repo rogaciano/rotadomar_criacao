@@ -235,7 +235,7 @@
                     <div class="info-cell">
                         <span class="info-label">Preço Atacado / Varejo</span>
                         <span class="info-value">
-                            R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }} / 
+                            R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }} /
                             R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}
                         </span>
                     </div>
@@ -297,12 +297,12 @@
                 $quantidadeProduto = $produto->quantidade ?? 0;
                 $divergencia = $totalLocalizacoes - $quantidadeProduto;
             @endphp
-            
+
             @if($divergencia != 0)
                 <div class="highlight-box" style="background-color: {{ $divergencia > 0 ? '#FEF3C7' : '#FEE2E2' }}; border-color: {{ $divergencia > 0 ? '#F59E0B' : '#EF4444' }}; margin-bottom: 10px;">
                     <strong style="color: {{ $divergencia > 0 ? '#92400E' : '#991B1B' }};">Atenção:</strong>
-                    Total nas localizações ({{ number_format($totalLocalizacoes, 0, ',', '.') }}) está 
-                    {{ abs($divergencia) }} unidade(s) {{ $divergencia > 0 ? 'acima' : 'abaixo' }} 
+                    Total nas localizações ({{ number_format($totalLocalizacoes, 0, ',', '.') }}) está
+                    {{ abs($divergencia) }} unidade(s) {{ $divergencia > 0 ? 'acima' : 'abaixo' }}
                     da quantidade pretendida ({{ number_format($quantidadeProduto, 0, ',', '.') }}).
                 </div>
             @endif
@@ -328,7 +328,9 @@
                         </td>
                         <td>
                             @if($localizacao->pivot->ordem_producao)
-                                <span class="badge badge-blue">{{ $localizacao->pivot->ordem_producao }}</span>
+                                <a href="{{ $localizacao->pivot->ordem_producao_url }}" style="text-decoration: none; color: #1E40AF;">
+                                    <span class="badge badge-blue">{{ $localizacao->pivot->ordem_producao }}</span>
+                                </a>
                             @else
                                 <span style="color: #9CA3AF;">-</span>
                             @endif

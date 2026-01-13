@@ -518,7 +518,9 @@
                                                                                         {{-- Coluna 1: OP --}}
                                                                                         <td class="py-1 pr-2 align-top whitespace-nowrap">
                                                                                             @if($loc->pivot->ordem_producao)
-                                                                                                <span class="font-semibold text-blue-700">OP: {{ $loc->pivot->ordem_producao }}</span>
+                                                                                                <a href="{{ $loc->pivot->ordem_producao_url }}" target="_blank" class="font-semibold text-blue-700 hover:underline">
+                                                                                                    OP: {{ $loc->pivot->ordem_producao }}
+                                                                                                </a>
                                                                                             @else
                                                                                                 <span class="text-gray-400">Sem OP</span>
                                                                                             @endif

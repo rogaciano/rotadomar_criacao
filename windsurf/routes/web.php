@@ -171,6 +171,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Routes para Etapas de Localizações de Produtos
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/avancar-etapa', [ProdutoLocalizacaoController::class, 'avancarEtapa'])->name('produtos.localizacoes.avancar-etapa');
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/voltar-etapa', [ProdutoLocalizacaoController::class, 'voltarEtapa'])->name('produtos.localizacoes.voltar-etapa');
+    Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/limpar-etapa', [ProdutoLocalizacaoController::class, 'limparEtapa'])->name('produtos.localizacoes.limpar-etapa');
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/definir-etapa', [ProdutoLocalizacaoController::class, 'definirEtapa'])->name('produtos.localizacoes.definir-etapa');
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/update-data-entrega', [ProdutoLocalizacaoController::class, 'updateDataEntrega'])->name('produtos.localizacoes.update-data-entrega');
     Route::get('produtos/{produto}/localizacoes/{produtoLocalizacao}/historico-etapas', [ProdutoLocalizacaoController::class, 'historicoEtapas'])->name('produtos.localizacoes.historico-etapas');
