@@ -17,5 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Database\QueryException $e, \Illuminate\Http\Request $request) {
+            // Verificar se o erro é de conexão (SQLSTATE[HY000] [2002])
+            if (str_contains($e->getMessage(), '1045') || str_contains($e->getMessage(), '2002')) {
+                return response()->view('errors.db-connection', [], 500);
+            }
+            return null;
+        });
     })->create();

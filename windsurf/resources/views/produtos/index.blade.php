@@ -21,11 +21,17 @@
                     @endif
                 </div>
                 @if(auth()->user()->canRead('produtos'))
-                    <button id="btn-gerar-pdf" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <button id="btn-gerar-pdf-landscape" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
-                        Gerar PDF
+                        PDF Paisagem
+                    </button>
+                    <button id="btn-gerar-pdf-portrait" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        PDF Retrato
                     </button>
                 @endif
             </div>
@@ -498,40 +504,48 @@
                 'border-color': 'rgb(209, 213, 219)'
             });
 
-            // Gerar PDF diretamente com force_generate=1 para evitar erros de contagem
-            const btnGerarPdf = document.getElementById('btn-gerar-pdf');
-            if (btnGerarPdf) {
-                btnGerarPdf.addEventListener('click', function(e) {
+            // Função para gerar PDF com orientação específica
+            function gerarPdf(btn, orientation) {
+                if (!btn) return;
+
+                btn.addEventListener('click', function(e) {
                     e.preventDefault();
 
                     // Mostrar indicador de carregamento
-                    btnGerarPdf.disabled = true;
-                    btnGerarPdf.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando PDF...';
+                    const originalContent = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando...';
 
                     // Obter os filtros do formulário
                     const formData = new FormData(document.getElementById('filter-form'));
                     const queryParams = new URLSearchParams(formData).toString();
 
                     // Gerar o PDF diretamente com force_generate=1 para evitar o erro de contagem
-                    const pdfUrl = '{{ route("produtos.lista.pdf") }}?' + queryParams + '&force_generate=1';
+                    const pdfUrl = '{{ route("produtos.lista.pdf") }}?' + queryParams + '&force_generate=1&orientation=' + orientation;
 
                     // Abrir o PDF em uma nova aba
                     const pdfWindow = window.open(pdfUrl, '_blank');
 
                     // Restaurar o botão após um curto período
                     setTimeout(function() {
-                        btnGerarPdf.disabled = false;
-                        btnGerarPdf.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Gerar PDF';
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
                     }, 1500);
 
                     // Verificar se a janela do PDF foi bloqueada pelo navegador
                     if (!pdfWindow || pdfWindow.closed || typeof pdfWindow.closed === 'undefined') {
                         alert('Por favor, permita pop-ups para este site para visualizar o PDF.');
-                        btnGerarPdf.disabled = false;
-                        btnGerarPdf.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg> Gerar PDF';
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
                     }
                 });
             }
+
+            // Gerar PDF Landscape
+            gerarPdf(document.getElementById('btn-gerar-pdf-landscape'), 'landscape');
+
+            // Gerar PDF Portrait
+            gerarPdf(document.getElementById('btn-gerar-pdf-portrait'), 'portrait');
 
             // Limpar filtros: função utilitária e bind do botão
             const form = document.getElementById('filter-form');
@@ -610,7 +624,7 @@
             function getSelectText(selectId, value) {
                 const select = document.getElementById(selectId);
                 if (!select) return Array.isArray(value) ? value.join(', ') : value;
-                
+
                 // Se for array, mapear cada valor para o texto correspondente
                 if (Array.isArray(value)) {
                     return value.map(v => {
@@ -618,7 +632,7 @@
                         return option ? option.textContent.trim() : v;
                     }).join(', ');
                 }
-                
+
                 const option = select.querySelector(`option[value="${value}"]`);
                 return option ? option.textContent.trim() : value;
             }
@@ -634,7 +648,7 @@
                     const value = filters[key];
                     // Verifica se tem valor (string não vazia ou array não vazio)
                     const hasValue = Array.isArray(value) ? value.length > 0 : (value && value !== '');
-                    
+
                     if (hasValue && key !== 'page') {
                         hasActiveFilters = true;
                         let displayValue = value;
@@ -763,7 +777,7 @@
                 const selects = filterForm.querySelectorAll('select');
                 selects.forEach(select => {
                     let hasValue = false;
-                    
+
                     if (select.multiple) {
                         // Select múltiplo - verificar se tem alguma opção selecionada
                         hasValue = select.selectedOptions.length > 0;
@@ -771,7 +785,7 @@
                         // Select simples - verificar se o valor não é vazio
                         hasValue = select.value !== '' && select.value !== null;
                     }
-                    
+
                     // Verificar se usa Select2
                     const select2Container = select.nextElementSibling;
                     if (select2Container && select2Container.classList.contains('select2-container')) {

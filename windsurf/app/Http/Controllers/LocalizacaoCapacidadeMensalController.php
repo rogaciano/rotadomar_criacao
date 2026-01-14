@@ -782,27 +782,27 @@ class LocalizacaoCapacidadeMensalController extends Controller
     }
 
     /**
-     * Gerar relatório PDF do dashboard de capacidades
+     * Gerar PDF do relatório de planejamento
      */
     public function gerarRelatorioPDF(Request $request)
     {
-        $mes = $request->filled('mes') ? $request->mes : now()->month;
-        $ano = $request->filled('ano') ? $request->ano : now()->year;
-        $localizacaoId = $request->filled('localizacao_id') ? $request->localizacao_id : null;
+        $mes = $request->input('mes', now()->month);
+        $ano = $request->input('ano', now()->year);
+        $localizacaoId = $request->input('localizacao_id');
+        $orientation = $request->input('orientation', 'landscape');
 
         // Buscar capacidades do período
         $query = LocalizacaoCapacidadeMensal::with('localizacao')
             ->where('mes', $mes)
             ->where('ano', $ano);
 
-        // Aplicar filtro de localização se selecionado
         if ($localizacaoId) {
             $query->where('localizacao_id', $localizacaoId);
         }
 
         $capacidades = $query->get();
 
-        // Adicionar informações de produtos previstos
+        // Mapear dados para o formato esperado pela view (mesma lógica do dashboard)
         $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano) {
             // Buscar produtos diretamente pela data_prevista_faccao em produto_localizacao
             $produtos = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade, $mes, $ano) {
@@ -817,7 +817,6 @@ class LocalizacaoCapacidadeMensalController extends Controller
             }])
             ->get()
             ->map(function($produto) {
-                // Adicionar quantidade_alocada do pivot
                 $produto->quantidade_alocada = $produto->localizacoes->sum('pivot.quantidade');
                 return $produto;
             });
@@ -847,7 +846,10 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->orderBy('ordem')
             ->get();
 
-        $pdf = \PDF::loadView('localizacao-capacidade.relatorio-pdf', compact('dadosDashboard', 'mes', 'ano', 'mesNome', 'etapasProducao'));
+        $view = $orientation === 'portrait' ? 'localizacao-capacidade.relatorio-retrato-pdf' : 'localizacao-capacidade.relatorio-pdf';
+
+        $pdf = \PDF::loadView($view, compact('dadosDashboard', 'mes', 'ano', 'mesNome', 'etapasProducao'))
+                   ->setPaper('a4', $orientation);
 
         return $pdf->stream("Relatorio_Planejamento_{$mesNome}_{$ano}.pdf");
     }

@@ -131,7 +131,7 @@ class ProdutoController extends Controller
         // Filtro por localização (suporta múltiplos valores)
         if (!empty($filters['localizacao_id'])) {
             $localizacaoIds = is_array($filters['localizacao_id']) ? $filters['localizacao_id'] : [$filters['localizacao_id']];
-            
+
             // Obter IDs dos produtos cuja última movimentação está em uma das localizações selecionadas
             $subquery = \App\Models\Movimentacao::select('produto_id')
                 ->whereIn('localizacao_id', $localizacaoIds)
@@ -147,7 +147,7 @@ class ProdutoController extends Controller
         // Filtro por situação (suporta múltiplos valores)
         if (!empty($filters['situacao_id'])) {
             $situacaoIds = is_array($filters['situacao_id']) ? $filters['situacao_id'] : [$filters['situacao_id']];
-            
+
             // Obter IDs dos produtos cuja última movimentação está em uma das situações selecionadas
             $subquery = \App\Models\Movimentacao::select('produto_id')
                 ->whereIn('situacao_id', $situacaoIds)
@@ -1041,7 +1041,7 @@ class ProdutoController extends Controller
             // Filtro por localização (suporta múltiplos valores)
             if (!empty($filters['localizacao_id'])) {
                 $localizacaoIds = is_array($filters['localizacao_id']) ? $filters['localizacao_id'] : [$filters['localizacao_id']];
-                
+
                 // Obter IDs dos produtos cuja última movimentação está em uma das localizações selecionadas
                 $subquery = \App\Models\Movimentacao::select('produto_id')
                     ->whereIn('localizacao_id', $localizacaoIds)
@@ -1057,7 +1057,7 @@ class ProdutoController extends Controller
             // Filtro por situação (suporta múltiplos valores)
             if (!empty($filters['situacao_id'])) {
                 $situacaoIds = is_array($filters['situacao_id']) ? $filters['situacao_id'] : [$filters['situacao_id']];
-                
+
                 // Obter IDs dos produtos cuja última movimentação está em uma das situações selecionadas
                 $subquery = \App\Models\Movimentacao::select('produto_id')
                     ->whereIn('situacao_id', $situacaoIds)
@@ -1142,8 +1142,11 @@ class ProdutoController extends Controller
                 }
             }
 
-            $pdf = PDF::loadView('produtos.lista-pdf', compact('produtos'))
-                   ->setPaper('a4', 'landscape');
+            $orientation = $request->get('orientation', 'landscape');
+            $view = $orientation === 'portrait' ? 'produtos.lista-retrato-pdf' : 'produtos.lista-pdf';
+
+            $pdf = PDF::loadView($view, compact('produtos'))
+                   ->setPaper('a4', $orientation);
 
             return $pdf->stream('lista-produtos.pdf');
 
