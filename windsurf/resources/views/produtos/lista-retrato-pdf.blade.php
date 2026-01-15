@@ -160,7 +160,7 @@
     </table>
 
     <div class="footer">
-        Rota do Mar - Sistema de Gestão de Produção | Página {PAGENO} de {nb}
+        Grupo Rota do Mar - Sistema de Gestão de Produção | Página {PAGENO} de {nb}
     </div>
 </body>
 </html>

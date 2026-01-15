@@ -534,7 +534,7 @@ def migrate_produtos(cx):
         print("\n⚙️ Executando ajustes finais de marca em produtos...")
         try:
             updates = [
-                "UPDATE produtos SET marca_id = 1 WHERE marca_id IN ( 15 )",  # Rota do mar
+                "UPDATE produtos SET marca_id = 1 WHERE marca_id IN ( 15 )",  # Grupo Rota do Mar
                 "UPDATE produtos SET marca_id = 2 WHERE marca_id IN ( 29, 19, 26  )",  # HAUS
                 "UPDATE produtos SET marca_id = 3 WHERE marca_id IN ( 6 )",  # Mitch's
                 "UPDATE produtos SET marca_id = 4 WHERE marca_id IN (10, 12, 13, 14, 16, 17, 22, 23, 24, 27, 28, 30 )",  # private label

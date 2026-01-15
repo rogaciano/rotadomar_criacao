@@ -117,7 +117,7 @@
         <div class="wave-overlay"></div>
 
         <!-- Watermark -->
-        <div class="watermark">ROTA DO MAR</div>
+        <div class="watermark">Grupo Rota do Mar</div>
 
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 relative overflow-hidden">
             <!-- Decorative floating shapes (bolhas no mar) -->

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Rota do Mar'),
+    'name' => env('APP_NAME', 'Grupo Rota do Mar'),
 
     /*
     |--------------------------------------------------------------------------

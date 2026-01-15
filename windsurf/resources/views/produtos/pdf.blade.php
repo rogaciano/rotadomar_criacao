@@ -159,7 +159,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="title">Rota do Mar - DETALHES DO PRODUTO</div>
+            <div class="title">Grupo Rota do Mar - DETALHES DO PRODUTO</div>
             <div class="subtitle">{{ $produto->referencia }} - {{ $produto->descricao }}</div>
             <div style="font-size: 10px; color: #6B7280;">Gerado em: {{ now()->format('d/m/Y H:i') }}</div>
         </div>
@@ -439,7 +439,7 @@
         </div>
 
         <div class="footer">
-            <p>Rota do Mar - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
+            <p>Grupo Rota do Mar - Documento gerado em {{ now()->format('d/m/Y às H:i:s') }}</p>
         </div>
     </div>
 
