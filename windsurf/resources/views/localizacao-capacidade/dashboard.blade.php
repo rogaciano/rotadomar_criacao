@@ -970,8 +970,8 @@
                 <form id="form-data-entrega" method="POST">
                     @csrf
                     <div class="mb-4">
-                        <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-2">Selecione a Data *</label>
-                        <input type="date" name="data_entrega_faccao" id="input_data_entrega_faccao" required
+                        <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-2">Selecione a Data</label>
+                        <input type="date" name="data_entrega_faccao" id="input_data_entrega_faccao"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     </div>
                     <div class="flex justify-end space-x-2">

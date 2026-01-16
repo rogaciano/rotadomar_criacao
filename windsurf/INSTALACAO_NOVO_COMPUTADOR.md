@@ -1,4 +1,4 @@
-# Instalação do Projeto Rota do Amar PLM
+# Instalação do Projeto Grupo Rota do Mar PLM
 
 ## 📋 Comandos para Configuração em Novo Computador
 

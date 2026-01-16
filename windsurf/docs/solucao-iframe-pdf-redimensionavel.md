@@ -280,7 +280,7 @@ function expandirTelaCheia() {
 
 ---
 
-**Desenvolvido por:** Equipe Rota do Amar  
+**Desenvolvido por:** Equipe Grupo Rota do Mar  
 **Testado em:** Chrome 120+, Firefox 120+, Edge 120+  
 **Status:** ✅ Em produção
 

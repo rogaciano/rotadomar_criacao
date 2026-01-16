@@ -263,9 +263,12 @@ class ProdutoLocalizacaoController extends Controller
             return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
         }
 
-        // Validação: Apenas se data_entrega_faccao estiver preenchida
-        if (!$produtoLocalizacao->data_entrega_faccao) {
-            return redirect()->back()->with('error', 'Para iniciar ou avançar uma etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
+        // Buscar a etapa destino para verificar se obriga data_entrega_faccao
+        $etapaDestino = \App\Models\EtapaProducao::find($request->etapa_id);
+
+        // Validação: Apenas se a etapa destino obriga data_entrega_faccao
+        if ($etapaDestino && $etapaDestino->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
+            return redirect()->back()->with('error', 'Para avançar para esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
         }
 
         $produtoLocalizacao->avancarEtapa(
@@ -384,9 +387,12 @@ class ProdutoLocalizacaoController extends Controller
             return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
         }
 
-        // Validação: Apenas se data_entrega_faccao estiver preenchida
-        if (!$produtoLocalizacao->data_entrega_faccao) {
-            return redirect()->back()->with('error', 'Para definir a etapa inicial, você deve primeiro preencher a "Entrega Prevista Facção".');
+        // Buscar a etapa para verificar se obriga data_entrega_faccao
+        $etapa = \App\Models\EtapaProducao::find($request->etapa_id);
+
+        // Validação: Apenas se a etapa obriga data_entrega_faccao
+        if ($etapa && $etapa->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
+            return redirect()->back()->with('error', 'Para definir esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
         }
 
         $produtoLocalizacao->definirEtapaInicial(
@@ -426,7 +432,7 @@ class ProdutoLocalizacaoController extends Controller
     public function updateDataEntrega(Request $request, $produtoId, $produtoLocalizacaoId)
     {
         $request->validate([
-            'data_entrega_faccao' => 'required|date'
+            'data_entrega_faccao' => 'nullable|date'
         ]);
 
         $user = auth()->user();

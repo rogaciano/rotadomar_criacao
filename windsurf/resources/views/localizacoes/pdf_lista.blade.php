@@ -194,7 +194,7 @@
     @endif
     
     <div class="footer">
-        <p>Documento gerado automaticamente pelo sistema Rota do Amar</p>
+        <p>Documento gerado automaticamente pelo sistema - Grupo Rota do Mar</p>
     </div>
 </body>
 </html>

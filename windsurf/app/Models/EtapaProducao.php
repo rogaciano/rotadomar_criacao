@@ -19,13 +19,15 @@ class EtapaProducao extends Model
         'icone',
         'ativo',
         'localizacao_id',
-        'ordem'
+        'ordem',
+        'obriga_data_entrega_faccao'
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
         'localizacao_id' => 'integer',
-        'ordem' => 'integer'
+        'ordem' => 'integer',
+        'obriga_data_entrega_faccao' => 'boolean'
     ];
 
     /**

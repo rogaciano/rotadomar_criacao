@@ -604,7 +604,7 @@
     @endforelse
 
     <div class="footer">
-        <p>Sistema de Gestão de Capacidade - Rota do Amar</p>
+        <p>Sistema de Gestão de Capacidade - Grupo Rota do Mar</p>
     </div>
 </body>
 </html>
