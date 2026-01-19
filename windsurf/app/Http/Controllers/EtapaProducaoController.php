@@ -116,7 +116,8 @@ class EtapaProducaoController extends Controller
             'icone' => $validated['icone'] ?: null,
             'localizacao_id' => $validated['localizacao_id'] ?: null,
             'ativo' => $request->has('ativo'),
-            'ordem' => $validated['ordem']
+            'ordem' => $validated['ordem'],
+            'obriga_data_entrega_faccao' => $request->has('obriga_data_entrega_faccao')
         ]);
 
         // Criar transições se fornecidas
@@ -197,7 +198,8 @@ class EtapaProducaoController extends Controller
             'icone' => $validated['icone'] ?: null,
             'localizacao_id' => $validated['localizacao_id'] ?: null,
             'ativo' => $request->has('ativo'),
-            'ordem' => $validated['ordem']
+            'ordem' => $validated['ordem'],
+            'obriga_data_entrega_faccao' => $request->has('obriga_data_entrega_faccao')
         ]);
 
         // Atualizar transições

@@ -117,6 +117,16 @@
                                     <span class="ml-2 text-sm text-gray-600">Etapa ativa</span>
                                 </label>
                             </div>
+
+                            <!-- Obriga Data Entrega Facção -->
+                            <div class="md:col-span-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" name="obriga_data_entrega_faccao" value="1" {{ old('obriga_data_entrega_faccao', $etapa->obriga_data_entrega_faccao) ? 'checked' : '' }}
+                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <span class="ml-2 text-sm text-gray-600">Obriga preenchimento da Data de Entrega Prevista</span>
+                                </label>
+                                <p class="mt-1 text-xs text-gray-500 ml-6">Se marcado, será obrigatório preencher a "Entrega Prevista Facção" para avançar para esta etapa.</p>
+                            </div>
                         </div>
 
                         <!-- Transições (Próximas etapas) -->

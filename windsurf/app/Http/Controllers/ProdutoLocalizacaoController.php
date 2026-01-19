@@ -268,7 +268,7 @@ class ProdutoLocalizacaoController extends Controller
 
         // Validação: Apenas se a etapa destino obriga data_entrega_faccao
         if ($etapaDestino && $etapaDestino->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
-            return redirect()->back()->with('error', 'Para avançar para esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
+            return redirect()->back()->with('alert_error', 'Para avançar para esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
         }
 
         $produtoLocalizacao->avancarEtapa(
@@ -392,7 +392,7 @@ class ProdutoLocalizacaoController extends Controller
 
         // Validação: Apenas se a etapa obriga data_entrega_faccao
         if ($etapa && $etapa->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
-            return redirect()->back()->with('error', 'Para definir esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
+            return redirect()->back()->with('alert_error', 'Para definir esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
         }
 
         $produtoLocalizacao->definirEtapaInicial(

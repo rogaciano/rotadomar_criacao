@@ -91,6 +91,9 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
                                     </th>
+                                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Obriga Data Entrega
+                                    </th>
                                     <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Ações
                                     </th>
@@ -157,6 +160,15 @@
                                                 {{ $etapa->ativo ? 'Ativo' : 'Inativo' }}
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                                            @if($etapa->obriga_data_entrega_faccao)
+                                                <span class="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                                                    Sim
+                                                </span>
+                                            @else
+                                                <span class="text-gray-400">-</span>
+                                            @endif
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div class="flex item-center justify-center">
                                                 <a href="{{ route('etapas-producao.show', $etapa->id) }}" class="text-blue-600 hover:text-blue-900 bg-transparent p-1 rounded-full hover:bg-blue-100 transition-all" title="Ver detalhes">
@@ -186,7 +198,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="py-6 px-6 text-center text-gray-500">Nenhuma etapa de produção encontrada.</td>
+                                        <td colspan="7" class="py-6 px-6 text-center text-gray-500">Nenhuma etapa de produção encontrada.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

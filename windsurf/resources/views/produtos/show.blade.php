@@ -41,6 +41,27 @@
 
     <div class="py-12">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8" style="max-width: 95%;">
+            <!-- Mensagens de Feedback -->
+            @if(session('error'))
+                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ session('error') }}</span>
+                </div>
+            @endif
+            @if(session('success'))
+                <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium">{{ session('success') }}</span>
+                </div>
+            @endif
+            @if(session('alert_error'))
+                <script>alert('{{ session('alert_error') }}');</script>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6">
                     <!-- Informações do Produto -->
@@ -228,7 +249,7 @@
                                     </div>
 
                                     <!-- Vista Mobile (Cards) -->
-                                    <div class="md:hidden space-y-4">
+                                    <div class="lg:hidden space-y-4">
                                         @foreach($produto->tecidos as $tecido)
                                             <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                                                 <div class="flex justify-between items-start mb-2">
@@ -322,7 +343,7 @@
                         @endif
 
                         @if($produto->localizacoes->count() > 0)
-                            <!-- Vista Desktop -->
+                            <!-- Tabela Desktop -->
                             <div class="hidden lg:block overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
@@ -449,36 +470,42 @@
                                                 </td>
                                                 <td class="px-4 py-2 text-sm" x-data="{ showEtapaMenu: false }">
                                                     @if($etapaAtual)
-                                                        <div class="flex items-center gap-1">
-                                                            <span class="inline-block px-2 py-1 rounded-full text-xs font-medium border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
-                                                                {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
-                                                            </span>
-                                                            <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}"
-                                                               class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                            </a>
-                                                        </div>
-                                                        @if($podeGerenciarEtapa)
-                                                            <div class="mt-1 flex flex-wrap gap-2">
-                                                                @if($etapaAnteriorId)
-                                                                    <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
-                                                                        @csrf
-                                                                        <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Voltar etapa?')">← Voltar</button>
-                                                                    </form>
-                                                                @endif
-
-                                                                <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
-                                                                    @csrf
-                                                                    <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline" onclick="return confirm('Isso irá resetar a etapa atual para Não Definida, mas manterá as quantidades e datas. Confirmar?')">Limpar Etapa</button>
-                                                                </form>
+                                                        <div class="flex flex-col gap-1">
+                                                            <div class="flex items-center gap-1">
+                                                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                                                                    {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
+                                                                </span>
+                                                                <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}"
+                                                                   class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                </a>
                                                             </div>
-                                                        @endif
+                                                            @if($podeGerenciarEtapa)
+                                                                <div class="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
+                                                                    @if($etapaAnteriorId)
+                                                                        <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                                            @csrf
+                                                                            <button type="submit" class="text-[9px] font-bold text-gray-400 hover:text-gray-700 hover:underline uppercase" onclick="return confirm('Voltar etapa?')">
+                                                                                Voltar
+                                                                            </button>
+                                                                        </form>
+                                                                    @endif
+
+                                                                    <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                                        @csrf
+                                                                        <button type="submit" class="text-[9px] font-bold text-red-300 hover:text-red-500 hover:underline uppercase" onclick="return confirm('Isso irá resetar a etapa atual para Não Definida, mas manterá as quantidades e datas. Confirmar?')">
+                                                                            Limpar
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            @endif
+                                                        </div>
                                                     @else
                                                         <div class="relative" @click.away="showEtapaMenu = false">
                                                             @if($podeGerenciarEtapa)
-                                                                <button type="button" @click="{{ $possuiDataEntrega ? 'showEtapaMenu = !showEtapaMenu' : 'alert(\'Preencha a Entrega Prevista Facção.\')' }}" class="px-2 py-1 text-xs rounded border border-dashed {{ $possuiDataEntrega ? 'bg-gray-100 hover:bg-gray-200 border-gray-300' : 'bg-gray-100 text-gray-300 border-gray-200 opacity-40 grayscale' }}">+ Definir</button>
+                                                                <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="px-2 py-1 text-xs rounded border border-dashed bg-gray-100 hover:bg-gray-200 border-gray-300">+ Definir</button>
                                                             @endif
                                                             <div x-show="showEtapaMenu" x-transition class="absolute z-20 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200">
                                                                 @foreach($etapasProducao as $etapa)
@@ -499,7 +526,7 @@
                                                                 <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
                                                                     @csrf
                                                                     <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                                    <button type="submit" {{ !$possuiDataEntrega ? 'disabled' : '' }} class="w-full text-left px-3 py-1 rounded text-xs font-medium {{ $possuiDataEntrega ? ($btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white') : 'bg-gray-200 opacity-40' }}">→ {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</button>
+                                                                    <button type="submit" class="w-full text-left px-2 py-0.5 rounded text-[10px] font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white' }}">→ {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</button>
                                                                 </form>
                                                             @endforeach
                                                         </div>
@@ -531,8 +558,13 @@
                                 </table>
                             </div>
 
-                            <!-- Vista Mobile (Cards) -->
-                            <div class="lg:hidden space-y-4">
+                            <!-- Cards Mobile - Escondido em telas >= 1024px -->
+                            <div class="space-y-4" style="display: block;" id="cards-mobile-localizacoes">
+                            <style>
+                                @media (min-width: 1024px) {
+                                    #cards-mobile-localizacoes { display: none !important; }
+                                }
+                            </style>
                                 @foreach($produto->localizacoes as $localizacao)
                                     @php
                                         $etapaAtualId = $localizacao->pivot->etapa_atual_id;
@@ -541,8 +573,8 @@
                                         $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
                                         $userLoc = auth()->user()->localizacao;
                                         $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
-                                        $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
-                                        $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
+                                        $userLocal = auth()->user()->localizacao;
+                                        $podeEditarEntrega = auth()->user()->isAdmin() || ($userLocal && $userLocal->capacidade > 0 && $userLocal->id == $localizacao->id);
 
                                         $corClasses = [
                                             'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
@@ -558,7 +590,7 @@
                                         ];
                                     @endphp
                                     <div x-data="{ showEtapaMenu: false }" class="bg-white border rounded-xl shadow-sm overflow-hidden border-purple-100">
-                                        <!-- Header do Card -->
+                                        <!-- Header -->
                                         <div class="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
                                             <div>
                                                 <span class="text-xs font-bold text-purple-700 uppercase tracking-wider block">Localização</span>
@@ -567,28 +599,34 @@
                                             <div class="text-right">
                                                 <span class="text-xs font-bold text-blue-700 uppercase tracking-wider block">OP</span>
                                                 @if($localizacao->pivot->ordem_producao)
-                                                    <a href="{{ $localizacao->pivot->ordem_producao_url }}" target="_blank" class="font-bold text-blue-800 hover:underline">
-                                                        {{ $localizacao->pivot->ordem_producao }}
-                                                    </a>
+                                                    <a href="{{ $localizacao->pivot->ordem_producao_url }}" target="_blank" class="font-bold text-blue-800 hover:underline">{{ $localizacao->pivot->ordem_producao }}</a>
                                                 @else
-                                                    <span class="font-bold text-blue-800">—</span>
+                                                    <span class="font-bold text-gray-400">—</span>
                                                 @endif
                                             </div>
                                         </div>
 
-                                        <!-- Corpo do Card -->
+                                        <!-- Corpo -->
                                         <div class="p-4 space-y-4">
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Quantidade</span>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Quantidade</span>
                                                     <span class="text-lg font-bold text-gray-900">{{ number_format($localizacao->pivot->quantidade, 0, ',', '.') }}</span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter block mb-0.5">Etapa Atual</span>
+                                                    <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Etapa Atual</span>
                                                     @if($etapaAtual)
-                                                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 border-gray-200' }}">
-                                                            {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
-                                                        </span>
+                                                        <div class="flex items-center gap-1">
+                                                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 border-gray-200' }}">
+                                                                {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
+                                                            </span>
+                                                            <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}"
+                                                               class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                </svg>
+                                                            </a>
+                                                        </div>
                                                     @else
                                                         <span class="text-gray-400 text-xs italic">Não definida</span>
                                                     @endif
@@ -610,7 +648,7 @@
                                                     <div class="flex items-center gap-1">
                                                         <span class="text-xs font-bold text-yellow-700">{{ $localizacao->pivot->data_entrega_faccao ? \Carbon\Carbon::parse($localizacao->pivot->data_entrega_faccao)->format('d/m/Y') : '—' }}</span>
                                                         @if($podeEditarEntrega)
-                                                            <button type="button" onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->nome_localizacao) }})" class="text-blue-500 p-1.5 bg-blue-50 rounded-lg border border-blue-100 shadow-sm active:scale-95 transition">
+                                                            <button type="button" onclick="abrirModalDataEntrega({{ $localizacao->pivot->id }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->nome_localizacao) }})" class="text-blue-500 p-1.5 bg-blue-50 rounded-lg border border-blue-100 shadow-sm">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
                                                             </button>
                                                         @endif
@@ -626,61 +664,67 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Ações de Etapa -->
+                                            <!-- Controles de Etapa -->
                                             @if($podeGerenciarEtapa)
-                                                <div class="border-t pt-3 flex flex-col gap-2 relative">
-                                                    @if($etapaAtual)
-                                                        <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="w-full">
-                                                            @csrf
-                                                            <button type="submit" class="w-full py-2 bg-red-50 text-red-600 border border-red-100 rounded-lg text-xs font-bold hover:bg-red-100 transition" onclick="return confirm('Isso irá resetar a etapa atual para Não Definida, mas manterá as quantidades e datas. Confirmar?')">
-                                                                Limpar Etapa (Recomeçar)
-                                                            </button>
-                                                        </form>
-                                                    @endif
-
+                                                <div class="pt-3 border-t border-gray-200 space-y-2 relative">
                                                     @if($transicoes->count() > 0)
-                                                        @foreach($transicoes as $transicao)
-                                                            <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                                <button type="submit" {{ !$possuiDataEntrega ? 'disabled' : '' }} class="w-full py-2.5 rounded-lg text-xs font-bold {{ $possuiDataEntrega ? ($btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white') : 'bg-gray-100 text-gray-300 cursor-not-allowed text-center' }}">
-                                                                    → {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
-                                                                </button>
-                                                            </form>
-                                                        @endforeach
+                                                        <div class="flex flex-wrap gap-2">
+                                                            @foreach($transicoes as $transicao)
+                                                                <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="flex-1 min-w-[120px]">
+                                                                    @csrf
+                                                                    <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
+                                                                    <button type="submit" class="w-full py-2 rounded-lg text-xs font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white' }}">
+                                                                        → {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
+                                                                    </button>
+                                                                </form>
+                                                            @endforeach
+                                                        </div>
                                                     @elseif(!$etapaAtual)
-                                                        <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="w-full py-2.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-100 transition inline-flex items-center justify-center gap-1">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                                                            Definir Etapa Inicial
+                                                        <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="w-full py-2 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-lg text-xs font-bold">
+                                                            + Definir Etapa
                                                         </button>
-
-                                                        <div x-show="showEtapaMenu" @click.away="showEtapaMenu = false" class="absolute left-0 bottom-full mb-2 w-full bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden divide-y divide-gray-100">
+                                                        <div x-show="showEtapaMenu" @click.away="showEtapaMenu = false" class="absolute left-0 right-0 bottom-full mb-2 bg-white rounded-lg shadow-xl border border-gray-200 z-50 divide-y divide-gray-100">
                                                             @foreach($etapasProducao as $etapa)
                                                                 <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
                                                                     @csrf
                                                                     <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
-                                                                    <button type="submit" class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 flex items-center gap-2 font-medium">
-                                                                        <span class="shrink-0">{{ $etapa->icone ?? '•' }}</span>
+                                                                    <button type="submit" class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                                                        <span>{{ $etapa->icone ?? '•' }}</span>
                                                                         <span>{{ $etapa->nome }}</span>
                                                                     </button>
                                                                 </form>
                                                             @endforeach
                                                         </div>
                                                     @endif
+                                                    @if($etapaAtual)
+                                                        <div class="flex flex-col items-center gap-2">
+                                                            @if($etapaAnteriorId)
+                                                                <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                                    @csrf
+                                                                    <button type="submit" class="text-xs text-gray-500 hover:text-gray-700 underline" onclick="return confirm('Voltar etapa?')">← Voltar Etapa</button>
+                                                                </form>
+                                                            @endif
+
+                                                            <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
+                                                                @csrf
+                                                                <button type="submit" class="text-red-500 text-xs underline" onclick="return confirm('Resetar etapa atual?')">Limpar Etapa</button>
+                                                            </form>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             @endif
                                         </div>
 
-                                        <!-- Rodapé Ações CRUD -->
+                                        <!-- Rodapé Ações -->
                                         @if($canAnyProdutoLocalizacoes)
                                             <div class="bg-gray-50 px-4 py-3 border-t flex justify-end gap-6">
                                                 @if($canUpdateProdutoLocalizacoes)
-                                                    <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 font-bold text-xs uppercase tracking-tighter hover:text-indigo-800">Editar</button>
+                                                    <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 font-bold text-xs uppercase hover:text-indigo-800">Editar</button>
                                                 @endif
                                                 @if($canDeleteProdutoLocalizacoes)
-                                                    <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja REMOVER COMPLETAMENTE esta fábrica e todos os seus dados de produção?')">
+                                                    <form action="{{ route('produtos.localizacoes.destroy', [$produto->id, $localizacao->pivot->id]) }}" method="POST" onsubmit="return confirm('Remover esta fábrica?')">
                                                         @csrf @method('DELETE')
-                                                        <button type="submit" class="text-red-600 font-bold text-xs uppercase tracking-tighter hover:text-red-800">Remover Fábrica</button>
+                                                        <button type="submit" class="text-red-600 font-bold text-xs uppercase hover:text-red-800">Remover</button>
                                                     </form>
                                                 @endif
                                             </div>
@@ -688,7 +732,7 @@
                                     </div>
                                 @endforeach
 
-                                <!-- Total Mobile Localizações -->
+                                <!-- Total Mobile -->
                                 <div class="bg-indigo-50 border-2 border-indigo-100 rounded-xl p-4 shadow-sm flex justify-between items-center">
                                     <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider">Total em Produção</span>
                                     <span class="text-xl font-black text-indigo-900">{{ number_format($totalLocalizacoes, 0, ',', '.') }}</span>
