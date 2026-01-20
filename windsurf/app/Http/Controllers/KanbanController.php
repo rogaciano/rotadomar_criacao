@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Produto;
 use App\Models\Localizacao;
 use App\Models\DirecionamentoComercial;
+use App\Models\Marca;
 use Illuminate\Support\Facades\DB;
 
 class KanbanController extends Controller
@@ -28,11 +29,15 @@ class KanbanController extends Controller
         $direcionamentoComercialId = $request->get('direcionamento_comercial_id');
         $direcionamentoComercialIds = collect($direcionamentoComercialId)->filter()->values()->all();
 
+        // Marcas - multi-select
+        $marcaId = $request->get('marca_id');
+        $marcaIds = collect($marcaId)->filter()->values()->all();
+
         // Verificar se o usuário está vinculado a uma localização com capacidade > 0
         $user = auth()->user();
         $localizacaoUsuario = $user->localizacao;
         $usuarioRestrito = false;
-        
+
         if ($localizacaoUsuario && $localizacaoUsuario->capacidade > 0) {
             // Usuário está vinculado a uma localização com capacidade - forçar visualização apenas da localização dele
             $localizacaoIds = [$localizacaoUsuario->id];
@@ -84,6 +89,10 @@ class KanbanController extends Controller
             ->when(!empty($direcionamentoComercialIds), function($query) use ($direcionamentoComercialIds) {
                 $query->whereIn('direcionamento_comercial_id', $direcionamentoComercialIds);
             })
+            // Filtro opcional por Marcas
+            ->when(!empty($marcaIds), function($query) use ($marcaIds) {
+                $query->whereIn('marca_id', $marcaIds);
+            })
             ->get()
             ->map(function($produto) {
                 // Adicionar quantidade_alocada do pivot
@@ -127,6 +136,11 @@ class KanbanController extends Controller
             ->orderBy('descricao')
             ->get();
 
+        // Lista de marcas para o filtro
+        $marcas = Marca::where('ativo', true)
+            ->orderBy('nome_marca')
+            ->get();
+
         return view('kanban.index', compact(
             'produtosPorLocalizacao',
             'meses',
@@ -137,6 +151,8 @@ class KanbanController extends Controller
             'localizacaoIds',
             'direcionamentosComerciais',
             'direcionamentoComercialIds',
+            'marcas',
+            'marcaIds',
             'usuarioRestrito'
         ));
     }

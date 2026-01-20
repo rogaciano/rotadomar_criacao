@@ -82,6 +82,20 @@
                         </select>
                     </div>
 
+                    <!-- Filtro de Marca (multi-select com Select2) -->
+                    <div class="flex-1 min-w-[220px]">
+                        <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca (uma ou mais)</label>
+                        <select name="marca_id[]" id="marca_id" multiple
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-marca">
+                            @foreach($marcas as $marca)
+                                <option value="{{ $marca->id }}"
+                                    {{ !empty($marcaIds ?? []) && in_array($marca->id, $marcaIds) ? 'selected' : '' }}>
+                                    {{ $marca->nome_marca }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <!-- Botão Atualizar -->
                     <div>
                         <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors">
@@ -109,6 +123,17 @@
                         @foreach($direcionamentosSelecionados as $direcionamentoAtual)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                 Direcionamento: <span class="ml-1 font-semibold">{{ $direcionamentoAtual->descricao }}</span>
+                            </span>
+                        @endforeach
+                    @endif
+
+                    @if(!empty($marcaIds))
+                        @php
+                            $marcasSelecionadas = $marcas->whereIn('id', $marcaIds);
+                        @endphp
+                        @foreach($marcasSelecionadas as $marcaAtual)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Marca: <span class="ml-1 font-semibold">{{ $marcaAtual->nome_marca }}</span>
                             </span>
                         @endforeach
                     @endif
@@ -512,6 +537,13 @@
                 jQuery('.js-select2-direcionamento').select2({
                     width: '100%',
                     placeholder: 'Selecione um ou mais direcionamentos',
+                    allowClear: true,
+                    language: 'pt-BR'
+                });
+
+                jQuery('.js-select2-marca').select2({
+                    width: '100%',
+                    placeholder: 'Selecione uma ou mais marcas',
                     allowClear: true,
                     language: 'pt-BR'
                 });
