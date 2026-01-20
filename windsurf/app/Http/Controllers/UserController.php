@@ -20,28 +20,22 @@ class UserController extends Controller
 
         // Filtro por nome
         if ($request->filled('name')) {
-            $name = trim((string) $request->name);
-            if ($name !== '') {
-                $query->where('name', 'like', '%' . $name . '%');
-            }
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
         }
 
         // Filtro por email
         if ($request->filled('email')) {
-            $email = trim((string) $request->email);
-            if ($email !== '') {
-                $query->where('email', 'like', '%' . $email . '%');
-            }
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
         }
 
         // Filtro por localização
         if ($request->filled('localizacao_id')) {
-            $query->where('localizacao_id', $request->localizacao_id);
+            $query->where('localizacao_id', $request->input('localizacao_id'));
         }
 
         // Filtro por tipo de usuário (admin/normal)
-        if ($request->has('is_admin') && $request->is_admin !== '') {
-            $query->where('is_admin', $request->is_admin);
+        if ($request->filled('is_admin')) {
+            $query->where('is_admin', $request->input('is_admin'));
         }
 
         $users = $query->orderBy('name')->paginate(10)->withQueryString();
