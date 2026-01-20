@@ -247,6 +247,8 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $ano = $request->filled('ano') ? $request->ano : now()->year;
         $localizacaoId = $request->filled('localizacao_id') ? $request->localizacao_id : null;
         $etapaId = $request->filled('etapa_id') ? $request->etapa_id : null;
+        $marcaId = $request->filled('marca_id') ? $request->marca_id : null;
+        $referencia = $request->input('referencia');
 
         // Verificar se o usuário está vinculado a uma localização com capacidade > 0
         $user = auth()->user();
@@ -271,8 +273,8 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         $capacidades = $query->get();
 
-        // Adicionar informações de produtos previstos
-        $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano, $etapaId) {
+        // Mapear dados para o formato esperado pela view
+        $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano, $etapaId, $marcaId, $referencia) {
             // Buscar produtos diretamente pela data_prevista_faccao em produto_localizacao
             $produtosQuery = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade, $mes, $ano, $etapaId) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
@@ -295,22 +297,33 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 }
             }]);
 
+            // Filtrar por marca se selecionada
+            if ($marcaId) {
+                $produtosQuery->where('marca_id', $marcaId);
+            }
+
+            // Filtrar por referência se informada
+            if ($referencia) {
+                $produtosQuery->where('referencia', 'like', "%{$referencia}%");
+            }
+
             $produtos = $produtosQuery->get()
             ->map(function($produto) {
-                // Adicionar quantidade_alocada do pivot
                 $produto->quantidade_alocada = $produto->localizacoes->sum('pivot.quantidade');
                 return $produto;
             });
+
+            $produtosPrevistos = $produtos->sum('quantidade_alocada');
 
             return [
                 'localizacao' => $capacidade->localizacao,
                 'capacidade' => $capacidade->capacidade,
                 'observacoes' => $capacidade->observacoes,
-                'produtos_previstos' => $capacidade->getProdutosPrevistos(),
+                'produtos_previstos' => $produtosPrevistos,
                 'produtos' => $produtos,
-                'saldo' => $capacidade->getSaldo(),
-                'percentual' => $capacidade->getPercentualOcupacao(),
-                'acima_capacidade' => $capacidade->isAcimaDaCapacidade()
+                'saldo' => $capacidade->capacidade - $produtosPrevistos,
+                'percentual' => $capacidade->capacidade > 0 ? round(($produtosPrevistos / $capacidade->capacidade) * 100, 1) : 0,
+                'acima_capacidade' => $produtosPrevistos > $capacidade->capacidade
             ];
         });
 
@@ -324,461 +337,12 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->orderBy('ordem')
             ->get();
 
-        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'usuarioRestrito'));
-    }
-
-    /**
-     * Sugerir redistribuição de produtos excedentes
-     * DESABILITADO: Tabela produto_alocacao_mensal não existe mais
-     */
-    public function sugerirRedistribuicao(Request $request)
-    {
-        return response()->json([
-            'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
-        ], 410);
-
-        /* CÓDIGO ANTIGO COMENTADO
-        $localizacaoId = $request->localizacao_id;
-        $mes = $request->mes;
-        $ano = $request->ano;
-
-        // Buscar capacidade atual
-        $capacidadeAtual = LocalizacaoCapacidadeMensal::where('localizacao_id', $localizacaoId)
-            ->where('mes', $mes)
-            ->where('ano', $ano)
-            ->with('localizacao')
-            ->first();
-
-        if (!$capacidadeAtual) {
-            return response()->json(['error' => 'Capacidade não encontrada'], 404);
-        }
-
-        // Calcular excedente
-        $excedente = $capacidadeAtual->getProdutosPrevistos() - $capacidadeAtual->capacidade;
-
-        if ($excedente <= 0) {
-            return response()->json(['message' => 'Não há excedente para redistribuir'], 200);
-        }
-
-        // Buscar alocações para redistribuir
-        // Ordena por quantidade CRESCENTE para pegar menores primeiro
-        $alocacoes = \App\Models\ProdutoAlocacaoMensal::where('localizacao_id', $localizacaoId)
-            ->where('mes', $mes)
-            ->where('ano', $ano)
-            ->with(['produto.marca', 'produto.grupoProduto'])
-            ->orderBy('quantidade', 'asc') // Menores quantidades primeiro
-            ->orderBy('created_at', 'desc') // Mais recentes primeiro
+        // Marcas para filtro
+        $marcas = \App\Models\Marca::where('ativo', true)
+            ->orderBy('nome_marca')
             ->get();
 
-        // Selecionar alocações e calcular quantidades exatas para redistribuir
-        $alocacoesSelecionadas = [];
-        $quantidadeAcumulada = 0;
-
-        foreach ($alocacoes as $alocacao) {
-            // Se já completou o excedente necessário, para
-            if ($quantidadeAcumulada >= $excedente) {
-                break;
-            }
-
-            // Calcula quanto ainda falta
-            $quantidadeFaltante = $excedente - $quantidadeAcumulada;
-
-            if ($alocacao->quantidade <= $quantidadeFaltante) {
-                // Alocação cabe inteira - move tudo
-                $alocacoesSelecionadas[] = [
-                    'alocacao' => $alocacao,
-                    'quantidade_mover' => $alocacao->quantidade,
-                    'tipo' => 'completo'
-                ];
-                $quantidadeAcumulada += $alocacao->quantidade;
-            } else {
-                // Alocação é maior que o necessário - DIVIDIR
-                $alocacoesSelecionadas[] = [
-                    'alocacao' => $alocacao,
-                    'quantidade_mover' => $quantidadeFaltante,
-                    'tipo' => 'parcial'
-                ];
-                $quantidadeAcumulada += $quantidadeFaltante;
-                break; // Completou o excedente exato
-            }
-        }
-
-        // Buscar próximo mês com capacidade disponível
-        $proximoMes = $mes + 1;
-        $proximoAno = $ano;
-
-        if ($proximoMes > 12) {
-            $proximoMes = 1;
-            $proximoAno++;
-        }
-
-        $capacidadeDestino = LocalizacaoCapacidadeMensal::where('localizacao_id', $localizacaoId)
-            ->where('mes', $proximoMes)
-            ->where('ano', $proximoAno)
-            ->first();
-
-        return response()->json([
-            'excedente' => $excedente,
-            'quantidade_selecionada' => $quantidadeAcumulada,
-            'alocacoes' => collect($alocacoesSelecionadas)->map(function($item) {
-                $alocacao = $item['alocacao'];
-                $produto = $alocacao->produto;
-
-                return [
-                    'alocacao_id' => $alocacao->id,
-                    'produto_id' => $produto->id,
-                    'referencia' => $produto->referencia,
-                    'descricao' => $produto->descricao,
-                    'quantidade' => $alocacao->quantidade,
-                    'quantidade_mover' => $item['quantidade_mover'],
-                    'tipo' => $item['tipo'],
-                    'marca' => $produto->marca,
-                    'grupoProduto' => $produto->grupoProduto
-                ];
-            }),
-            'mes_destino' => $proximoMes,
-            'ano_destino' => $proximoAno,
-            'capacidade_destino' => $capacidadeDestino,
-            'localizacao' => $capacidadeAtual->localizacao
-        ]);
-        */
-    }
-
-    /**
-     * Aplicar redistribuição de alocações
-     * DESABILITADO: Tabela produto_alocacao_mensal não existe mais
-     */
-    public function aplicarRedistribuicao(Request $request)
-    {
-        return response()->json([
-            'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
-        ], 410);
-
-        /* CÓDIGO ANTIGO COMENTADO
-        $validator = Validator::make($request->all(), [
-            'alocacoes' => 'required|array',
-            'alocacoes.*.alocacao_id' => 'required|exists:produto_alocacao_mensal,id',
-            'alocacoes.*.quantidade_mover' => 'required|integer|min:1',
-            'mes_destino' => 'required|integer|min:1|max:12',
-            'ano_destino' => 'required|integer',
-            'localizacao_id' => 'required|exists:localizacoes,id',
-            'motivo' => 'nullable|string',
-            'observacoes' => 'nullable|string'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $redistribuidos = 0;
-        $divididos = 0;
-        $erros = [];
-
-        \DB::beginTransaction();
-
-        try {
-            foreach ($request->alocacoes as $alocacaoData) {
-                $alocacao = \App\Models\ProdutoAlocacaoMensal::find($alocacaoData['alocacao_id']);
-
-                if (!$alocacao) {
-                    $erros[] = "Alocação ID {$alocacaoData['alocacao_id']} não encontrada";
-                    continue;
-                }
-
-                $quantidadeMover = $alocacaoData['quantidade_mover'];
-
-                if ($quantidadeMover < $alocacao->quantidade) {
-                    // DIVIDIR ALOCAÇÃO
-                    $quantidadeFicar = $alocacao->quantidade - $quantidadeMover;
-
-                    // Reduzir quantidade da alocação original
-                    $alocacao->quantidade = $quantidadeFicar;
-                    $alocacao->save();
-
-                    // Criar nova alocação no mês destino
-                    \App\Models\ProdutoAlocacaoMensal::create([
-                        'produto_id' => $alocacao->produto_id,
-                        'localizacao_id' => $request->localizacao_id,
-                        'mes' => $request->mes_destino,
-                        'ano' => $request->ano_destino,
-                        'quantidade' => $quantidadeMover,
-                        'tipo' => 'redistribuido',
-                        'usuario_id' => auth()->id(),
-                        'observacoes' => "Redistribuído de {$alocacao->mes_ano_formatado}. " . ($request->observacoes ?? '')
-                    ]);
-
-                    $divididos++;
-
-                } else {
-                    // MOVER ALOCAÇÃO COMPLETA
-                    $alocacao->mes = $request->mes_destino;
-                    $alocacao->ano = $request->ano_destino;
-                    $alocacao->tipo = 'redistribuido';
-                    $alocacao->observacoes = "Redistribuído. " . ($request->observacoes ?? '');
-                    $alocacao->save();
-                }
-
-                // Registrar histórico
-                \App\Models\ProdutoRedistribuicaoHistorico::create([
-                    'produto_id' => $alocacao->produto_id,
-                    'localizacao_origem_id' => $alocacao->localizacao_id,
-                    'data_prevista_origem' => null,
-                    'mes_origem' => $alocacao->mes,
-                    'ano_origem' => $alocacao->ano,
-                    'localizacao_destino_id' => $request->localizacao_id,
-                    'data_prevista_destino' => null,
-                    'mes_destino' => $request->mes_destino,
-                    'ano_destino' => $request->ano_destino,
-                    'quantidade' => $quantidadeMover,
-                    'motivo' => $request->motivo ?? 'excedente_capacidade',
-                    'tipo_redistribuicao' => $divididos > 0 ? 'automatica_divisao' : 'automatica',
-                    'usuario_id' => auth()->id(),
-                    'observacoes' => $request->observacoes
-                ]);
-
-                $redistribuidos++;
-            }
-
-            \DB::commit();
-
-            $mensagem = "$redistribuidos alocação(ões) redistribuída(s)";
-            if ($divididos > 0) {
-                $mensagem .= " ($divididos dividida(s))";
-            }
-            $mensagem .= " com sucesso!";
-
-            return response()->json([
-                'success' => true,
-                'message' => $mensagem,
-                'redistribuidos' => $redistribuidos,
-                'divididos' => $divididos,
-                'erros' => $erros
-            ]);
-
-        } catch (\Exception $e) {
-            \DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao redistribuir: ' . $e->getMessage()
-            ], 500);
-        }
-        */
-    }
-
-    /**
-     * Gerar capacidades mensais baseadas no padrão das localizações
-     */
-    public function gerarCapacidadesMes(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'mes' => 'required|integer|min:1|max:12',
-            'ano' => 'required|integer|min:2020|max:2100'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Dados inválidos',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        try {
-            $mes = $request->mes;
-            $ano = $request->ano;
-
-            // Buscar localizações ativas com capacidade > 0
-            $localizacoes = Localizacao::where('ativo', true)
-                ->where('capacidade', '>', 0)
-                ->get();
-
-            if ($localizacoes->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Nenhuma localização ativa com capacidade encontrada.'
-                ]);
-            }
-
-            $criados = 0;
-            $jaExistentes = 0;
-            $erros = [];
-
-            foreach ($localizacoes as $localizacao) {
-                // Verificar se já existe registro (inclusive soft-deleted) para este mês/ano
-                $registro = LocalizacaoCapacidadeMensal::withTrashed()
-                    ->where('localizacao_id', $localizacao->id)
-                    ->where('mes', $mes)
-                    ->where('ano', $ano)
-                    ->first();
-
-                if ($registro) {
-                    // Se existir e estiver soft-deleted, restaurar e atualizar capacidade
-                    if ($registro->trashed()) {
-                        try {
-                            $registro->restore();
-                            $registro->capacidade = $localizacao->capacidade;
-                            $registro->save();
-                        } catch (\Exception $e) {
-                            $erros[] = "Erro ao restaurar capacidade para {$localizacao->nome_localizacao}: " . $e->getMessage();
-                        }
-                    }
-
-                    $jaExistentes++;
-                    continue;
-                }
-
-                try {
-                    LocalizacaoCapacidadeMensal::create([
-                        'localizacao_id' => $localizacao->id,
-                        'mes' => $mes,
-                        'ano' => $ano,
-                        'capacidade' => $localizacao->capacidade
-                    ]);
-                    $criados++;
-                } catch (\Exception $e) {
-                    $erros[] = "Erro ao criar capacidade para {$localizacao->nome_localizacao}: " . $e->getMessage();
-                }
-            }
-
-            $mesesNomes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            $mensagem = "Capacidades geradas para {$mesesNomes[$mes]}/{$ano}: ";
-            $mensagem .= "{$criados} criada(s)";
-
-            if ($jaExistentes > 0) {
-                $mensagem .= ", {$jaExistentes} já existente(s)";
-            }
-
-            if (!empty($erros)) {
-                $mensagem .= ". Alguns erros ocorreram.";
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $mensagem,
-                'criados' => $criados,
-                'ja_existentes' => $jaExistentes,
-                'erros' => $erros
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao gerar capacidades: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Reverter redistribuição de alocação
-     * DESABILITADO: Tabela produto_alocacao_mensal não existe mais
-     */
-    public function reverterRedistribuicao(Request $request)
-    {
-        return response()->json([
-            'error' => 'Funcionalidade desabilitada - tabela produto_alocacao_mensal não existe mais'
-        ], 410);
-
-        /* CÓDIGO ANTIGO COMENTADO
-        $validator = Validator::make($request->all(), [
-            'historico_id' => 'required|exists:produto_redistribuicao_historico,id'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        \DB::beginTransaction();
-
-        try {
-            $historico = \App\Models\ProdutoRedistribuicaoHistorico::with(['produto'])->findOrFail($request->historico_id);
-
-            // Buscar a alocação redistribuída (no destino)
-            $alocacaoDestino = \App\Models\ProdutoAlocacaoMensal::where('produto_id', $historico->produto_id)
-                ->where('localizacao_id', $historico->localizacao_destino_id)
-                ->where('mes', $historico->mes_destino)
-                ->where('ano', $historico->ano_destino)
-                ->where('tipo', 'redistribuido')
-                ->first();
-
-            if (!$alocacaoDestino) {
-                throw new \Exception('Alocação redistribuída não encontrada. Pode já ter sido revertida ou removida.');
-            }
-
-            // Verificar se a alocação origem ainda existe (se foi dividida)
-            $alocacaoOrigem = \App\Models\ProdutoAlocacaoMensal::where('produto_id', $historico->produto_id)
-                ->where('localizacao_id', $historico->localizacao_origem_id)
-                ->where('mes', $historico->mes_origem)
-                ->where('ano', $historico->ano_origem)
-                ->first();
-
-            if ($alocacaoOrigem) {
-                // Se a alocação origem existe, foi uma divisão - somar a quantidade de volta
-                $alocacaoOrigem->quantidade += $historico->quantidade;
-                $alocacaoOrigem->save();
-
-                // Remover a alocação do destino
-                $alocacaoDestino->delete();
-            } else {
-                // Se não existe, foi uma movimentação completa - mover de volta
-                $alocacaoDestino->mes = $historico->mes_origem;
-                $alocacaoDestino->ano = $historico->ano_origem;
-                $alocacaoDestino->localizacao_id = $historico->localizacao_origem_id;
-                $alocacaoDestino->tipo = 'manual';
-                $alocacaoDestino->observacoes = "Redistribuição revertida. " . ($alocacaoDestino->observacoes ?? '');
-                $alocacaoDestino->save();
-            }
-
-            // Marcar histórico como revertido (vamos adicionar esse campo)
-            // Por enquanto, vamos deletar o histórico ou adicionar uma observação
-            $historico->observacoes = "[REVERTIDO] " . ($historico->observacoes ?? '');
-            $historico->save();
-
-            \DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Redistribuição revertida com sucesso!',
-                'produto' => $historico->produto->referencia ?? 'N/A'
-            ]);
-
-        } catch (\Exception $e) {
-            \DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro ao reverter redistribuição: ' . $e->getMessage()
-            ], 500);
-        }
-        */
-    }
-
-    /**
-     * Listar histórico de redistribuições para um período
-     */
-    public function historicoRedistribuicoes(Request $request)
-    {
-        $mes = $request->filled('mes') ? $request->mes : now()->month;
-        $ano = $request->filled('ano') ? $request->ano : now()->year;
-
-        $historico = \App\Models\ProdutoRedistribuicaoHistorico::with([
-            'produto',
-            'localizacaoOrigem',
-            'localizacaoDestino',
-            'usuario'
-        ])
-        ->porPeriodo($mes, $ano)
-        ->where(function($query) {
-            $query->whereNull('observacoes')
-                  ->orWhere('observacoes', 'NOT LIKE', '[REVERTIDO]%');
-        })
-        ->orderBy('created_at', 'desc')
-        ->get();
-
-        return response()->json([
-            'success' => true,
-            'historico' => $historico
-        ]);
+        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioRestrito'));
     }
 
     /**
@@ -789,6 +353,9 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $mes = $request->input('mes', now()->month);
         $ano = $request->input('ano', now()->year);
         $localizacaoId = $request->input('localizacao_id');
+        $etapaId = $request->input('etapa_id');
+        $marcaId = $request->input('marca_id');
+        $referencia = $request->input('referencia');
         $orientation = $request->input('orientation', 'landscape');
 
         // Buscar capacidades do período
@@ -803,33 +370,56 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $capacidades = $query->get();
 
         // Mapear dados para o formato esperado pela view (mesma lógica do dashboard)
-        $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano) {
+        $dadosDashboard = $capacidades->map(function ($capacidade) use ($mes, $ano, $etapaId, $marcaId, $referencia) {
             // Buscar produtos diretamente pela data_prevista_faccao em produto_localizacao
-            $produtos = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade, $mes, $ano) {
+            $produtosQuery = \App\Models\Produto::whereHas('localizacoes', function($query) use ($capacidade, $mes, $ano, $etapaId) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
+
+                // Filtrar por etapa se selecionada
+                if ($etapaId) {
+                    $query->where('etapa_atual_id', $etapaId);
+                }
             })
-            ->with(['marca', 'grupoProduto', 'status', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade, $mes, $ano) {
+            ->with(['marca', 'grupoProduto', 'status', 'observacoes', 'direcionamentoComercial', 'localizacoes' => function($query) use ($capacidade, $mes, $ano, $etapaId) {
                 $query->where('localizacao_id', $capacidade->localizacao_id)
                       ->whereMonth('data_prevista_faccao', $mes)
                       ->whereYear('data_prevista_faccao', $ano);
-            }])
-            ->get()
+
+                // Filtrar por etapa se selecionada
+                if ($etapaId) {
+                    $query->where('etapa_atual_id', $etapaId);
+                }
+            }]);
+
+            // Filtrar por marca se selecionada
+            if ($marcaId) {
+                $produtosQuery->where('marca_id', $marcaId);
+            }
+
+            // Filtrar por referência se informada
+            if ($referencia) {
+                $produtosQuery->where('referencia', 'like', "%{$referencia}%");
+            }
+
+            $produtos = $produtosQuery->get()
             ->map(function($produto) {
                 $produto->quantidade_alocada = $produto->localizacoes->sum('pivot.quantidade');
                 return $produto;
             });
 
+            $produtosPrevistos = $produtos->sum('quantidade_alocada');
+
             return [
                 'localizacao' => $capacidade->localizacao,
                 'capacidade' => $capacidade->capacidade,
                 'observacoes' => $capacidade->observacoes,
-                'produtos_previstos' => $capacidade->getProdutosPrevistos(),
+                'produtos_previstos' => $produtosPrevistos,
                 'produtos' => $produtos,
-                'saldo' => $capacidade->getSaldo(),
-                'percentual' => $capacidade->getPercentualOcupacao(),
-                'acima_capacidade' => $capacidade->isAcimaDaCapacidade()
+                'saldo' => $capacidade->capacidade - $produtosPrevistos,
+                'percentual' => $capacidade->capacidade > 0 ? round(($produtosPrevistos / $capacidade->capacidade) * 100, 1) : 0,
+                'acima_capacidade' => $produtosPrevistos > $capacidade->capacidade
             ];
         });
 
@@ -908,6 +498,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $mes = $request->input('mes', now()->month);
         $ano = $request->input('ano', now()->year);
         $localizacaoId = $request->input('localizacao_id');
+        $referencia = $request->input('referencia');
 
         // Buscar todas as alocações do mês com suas datas
         $query = \DB::table('produto_localizacao')
@@ -947,6 +538,10 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         if ($localizacaoId) {
             $query->where('produto_localizacao.localizacao_id', $localizacaoId);
+        }
+
+        if ($referencia) {
+            $query->where('produtos.referencia', 'like', "%{$referencia}%");
         }
 
         $alocacoes = $query->get();

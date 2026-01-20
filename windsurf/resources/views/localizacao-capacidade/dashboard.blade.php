@@ -31,14 +31,14 @@
                     Ver Listagem
                 </a>
 
-                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'orientation' => 'landscape']) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'landscape']) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     PDF Paisagem
                 </a>
 
-                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'orientation' => 'portrait']) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'portrait']) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
@@ -64,9 +64,9 @@
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
                 <div class="p-6">
-                    <form action="{{ route('localizacao-capacidade.dashboard') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div>
-                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">
+                    <form action="{{ route('localizacao-capacidade.dashboard') }}" method="GET" class="flex flex-col lg:flex-row lg:items-end gap-4">
+                        <div class="flex-1 min-w-[150px]">
+                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1 text-nowrap">
                                 Localização
                                 @if($usuarioRestrito ?? false)
                                     <span class="text-xs text-gray-500">(Seu acesso)</span>
@@ -97,9 +97,14 @@
                             @endif
                         </div>
 
-                        <div>
+                        <div class="w-full lg:w-32">
+                            <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
+                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Ex: 1234" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                        </div>
+
+                        <div class="w-full lg:w-32">
                             <label for="mes" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
-                            <select name="mes" id="mes" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <select name="mes" id="mes" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
                                 @php
                                     $meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
                                 @endphp
@@ -111,9 +116,9 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="w-full lg:w-28">
                             <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-                            <select name="ano" id="ano" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <select name="ano" id="ano" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
                                 @foreach(range(now()->year - 1, now()->year + 2) as $a)
                                     <option value="{{ $a }}" {{ $ano == $a ? 'selected' : '' }}>
                                         {{ $a }}
@@ -122,9 +127,21 @@
                             </select>
                         </div>
 
-                        <div>
+                        <div class="flex-1 min-w-[120px]">
+                            <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                            <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                                <option value="">Todas as Marcas</option>
+                                @foreach($marcas as $marca)
+                                    <option value="{{ $marca->id }}" {{ ($marcaId ?? '') == $marca->id ? 'selected' : '' }}>
+                                        {{ $marca->nome_marca }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex-1 min-w-[150px]">
                             <label for="etapa_id" class="block text-sm font-medium text-gray-700 mb-1">Etapa de Produção</label>
-                            <select name="etapa_id" id="etapa_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <select name="etapa_id" id="etapa_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
                                 <option value="">Todas as Etapas</option>
                                 @foreach($etapasProducao as $etapa)
                                     <option value="{{ $etapa->id }}" {{ ($etapaId ?? '') == $etapa->id ? 'selected' : '' }}>
@@ -134,8 +151,8 @@
                             </select>
                         </div>
 
-                        <div class="flex items-end gap-2">
-                            <button type="submit" class="flex-1 inline-flex justify-center items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <div class="w-full lg:w-auto">
+                            <button type="submit" class="w-full lg:px-6 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 h-[42px] flex justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
