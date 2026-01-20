@@ -41,18 +41,32 @@
                         <div class="flex items-center gap-3">
                             @php
                                 $corClasses = [
-                                    'blue' => 'bg-blue-100 text-blue-800',
-                                    'green' => 'bg-green-100 text-green-800',
-                                    'yellow' => 'bg-yellow-100 text-yellow-800',
-                                    'red' => 'bg-red-100 text-red-800',
-                                    'purple' => 'bg-purple-100 text-purple-800',
-                                    'gray' => 'bg-gray-100 text-gray-800',
-                                    'indigo' => 'bg-indigo-100 text-indigo-800',
-                                    'pink' => 'bg-pink-100 text-pink-800',
-                                    'orange' => 'bg-orange-100 text-orange-800',
+                                    'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                    'green' => 'bg-green-100 text-green-800 border-green-200',
+                                    'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                    'red' => 'bg-red-100 text-red-800 border-red-200',
+                                    'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                    'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                    'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                    'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                    'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
                                 ];
+                                $btnCorClasses = [
+                                    'blue' => 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
+                                    'green' => 'bg-green-600 hover:bg-green-700 text-white shadow-sm',
+                                    'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm',
+                                    'red' => 'bg-red-600 hover:bg-red-700 text-white shadow-sm',
+                                    'purple' => 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm',
+                                    'gray' => 'bg-gray-600 hover:bg-gray-700 text-white shadow-sm',
+                                    'indigo' => 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm',
+                                    'pink' => 'bg-pink-500 hover:bg-pink-600 text-white shadow-sm',
+                                    'orange' => 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm',
+                                ];
+                                // Fallback para cores não mapeadas
+                                $defaultCorClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                                $defaultBtnClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm';
                             @endphp
-                            <span class="px-3 py-1 rounded-full text-sm font-medium {{ $corClasses[$etapa->cor] ?? 'bg-gray-100 text-gray-800' }}">
+                            <span class="px-3 py-1 rounded-full text-sm font-medium {{ $corClasses[$etapa->cor] ?? $defaultCorClass }}">
                                 {{ ucfirst($etapa->cor) }}
                             </span>
                             <span class="px-3 py-1 rounded-full text-sm {{ $etapa->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -105,24 +119,36 @@
                         </svg>
                         Próximas Etapas Possíveis (Saída)
                     </h4>
-                    
+
                     @if($etapa->transicoesOrigem->count() > 0)
                         <div class="flex flex-wrap gap-2">
                             @foreach($etapa->transicoesOrigem as $transicao)
                                 @php
-                                    $btnCorClasses = [
-                                        'blue' => 'bg-blue-500 hover:bg-blue-600 text-white',
-                                        'green' => 'bg-green-500 hover:bg-green-600 text-white',
-                                        'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white',
-                                        'red' => 'bg-red-500 hover:bg-red-600 text-white',
-                                        'purple' => 'bg-purple-500 hover:bg-purple-600 text-white',
-                                        'gray' => 'bg-gray-500 hover:bg-gray-600 text-white',
-                                        'indigo' => 'bg-indigo-500 hover:bg-indigo-600 text-white',
-                                        'pink' => 'bg-pink-500 hover:bg-pink-600 text-white',
-                                        'orange' => 'bg-orange-500 hover:bg-orange-600 text-white',
+                                    $corClasses = [
+                                        'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                        'green' => 'bg-green-100 text-green-800 border-green-200',
+                                        'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                        'red' => 'bg-red-100 text-red-800 border-red-200',
+                                        'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                        'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                        'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                        'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                        'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
                                     ];
+                                    $btnCorClasses = [
+                                        'blue' => 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
+                                        'green' => 'bg-green-600 hover:bg-green-700 text-white shadow-sm',
+                                        'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm',
+                                        'red' => 'bg-red-600 hover:bg-red-700 text-white shadow-sm',
+                                        'purple' => 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm',
+                                        'gray' => 'bg-gray-600 hover:bg-gray-700 text-white shadow-sm',
+                                        'indigo' => 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm',
+                                        'pink' => 'bg-pink-500 hover:bg-pink-600 text-white shadow-sm',
+                                        'orange' => 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm',
+                                    ];
+                                    $defaultBtnClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm';
                                 @endphp
-                                <span class="px-4 py-2 rounded-lg text-sm font-medium {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-gray-500 text-white' }}">
+                                <span class="px-4 py-2 rounded-lg text-sm font-medium {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
                                     {{ $transicao->etapaDestino->icone ?? '' }}
                                     {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
                                 </span>
@@ -143,7 +169,7 @@
                         </svg>
                         Etapas Anteriores (De onde pode vir)
                     </h4>
-                    
+
                     @if($etapa->transicoesDestino->count() > 0)
                         <div class="flex flex-wrap gap-2">
                             @foreach($etapa->transicoesDestino as $transicao)

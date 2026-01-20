@@ -100,19 +100,30 @@
                             $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
 
                             $corClasses = [
-                                'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
-                                'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'red' => 'bg-red-100 text-red-800 border-red-200',
-                                'purple' => 'bg-purple-100 text-purple-800 border-purple-200', 'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
-                                'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200', 'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                                'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                'green' => 'bg-green-100 text-green-800 border-green-200',
+                                'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                'red' => 'bg-red-100 text-red-800 border-red-200',
+                                'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                                'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                                'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
                                 'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
                             ];
                             $btnCorClasses = [
-                                'blue' => 'bg-blue-500 hover:bg-blue-600 text-white', 'green' => 'bg-green-500 hover:bg-green-600 text-white',
-                                'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white', 'red' => 'bg-red-500 hover:bg-red-600 text-white',
-                                'purple' => 'bg-purple-500 hover:bg-purple-600 text-white', 'gray' => 'bg-gray-500 hover:bg-gray-600 text-white',
-                                'indigo' => 'bg-indigo-500 hover:bg-indigo-600 text-white', 'pink' => 'bg-pink-500 hover:bg-pink-600 text-white',
-                                'orange' => 'bg-orange-500 hover:bg-orange-600 text-white',
+                                'blue' => 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
+                                'green' => 'bg-green-600 hover:bg-green-700 text-white shadow-sm',
+                                'yellow' => 'bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm',
+                                'red' => 'bg-red-600 hover:bg-red-700 text-white shadow-sm',
+                                'purple' => 'bg-purple-600 hover:bg-purple-700 text-white shadow-sm',
+                                'gray' => 'bg-gray-600 hover:bg-gray-700 text-white shadow-sm',
+                                'indigo' => 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm',
+                                'pink' => 'bg-pink-500 hover:bg-pink-600 text-white shadow-sm',
+                                'orange' => 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm',
                             ];
+                            // Fallback para cores não mapeadas
+                            $defaultCorClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                            $defaultBtnClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm';
                         @endphp
                         <tr>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
@@ -196,7 +207,7 @@
                                 @if($etapaAtual)
                                     <div class="flex flex-col gap-1">
                                         <div class="flex items-center gap-1">
-                                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                                            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? $defaultCorClass }}">
                                                 {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
                                             </span>
                                             <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}"
@@ -250,7 +261,7 @@
                                             <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                <button type="submit" class="w-full text-left px-2 py-0.5 rounded text-[10px] font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white' }}">→ {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</button>
+                                                <button type="submit" class="w-full text-left px-2 py-0.5 rounded text-[10px] font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">→ {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</button>
                                             </form>
                                         @endforeach
                                     </div>
@@ -301,17 +312,29 @@
                     $podeEditarEntrega = auth()->user()->isAdmin() || ($userLocal && $userLocal->capacidade > 0 && $userLocal->id == $localizacao->id);
 
                     $corClasses = [
-                        'blue' => 'bg-blue-100 text-blue-800 border-blue-200', 'green' => 'bg-green-100 text-green-800 border-green-200',
-                        'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200', 'red' => 'bg-red-100 text-red-800 border-red-200',
-                        'purple' => 'bg-purple-100 text-purple-800 border-purple-200', 'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
-                        'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200', 'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
+                        'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
+                        'green' => 'bg-green-100 text-green-800 border-green-200',
+                        'yellow' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                        'red' => 'bg-red-100 text-red-800 border-red-200',
+                        'purple' => 'bg-purple-100 text-purple-800 border-purple-200',
+                        'gray' => 'bg-gray-100 text-gray-800 border-gray-200',
+                        'indigo' => 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                        'pink' => 'bg-pink-100 text-pink-800 border-pink-200',
                         'orange' => 'bg-orange-100 text-orange-800 border-orange-200',
                     ];
                     $btnCorClasses = [
-                        'blue' => 'bg-blue-500 text-white', 'green' => 'bg-green-500 text-white', 'yellow' => 'bg-yellow-500 text-white',
-                        'red' => 'bg-red-500 text-white', 'purple' => 'bg-purple-500 text-white', 'gray' => 'bg-gray-500 text-white',
-                        'indigo' => 'bg-indigo-500 text-white', 'pink' => 'bg-pink-500 text-white', 'orange' => 'bg-orange-500 text-white',
+                        'blue' => 'bg-blue-600 text-white shadow-sm',
+                        'green' => 'bg-green-600 text-white shadow-sm',
+                        'yellow' => 'bg-yellow-500 text-white shadow-sm',
+                        'red' => 'bg-red-600 text-white shadow-sm',
+                        'purple' => 'bg-purple-600 text-white shadow-sm',
+                        'gray' => 'bg-gray-600 text-white shadow-sm',
+                        'indigo' => 'bg-indigo-600 text-white shadow-sm',
+                        'pink' => 'bg-pink-500 text-white shadow-sm',
+                        'orange' => 'bg-orange-500 text-white shadow-sm',
                     ];
+                    $defaultCorClass = 'bg-gray-100 text-gray-800 border-gray-200';
+                    $defaultBtnClass = 'bg-blue-600 text-white shadow-sm';
                 @endphp
                 <div x-data="{ showEtapaMenu: false }" class="bg-white border rounded-xl shadow-sm overflow-hidden border-purple-100">
                     <!-- Header -->
@@ -341,7 +364,7 @@
                                 <span class="text-[10px] font-bold text-gray-400 uppercase block mb-0.5">Etapa Atual</span>
                                 @if($etapaAtual)
                                     <div class="flex items-center gap-1">
-                                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? 'bg-gray-100 border-gray-200' }}">
+                                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $corClasses[$etapaAtual->cor] ?? $defaultCorClass }}">
                                             {{ $etapaAtual->icone ?? '' }} {{ $etapaAtual->nome }}
                                         </span>
                                         <a href="{{ route('produtos.localizacoes.historico-etapas', [$produto->id, $localizacao->pivot->id]) }}"
@@ -397,7 +420,7 @@
                                             <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="flex-1 min-w-[120px]">
                                                 @csrf
                                                 <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                <button type="submit" class="w-full py-2 rounded-lg text-xs font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-500 text-white' }}">
+                                                <button type="submit" class="w-full py-2 rounded-lg text-xs font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
                                                     → {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
                                                 </button>
                                             </form>
