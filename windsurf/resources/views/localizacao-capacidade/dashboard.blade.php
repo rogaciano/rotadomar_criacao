@@ -68,13 +68,13 @@
                         <div class="flex-1 min-w-[150px]">
                             <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1 text-nowrap">
                                 Localização
-                                @if($usuarioRestrito ?? false)
+                                @if($usuarioFaccao ?? false)
                                     <span class="text-xs text-gray-500">(Seu acesso)</span>
                                 @endif
                             </label>
                             <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                @if($usuarioRestrito ?? false)
-                                    {{-- Usuário restrito: principal no topo, visualizações abaixo --}}
+                                @if($usuarioFaccao ?? false)
+                                    {{-- Usuário de facção: principal no topo, visualizações abaixo --}}
                                     @php
                                         $locPrincipal = $localizacoes->firstWhere('id', $localizacaoPrincipalId ?? null);
                                         $locsVisualizacao = $localizacoes->filter(fn($l) => in_array($l->id, $localizacoesVisualizacaoIds ?? []));

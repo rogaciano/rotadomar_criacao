@@ -71,27 +71,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Verifica se o usuário é um usuário de facção (localização com capacidade > 0)
+     * Usuários de facção têm um localizacao_id definido, NÃO são admins,
+     * e a localização tem capacidade maior que zero
+     *
+     * @return bool
+     */
+    public function isUsuarioFaccao(): bool
+    {
+        if ($this->isAdmin() || empty($this->localizacao_id)) {
+            return false;
+        }
+
+        $localizacao = $this->localizacao;
+        return $localizacao && $localizacao->capacidade > 0;
+    }
+
+    /**
      * Verifica se o usuário é um usuário de localização (facção/setor) restrito
-     * Usuários de localização têm um localizacao_id definido E NÃO são admins
+     * Alias para isUsuarioFaccao() para manter compatibilidade
      *
      * @return bool
      */
     public function isUsuarioLocalizacao(): bool
     {
-        return !empty($this->localizacao_id) && !$this->isAdmin();
+        return $this->isUsuarioFaccao();
     }
 
     /**
      * Verifica se o usuário pode gerenciar etapas de uma localização específica
-     * Permite se for Admin OU se a localização for a sua principal
+     * Permite APENAS se for a localização PRINCIPAL do usuário de facção
+     * Admins e outros usuários NÃO podem mudar etapas
      *
      * @param int $localizacaoId
      * @return bool
      */
     public function podeGerenciarEtapa(int $localizacaoId): bool
     {
-        if ($this->isAdmin()) {
-            return true;
+        // Apenas usuários de facção podem mudar etapas, e só na sua localização principal
+        if (!$this->isUsuarioFaccao()) {
+            return false;
         }
 
         return $this->localizacao_id == $localizacaoId;

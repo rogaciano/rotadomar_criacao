@@ -250,15 +250,14 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $marcaId = $request->filled('marca_id') ? $request->marca_id : null;
         $referencia = $request->input('referencia');
 
-        // Verificar se o usuário é um usuário de localização (facção/setor)
+        // Verificar se o usuário é um usuário de facção (localização com capacidade > 0)
         $user = auth()->user();
-        $usuarioRestrito = false;
+        $usuarioFaccao = $user->isUsuarioFaccao();
         $localizacoesPermitidas = [];
 
-        if ($user->isUsuarioLocalizacao()) {
-            // Usuário de localização: pode ver sua localização principal + localizações de visualização
+        if ($usuarioFaccao) {
+            // Usuário de facção: pode ver sua localização principal + localizações de visualização
             $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
-            $usuarioRestrito = true;
 
             // Se não há filtro, usar a localização principal por padrão
             if (!$localizacaoId) {
@@ -268,6 +267,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 $localizacaoId = $user->localizacao_id;
             }
         }
+        // Outros usuários (admin ou com permissão): veem tudo, sem filtro obrigatório
 
         // Buscar capacidades do período
         $query = LocalizacaoCapacidadeMensal::with('localizacao')
@@ -277,10 +277,11 @@ class LocalizacaoCapacidadeMensalController extends Controller
         // Aplicar filtro de localização
         if ($localizacaoId) {
             $query->where('localizacao_id', $localizacaoId);
-        } elseif ($usuarioRestrito && !empty($localizacoesPermitidas)) {
-            // Se usuário restrito sem filtro, mostrar TODAS suas localizações permitidas
+        } elseif ($usuarioFaccao && !empty($localizacoesPermitidas)) {
+            // Se usuário de facção sem filtro, mostrar suas localizações permitidas
             $query->whereIn('localizacao_id', $localizacoesPermitidas);
         }
+        // Outros usuários: sem filtro = veem todas as localizações
 
         $capacidades = $query->get();
 
@@ -338,16 +339,16 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ];
         });
 
-        // Localizações para filtro (restrito para usuários de localização)
+        // Localizações para filtro (restrito para usuários de facção)
         $localizacoesQuery = Localizacao::where('ativo', true);
-        if ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+        if ($usuarioFaccao && !empty($localizacoesPermitidas)) {
             $localizacoesQuery->whereIn('id', $localizacoesPermitidas);
         }
         $localizacoes = $localizacoesQuery->orderBy('nome_localizacao')->get();
 
         // IDs para organização do filtro (principal no topo, visualizações abaixo)
-        $localizacaoPrincipalId = $usuarioRestrito ? $user->localizacao_id : null;
-        $localizacoesVisualizacaoIds = $usuarioRestrito ? $user->visualizacoes()->pluck('localizacoes.id')->toArray() : [];
+        $localizacaoPrincipalId = $usuarioFaccao ? $user->localizacao_id : null;
+        $localizacoesVisualizacaoIds = $usuarioFaccao ? $user->visualizacoes()->pluck('localizacoes.id')->toArray() : [];
 
         // Etapas de Produção para filtro
         $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
@@ -359,7 +360,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->orderBy('nome_marca')
             ->get();
 
-        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioRestrito', 'localizacaoPrincipalId', 'localizacoesVisualizacaoIds'));
+        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioFaccao', 'localizacaoPrincipalId', 'localizacoesVisualizacaoIds'));
     }
 
     /**
@@ -517,14 +518,13 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $localizacaoId = $request->input('localizacao_id');
         $referencia = $request->input('referencia');
 
-        // Verificar se o usuário é um usuário de localização (facção/setor)
+        // Verificar se o usuário é um usuário de facção (localização com capacidade > 0)
         $user = auth()->user();
-        $usuarioRestrito = false;
+        $usuarioFaccao = $user->isUsuarioFaccao();
         $localizacoesPermitidas = [];
 
-        if ($user->isUsuarioLocalizacao()) {
+        if ($usuarioFaccao) {
             $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
-            $usuarioRestrito = true;
 
             // Se não há filtro, usar a localização principal por padrão
             if (!$localizacaoId) {
@@ -534,6 +534,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
                 $localizacaoId = $user->localizacao_id;
             }
         }
+        // Outros usuários: veem tudo, sem filtro obrigatório
 
         // Buscar todas as alocações do mês com suas datas
         $query = \DB::table('produto_localizacao')
@@ -573,10 +574,11 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         if ($localizacaoId) {
             $query->where('produto_localizacao.localizacao_id', $localizacaoId);
-        } elseif ($usuarioRestrito && !empty($localizacoesPermitidas)) {
-            // Se usuário restrito sem filtro específico, mostrar apenas suas localizações permitidas
+        } elseif ($usuarioFaccao && !empty($localizacoesPermitidas)) {
+            // Se usuário de facção sem filtro específico, mostrar apenas suas localizações permitidas
             $query->whereIn('produto_localizacao.localizacao_id', $localizacoesPermitidas);
         }
+        // Outros usuários: sem filtro = veem todas
 
         if ($referencia) {
             $query->where('produtos.referencia', 'like', "%{$referencia}%");
@@ -665,9 +667,9 @@ class LocalizacaoCapacidadeMensalController extends Controller
             }
         }
 
-        // Localizações para filtro (restrito para usuários de localização)
+        // Localizações para filtro (restrito para usuários de facção)
         $localizacoesQuery = Localizacao::where('ativo', true);
-        if ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+        if ($usuarioFaccao && !empty($localizacoesPermitidas)) {
             $localizacoesQuery->whereIn('id', $localizacoesPermitidas);
         }
         $localizacoes = $localizacoesQuery->orderBy('nome_localizacao')->get();
