@@ -1,8 +1,20 @@
 <!-- Documentos e Anexos -->
 <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+    @php
+        // Verificar se usuário pode gerenciar pelo menos uma localização do produto
+        $podeGerenciarProduto = auth()->user()->isAdmin();
+        if (!$podeGerenciarProduto && $produto->localizacoes->count() > 0) {
+            foreach ($produto->localizacoes as $loc) {
+                if (auth()->user()->podeGerenciarEtapa($loc->id)) {
+                    $podeGerenciarProduto = true;
+                    break;
+                }
+            }
+        }
+    @endphp
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800">Documentos e Anexos</h3>
-        @if(auth()->user()->canUpdate('produtos'))
+        @if(auth()->user()->canUpdate('produtos') && $podeGerenciarProduto)
             <button type="button" onclick="document.getElementById('modal-adicionar-anexo').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-700 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-300 disabled:opacity-25 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -38,7 +50,7 @@
                             <a href="{{ route('produtos.anexos.show', $anexo->id) }}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm mr-3">
                                 Visualizar
                             </a>
-                            @if(auth()->user()->canUpdate('produtos'))
+                            @if(auth()->user()->canUpdate('produtos') && $podeGerenciarProduto)
                                 <form action="{{ route('produtos.anexos.destroy', $anexo->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este anexo?')">
                                     @csrf
                                     @method('DELETE')

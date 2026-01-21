@@ -250,15 +250,23 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $marcaId = $request->filled('marca_id') ? $request->marca_id : null;
         $referencia = $request->input('referencia');
 
-        // Verificar se o usuário está vinculado a uma localização com capacidade > 0
+        // Verificar se o usuário é um usuário de localização (facção/setor)
         $user = auth()->user();
-        $localizacaoUsuario = $user->localizacao;
         $usuarioRestrito = false;
+        $localizacoesPermitidas = [];
 
-        if ($localizacaoUsuario && $localizacaoUsuario->capacidade > 0) {
-            // Usuário está vinculado a uma localização com capacidade - forçar visualização apenas da localização dele
-            $localizacaoId = $localizacaoUsuario->id;
+        if ($user->isUsuarioLocalizacao()) {
+            // Usuário de localização: pode ver sua localização principal + localizações de visualização
+            $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
             $usuarioRestrito = true;
+
+            // Se não há filtro, usar a localização principal por padrão
+            if (!$localizacaoId) {
+                $localizacaoId = $user->localizacao_id;
+            } elseif (!in_array($localizacaoId, $localizacoesPermitidas)) {
+                // Se há filtro inválido, voltar para a principal
+                $localizacaoId = $user->localizacao_id;
+            }
         }
 
         // Buscar capacidades do período
@@ -266,9 +274,12 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->where('mes', $mes)
             ->where('ano', $ano);
 
-        // Aplicar filtro de localização se selecionado (ou forçado por restrição de usuário)
+        // Aplicar filtro de localização
         if ($localizacaoId) {
             $query->where('localizacao_id', $localizacaoId);
+        } elseif ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+            // Se usuário restrito sem filtro, mostrar TODAS suas localizações permitidas
+            $query->whereIn('localizacao_id', $localizacoesPermitidas);
         }
 
         $capacidades = $query->get();
@@ -327,10 +338,16 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ];
         });
 
-        // Localizações para filtro
-        $localizacoes = Localizacao::where('ativo', true)
-            ->orderBy('nome_localizacao')
-            ->get();
+        // Localizações para filtro (restrito para usuários de localização)
+        $localizacoesQuery = Localizacao::where('ativo', true);
+        if ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+            $localizacoesQuery->whereIn('id', $localizacoesPermitidas);
+        }
+        $localizacoes = $localizacoesQuery->orderBy('nome_localizacao')->get();
+
+        // IDs para organização do filtro (principal no topo, visualizações abaixo)
+        $localizacaoPrincipalId = $usuarioRestrito ? $user->localizacao_id : null;
+        $localizacoesVisualizacaoIds = $usuarioRestrito ? $user->visualizacoes()->pluck('localizacoes.id')->toArray() : [];
 
         // Etapas de Produção para filtro
         $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
@@ -342,7 +359,7 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->orderBy('nome_marca')
             ->get();
 
-        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioRestrito'));
+        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioRestrito', 'localizacaoPrincipalId', 'localizacoesVisualizacaoIds'));
     }
 
     /**
@@ -500,6 +517,24 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $localizacaoId = $request->input('localizacao_id');
         $referencia = $request->input('referencia');
 
+        // Verificar se o usuário é um usuário de localização (facção/setor)
+        $user = auth()->user();
+        $usuarioRestrito = false;
+        $localizacoesPermitidas = [];
+
+        if ($user->isUsuarioLocalizacao()) {
+            $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
+            $usuarioRestrito = true;
+
+            // Se não há filtro, usar a localização principal por padrão
+            if (!$localizacaoId) {
+                $localizacaoId = $user->localizacao_id;
+            } elseif (!in_array($localizacaoId, $localizacoesPermitidas)) {
+                // Se há filtro inválido, voltar para a principal
+                $localizacaoId = $user->localizacao_id;
+            }
+        }
+
         // Buscar todas as alocações do mês com suas datas
         $query = \DB::table('produto_localizacao')
             ->join('produtos', 'produto_localizacao.produto_id', '=', 'produtos.id')
@@ -538,6 +573,9 @@ class LocalizacaoCapacidadeMensalController extends Controller
 
         if ($localizacaoId) {
             $query->where('produto_localizacao.localizacao_id', $localizacaoId);
+        } elseif ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+            // Se usuário restrito sem filtro específico, mostrar apenas suas localizações permitidas
+            $query->whereIn('produto_localizacao.localizacao_id', $localizacoesPermitidas);
         }
 
         if ($referencia) {
@@ -627,10 +665,12 @@ class LocalizacaoCapacidadeMensalController extends Controller
             }
         }
 
-        // Localizações para filtro
-        $localizacoes = Localizacao::where('ativo', true)
-            ->orderBy('nome_localizacao')
-            ->get();
+        // Localizações para filtro (restrito para usuários de localização)
+        $localizacoesQuery = Localizacao::where('ativo', true);
+        if ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+            $localizacoesQuery->whereIn('id', $localizacoesPermitidas);
+        }
+        $localizacoes = $localizacoesQuery->orderBy('nome_localizacao')->get();
 
         // Dados do calendário
         $primeiroDia = \Carbon\Carbon::createFromDate($ano, $mes, 1);

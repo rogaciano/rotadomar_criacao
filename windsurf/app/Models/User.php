@@ -61,7 +61,64 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Localizacao::class);
     }
-    
+
+    /**
+     * Localizações que o usuário pode visualizar (além da principal)
+     */
+    public function visualizacoes()
+    {
+        return $this->belongsToMany(Localizacao::class, 'user_localizacao_visualizacao');
+    }
+
+    /**
+     * Verifica se o usuário é um usuário de localização (facção/setor) restrito
+     * Usuários de localização têm um localizacao_id definido E NÃO são admins
+     *
+     * @return bool
+     */
+    public function isUsuarioLocalizacao(): bool
+    {
+        return !empty($this->localizacao_id) && !$this->isAdmin();
+    }
+
+    /**
+     * Verifica se o usuário pode gerenciar etapas de uma localização específica
+     * Permite se for Admin OU se a localização for a sua principal
+     *
+     * @param int $localizacaoId
+     * @return bool
+     */
+    public function podeGerenciarEtapa(int $localizacaoId): bool
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        return $this->localizacao_id == $localizacaoId;
+    }
+
+    /**
+     * Retorna array com IDs das localizações que o usuário pode ver
+     * Inclui a localização principal + localizações de visualização
+     *
+     * @return array
+     */
+    public function getLocalizacoesPermitidasIds(): array
+    {
+        $ids = [];
+
+        // Adiciona a localização principal se existir
+        if ($this->localizacao_id) {
+            $ids[] = $this->localizacao_id;
+        }
+
+        // Adiciona as localizações de visualização
+        $visualizacaoIds = $this->visualizacoes()->pluck('localizacoes.id')->toArray();
+        $ids = array_merge($ids, $visualizacaoIds);
+
+        return array_unique($ids);
+    }
+
     /**
      * Verifica se o usuário é um administrador.
      *
@@ -71,7 +128,7 @@ class User extends Authenticatable
     {
         return (bool) $this->is_admin;
     }
-    
+
     /**
      * Get the groups that the user belongs to.
      */
@@ -79,7 +136,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Group::class, 'user_group');
     }
-    
+
     /**
      * Relação com permissões específicas do usuário.
      */
@@ -87,7 +144,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserPermission::class);
     }
-    
+
     /**
      * Verifica se o usuário tem uma permissão específica.
      *
@@ -100,7 +157,7 @@ class User extends Authenticatable
         if ($this->isAdmin()) {
             return true;
         }
-        
+
         // Se o usuário possui uma permissão específica cadastrada com qualquer ação permitida, considera que ele possui a permissão
         $permission = Permission::where('name', $permissionSlug)->first();
         if ($permission) {
@@ -109,7 +166,7 @@ class User extends Authenticatable
                 return true;
             }
         }
-        
+
         // Verifica se o usuário tem a permissão através de seus grupos
         foreach ($this->groups as $group) {
             foreach ($group->permissions as $permission) {
@@ -118,10 +175,10 @@ class User extends Authenticatable
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Verifica se o usuário tem qualquer uma das permissões especificadas.
      *
@@ -135,10 +192,10 @@ class User extends Authenticatable
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Verifica se o usuário tem todas as permissões especificadas.
      *
@@ -152,7 +209,7 @@ class User extends Authenticatable
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -206,7 +263,7 @@ class User extends Authenticatable
     {
         return $this->canAction('delete', $permissionSlug);
     }
-    
+
     /**
      * Relacionamento com os filtros do usuário
      */
@@ -214,7 +271,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserFilter::class);
     }
-    
+
     /**
      * Salvar filtros para um tipo de página
      *
@@ -226,7 +283,7 @@ class User extends Authenticatable
     {
         return UserFilter::saveFilters($this->id, $pageType, $filters);
     }
-    
+
     /**
      * Obter filtros para um tipo de página
      *
@@ -237,7 +294,7 @@ class User extends Authenticatable
     {
         return UserFilter::getFilters($this->id, $pageType);
     }
-    
+
     /**
      * Limpar filtros para um tipo de página
      *
@@ -248,7 +305,7 @@ class User extends Authenticatable
     {
         return UserFilter::clearFilters($this->id, $pageType);
     }
-    
+
     /**
      * Get the access schedule associated with the user.
      */
@@ -256,7 +313,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserAccessSchedule::class, 'user_id');
     }
-    
+
     /**
      * Obter contagem de movimentações pendentes (não concluídas) para a localização do usuário
      *
@@ -267,13 +324,13 @@ class User extends Authenticatable
         if (!$this->localizacao_id) {
             return 0;
         }
-        
+
         return \App\Models\Movimentacao::where('localizacao_id', $this->localizacao_id)
             ->where('concluido', false)
             ->whereNull('data_saida')
             ->count();
     }
-    
+
     /**
      * Obter contagem de movimentações atrasadas para a localização do usuário
      *
@@ -284,25 +341,25 @@ class User extends Authenticatable
         if (!$this->localizacao_id || !$this->localizacao) {
             return 0;
         }
-        
+
         // Se a localização não tem prazo definido, não há movimentações atrasadas
         if (!$this->localizacao->prazo) {
             return 0;
         }
-        
+
         // Buscar movimentações pendentes e calcular dias úteis
         $movimentacoes = \App\Models\Movimentacao::where('localizacao_id', $this->localizacao_id)
             ->where('concluido', false)
             ->whereNull('data_saida')
             ->get();
-        
+
         // Contar apenas as que estão atrasadas considerando dias úteis
         return $movimentacoes->filter(function ($movimentacao) {
             $diasUteis = \App\Helpers\MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada);
             return $diasUteis > $this->localizacao->prazo;
         })->count();
     }
-    
+
     /**
      * Obter movimentações pendentes completas para a localização do usuário
      *
@@ -313,7 +370,7 @@ class User extends Authenticatable
         if (!$this->localizacao_id) {
             return collect();
         }
-        
+
         return \App\Models\Movimentacao::with(['produto', 'tipo', 'situacao', 'localizacao'])
             ->where('localizacao_id', $this->localizacao_id)
             ->where('concluido', false)

@@ -64,6 +64,8 @@ class UserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'localizacao_id' => ['required', 'exists:localizacoes,id'],
             'is_admin' => ['boolean'],
+            'visualizacoes' => ['nullable', 'array'],
+            'visualizacoes.*' => ['exists:localizacoes,id'],
         ]);
 
         $user = User::create([
@@ -73,6 +75,11 @@ class UserController extends Controller
             'localizacao_id' => $request->localizacao_id,
             'is_admin' => (bool)$request->input('is_admin'),
         ]);
+
+        // Sincronizar localizações de visualização
+        if ($request->has('visualizacoes')) {
+            $user->visualizacoes()->sync($request->input('visualizacoes', []));
+        }
 
         event(new Registered($user));
 
@@ -94,7 +101,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
-        return view('users.edit', compact('user', 'localizacoes'));
+        $visualizacoesIds = $user->visualizacoes()->pluck('localizacoes.id')->toArray();
+        return view('users.edit', compact('user', 'localizacoes', 'visualizacoesIds'));
     }
 
     /**
@@ -107,6 +115,8 @@ class UserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'localizacao_id' => ['required', 'exists:localizacoes,id'],
             'is_admin' => ['boolean'],
+            'visualizacoes' => ['nullable', 'array'],
+            'visualizacoes.*' => ['exists:localizacoes,id'],
         ];
 
         // Apenas validar a senha se ela foi fornecida
@@ -128,6 +138,9 @@ class UserController extends Controller
         }
 
         $user->save();
+
+        // Sincronizar localizações de visualização
+        $user->visualizacoes()->sync($request->input('visualizacoes', []));
 
         return redirect()->route('users.index')
             ->with('success', 'Usuário atualizado com sucesso!');

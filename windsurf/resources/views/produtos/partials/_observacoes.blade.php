@@ -1,8 +1,20 @@
 <!-- Observações -->
 <div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+    @php
+        // Verificar se usuário pode gerenciar pelo menos uma localização do produto
+        $podeGerenciarProdutoObs = auth()->user()->isAdmin();
+        if (!$podeGerenciarProdutoObs && $produto->localizacoes->count() > 0) {
+            foreach ($produto->localizacoes as $loc) {
+                if (auth()->user()->podeGerenciarEtapa($loc->id)) {
+                    $podeGerenciarProdutoObs = true;
+                    break;
+                }
+            }
+        }
+    @endphp
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800">Observações</h3>
-        @if(auth()->user()->canUpdate('produtos'))
+        @if(auth()->user()->canUpdate('produtos') && $podeGerenciarProdutoObs)
             <button type="button" onclick="abrirModalObservacao()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />

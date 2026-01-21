@@ -72,15 +72,27 @@
                                     <span class="text-xs text-gray-500">(Seu acesso)</span>
                                 @endif
                             </label>
-                            <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 {{ ($usuarioRestrito ?? false) ? 'bg-gray-100' : '' }}" {{ ($usuarioRestrito ?? false) ? 'disabled' : '' }}>
+                            <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 @if($usuarioRestrito ?? false)
-                                    {{-- Usuário restrito: mostrar apenas a localização dele --}}
+                                    {{-- Usuário restrito: principal no topo, visualizações abaixo --}}
                                     @php
-                                        $localizacaoSelecionada = $localizacoes->firstWhere('id', $localizacaoId);
+                                        $locPrincipal = $localizacoes->firstWhere('id', $localizacaoPrincipalId ?? null);
+                                        $locsVisualizacao = $localizacoes->filter(fn($l) => in_array($l->id, $localizacoesVisualizacaoIds ?? []));
                                     @endphp
-                                    <option value="{{ $localizacaoId }}" selected>
-                                        {{ $localizacaoSelecionada->nome_localizacao ?? 'Localização' }}
-                                    </option>
+                                    @if($locPrincipal)
+                                        <option value="{{ $locPrincipal->id }}" {{ ($localizacaoId ?? '') == $locPrincipal->id || empty($localizacaoId) ? 'selected' : '' }}>
+                                            {{ $locPrincipal->nome_localizacao }} (Principal)
+                                        </option>
+                                    @endif
+                                    @if($locsVisualizacao->count() > 0)
+                                        <optgroup label="Visualização">
+                                            @foreach($locsVisualizacao as $locVis)
+                                                <option value="{{ $locVis->id }}" {{ ($localizacaoId ?? '') == $locVis->id ? 'selected' : '' }}>
+                                                    {{ $locVis->nome_localizacao }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
                                 @else
                                     {{-- Usuário normal: pode ver todas --}}
                                     <option value="">Todas as Localizações</option>
@@ -91,10 +103,6 @@
                                     @endforeach
                                 @endif
                             </select>
-                            @if($usuarioRestrito ?? false)
-                                {{-- Hidden input para manter o valor mesmo com o select disabled --}}
-                                <input type="hidden" name="localizacao_id" value="{{ $localizacaoId }}">
-                            @endif
                         </div>
 
                         <div class="w-full lg:w-32">
@@ -578,9 +586,17 @@
                                                                                                 $etapaLinha = $etapaLinhaId ? $etapasProducao->firstWhere('id', $etapaLinhaId) : null;
                                                                                             @endphp
                                                                                             @if($etapaLinha)
-                                                                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-800' }} uppercase">
-                                                                                                    {{ $etapaLinha->icone ?? '' }} {{ $etapaLinha->nome }}
-                                                                                                </span>
+                                                                                                <div class="flex items-center gap-1">
+                                                                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-800' }} uppercase">
+                                                                                                        {{ $etapaLinha->icone ?? '' }} {{ $etapaLinha->nome }}
+                                                                                                    </span>
+                                                                                                    <a href="{{ route('produtos.localizacoes.historico-etapas', [$produtoPrincipal->id, $loc->pivot->id]) }}"
+                                                                                                       class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico de etapas">
+                                                                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                                                        </svg>
+                                                                                                    </a>
+                                                                                                </div>
                                                                                             @else
                                                                                                 <span class="text-gray-400 text-[9px]">—</span>
                                                                                             @endif

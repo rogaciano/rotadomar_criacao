@@ -33,23 +33,36 @@ class KanbanController extends Controller
         $marcaId = $request->get('marca_id');
         $marcaIds = collect($marcaId)->filter()->values()->all();
 
-        // Verificar se o usuário está vinculado a uma localização com capacidade > 0
+        // Verificar se o usuário é um usuário de localização (facção/setor)
         $user = auth()->user();
-        $localizacaoUsuario = $user->localizacao;
         $usuarioRestrito = false;
+        $localizacoesPermitidas = [];
 
-        if ($localizacaoUsuario && $localizacaoUsuario->capacidade > 0) {
-            // Usuário está vinculado a uma localização com capacidade - forçar visualização apenas da localização dele
-            $localizacaoIds = [$localizacaoUsuario->id];
+        if ($user->isUsuarioLocalizacao()) {
+            // Usuário de localização: pode ver sua localização principal + localizações de visualização
+            $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
             $usuarioRestrito = true;
+
+            // Se não há filtro de localização, mostrar todas as permitidas
+            if (empty($localizacaoIds)) {
+                $localizacaoIds = $localizacoesPermitidas;
+            } else {
+                // Se há filtro, garantir que só mostre localizações permitidas
+                $localizacaoIds = array_intersect($localizacaoIds, $localizacoesPermitidas);
+            }
         }
 
         // Lista completa de localizações ativas, com capacidade > 0 e que fazem movimentação (para o filtro)
-        $todasLocalizacoes = Localizacao::where('ativo', true)
+        $todasLocalizacoesQuery = Localizacao::where('ativo', true)
             ->where('faz_movimentacao', true)
-            ->where('capacidade', '>', 0)
-            ->orderBy('nome_localizacao')
-            ->get();
+            ->where('capacidade', '>', 0);
+
+        // Se usuário restrito, filtrar lista de localizações do filtro
+        if ($usuarioRestrito && !empty($localizacoesPermitidas)) {
+            $todasLocalizacoesQuery->whereIn('id', $localizacoesPermitidas);
+        }
+
+        $todasLocalizacoes = $todasLocalizacoesQuery->orderBy('nome_localizacao')->get();
 
         // Localizações que serão exibidas nas colunas do Kanban (pode ser filtrada)
         $localizacoesQuery = Localizacao::where('ativo', true)

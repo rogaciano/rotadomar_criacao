@@ -5,10 +5,25 @@
         $canUpdateProdutoLocalizacoes = auth()->user()->canUpdate('produto_localizacao');
         $canDeleteProdutoLocalizacoes = auth()->user()->canDelete('produto_localizacao');
         $canAnyProdutoLocalizacoes = $canUpdateProdutoLocalizacoes || $canDeleteProdutoLocalizacoes;
+
+        // Verificar se usuário pode gerenciar pelo menos uma localização do produto (ou é admin)
+        $podeAdicionarLocalizacao = auth()->user()->isAdmin();
+        if (!$podeAdicionarLocalizacao && $produto->localizacoes->count() > 0) {
+            foreach ($produto->localizacoes as $loc) {
+                if (auth()->user()->podeGerenciarEtapa($loc->id)) {
+                    $podeAdicionarLocalizacao = true;
+                    break;
+                }
+            }
+        }
+        // Se produto não tem localizações ainda, permitir se tiver permissão geral
+        if ($produto->localizacoes->count() == 0) {
+            $podeAdicionarLocalizacao = true;
+        }
     @endphp
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800">Localizações do Produto</h3>
-        @if($canCreateProdutoLocalizacoes)
+        @if($canCreateProdutoLocalizacoes && $podeAdicionarLocalizacao)
             <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
@@ -94,8 +109,8 @@
                             $etapaAnteriorId = $localizacao->pivot->etapa_anterior_id;
                             $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
                             $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
-                            $userLoc = auth()->user()->localizacao;
-                            $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
+                            $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($localizacao->id);
+                            $podeGerenciarLocalizacao = auth()->user()->podeGerenciarEtapa($localizacao->id);
                             $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
                             $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
 
@@ -175,12 +190,7 @@
                                     @endif
 
                                     @php
-                                        $userLocal = auth()->user()->localizacao;
-                                        $podeEditarEntrega = auth()->user()->isAdmin() || (
-                                            $userLocal &&
-                                            $userLocal->capacidade > 0 &&
-                                            $userLocal->id == $localizacao->id
-                                        );
+                                        $podeEditarEntrega = auth()->user()->podeGerenciarEtapa($localizacao->id);
                                     @endphp
 
                                     @if($podeEditarEntrega)
@@ -267,7 +277,7 @@
                                     </div>
                                 @endif
                             </td>
-                            @if($canAnyProdutoLocalizacoes)
+                            @if($canAnyProdutoLocalizacoes && $podeGerenciarLocalizacao)
                                 <td class="px-4 py-2 whitespace-nowrap text-sm space-x-3">
                                     @if($canUpdateProdutoLocalizacoes)
                                         <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 hover:text-indigo-800">Editar</button>
@@ -278,6 +288,10 @@
                                             <button type="submit" class="text-red-600 hover:text-red-800" title="Excluir toda a alocação">Remover Fábrica</button>
                                         </form>
                                     @endif
+                                </td>
+                            @elseif($canAnyProdutoLocalizacoes)
+                                <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-400">
+                                    <span class="text-xs italic">Apenas visualização</span>
                                 </td>
                             @endif
                         </tr>
@@ -306,10 +320,9 @@
                     $etapaAnteriorId = $localizacao->pivot->etapa_anterior_id;
                     $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
                     $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
-                    $userLoc = auth()->user()->localizacao;
-                    $podeGerenciarEtapa = auth()->user()->isAdmin() || ($userLoc && $userLoc->id == $localizacao->id);
-                    $userLocal = auth()->user()->localizacao;
-                    $podeEditarEntrega = auth()->user()->isAdmin() || ($userLocal && $userLocal->capacidade > 0 && $userLocal->id == $localizacao->id);
+                    $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($localizacao->id);
+                    $podeEditarEntrega = auth()->user()->podeGerenciarEtapa($localizacao->id);
+                    $podeGerenciarLocalizacao = auth()->user()->podeGerenciarEtapa($localizacao->id);
 
                     $corClasses = [
                         'blue' => 'bg-blue-100 text-blue-800 border-blue-200',
@@ -463,7 +476,7 @@
                     </div>
 
                     <!-- Rodapé Ações -->
-                    @if($canAnyProdutoLocalizacoes)
+                    @if($canAnyProdutoLocalizacoes && $podeGerenciarLocalizacao)
                         <div class="bg-gray-50 px-4 py-3 border-t flex justify-end gap-6">
                             @if($canUpdateProdutoLocalizacoes)
                                 <button type="button" onclick="abrirModalEditarLocalizacao({{ $localizacao->pivot->id }}, {{ $localizacao->id }}, {{ Js::from($localizacao->nome_localizacao) }}, {{ $localizacao->pivot->quantidade }}, {{ Js::from($localizacao->pivot->data_prevista_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->ordem_producao) }}, {{ Js::from($localizacao->pivot->observacao) }}, {{ $localizacao->pivot->concluido }}, {{ Js::from($localizacao->pivot->data_envio_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_retorno_faccao?->format('Y-m-d')) }}, {{ Js::from($localizacao->pivot->data_entrega_faccao?->format('Y-m-d')) }})" class="text-indigo-600 font-bold text-xs uppercase hover:text-indigo-800">Editar</button>
@@ -474,6 +487,10 @@
                                     <button type="submit" class="text-red-600 font-bold text-xs uppercase hover:text-red-800">Remover</button>
                                 </form>
                             @endif
+                        </div>
+                    @elseif($canAnyProdutoLocalizacoes)
+                        <div class="bg-gray-50 px-4 py-3 border-t text-center">
+                            <span class="text-xs text-gray-400 italic">Apenas visualização</span>
                         </div>
                     @endif
                 </div>

@@ -123,6 +123,15 @@ class MovimentacaoController extends Controller
             'localizacao'
         ]);
 
+        // Restrição para usuários de localização: só veem suas localizações permitidas
+        $user = auth()->user();
+        if ($user->isUsuarioLocalizacao()) {
+            $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
+            if (!empty($localizacoesPermitidas)) {
+                $query->whereIn('localizacao_id', $localizacoesPermitidas);
+            }
+        }
+
         // Filtro por referência do produto
         if ($request->filled('referencia')) {
             $query->whereHas('produto', function($q) use ($request) {

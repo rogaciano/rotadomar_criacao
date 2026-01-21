@@ -63,6 +63,20 @@
                                 <x-input-error :messages="$errors->get('is_admin')" class="mt-2" />
                             </div>
 
+                            <!-- Localizações de Visualização -->
+                            <div class="md:col-span-2">
+                                <x-label for="visualizacoes" value="{{ __('Localizações de Visualização (além da principal)') }}" />
+                                <select id="visualizacoes" name="visualizacoes[]" multiple class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-32">
+                                    @foreach($localizacoes as $localizacao)
+                                        <option value="{{ $localizacao->id }}" {{ in_array($localizacao->id, old('visualizacoes', [])) ? 'selected' : '' }}>
+                                            {{ $localizacao->nome_localizacao }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Segure Ctrl (ou Cmd no Mac) para selecionar múltiplas localizações. O usuário poderá visualizar essas localizações mas não poderá editá-las.</p>
+                                <x-input-error :messages="$errors->get('visualizacoes')" class="mt-2" />
+                            </div>
+
                             <!-- Senha -->
                             <div>
                                 <x-label for="password" value="{{ __('Senha') }}" />
