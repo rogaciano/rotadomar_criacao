@@ -6,3 +6,23 @@
 [x-cloak] {
     display: none !important;
 }
+
+@layer components {
+    .glass {
+        @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl;
+    }
+    
+    .glass-dark {
+        @apply bg-slate-900/70 backdrop-blur-md border border-slate-700/30 shadow-2xl;
+    }
+
+    .card-hover {
+        @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98];
+    }
+}
+
+@layer utilities {
+    .text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-indigo-600;
+    }
+}

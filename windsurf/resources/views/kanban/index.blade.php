@@ -5,10 +5,10 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-8 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8" style="max-width: 96%;">
             <!-- Filtros -->
-            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+            <div class="glass dark:glass-dark rounded-2xl border-none ring-1 ring-black/5 p-6 mb-6">
                 <form method="GET" action="{{ route('kanban.index') }}" class="flex flex-wrap items-end gap-4">
                     <!-- Filtro de Mês -->
                     <div class="flex-1 min-w-[140px]">
@@ -98,9 +98,9 @@
 
                     <!-- Botão Atualizar -->
                     <div>
-                        <button type="submit" class="inline-flex items-center px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        <button type="submit" class="inline-flex items-center px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                             ATUALIZAR
                         </button>

@@ -1,64 +1,68 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard de Capacidade das Localizações') }}
+            {{ __('Planejamento - Dashboard') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-8 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-screen-2xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Botões de ação -->
-            <div class="flex flex-wrap gap-2 mb-4">
-                <a href="{{ route('localizacao-capacidade.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nova Capacidade
-                </a>
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ route('localizacao-capacidade.create') }}" class="inline-flex items-center px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nova Capacidade
+                    </a>
 
-                <button onclick="openGerarCapacidadesModal()" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
-                    Gerar Capacidades do Mês
-                </button>
+                    <button onclick="openGerarCapacidadesModal()" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                        </svg>
+                        Gerar Capacidades
+                    </button>
 
-                <a href="{{ route('localizacao-capacidade.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                    Ver Listagem
-                </a>
+                    <a href="{{ route('localizacao-capacidade.index') }}" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #4b5563 0%, #374151 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        Listagem
+                    </a>
 
-                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'landscape']) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    PDF Paisagem
-                </a>
+                    <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3a1 1 0 10-2 0M15 8l-1.333-2.001L12 4.001l-1.667 1.999L9 8m6 0v8a2 2 0 01-2 2H9a2 2 0 01-2-2V8m8 0h-6" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10" />
+                        </svg>
+                        Fluxo
+                    </a>
 
-                <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'portrait']) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    PDF Retrato
-                </a>
+                    <a href="{{ route('localizacao-capacidade.calendario', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '']) }}" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Calendário
+                    </a>
+                </div>
+                
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'landscape']) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-rose-500/10 border border-rose-200 dark:border-rose-900/30 rounded-xl font-bold text-xs text-rose-600 dark:text-rose-400 uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        PDF Paisagem
+                    </a>
 
-                <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3a1 1 0 10-2 0M15 8l-1.333-2.001L12 4.001l-1.667 1.999L9 8m6 0v8a2 2 0 01-2 2H9a2 2 0 01-2-2V8m8 0h-6" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10" />
-                    </svg>
-                    Fluxo com Quantidades
-                </a>
-
-                <a href="{{ route('localizacao-capacidade.calendario', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '']) }}" class="inline-flex items-center px-4 py-2 bg-amber-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-amber-700 focus:bg-amber-700 active:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Calendário
-                </a>
+                    <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'portrait']) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-orange-500/10 border border-orange-200 dark:border-orange-900/30 rounded-xl font-bold text-xs text-orange-600 dark:text-orange-400 uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        PDF Retrato
+                    </a>
+                </div>
             </div>
 
             @push('styles')
@@ -95,17 +99,16 @@
     @endpush
 
             <!-- Filtros -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
-                <div class="p-6">
+            <div class="glass dark:glass-dark rounded-2xl border-none ring-1 ring-black/5 mb-6 p-6">
                     <form action="{{ route('localizacao-capacidade.dashboard') }}" method="GET" class="flex flex-col lg:flex-row lg:items-end gap-4">
                         <div class="flex-1 min-w-[150px]">
-                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1 text-nowrap">
+                            <label for="localizacao_id" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 text-nowrap">
                                 Localização
                                 @if($usuarioFaccao ?? false)
                                     <span class="text-xs text-gray-500">(Seu acesso)</span>
                                 @endif
                             </label>
-                            <select name="localizacao_id[]" id="localizacao_id" multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px] lg:h-auto min-h-[38px]">
+                            <select name="localizacao_id[]" id="localizacao_id" multiple class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 h-[38px] lg:h-auto min-h-[38px]">
                                 @if($usuarioFaccao ?? false)
                                     {{-- Usuário de facção: principal no topo, visualizações abaixo --}}
                                     @php
@@ -142,13 +145,13 @@
                         </div>
 
                         <div class="w-full lg:w-32">
-                            <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
-                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Ex: 1234" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                            <label for="referencia" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Referência</label>
+                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Ex: 1234" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 h-[38px]">
                         </div>
 
                         <div class="w-full lg:w-32">
-                            <label for="mes" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
-                            <select name="mes" id="mes" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                            <label for="mes" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Mês</label>
+                            <select name="mes" id="mes" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 h-[38px]">
                                 @php
                                     $meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
                                 @endphp
@@ -161,8 +164,8 @@
                         </div>
 
                         <div class="w-full lg:w-28">
-                            <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-                            <select name="ano" id="ano" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                            <label for="ano" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Ano</label>
+                            <select name="ano" id="ano" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 h-[38px]">
                                 @foreach(range(now()->year - 1, now()->year + 2) as $a)
                                     <option value="{{ $a }}" {{ $ano == $a ? 'selected' : '' }}>
                                         {{ $a }}
@@ -172,8 +175,8 @@
                         </div>
 
                         <div class="flex-1 min-w-[120px]">
-                            <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-                            <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                            <label for="marca_id" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Marca</label>
+                            <select name="marca_id" id="marca_id" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 h-[38px]">
                                 <option value="">Todas as Marcas</option>
                                 @foreach($marcas as $marca)
                                     <option value="{{ $marca->id }}" {{ ($marcaId ?? '') == $marca->id ? 'selected' : '' }}>
@@ -184,8 +187,8 @@
                         </div>
 
                         <div class="flex-1 min-w-[150px]">
-                            <label for="etapa_id" class="block text-sm font-medium text-gray-700 mb-1">Etapa de Produção</label>
-                            <select name="etapa_id" id="etapa_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px]">
+                            <label for="etapa_id" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Etapa de Produção</label>
+                            <select name="etapa_id" id="etapa_id" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50 h-[38px]">
                                 <option value="">Todas as Etapas</option>
                                 @foreach($etapasProducao as $etapa)
                                     <option value="{{ $etapa->id }}" {{ ($etapaId ?? '') == $etapa->id ? 'selected' : '' }}>
@@ -196,7 +199,7 @@
                         </div>
 
                         <div class="w-full lg:w-auto">
-                            <button type="submit" class="w-full lg:px-6 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150 h-[42px] flex justify-center items-center">
+                            <button type="submit" class="w-full lg:px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 h-[42px] flex justify-center items-center" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
@@ -206,8 +209,8 @@
                     </form>
 
                     <!-- Botão de Toggle Global para Produtos Previstos -->
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <button type="button" id="toggleAllProducts" onclick="toggleAllProductsVisibility()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <button type="button" id="toggleAllProducts" onclick="toggleAllProductsVisibility()" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
                             <svg id="toggleIconShow" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -217,9 +220,8 @@
                             </svg>
                             <span id="toggleText">Mostrar Todos os Produtos</span>
                         </button>
-                        <span class="ml-3 text-sm text-gray-500">Expande ou recolhe todas as listas de produtos previstos</span>
+                        <span class="ml-3 text-sm text-slate-500 dark:text-slate-400">Expande ou recolhe todas as listas de produtos previstos</span>
                     </div>
-                </div>
             </div>
 
             <!-- Resumo Geral -->

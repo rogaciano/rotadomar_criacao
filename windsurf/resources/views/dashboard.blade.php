@@ -4,240 +4,245 @@
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
-
-    <div class="py-6 bg-gray-900">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-6">
-            <!-- Logos das marcas -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                <div class="p-3">
-                    <div class="flex justify-between items-center">
-                        @php
-                            // Busca marcas ativas e que tenham logo
-                            $marcas = \App\Models\Marca::where('ativo', true)->where('logo_path', '!=', null)->get();
-                            $totalMarcas = $marcas->count();
-                        @endphp
-
-                        @foreach($marcas as $index => $marca)
-                            <div class="text-center flex-shrink-0" style="min-width: 70px;">
-                                @if($marca->logo_path)
-                                    <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="{{ $marca->nome_marca }}" class="h-12 w-auto object-contain mx-auto">
-                                @else
-                                    <div class="h-12 w-20 flex items-center justify-center bg-gray-100 rounded-lg">
-                                        <span class="text-xs font-semibold text-gray-700">{{ $marca->nome_marca }}</span>
-                                    </div>
-                                @endif
-                                <p class="mt-1 text-xs font-medium text-gray-600 truncate">{{ $marca->nome_marca }}</p>
-                            </div>
-
-                            @if($index < $totalMarcas - 1)
-                                <div class="h-8 border-r border-gray-200"></div>
+    <div class="py-8 bg-slate-50 dark:bg-slate-950 min-h-screen">
+        <!-- Seção de Marcas Dinâmica -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-2 overflow-hidden">
+                <div class="flex flex-wrap items-center justify-around gap-4 md:gap-8 py-4">
+                    @php
+                        $marcasDestaque = \App\Models\Marca::where('ativo', true)->get();
+                    @endphp
+                    @foreach($marcasDestaque as $marca)
+                        <div class="flex flex-col items-center group transition-all duration-300">
+                            @if($marca->logo_path)
+                                <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="{{ $marca->nome_marca }}" class="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100">
+                            @else
+                                <div class="h-10 w-20 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase">{{ $marca->nome_marca }}</span>
+                                </div>
                             @endif
-                        @endforeach
-                    </div>
+                            <span class="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{{ $marca->nome_marca }}</span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Cards estatísticos -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <!-- Cards estatísticos - Linha 1: Indicadores Base -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
                 <!-- Card Tecidos -->
-                <div class="bg-purple-600 rounded-lg shadow-md overflow-hidden">
-                    <div class="p-5">
-                        <div class="flex justify-center mb-2">
-                            <div class="rounded-full bg-purple-500/50 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
+                    <div class="p-6 relative text-white">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-white/20 backdrop-blur-md rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
+                            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest">Estoque</span>
                         </div>
-                        <h3 class="text-center text-white font-medium">Total de Tecidos</h3>
-                        <p class="text-center text-4xl font-bold text-white my-2">{{ \App\Models\Tecido::count() }}</p>
-                        <p class="text-center text-white text-sm">Cadastrados no sistema</p>
+                        <h3 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Total de Tecidos</h3>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-4xl font-black text-white">{{ \App\Models\Tecido::count() }}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60">Cadastrados no sistema</p>
                     </div>
-                    <div class="bg-purple-700 p-3">
-                        <a href="{{ route('tecidos.index') }}" class="flex justify-center items-center text-white hover:text-purple-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <span>Ver Tecidos</span>
+                    <div class="px-6 py-3 bg-black/10 flex justify-between items-center group-hover:bg-black/20 transition-colors">
+                        <a href="{{ route('tecidos.index') }}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center">
+                            Ver detalhes <svg class="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
                     </div>
                 </div>
 
                 <!-- Card Estilistas -->
-                <div class="bg-blue-500 rounded-lg shadow-md overflow-hidden">
-                    <div class="p-6">
-                        <div class="flex justify-center mb-2">
-                            <div class="rounded-full bg-blue-400/50 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+                    <div class="p-6 relative text-white">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-white/20 backdrop-blur-md rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.123-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                             </div>
+                            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest">Equipe</span>
                         </div>
-                        <h3 class="text-center text-white font-medium">Total de Estilistas</h3>
-                        <p class="text-center text-4xl font-bold text-white my-2">{{ \App\Models\Estilista::count() }}</p>
-                        <p class="text-center text-white text-sm">Cadastrados no sistema</p>
+                        <h3 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Total de Estilistas</h3>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-4xl font-black text-white">{{ \App\Models\Estilista::count() }}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60">Cadastrados no sistema</p>
                     </div>
-                    <div class="bg-blue-600 p-3">
-                        <a href="{{ route('estilistas.index') }}" class="flex justify-center items-center text-white hover:text-blue-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            <span>Ver Estilista</span>
+                    <div class="px-6 py-3 bg-black/10 flex justify-between items-center group-hover:bg-black/20 transition-colors">
+                        <a href="{{ route('estilistas.index') }}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center">
+                            Ver detalhes <svg class="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
                     </div>
                 </div>
 
-<!-- Card Grupo de Produtos -->
-<div class="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-md overflow-hidden">
-    <div class="p-6">
-        <div class="flex justify-center mb-2">
-            <div class="rounded-full bg-yellow-400/50 p-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-            </div>
-        </div>
-        <h3 class="text-center text-white font-medium">Grupos de Produtos</h3>
-        <p class="text-center text-4xl font-bold text-white my-2">{{ $totalGrupoProdutos }}</p>
-        <p class="text-center text-white text-sm">Total cadastrado</p>
-    </div>
-    <div class="bg-yellow-600 p-3">
-        <a href="{{ route('grupo_produtos.create') }}" class="flex justify-center items-center text-white hover:text-yellow-200">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            <span>Ver Grupos</span>
-        </a>
-    </div>
-</div>
+                <!-- Card Grupos -->
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);">
+                    <div class="p-6 relative text-white">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-white/20 backdrop-blur-md rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest">Configuração</span>
+                        </div>
+                        <h3 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Grupos de Produtos</h3>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-4xl font-black text-white">{{ $totalGrupoProdutos }}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60">Total cadastrado</p>
+                    </div>
+                    <div class="px-6 py-3 bg-black/10 flex justify-between items-center group-hover:bg-black/20 transition-colors">
+                        <a href="{{ route('grupo_produtos.index') }}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center">
+                            Ver detalhes <svg class="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- Card Produtos -->
-                <div class="bg-orange-500 rounded-lg shadow-md overflow-hidden">
-                    <div class="p-5">
-                        <div class="flex justify-center mb-2">
-                            <div class="rounded-full bg-orange-400/50 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);">
+                    <div class="p-6 relative text-white">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-white/20 backdrop-blur-md rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                             </div>
+                            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest">Catálogo</span>
                         </div>
-                        <h3 class="text-center text-white font-medium">Total de Produtos</h3>
-                        <p class="text-center text-4xl font-bold text-white my-2">{{ \App\Models\Produto::count() }}</p>
-                        <p class="text-center text-white text-sm">Cadastrados no sistema</p>
+                        <h3 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Total de Produtos</h3>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-4xl font-black text-white">{{ \App\Models\Produto::count() }}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60">Cadastrados no sistema</p>
                     </div>
-                    <div class="bg-orange-600 p-3">
-                        <a href="{{ route('produtos.index') }}" class="flex justify-center items-center text-white hover:text-orange-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-                            <span>Ver Produtos</span>
+                    <div class="px-6 py-3 bg-black/10 flex justify-between items-center group-hover:bg-black/20 transition-colors">
+                        <a href="{{ route('produtos.index') }}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center">
+                            Ver catálogo <svg class="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
                     </div>
                 </div>
 
                 <!-- Card Movimentações -->
-                <div class="bg-gray-500 rounded-lg shadow-md overflow-hidden">
-                    <div class="p-5">
-                        <div class="flex justify-center mb-2">
-                            <div class="rounded-full bg-gray-400/50 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #475569 0%, #334155 100%);">
+                    <div class="p-6 relative text-white">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-white/20 backdrop-blur-md rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                 </svg>
                             </div>
+                            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest">Fluxo</span>
                         </div>
-                        <h3 class="text-center text-white font-medium">Movimentações</h3>
-                        <p class="text-center text-4xl font-bold text-white my-2">{{ \App\Models\Movimentacao::count() }}</p>
-                        <p class="text-center text-white text-sm">Registradas no sistema</p>
+                        <h3 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Movimentações</h3>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-4xl font-black text-white">{{ \App\Models\Movimentacao::count() }}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60">Registradas no sistema</p>
                     </div>
-                    <div class="bg-gray-600 p-3">
-                        <a href="{{ route('movimentacoes.index') }}" class="flex justify-center items-center text-white hover:text-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-                            <span>Ver Movimentações</span>
+                    <div class="px-6 py-3 bg-black/10 flex justify-between items-center group-hover:bg-black/20 transition-colors">
+                        <a href="{{ route('movimentacoes.index') }}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center">
+                            Ver histórico <svg class="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </a>
                     </div>
                 </div>
-                <!-- Card Comparação Ano Atual vs Ano Passado -->
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-xl overflow-hidden">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
+            </div>
+
+            <!-- Cards de Análise - Segunda Linha -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Card Comparação Ano -->
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;">
+                    <div class="p-8 relative">
+                        <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h3 class="text-xl font-bold text-white">Produtos {{ now()->year }} vs {{ now()->year - 1 }}</h3>
-                                <p class="text-blue-100 mt-1">Até {{ now()->format('d/m') }}</p>
+                                <h3 class="text-2xl font-black text-white tracking-tight">Produtos {{ now()->year }} vs {{ now()->year - 1 }}</h3>
+                                <p class="text-blue-100/80 text-xs font-bold uppercase tracking-widest mt-1">Comparativo até {{ now()->format('d/m') }}</p>
                             </div>
-                            <div class="rounded-full bg-blue-400/30 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            <div class="p-4 bg-white/20 backdrop-blur-md rounded-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="mt-6">
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-white">{{ $produtosAnoAtualAteHoje }}</span>
-                                <span class="text-lg text-blue-100">{{ $produtosAnoPassadoAteHoje }}</span>
+                        
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div class="p-4 bg-white/10 rounded-2xl border border-white/10">
+                                <span class="block text-[10px] uppercase font-black text-blue-200 mb-1">Ano Atual</span>
+                                <span class="text-4xl font-black text-white">{{ $produtosAnoAtualAteHoje }}</span>
                             </div>
-                            <div class="flex items-center mt-2">
-                                @if($variacaoPercentual > 0)
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-300" viewBox="0 0 20 20" fill="currentColor">
+                            <div class="p-4 bg-black/10 rounded-2xl border border-white/5">
+                                <span class="block text-[10px] uppercase font-black text-blue-200 mb-1">Ano Anterior</span>
+                                <span class="text-4xl font-black text-white/50">{{ $produtosAnoPassadoAteHoje }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 py-3 px-6 bg-black/20 rounded-2xl inline-flex border border-white/10">
+                            @if($variacaoPercentual >= 0)
+                                <div class="p-1.5 bg-green-500/30 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
                                     </svg>
-                                @elseif($variacaoPercentual < 0)
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-300" viewBox="0 0 20 20" fill="currentColor">
+                                </div>
+                            @else
+                                <div class="p-1.5 bg-red-500/30 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1v-5a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586l-4.293-4.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd" />
                                     </svg>
-                                @else
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-300" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                @endif
-                                <span class="ml-1 text-sm font-medium {{ $variacaoPercentual > 0 ? 'text-green-300' : ($variacaoPercentual < 0 ? 'text-red-300' : 'text-yellow-300') }}">
-                                    {{ abs($variacaoPercentual) }}% {{ $variacaoPercentual > 0 ? 'aumento' : ($variacaoPercentual < 0 ? 'redução' : 'sem alteração') }}
-                                </span>
-                            </div>
+                                </div>
+                            @endif
+                            <span class="text-xl font-black {{ $variacaoPercentual >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                                {{ abs($variacaoPercentual) }}% {{ $variacaoPercentual >= 0 ? 'de aumento' : 'de redução' }}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card Projeção Anual -->
-                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-xl overflow-hidden">
-                    <div class="p-6">
-                        <div class="flex items-center justify-between">
+                <!-- Card Projeção -->
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #4338ca 0%, #312e81 100%) !important;">
+                    <div class="p-8 relative">
+                        <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h3 class="text-xl font-bold text-white">Projeção {{ now()->year }}</h3>
-                                <p class="text-indigo-100 mt-1">Baseado no ritmo atual</p>
+                                <h3 class="text-2xl font-black text-white tracking-tight">Projeção {{ now()->year }}</h3>
+                                <p class="text-indigo-100/80 text-xs font-bold uppercase tracking-widest mt-1">Ritmo atual de produção</p>
                             </div>
-                            <div class="rounded-full bg-indigo-400/30 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            <div class="p-4 bg-white/20 backdrop-blur-md rounded-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="mt-6">
-                            <div class="flex justify-between items-center">
-                                <span class="text-2xl font-bold text-white">{{ $projecaoProdutosAnoAtual }}</span>
-                                <span class="text-lg text-indigo-100">produtos</span>
-                            </div>
-                            <div class="flex items-center mt-2">
-                                @php
-                                    $percentualConcluido = round((now()->dayOfYear / (now()->isLeapYear() ? 366 : 365)) * 100);
-                                @endphp
-                                <div class="w-full bg-indigo-700 rounded-full h-2.5">
-                                    <div class="bg-white h-2.5 rounded-full" style="width: {{ $percentualConcluido }}%"></div>
-                                </div>
-                                <span class="ml-2 text-xs text-indigo-100">{{ $percentualConcluido }}%</span>
-                            </div>
+                        
+                        <div class="flex items-baseline mb-8">
+                            <span class="text-6xl font-black text-white tracking-tighter">{{ $projecaoProdutosAnoAtual }}</span>
+                            <span class="ml-3 text-indigo-200 text-sm font-bold uppercase tracking-widest">Produtos</span>
+                        </div>
+
+                        <div class="mb-8">
                             @php
-                                $tendencia = $produtosAnoAtual > 0 ? round(($projecaoProdutosAnoAtual / $produtosAnoAtual) * 100) - 100 : 0;
-                                $tendenciaTexto = $tendencia > 0 ? 'aumento' : ($tendencia < 0 ? 'redução' : 'estabilidade');
-                                $tendenciaClasse = $tendencia > 0 ? 'text-green-300' : ($tendencia < 0 ? 'text-red-300' : 'text-yellow-300');
+                                $percentualConcluido = round((now()->dayOfYear / (now()->isLeapYear() ? 366 : 365)) * 100);
                             @endphp
-                            <div class="mt-3 p-2 bg-indigo-600/50 rounded-md">
-                                <p class="text-xs text-indigo-100">Tendência para o final do ano:</p>
-                                <p class="text-sm font-medium {{ $tendenciaClasse }}">
-                                    {{ abs($tendencia) }}% de {{ $tendenciaTexto }} em relação ao ano passado
-                                </p>
+                            <div class="flex justify-between text-[10px] font-black text-indigo-200 uppercase mb-2 tracking-widest">
+                                <span>Progresso do Ano</span>
+                                <span>{{ $percentualConcluido }}%</span>
                             </div>
+                            <div class="w-full bg-white/10 rounded-full h-3 border border-white/10 p-0.5">
+                                <div class="bg-white h-full rounded-full shadow-[0_0_15px_rgba(255,255,255,0.7)] transition-all duration-1000" style="width: {{ $percentualConcluido }}%"></div>
+                            </div>
+                        </div>
+
+                        @php
+                            $tendencia = $produtosAnoAtual > 0 ? round(($projecaoProdutosAnoAtual / $produtosAnoAtual) * 100) - 100 : 0;
+                            $tendenciaTexto = $tendencia > 0 ? 'aumento' : 'redução';
+                        @endphp
+                        <div class="p-4 bg-black/20 rounded-2xl border border-white/10">
+                            <p class="text-[10px] font-black text-indigo-200 uppercase tracking-widest mb-1">Expectativa Final:</p>
+                            <p class="text-lg font-black {{ $tendencia >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                                {{ abs($tendencia) }}% de {{ $tendenciaTexto }} vs ano anterior
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -332,22 +337,24 @@
             </div>
             @endif
 
-           <!-- Filtro de Ano -->
-            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6 p-4">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-800">Filtrar Dados por Ano</h3>
-                    <div class="flex items-center space-x-2">
-                        <label for="filtroAno" class="text-sm font-medium text-gray-700">Selecione o Ano:</label>
-                        <select id="filtroAno" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+            <!-- Filtro de Ano -->
+            <div class="glass dark:glass-dark rounded-2xl mb-8 p-6 ring-1 ring-black/5">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Análise Temporal</h3>
+                        <p class="text-sm text-slate-500">Selecione o ano para filtrar os indicadores de desempenho</p>
+                    </div>
+                    <div class="flex items-center space-x-3 w-full md:w-auto">
+                        <select id="filtroAno" class="flex-1 md:w-32 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm focus:ring-primary-500 focus:border-primary-500">
                             @php
                                 $anoAtual = date('Y');
-                                $anoInicial = 2020; // Defina o ano inicial conforme necessidade
+                                $anoInicial = 2020;
                             @endphp
                             @for ($ano = $anoAtual; $ano >= $anoInicial; $ano--)
                                 <option value="{{ $ano }}" {{ $ano == $anoAtual ? 'selected' : '' }}>{{ $ano }}</option>
                             @endfor
                         </select>
-                        <button id="btnFiltrarAno" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        <button id="btnFiltrarAno" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-primary-600/20 active:scale-95">
                             Filtrar
                         </button>
                     </div>
@@ -356,78 +363,64 @@
 
 
             <!-- Gráficos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <!-- Gráfico de Produtos Ativos por Estilista -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b">
+                <div class="glass dark:glass-dark rounded-2xl overflow-hidden border-none ring-1 ring-black/5">
+                    <div class="p-6 border-b border-slate-200/50 dark:border-slate-800/50">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800">
+                            <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">
                                 Produtos Ativos por Estilista
                             </h3>
-                            <a href="{{ route('dashboard.produtos-por-estilista') }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                            <a href="{{ route('dashboard.produtos-por-estilista') }}" class="p-2 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-100 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
-                                Ver gráfico De Estilistas
                             </a>
                         </div>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         <canvas id="produtosAtivosPorEstilistaChart" height="300"></canvas>
                     </div>
                 </div>
 
                 <!-- Gráfico de Evolução de Produtos Ativos -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            Evolução de Produtos Ativos (Últimos 12 Meses)
+                <div class="glass dark:glass-dark rounded-2xl overflow-hidden border-none ring-1 ring-black/5">
+                    <div class="p-6 border-b border-slate-200/50 dark:border-slate-800/50">
+                        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">
+                            Evolução Temporal
                         </h3>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Últimos 12 Meses</p>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         <canvas id="evolucaoProdutosAtivosChart" height="300"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <!-- Gráfico de Produtos por Ano -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            Produtos Cadastrados por Ano
+                <div class="glass dark:glass-dark rounded-2xl overflow-hidden border-none ring-1 ring-black/5">
+                    <div class="p-6 border-b border-slate-200/50 dark:border-slate-800/50">
+                        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                            <span class="w-1.5 h-6 bg-primary-500 rounded-full mr-3"></span>
+                            Produtos por Ano
                         </h3>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         <canvas id="produtosAnoChart" height="250"></canvas>
                     </div>
                 </div>
 
                 <!-- Gráfico de Comparação de Anos -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="p-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>
-                            Comparação de Anos até {{ now()->format('d/m') }}
+                <div class="glass dark:glass-dark rounded-2xl overflow-hidden border-none ring-1 ring-black/5">
+                    <div class="p-6 border-b border-slate-200/50 dark:border-slate-800/50">
+                        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                            <span class="w-1.5 h-6 bg-green-500 rounded-full mr-3"></span>
+                            Comparativo até {{ now()->format('d/m') }}
                         </h3>
                     </div>
-                    <div class="p-4">
+                    <div class="p-6">
                         <canvas id="comparacaoAnosChart" height="250"></canvas>
-                    </div>
-                </div>
-
-                    <div class="p-4 border-b">
-                        <h3 class="text-lg font-semibold text-gray-800">Valor Total do Estoque</h3>
-                    </div>
-                    <div class="p-4 h-64">
-                        <div class="text-center text-gray-500 h-full flex items-center justify-center">
-                            <p>Gráfico de valor total será exibido aqui</p>
-                        </div>
                     </div>
                 </div>
             </div>

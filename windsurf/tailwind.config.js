@@ -31,6 +31,17 @@ export default {
         'bg-pink-500', 'hover:bg-pink-600',
         'bg-orange-500', 'hover:bg-orange-600',
         'text-white', 'shadow-sm',
+        // Cores primary personalizadas
+        'bg-primary-50', 'bg-primary-100', 'bg-primary-200', 'bg-primary-300',
+        'bg-primary-400', 'bg-primary-500', 'bg-primary-600', 'bg-primary-700',
+        'bg-primary-800', 'bg-primary-900', 'bg-primary-950',
+        'text-primary-50', 'text-primary-100', 'text-primary-200', 'text-primary-300',
+        'text-primary-400', 'text-primary-500', 'text-primary-600', 'text-primary-700',
+        'text-primary-800', 'text-primary-900', 'text-primary-950',
+        'hover:bg-primary-600', 'hover:bg-primary-700', 'hover:bg-primary-800',
+        'border-primary-200', 'border-primary-500', 'border-primary-600',
+        'ring-primary-500', 'focus:ring-primary-500', 'focus:border-primary-500',
+        'shadow-primary-600/20', 'shadow-primary-500/20',
     ],
 
     theme: {
@@ -38,8 +49,41 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                primary: {
+                    50: '#f0f9ff',
+                    100: '#e0f2fe',
+                    200: '#bae6fd',
+                    300: '#7dd3fc',
+                    400: '#38bdf8',
+                    500: '#0ea5e9',
+                    600: '#0284c7',
+                    700: '#0369a1',
+                    800: '#075985',
+                    900: '#0c4a6e',
+                    950: '#082f49',
+                },
+                secondary: {
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    400: '#94a3b8',
+                    500: '#64748b',
+                    600: '#475569',
+                    700: '#334155',
+                    800: '#1e293b',
+                    900: '#0f172a',
+                    950: '#020617',
+                }
+            },
+            backdropBlur: {
+                xs: '2px',
+            },
         },
     },
+
+    darkMode: 'class',
 
     plugins: [forms],
 };

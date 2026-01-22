@@ -5,40 +5,42 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-8 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <!-- Botões de ação -->
-            <div class="flex flex-wrap justify-between mb-4">
-
-                <div>
+            <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                <div class="flex flex-wrap gap-3">
                     @if(auth()->user()->canCreate('produtos'))
-                    <a href="{{ route('produtos.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    <a href="{{ route('produtos.create') }}" class="inline-flex items-center px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                         </svg>
                         Adicionar Produto
                     </a>
                     @endif
                 </div>
-                @if(auth()->user()->canRead('produtos'))
-                    <button id="btn-gerar-pdf-landscape" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        PDF Paisagem
-                    </button>
-                    <button id="btn-gerar-pdf-portrait" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
-                        PDF Retrato
-                    </button>
-                @endif
+                
+                <div class="flex flex-wrap gap-2">
+                    @if(auth()->user()->canRead('produtos'))
+                        <button id="btn-gerar-pdf-landscape" class="inline-flex items-center px-4 py-2.5 bg-rose-500/10 border border-rose-200 dark:border-rose-900/30 rounded-xl font-bold text-xs text-rose-600 dark:text-rose-400 uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            PDF Paisagem
+                        </button>
+                        <button id="btn-gerar-pdf-portrait" class="inline-flex items-center px-4 py-2.5 bg-orange-500/10 border border-orange-200 dark:border-orange-900/30 rounded-xl font-bold text-xs text-orange-600 dark:text-orange-400 uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            PDF Retrato
+                        </button>
+                    @endif
+                </div>
             </div>
 
             <!-- Filtros -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden border-none ring-1 ring-black/5 rounded-2xl mb-8">
+                <div class="p-6">
 
                     <!-- Cabeçalho dos Filtros com Toggle -->
                     <div class="mb-4 flex items-center justify-between">
@@ -79,7 +81,7 @@
                     </div>
 
                     <!-- Formulário de Filtros -->
-                    <div id="filters-container" class="mb-6 bg-gray-100 p-4 rounded-lg">
+                    <div id="filters-container" class="mb-6 bg-slate-100/50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
                         <form id="filter-form" action="{{ route('produtos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-1">
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
@@ -281,49 +283,49 @@
             @endif
 
                     <!-- Tabela de Produtos -->
-                    <div class="relative overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                    <div class="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                            <thead class="bg-slate-50 dark:bg-slate-900/50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Referência
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Descrição
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Data Prev. Produção
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                        Prev. Produção
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        1ª Data Prev. Facção
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                        Facção (1ª Data)
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Marca
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Grupo
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Direcionamento Comercial
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                        Direcionamento
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-0 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-8">
-                                        <span class="sr-only">Concluído</span>
+                                    <th scope="col" class="px-0 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest w-8">
+                                        OK
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Localização
                                     </th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                                         Situação
                                     </th>
-                                    <th scope="col" class="sticky right-0 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 shadow-md z-10">
+                                    <th scope="col" class="sticky right-0 px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 dark:bg-slate-900 shadow-md z-10">
                                         Ações
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
                                 @forelse($produtos as $produto)
                                     <tr class="{{ $produto->trashed() ? 'bg-red-50' : '' }}">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 line-clamp-1">

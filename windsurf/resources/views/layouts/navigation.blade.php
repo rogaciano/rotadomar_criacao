@@ -1,4 +1,10 @@
-<nav x-data="{ open: false, dropdownOpen: false }" class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-md">
+<nav x-data="{ open: false, dropdownOpen: false, darkMode: localStorage.getItem('dark-mode') === 'true' }" 
+     x-init="$watch('darkMode', val => {
+        localStorage.setItem('dark-mode', val);
+        if (val) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+     })"
+     class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 transition-all duration-300">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -94,60 +100,124 @@
                 </div>
             </div>
 
-            <!-- Notifications Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6" x-data="{
-                open: false,
-                notificacoes: [],
-                count: 0,
-                loading: false,
-                async loadNotificacoes() {
-                    if (this.loading) return;
-                    this.loading = true;
-                    try {
-                        const response = await fetch('{{ route("api.notificacoes.nao-visualizadas") }}', {
-                            headers: {
-                                'Accept': 'application/json'
-                            }
-                        });
-                        const data = await response.json();
-                        this.notificacoes = data.notificacoes;
-                        this.count = data.count;
-                    } catch (error) {
-                        console.error('Erro ao carregar notificações:', error);
-                    } finally {
-                        this.loading = false;
+            <!-- Right Side Group (Settings + Theme + Notifications) -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Settings Dropdown -->
+                <div class="me-4 relative">
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                <div>{{ Auth::user()->name }}</div>
+
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            @if(auth()->user()->isAdmin())
+                            <x-dropdown-link :href="route('users.index')">
+                                {{ __('Usuários') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('permissions.index')">
+                                {{ __('Permissões') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('logs.index')">
+                                {{ __('Logs') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('activity-log.index')">
+                                {{ __('Log de Atividades') }}
+                            </x-dropdown-link>
+                            @endif
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('Profile') }}
+                            </x-dropdown-link>
+
+                            <!-- Authentication -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+
+                                <x-dropdown-link :href="route('logout')"
+                                        onclick="event.preventDefault();
+                                                    this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 focus:outline-none ring-1 ring-black/5 dark:ring-white/5 ms-2">
+                    <svg x-show="!darkMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                    <svg x-show="darkMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div class="relative ms-4" x-data="{
+                    open: false,
+                    notificacoes: [],
+                    count: 0,
+                    loading: false,
+                    async loadNotificacoes() {
+                        if (this.loading) return;
+                        this.loading = true;
+                        try {
+                            const response = await fetch('{{ route("api.notificacoes.nao-visualizadas") }}', {
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            const data = await response.json();
+                            this.notificacoes = data.notificacoes;
+                            this.count = data.count;
+                        } catch (error) {
+                            console.error('Erro ao carregar notificações:', error);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+                    init() {
+                        this.loadNotificacoes();
+                        setInterval(() => this.loadNotificacoes(), 30000);
                     }
-                },
-                init() {
-                    this.loadNotificacoes();
-                    // Recarregar notificações a cada 30 segundos
-                    setInterval(() => this.loadNotificacoes(), 30000);
-                }
-            }">
-                <div class="relative">
+                }">
                     <button @click="open = !open; if(open) loadNotificacoes()" @click.away="open = false"
-                            class="relative inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            class="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 focus:outline-none ring-1 ring-black/5 dark:ring-white/5">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12h5v12z" />
                         </svg>
                         <span x-show="count > 0" x-text="count"
-                              class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full min-w-[1.25rem] h-5"></span>
+                                class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
                     </button>
 
-                    <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute z-50 mt-2 w-80 rounded-md shadow-lg origin-top-right right-0 bg-white ring-1 ring-black ring-opacity-5" style="display: none;">
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200" 
+                         x-transition:enter-start="transform opacity-0 scale-95" 
+                         x-transition:enter-end="transform opacity-100 scale-100" 
+                         x-transition:leave="transition ease-in duration-75" 
+                         x-transition:leave-start="transform opacity-100 scale-100" 
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         class="absolute z-50 mt-2 w-80 rounded-2xl shadow-2xl origin-top-right right-0 bg-white dark:bg-slate-800 ring-1 ring-black/5 dark:ring-white/10" style="display: none;">
                         <div class="py-1">
-                            <div class="px-4 py-2 border-b border-gray-200">
+                            <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
                                 <div class="flex items-center justify-between">
-                                    <h3 class="text-sm font-medium text-gray-900">Notificações</h3>
-                                    <a href="{{ route('notificacoes.index') }}" class="text-xs text-blue-600 hover:text-blue-800">Ver todas</a>
+                                    <h3 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest">Notificações</h3>
+                                    <a href="{{ route('notificacoes.index') }}" class="text-[10px] font-bold text-primary-600 dark:text-primary-400 uppercase hover:underline">Ver todas</a>
                                 </div>
                             </div>
 
                             <div class="max-h-96 overflow-y-auto">
                                 <template x-if="loading">
-                                    <div class="px-4 py-3 text-center text-gray-500">
-                                        <svg class="animate-spin h-5 w-5 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <div class="px-4 py-6 text-center">
+                                        <svg class="animate-spin h-5 w-5 mx-auto text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
@@ -155,24 +225,24 @@
                                 </template>
 
                                 <template x-if="!loading && notificacoes.length === 0">
-                                    <div class="px-4 py-3 text-center text-gray-500 text-sm">
+                                    <div class="px-4 py-8 text-center text-slate-500 text-xs italic">
                                         Nenhuma notificação nova
                                     </div>
                                 </template>
 
                                 <template x-for="notificacao in notificacoes" :key="notificacao.id">
-                                    <a :href="notificacao.link" :title="notificacao.mensagem" class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                                    <a :href="notificacao.link" :title="notificacao.mensagem" class="block px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-50 dark:border-slate-700 last:border-0 transition-colors">
                                         <div class="flex items-start space-x-3">
                                             <div class="flex-shrink-0">
-                                                <div class="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
+                                                <div class="w-1.5 h-1.5 bg-primary-500 rounded-full mt-1.5 shadow-sm shadow-primary-500/50"></div>
                                             </div>
                                             <div class="flex-1 min-w-0">
-                                                <p class="text-sm font-medium text-gray-900" x-text="notificacao.titulo"></p>
-                                                <p class="text-sm text-gray-600 truncate" x-text="notificacao.mensagem"></p>
-                                                <div class="flex items-center space-x-2 mt-1">
-                                                    <p class="text-xs text-gray-400" x-text="notificacao.created_at"></p>
-                                                    <span class="text-xs text-gray-400">•</span>
-                                                    <p class="text-xs text-blue-600 font-medium" x-text="notificacao.localizacao"></p>
+                                                <p class="text-[13px] font-bold text-slate-900 dark:text-white leading-tight" x-text="notificacao.titulo"></p>
+                                                <p class="text-[12px] text-slate-600 dark:text-slate-400 truncate mt-0.5" x-text="notificacao.mensagem"></p>
+                                                <div class="flex items-center space-x-2 mt-1.5">
+                                                    <p class="text-[10px] text-slate-400 font-medium" x-text="notificacao.created_at"></p>
+                                                    <span class="text-slate-300 dark:text-slate-600">•</span>
+                                                    <p class="text-[10px] text-primary-600 dark:text-primary-400 font-bold uppercase" x-text="notificacao.localizacao"></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -182,54 +252,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        @if(auth()->user()->isAdmin())
-                        <x-dropdown-link :href="route('users.index')">
-                            {{ __('Usuários') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('permissions.index')">
-                            {{ __('Permissões') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('logs.index')">
-                            {{ __('Logs') }}
-                        </x-dropdown-link>
-                        <x-dropdown-link :href="route('activity-log.index')">
-                            {{ __('Log de Atividades') }}
-                        </x-dropdown-link>
-                        @endif
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
             </div>
 
             <!-- Hamburger -->
