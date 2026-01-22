@@ -61,6 +61,39 @@
                 </a>
             </div>
 
+            @push('styles')
+    <style>
+        .select2-container--default .select2-selection--multiple {
+            border-color: #D1D5DB !important; /* gray-300 */
+            border-radius: 0.375rem !important; /* rounded-md */
+            min-height: 38px !important;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #A5B4FC !important; /* indigo-300 */
+            ring: 2px;
+            ring-color: #C7D2FE !important; /* indigo-200 */
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #EEF2FF !important; /* indigo-50 */
+            border-color: #C7D2FE !important; /* indigo-200 */
+            color: #4338CA !important; /* indigo-700 */
+            font-size: 0.75rem !important;
+            font-weight: 600 !important;
+            border-radius: 9999px !important;
+            padding: 2px 8px !important;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #4338CA !important;
+            margin-right: 5px !important;
+            border: none !important;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            background: none !important;
+            color: #3730A3 !important;
+        }
+    </style>
+    @endpush
+
             <!-- Filtros -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-4">
                 <div class="p-6">
@@ -72,22 +105,23 @@
                                     <span class="text-xs text-gray-500">(Seu acesso)</span>
                                 @endif
                             </label>
-                            <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <select name="localizacao_id[]" id="localizacao_id" multiple class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-[38px] lg:h-auto min-h-[38px]">
                                 @if($usuarioFaccao ?? false)
                                     {{-- Usuário de facção: principal no topo, visualizações abaixo --}}
                                     @php
                                         $locPrincipal = $localizacoes->firstWhere('id', $localizacaoPrincipalId ?? null);
                                         $locsVisualizacao = $localizacoes->filter(fn($l) => in_array($l->id, $localizacoesVisualizacaoIds ?? []));
+                                        $selectedIds = is_array($localizacaoId) ? $localizacaoId : [$localizacaoId];
                                     @endphp
                                     @if($locPrincipal)
-                                        <option value="{{ $locPrincipal->id }}" {{ ($localizacaoId ?? '') == $locPrincipal->id || empty($localizacaoId) ? 'selected' : '' }}>
+                                        <option value="{{ $locPrincipal->id }}" {{ in_array($locPrincipal->id, $selectedIds) || empty($localizacaoId) ? 'selected' : '' }}>
                                             {{ $locPrincipal->nome_localizacao }} (Principal)
                                         </option>
                                     @endif
                                     @if($locsVisualizacao->count() > 0)
                                         <optgroup label="Visualização">
                                             @foreach($locsVisualizacao as $locVis)
-                                                <option value="{{ $locVis->id }}" {{ ($localizacaoId ?? '') == $locVis->id ? 'selected' : '' }}>
+                                                <option value="{{ $locVis->id }}" {{ in_array($locVis->id, $selectedIds) ? 'selected' : '' }}>
                                                     {{ $locVis->nome_localizacao }}
                                                 </option>
                                             @endforeach
@@ -95,9 +129,11 @@
                                     @endif
                                 @else
                                     {{-- Usuário normal: pode ver todas --}}
-                                    <option value="">Todas as Localizações</option>
+                                    @php
+                                        $selectedIds = is_array($localizacaoId) ? $localizacaoId : ($localizacaoId ? [$localizacaoId] : []);
+                                    @endphp
                                     @foreach($localizacoes as $localizacao)
-                                        <option value="{{ $localizacao->id }}" {{ ($localizacaoId ?? '') == $localizacao->id ? 'selected' : '' }}>
+                                        <option value="{{ $localizacao->id }}" {{ in_array($localizacao->id, $selectedIds) ? 'selected' : '' }}>
                                             {{ $localizacao->nome_localizacao }}
                                         </option>
                                     @endforeach
@@ -972,6 +1008,17 @@
                 toggleIconHide.classList.add('hidden');
             }
         }
+
+        // Inicializar Select2 para localização
+        $(document).ready(function() {
+            $('#localizacao_id').select2({
+                placeholder: "Todas as Localizações",
+                allowClear: true,
+                width: '100%',
+                language: "pt-BR",
+                closeOnSelect: false
+            });
+        });
 
         // Inicializar estado do botão baseado no estado inicial (usuário restrito)
         document.addEventListener('DOMContentLoaded', function() {

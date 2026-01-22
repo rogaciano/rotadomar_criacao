@@ -245,7 +245,11 @@ class LocalizacaoCapacidadeMensalController extends Controller
         // Mês e ano padrão (atual)
         $mes = $request->filled('mes') ? $request->mes : now()->month;
         $ano = $request->filled('ano') ? $request->ano : now()->year;
-        $localizacaoId = $request->filled('localizacao_id') ? $request->localizacao_id : null;
+        $localizacaoId = $request->input('localizacao_id'); // Agora pode ser array ou string
+        if ($localizacaoId && !is_array($localizacaoId)) {
+            $localizacaoId = [$localizacaoId];
+        }
+
         $etapaId = $request->filled('etapa_id') ? $request->etapa_id : null;
         $marcaId = $request->filled('marca_id') ? $request->marca_id : null;
         $referencia = $request->input('referencia');
@@ -260,11 +264,14 @@ class LocalizacaoCapacidadeMensalController extends Controller
             $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
 
             // Se não há filtro, usar a localização principal por padrão
-            if (!$localizacaoId) {
-                $localizacaoId = $user->localizacao_id;
-            } elseif (!in_array($localizacaoId, $localizacoesPermitidas)) {
-                // Se há filtro inválido, voltar para a principal
-                $localizacaoId = $user->localizacao_id;
+            if (empty($localizacaoId)) {
+                $localizacaoId = [$user->localizacao_id];
+            } else {
+                // Filtrar apenas as permitidas
+                $localizacaoId = array_intersect($localizacaoId, $localizacoesPermitidas);
+                if (empty($localizacaoId)) {
+                    $localizacaoId = [$user->localizacao_id];
+                }
             }
         }
         // Outros usuários (admin ou com permissão): veem tudo, sem filtro obrigatório
@@ -275,8 +282,8 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->where('ano', $ano);
 
         // Aplicar filtro de localização
-        if ($localizacaoId) {
-            $query->where('localizacao_id', $localizacaoId);
+        if (!empty($localizacaoId)) {
+            $query->whereIn('localizacao_id', $localizacaoId);
         } elseif ($usuarioFaccao && !empty($localizacoesPermitidas)) {
             // Se usuário de facção sem filtro, mostrar suas localizações permitidas
             $query->whereIn('localizacao_id', $localizacoesPermitidas);
@@ -371,6 +378,10 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $mes = $request->input('mes', now()->month);
         $ano = $request->input('ano', now()->year);
         $localizacaoId = $request->input('localizacao_id');
+        if ($localizacaoId && !is_array($localizacaoId)) {
+            $localizacaoId = [$localizacaoId];
+        }
+
         $etapaId = $request->input('etapa_id');
         $marcaId = $request->input('marca_id');
         $referencia = $request->input('referencia');
@@ -381,8 +392,8 @@ class LocalizacaoCapacidadeMensalController extends Controller
             ->where('mes', $mes)
             ->where('ano', $ano);
 
-        if ($localizacaoId) {
-            $query->where('localizacao_id', $localizacaoId);
+        if (!empty($localizacaoId)) {
+            $query->whereIn('localizacao_id', $localizacaoId);
         }
 
         $capacidades = $query->get();
