@@ -8,7 +8,7 @@
         <!-- Seção de Marcas Dinâmica -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
             <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-2 overflow-hidden">
-                <div class="flex flex-wrap items-center justify-around gap-4 md:gap-8 py-4">
+                <div class="flex flex-wrap items-center justify-between gap-4 md:gap-8 py-4 px-4 md:px-12">
                     @php
                         $marcasDestaque = \App\Models\Marca::where('ativo', true)->get();
                     @endphp

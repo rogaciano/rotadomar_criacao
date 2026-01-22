@@ -1,1 +1,1 @@
-<img src="{{ asset('images/rota_logo.png') }}" {{ $attributes }} alt="Grupo Rota do Mar Logo">
+<img src="{{ asset('images/rota_logo.png') }}" {{ $attributes }} alt="Rota do Mar">
