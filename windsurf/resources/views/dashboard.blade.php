@@ -250,16 +250,16 @@
 
             <!-- Gráfico de Capacidade das Localizações -->
             @if(isset($capacidadeLocalizacoes) && count($capacidadeLocalizacoes) > 0)
-            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
-                <div class="p-4 border-b">
-                    <h3 class="text-lg font-semibold text-gray-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="bg-white dark:bg-slate-900 rounded-lg shadow-md overflow-hidden mb-6 border border-slate-200 dark:border-slate-800">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         Capacidade de Localizações - Próximos 3 Meses
                     </h3>
-                    <p class="text-sm text-gray-500 mt-1">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         Comparação entre <strong class="text-blue-600">Capacidade Total</strong> e <strong class="text-orange-600">Previsto Total</strong> de todas as localizações
                         <span class="text-xs text-gray-400 ml-2">({{ count($capacidadeLocalizacoes) }} localização(ões))</span>
                     </p>
@@ -276,10 +276,10 @@
             </div>
 
             <!-- Modal de Detalhamento por Mês -->
-            <div id="modalDetalhamentoMes" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-                    <div class="flex justify-between items-center mb-4 pb-3 border-b">
-                        <h3 class="text-xl font-semibold text-gray-900" id="modalTitulo">Detalhamento - Mês</h3>
+            <div id="modalDetalhamentoMes" class="hidden fixed inset-0 bg-gray-600/50 dark:bg-gray-900/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white dark:bg-slate-900 border-gray-200 dark:border-gray-700">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white" id="modalTitulo">Detalhamento - Mês</h3>
                         <button onclick="fecharModalDetalhamento()" class="text-gray-400 hover:text-gray-600">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -288,33 +288,33 @@
                     </div>
                     <div class="mt-2">
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-slate-800">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Capacidade</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Previsto</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ocupação</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Localização</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Capacidade</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Previsto</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Saldo</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ocupação</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabelaDetalhamento" class="bg-white divide-y divide-gray-200">
+                                <tbody id="tabelaDetalhamento" class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-gray-700 text-gray-900 dark:text-gray-100">
                                     <!-- Conteúdo será preenchido via JavaScript -->
                                 </tbody>
-                                <tfoot class="bg-gray-100 font-semibold">
+                                <tfoot class="bg-gray-100 dark:bg-slate-800 font-semibold">
                                     <tr>
-                                        <td class="px-6 py-3 text-left text-sm text-gray-900">Total</td>
-                                        <td id="totalCapacidade" class="px-6 py-3 text-right text-sm text-gray-900"></td>
-                                        <td id="totalPrevisto" class="px-6 py-3 text-right text-sm text-gray-900"></td>
-                                        <td id="totalSaldo" class="px-6 py-3 text-right text-sm text-gray-900"></td>
-                                        <td id="totalOcupacao" class="px-6 py-3 text-right text-sm text-gray-900"></td>
+                                        <td class="px-6 py-3 text-left text-sm text-gray-900 dark:text-white">Total</td>
+                                        <td id="totalCapacidade" class="px-6 py-3 text-right text-sm text-gray-900 dark:text-white"></td>
+                                        <td id="totalPrevisto" class="px-6 py-3 text-right text-sm text-gray-900 dark:text-white"></td>
+                                        <td id="totalSaldo" class="px-6 py-3 text-right text-sm text-gray-900 dark:text-white"></td>
+                                        <td id="totalOcupacao" class="px-6 py-3 text-right text-sm text-gray-900 dark:text-white"></td>
                                     </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
                     <div class="mt-4 flex justify-end">
-                        <button onclick="fecharModalDetalhamento()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                        <button onclick="fecharModalDetalhamento()" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 text-white rounded transition-colors">
                             Fechar
                         </button>
                     </div>
@@ -322,13 +322,13 @@
             </div>
 
             @elseif(isset($capacidadeLocalizacoes))
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900/50 rounded-lg p-4 mb-6">
                 <div class="flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 dark:text-yellow-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                     <div>
-                        <p class="text-sm font-medium text-yellow-800">Nenhuma localização com capacidade encontrada</p>
+                        <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Nenhuma localização com capacidade encontrada</p>
                         <p class="text-xs text-yellow-600 mt-1">
                             Configure localizações ativas com capacidade > 0 para visualizar o gráfico
                         </p>

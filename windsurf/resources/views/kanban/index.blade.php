@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Kanban - Produtos por Localização') }}
         </h2>
     </x-slot>
@@ -12,8 +12,8 @@
                 <form method="GET" action="{{ route('kanban.index') }}" class="flex flex-wrap items-end gap-4">
                     <!-- Filtro de Mês -->
                     <div class="flex-1 min-w-[140px]">
-                        <label for="mes" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
-                        <select name="mes" id="mes" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <label for="mes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mês</label>
+                        <select name="mes" id="mes" class="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                             @foreach($meses as $numero => $nome)
                                 <option value="{{ $numero }}" {{ $mes == $numero ? 'selected' : '' }}>
                                     {{ $nome }}
@@ -24,8 +24,8 @@
 
                     <!-- Filtro de Ano -->
                     <div class="flex-1 min-w-[120px]">
-                        <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-                        <select name="ano" id="ano" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <label for="ano" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ano</label>
+                        <select name="ano" id="ano" class="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
                             @foreach($anos as $anoOpcao)
                                 <option value="{{ $anoOpcao }}" {{ $ano == $anoOpcao ? 'selected' : '' }}>
                                     {{ $anoOpcao }}
@@ -36,10 +36,10 @@
 
                     <!-- Filtro de Localização (multi-select com Select2) -->
                     <div class="flex-1 min-w-[220px]">
-                        <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        <label for="localizacao_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Localização (uma ou mais)
                             @if($usuarioRestrito ?? false)
-                                <span class="text-xs text-gray-500">(Seu acesso)</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">(Seu acesso)</span>
                             @endif
                         </label>
                         @if($usuarioRestrito ?? false)
@@ -48,7 +48,7 @@
                                 $localizacaoSelecionada = $todasLocalizacoes->firstWhere('id', $localizacaoIds[0] ?? null);
                             @endphp
                             <select name="localizacao_id[]" id="localizacao_id"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-100 h-10" disabled>
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 h-10" disabled>
                                 <option value="{{ $localizacaoIds[0] ?? '' }}" selected>
                                     {{ $localizacaoSelecionada->nome_localizacao ?? 'Localização' }}
                                 </option>
@@ -57,7 +57,7 @@
                         @else
                             {{-- Usuário normal: pode ver todas com multi-select --}}
                             <select name="localizacao_id[]" id="localizacao_id" multiple
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-localizacao">
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-localizacao dark:bg-gray-700 dark:text-white">
                                 @foreach($todasLocalizacoes as $localizacao)
                                     <option value="{{ $localizacao->id }}"
                                         {{ !empty($localizacaoIds ?? []) && in_array($localizacao->id, $localizacaoIds) ? 'selected' : '' }}>
@@ -70,9 +70,9 @@
 
                     <!-- Filtro de Direcionamento Comercial (multi-select com Select2) -->
                     <div class="flex-1 min-w-[220px]">
-                        <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial (um ou mais)</label>
+                        <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direcionamento Comercial (um ou mais)</label>
                         <select name="direcionamento_comercial_id[]" id="direcionamento_comercial_id" multiple
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-direcionamento">
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-direcionamento dark:bg-gray-700 dark:text-white">
                             @foreach($direcionamentosComerciais as $direcionamento)
                                 <option value="{{ $direcionamento->id }}"
                                     {{ !empty($direcionamentoComercialIds ?? []) && in_array($direcionamento->id, $direcionamentoComercialIds) ? 'selected' : '' }}>
@@ -84,9 +84,9 @@
 
                     <!-- Filtro de Marca (multi-select com Select2) -->
                     <div class="flex-1 min-w-[220px]">
-                        <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca (uma ou mais)</label>
+                        <label for="marca_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marca (uma ou mais)</label>
                         <select name="marca_id[]" id="marca_id" multiple
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-marca">
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-24 js-select2-marca dark:bg-gray-700 dark:text-white">
                             @foreach($marcas as $marca)
                                 <option value="{{ $marca->id }}"
                                     {{ !empty($marcaIds ?? []) && in_array($marca->id, $marcaIds) ? 'selected' : '' }}>
@@ -108,7 +108,7 @@
                 </form>
 
                 <!-- Indicador de Período -->
-                <div class="mt-3 flex flex-wrap items-center text-sm text-gray-600 gap-2">
+                <div class="mt-3 flex flex-wrap items-center text-sm text-gray-600 dark:text-gray-400 gap-2">
                     <div class="flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -142,14 +142,15 @@
             <!-- Kanban Board com Botões de Navegação -->
             <div class="relative" style="min-height: 500px;">
                 <!-- Botão Esquerda -->
-                <button id="scroll-left" class="absolute left-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-md rounded-full p-2 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
-                    <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Botão Esquerda -->
+                <button id="scroll-left" class="absolute left-2 top-[230px] z-30 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-md rounded-full p-2 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300 dark:border-gray-600">
+                    <svg class="w-4 h-4 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                     </svg>
                 </button>
 
                 <!-- Botão Direita -->
-                <button id="scroll-right" class="absolute right-2 top-[230px] z-30 bg-white hover:bg-gray-100 shadow-md rounded-full p-2 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300">
+                <button id="scroll-right" class="absolute right-2 top-[230px] z-30 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 shadow-md rounded-full p-2 transition-all duration-200 opacity-90 hover:opacity-100 border border-gray-300 dark:border-gray-600">
                     <svg class="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
@@ -164,29 +165,29 @@
                 <div id="kanban-container" class="flex gap-4 pb-4 kanban-scroll mx-auto" style="max-width: 100%;">
                     @forelse($produtosPorLocalizacao as $dados)
                     <!-- Coluna da Localização -->
-                    <div class="flex-shrink-0 w-80 bg-gray-100 rounded-lg overflow-hidden">
+                    <div class="flex-shrink-0 w-80 bg-gray-100 dark:bg-gray-900/50 rounded-lg overflow-hidden">
                         <!-- Header da Coluna (Fixo) -->
-                        <div class="sticky top-0 z-20 bg-gray-100 p-4 pb-3 border-b border-gray-300">
+                        <div class="sticky top-0 z-20 bg-gray-100 dark:bg-gray-900 p-4 pb-3 border-b border-gray-300 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-bold text-lg text-gray-800">
+                                <h3 class="font-bold text-lg text-gray-800 dark:text-white">
                                     {{ $dados['localizacao']->nome_reduzido ?? $dados['localizacao']->nome_localizacao }}
                                 </h3>
                                 <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
                                     {{ $dados['total'] }}
                                 </span>
                             </div>
-                            <p class="text-xs text-gray-600">{{ $dados['localizacao']->nome_localizacao }}</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ $dados['localizacao']->nome_localizacao }}</p>
                         </div>
 
                         <!-- Cards dos Produtos -->
                         <div class="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto p-4 pt-3 pr-2">
                             @forelse($dados['produtos'] as $produto)
-                                <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 {{ $produto->direcionamentoComercial ? 'border-blue-500' : 'border-' . ($produto->marca->cor_fundo ?? 'gray') . '-500' }}">
+                                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border-l-4 {{ $produto->direcionamentoComercial ? 'border-blue-500' : 'border-' . ($produto->marca->cor_fundo ?? 'gray') . '-500' }}">
                                     <!-- Referência -->
                                     <div class="flex items-start justify-between mb-2 gap-2">
                                         <div class="flex-grow">
                                             <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(request()->fullUrl()) }}"
-                                               class="text-blue-600 hover:text-blue-800 font-bold text-lg block">
+                                               class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-lg block">
                                                 {{ $produto->referencia }}
                                             </a>
                                         </div>
@@ -194,20 +195,20 @@
                                             <div class="flex-shrink-0">
                                                 <img src="{{ asset('storage/' . $produto->foto_principal) }}"
                                                      alt=""
-                                                     class="h-14 w-14 rounded-md object-cover border border-gray-200 shadow-sm transition-transform hover:scale-110 cursor-pointer"
+                                                     class="h-14 w-14 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-110 cursor-pointer"
                                                      onclick="abrirModalFoto('{{ asset('storage/' . $produto->foto_principal) }}', '{{ $produto->referencia }} - {{ $produto->descricao }}')">
                                             </div>
                                         @endif
                                     </div>
 
                                     <!-- Descrição -->
-                                    <p class="text-md text-gray-700 mb-1 line-clamp-2">
+                                    <p class="text-md text-gray-700 dark:text-gray-300 mb-1 line-clamp-2">
                                         {{ $produto->descricao }}
                                     </p>
 
                                     <!-- Direcionamento Comercial (texto em negrito) -->
                                     @if($produto->direcionamentoComercial)
-                                        <p class="text-blue-600 hover:text-blue-800 font-bold text-md">
+                                        <p class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-bold text-md">
                                             {{ $produto->direcionamentoComercial->descricao }}
                                         </p>
                                     @endif
@@ -224,7 +225,7 @@
                                     @endif
 
                                     <!-- Quantidade, Data Prevista e Anexos -->
-                                    <div class="mt-2 pt-2 border-t border-gray-200 space-y-1">
+                                    <div class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
                                         @php
                                             $dataPrevistaCarbon = $produto->data_prevista ? \Carbon\Carbon::parse($produto->data_prevista)->startOfDay() : null;
                                             $previstaVencida = $dataPrevistaCarbon && $dataPrevistaCarbon->lt(\Carbon\Carbon::today());
@@ -238,30 +239,30 @@
                                             $envioVazio = $datasEnvio->isEmpty();
                                         @endphp
                                         <div class="flex items-center justify-between text-xs">
-                                            <span class="flex items-center text-gray-600">
+                                            <span class="flex items-center text-gray-600 dark:text-gray-400">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                                                 </svg>
                                                 Quantidade:
                                             </span>
-                                            <span class="font-semibold text-gray-900">{{ $produto->quantidade_alocada ?? 0 }}</span>
+                                            <span class="font-semibold text-gray-900 dark:text-white">{{ $produto->quantidade_alocada ?? 0 }}</span>
                                         </div>
                                         @if($produto->data_prevista)
                                             <div class="flex items-center justify-between text-xs">
-                                                <span class="flex items-center text-gray-600">
+                                                <span class="flex items-center text-gray-600 dark:text-gray-400">
                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                     </svg>
                                                     Previsão de Envio:
                                                 </span>
-                                                <span class="font-semibold text-gray-900">{{ \Carbon\Carbon::parse($produto->data_prevista)->format('d/m/Y') }}</span>
+                                                <span class="font-semibold text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($produto->data_prevista)->format('d/m/Y') }}</span>
                                             </div>
 
-                                            <div class="border-t border-gray-200 my-1"></div>
+                                            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                         @endif
 
                                         <div class="text-xs">
-                                            <div class="flex items-center text-gray-600 mb-1">
+                                            <div class="flex items-center text-gray-600 dark:text-gray-400 mb-1">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17h8M8 17a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 104 0 2 2 0 00-4 0zM3 13V9a2 2 0 012-2h10a2 2 0 012 2v4m-2 4h4a1 1 0 001-1v-2.586a1 1 0 00-.293-.707l-2.414-2.414A1 1 0 0016.586 10H15"></path>
                                                 </svg>
@@ -276,7 +277,7 @@
                                                     $totalLocalizacoes = $produto->localizacoes->filter(fn($loc) => $loc->pivot->data_envio_faccao)->count();
                                                     $restantes = max(0, $totalLocalizacoes - 3);
                                                 @endphp
-                                                <table class="w-full text-xs {{ $previstaVencida && $envioVazio ? 'text-red-700' : 'text-gray-900' }}">
+                                                <table class="w-full text-xs {{ $previstaVencida && $envioVazio ? 'text-red-700 dark:text-red-400' : 'text-gray-900 dark:text-gray-100' }}">
                                                     @foreach($localizacoesComEnvio as $loc)
                                                         @php
                                                             $data = $loc->pivot->data_envio_faccao;
@@ -286,13 +287,13 @@
                                                             $qtd = $loc->pivot->quantidade ?? 0;
                                                         @endphp
                                                         <tr>
-                                                            <td class="text-blue-700 font-semibold pr-1 whitespace-nowrap">
+                                                            <td class="text-blue-700 dark:text-blue-400 font-semibold pr-1 whitespace-nowrap">
                                                                 @if($op)
                                                                     <a href="{{ $opUrl }}" target="_blank" class="hover:underline">OP: {{ $op }}</a>
                                                                 @endif
                                                             </td>
                                                             <td class="text-center px-1 whitespace-nowrap font-semibold">{{ $dataFormatada }}</td>
-                                                            <td class="text-right whitespace-nowrap"><span class="bg-blue-100 text-blue-800 px-1 rounded">{{ number_format($qtd, 0, ',', '.') }}</span></td>
+                                                            <td class="text-right whitespace-nowrap"><span class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-1 rounded">{{ number_format($qtd, 0, ',', '.') }}</span></td>
                                                         </tr>
                                                     @endforeach
                                                     @if($restantes > 0)
@@ -302,7 +303,7 @@
                                                     @endif
                                                 </table>
                                             @else
-                                                <div class="{{ $previstaVencida ? 'text-red-700 font-bold' : 'text-gray-400' }}">
+                                                <div class="{{ $previstaVencida ? 'text-red-700 dark:text-red-400 font-bold' : 'text-gray-400 dark:text-gray-500' }}">
                                                     <span>—</span>
                                                     @if($previstaVencida)
                                                         <svg class="w-4 h-4 inline-block ml-1 align-text-bottom text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,8 +315,8 @@
                                         </div>
 
                                         @if($produto->anexos && $produto->anexos->count())
-                                            <div class="flex items-center justify-start space-x-1 pt-1 border-t border-dashed border-gray-200 mt-1">
-                                                <span class="text-xs text-gray-600 mr-1">Anexos:</span>
+                                            <div class="flex items-center justify-start space-x-1 pt-1 border-t border-dashed border-gray-200 dark:border-gray-700 mt-1">
+                                                <span class="text-xs text-gray-600 dark:text-gray-400 mr-1">Anexos:</span>
                                                 @foreach($produto->anexos as $anexo)
                                                     @php
                                                         $isFicha = stripos($anexo->descricao ?? '', 'ficha') !== false;
@@ -324,7 +325,7 @@
                                                             onclick="abrirPreviewAnexo('{{ route('produtos.anexos.show', $anexo->id) }}', '{{ addslashes($anexo->descricao) }}')"
                                                             title="{{ $anexo->descricao }}"
                                                             class="inline-flex items-center justify-center w-5 h-5 rounded-full border text-[10px]
-                                                                   {{ $isFicha ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-700' }}">
+                                                                   {{ $isFicha ? 'bg-blue-600 border-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300' }}">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3h8l4 4v14H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
                                                         </svg>
@@ -753,6 +754,92 @@
 
         #kanban-scroll-top-content {
             height: 1px;
+        }
+
+        /* Select2 Dark Mode Styling - Matching global styles */
+        .dark .select2-container--default .select2-selection--multiple {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            color: #fff !important;
+            min-height: 42px;
+            padding: 4px 8px;
+        }
+
+        .dark .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #3b82f6 !important;
+            border-color: #2563eb !important;
+            color: #fff !important;
+            border-radius: 0.375rem;
+            padding: 2px 8px;
+            margin: 2px 4px 2px 0;
+        }
+
+        .dark .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #fff !important;
+            border-color: transparent !important;
+            margin-right: 4px;
+        }
+
+        .dark .select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+            color: #fff !important;
+            background-color: #ef4444 !important;
+            border-radius: 50%;
+        }
+
+        .dark .select2-container--default .select2-selection--multiple .select2-search__field {
+            color: #f1f5f9 !important;
+        }
+
+        .dark .select2-container--default .select2-selection--multiple .select2-search__field::placeholder {
+            color: #94a3b8 !important;
+        }
+
+        .dark .select2-dropdown {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+        }
+
+        .dark .select2-container--default .select2-results__option {
+            color: #e2e8f0 !important;
+            padding: 8px 12px;
+        }
+
+        .dark .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #3b82f6 !important;
+            color: #fff !important;
+        }
+
+        .dark .select2-container--default .select2-results__option[aria-selected="true"] {
+            background-color: #1e40af !important;
+            color: #fff !important;
+        }
+
+        .dark .select2-container--default .select2-search--dropdown .select2-search__field {
+            background-color: #0f172a !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+            padding: 8px 12px;
+        }
+
+        .dark .select2-container--default .select2-selection--single {
+            background-color: #1e293b !important;
+            border-color: #475569 !important;
+            height: 42px;
+        }
+
+        .dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #e2e8f0 !important;
+            line-height: 40px;
+        }
+
+        .dark .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: #94a3b8 transparent transparent transparent !important;
+        }
+
+        /* Fix height for multi-selects */
+        .select2-container--default .select2-selection--multiple {
+            min-height: 42px;
+            padding: 2px 8px;
         }
     </style>
     @endpush

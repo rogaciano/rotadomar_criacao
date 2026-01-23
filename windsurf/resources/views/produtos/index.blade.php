@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Produtos') }}
         </h2>
     </x-slot>
@@ -44,7 +44,7 @@
 
                     <!-- Cabeçalho dos Filtros com Toggle -->
                     <div class="mb-4 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-800">Filtros</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
                         <div class="flex flex-wrap items-center justify-end gap-2">
                             <button type="submit" form="filter-form" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,13 +68,15 @@
                     </div>
 
                     <!-- Filtros Ativos (visível quando filtros estão ocultos) -->
-                    <div id="active-filters-summary" class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 hidden">
+                    <div id="active-filters-summary" class="mb-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-slate-900/60 border border-indigo-200 dark:border-indigo-900/50 rounded-xl p-4 hidden backdrop-blur-sm ring-1 ring-indigo-500/10 dark:ring-indigo-400/10">
                         <div class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-                            </svg>
+                            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                             <div class="flex-1">
-                                <p class="text-sm font-semibold text-blue-900 mb-2">Filtros Ativos:</p>
+                                <p class="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-2">Filtros Ativos:</p>
                                 <div id="active-filters-list" class="flex flex-wrap gap-2"></div>
                             </div>
                         </div>
@@ -327,49 +329,49 @@
                             </thead>
                             <tbody class="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
                                 @forelse($produtos as $produto)
-                                    <tr class="{{ $produto->trashed() ? 'bg-red-50' : '' }}">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 line-clamp-1">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 {{ $produto->trashed() ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
                                             <div class="flex items-center">
                                                 @if($produto->foto_principal)
-                                                    <img src="{{ asset('storage/' . $produto->foto_principal) }}" alt="" class="h-10 w-10 rounded-md object-cover mr-3 border border-gray-200 shadow-sm">
+                                                    <img src="{{ asset('storage/' . $produto->foto_principal) }}" alt="" class="h-10 w-10 rounded-md object-cover mr-3 border border-gray-200 dark:border-gray-700 shadow-sm">
                                                 @endif
                                                 <span>{{ $produto->referencia }}</span>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ $produto->descricao }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ $produto->data_prevista_producao_mes_ano }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             @if($produto->primeira_data_prevista_faccao)
                                                 {{ $produto->primeira_data_prevista_faccao->format('d/m/Y') }}
                                             @else
-                                                <span class="text-gray-400 text-xs italic">Sem data</span>
+                                                <span class="text-gray-400 dark:text-gray-500 text-xs italic">Sem data</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             @if($produto->marca && $produto->marca->logo_path)
                                                 <img src="{{ asset('storage/' . $produto->marca->logo_path) }}" alt="{{ $produto->marca->nome_marca }}" class="h-6 w-auto object-contain" title="{{ $produto->marca->nome_marca }}">
                                             @else
                                                 {{ $produto->marca->nome_marca ?? 'N/A' }}
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             {{ $produto->grupoProduto->descricao ?? 'N/A' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                             @if($produto->direcionamentoComercial)
                                                 <span class="font-semibold">
                                                     {{ $produto->direcionamentoComercial->descricao }}
                                                 </span>
                                             @else
-                                                <span class="text-gray-400 text-xs italic">Sem direcionamento</span>
+                                                <span class="text-gray-400 dark:text-gray-500 text-xs italic">Sem direcionamento</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }}">
                                                 {{ $produto->status ? $produto->status->descricao : 'N/A' }}
                                             </span>
                                         </td>
@@ -384,28 +386,28 @@
                                                 </svg>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             @if($produto->localizacao_atual)
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                                                     {{ $produto->localizacao_atual->nome_localizacao }}
                                                 </span>
                                             @else
-                                                <span class="text-gray-400 text-xs italic">Não localizado</span>
+                                                <span class="text-gray-400 dark:text-gray-500 text-xs italic">Não localizado</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                             @if($produto->situacao_atual)
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200">
                                                     {{ $produto->situacao_atual->descricao }}
                                                 </span>
                                             @else
-                                                <span class="text-gray-400 text-xs italic">Sem situação</span>
+                                                <span class="text-gray-400 dark:text-gray-500 text-xs italic">Sem situação</span>
                                             @endif
                                         </td>
-                                        <td class="sticky right-0 px-6 py-4 whitespace-nowrap text-right text-sm font-medium bg-white shadow-md z-10">
+                                        <td class="sticky right-0 px-6 py-4 whitespace-nowrap text-right text-sm font-medium bg-white dark:bg-slate-900 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.4)] z-10">
                                             <div class="flex justify-end space-x-2">
                                                 @if(auth()->user()->canRead('produtos'))
-                                                    <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
+                                                    <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -414,7 +416,7 @@
                                                 @endif
 
                                                 @if(!$produto->trashed() && auth()->user()->canUpdate('produtos'))
-                                                    <a href="{{ route('produtos.edit', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
+                                                    <a href="{{ route('produtos.edit', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 p-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -425,7 +427,7 @@
                                                     <form action="{{ route('produtos.destroy', $produto->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-100">
+                                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/50">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                             </svg>
@@ -437,7 +439,7 @@
                                                     <form action="{{ route('produtos.destroy', $produto->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja restaurar este produto?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100">
+                                                        <button type="submit" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                             </svg>
@@ -673,9 +675,9 @@
                         }
 
                         const badge = document.createElement('span');
-                        badge.className = 'inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+                        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-sm';
                         badge.innerHTML = `
-                            <span class="font-semibold mr-1">${filterLabels[key] || key}:</span>
+                            <span class="font-bold mr-1 text-indigo-900 dark:text-indigo-200">${filterLabels[key] || key}:</span>
                             <span>${displayValue}</span>
                         `;
                         activeFiltersList.appendChild(badge);

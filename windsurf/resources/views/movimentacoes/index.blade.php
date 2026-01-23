@@ -86,13 +86,15 @@
                     </div>
 
                     <!-- Filtros Ativos (visível quando filtros estão ocultos) -->
-                    <div id="active-filters-summary" class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 hidden">
+                    <div id="active-filters-summary" class="mb-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/40 dark:to-slate-900/60 border border-indigo-200 dark:border-indigo-900/50 rounded-xl p-4 hidden backdrop-blur-sm ring-1 ring-indigo-500/10 dark:ring-indigo-400/10">
                         <div class="flex items-start">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 mr-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
-                            </svg>
+                            <div class="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-600 dark:text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                             <div class="flex-1">
-                                <p class="text-sm font-semibold text-blue-900 mb-2">Filtros Ativos:</p>
+                                <p class="text-xs font-bold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider mb-2">Filtros Ativos:</p>
                                 <div id="active-filters-list" class="flex flex-wrap gap-2"></div>
                             </div>
                         </div>
@@ -260,10 +262,10 @@
                     <div class="relative overflow-x-auto">
                         <!-- Versão para desktop/tablet -->
                         <div class="block">
-                            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700 text-sm">
+                            <thead class="bg-gray-50 dark:bg-slate-800">
                                 <tr>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                         <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'produto', 'direction' => request('sort') == 'produto' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                                             Produto
                                             @if(request('sort') == 'produto')
@@ -409,29 +411,29 @@
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Dias
                                     </th>
-                                    <th scope="col" class="sticky right-0 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 shadow-md z-10">
+                                    <th scope="col" class="sticky right-0 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-slate-800 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.4)] z-10">
                                         Ações
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                 @forelse($movimentacoes as $movimentacao)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs font-medium text-gray-900 dark:text-white">
                                             @if($movimentacao->produto)
                                                 <div>
                                                     <span>{{ $movimentacao->produto->referencia }}</span>
                                                     @if($movimentacao->produto->data_prevista_producao)
-                                                        <span class="text-blue-600 text-[10px] font-semibold ml-2">
+                                                        <span class="text-blue-600 dark:text-blue-400 text-[10px] font-semibold ml-2">
                                                             Dt.Prod: {{ $movimentacao->produto->data_prevista_producao->format('m/Y') }}
                                                         </span>
                                                     @endif
                                                 </div>
-                                                <div class="text-gray-500 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
+                                                <div class="text-gray-500 dark:text-gray-400 text-xs truncate max-w-[150px]" title="{{ $movimentacao->produto->descricao }}">
                                                     {{ Str::limit($movimentacao->produto->descricao, 25, '...') }}
                                                 </div>
                                                 @if($movimentacao->produto->marca)
-                                                <div class="text-gray-400 text-[10px] truncate max-w-[150px]" title="{{ $movimentacao->produto->marca->nome_marca }}">
+                                                <div class="text-gray-400 dark:text-gray-500 text-[10px] truncate max-w-[150px]" title="{{ $movimentacao->produto->marca->nome_marca }}">
                                                     {{ $movimentacao->produto->marca->nome_marca }}
                                                 </div>
                                                 @endif
@@ -442,18 +444,18 @@
                                         <td class="px-3 py-2 whitespace-nowrap text-xs text-center">
                                             @if($movimentacao->produto && $movimentacao->produto->status)
                                                 <div>
-                                                    <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                                                    <span class="px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                                                         {{ $movimentacao->produto->status->descricao }}
                                                     </span>
                                                 </div>
                                             @else
                                                 <div>
-                                                    <span class="text-gray-400">N/A</span>
+                                                    <span class="text-gray-400 dark:text-gray-500">N/A</span>
                                                 </div>
                                             @endif
 
                                             @if($movimentacao->produto && $movimentacao->produto->direcionamentoComercial)
-                                                <div class="mt-1 text-[11px] text-gray-700">
+                                                <div class="mt-1 text-[11px] text-gray-700 dark:text-gray-300">
                                                     <span class="font-semibold">
                                                         {{ $movimentacao->produto->direcionamentoComercial->descricao }}
                                                     </span>
@@ -471,78 +473,78 @@
                                                 </svg>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                                             @if($movimentacao->localizacao)
                                                 <div class="truncate max-w-[100px]" title="{{ $movimentacao->localizacao->nome_localizacao }}">
                                                     {{ Str::limit($movimentacao->localizacao->nome_localizacao, 15, '...') }}
                                                 </div>
                                             @else
-                                                <span class="text-gray-400">N/A</span>
+                                                <span class="text-gray-400 dark:text-gray-500">N/A</span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->tipo && $movimentacao->tipo->descricao == 'Entrada' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->tipo && $movimentacao->tipo->descricao == 'Entrada' ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' : 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200' }}">
                                                 {{ $movimentacao->tipo ? $movimentacao->tipo->descricao : 'N/A' }}
                                             </span>
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                                             @if($movimentacao->situacao)
                                                 <div class="truncate max-w-[100px]" title="{{ $movimentacao->situacao->descricao }}">
-                                                    <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 text-gray-800' }}">
+                                                    <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->situacao->cor ? 'bg-'.$movimentacao->situacao->cor.'-100 text-'.$movimentacao->situacao->cor.'-800' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }}">
                                                         {{ Str::limit($movimentacao->situacao->descricao, 15, '...') }}
                                                     </span>
                                                 </div>
                                             @else
-                                                <span class="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800">
+                                                <span class="px-2 py-1 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                                     N/A
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 text-right">
                                             @if($movimentacao->data_entrada)
                                                 <div class="leading-tight">
                                                     <div>{{ $movimentacao->data_entrada->format('d/m/Y') }}</div>
-                                                    <div class="text-gray-400">{{ $movimentacao->data_entrada->format('H:i') }}</div>
+                                                    <div class="text-gray-400 dark:text-gray-500">{{ $movimentacao->data_entrada->format('H:i') }}</div>
                                                 </div>
                                             @else
                                                 N/A
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 text-right">
                                             @if($movimentacao->data_saida)
                                                 <div class="leading-tight">
                                                     <div>{{ $movimentacao->data_saida->format('d/m/Y') }}</div>
-                                                    <div class="text-gray-400">{{ $movimentacao->data_saida->format('H:i') }}</div>
+                                                    <div class="text-gray-400 dark:text-gray-500">{{ $movimentacao->data_saida->format('H:i') }}</div>
                                                 </div>
                                             @else
                                                 N/A
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 text-right">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 text-right">
                                             @if($movimentacao->data_devolucao)
                                                 <div class="leading-tight">
                                                     <div>{{ $movimentacao->data_devolucao->format('d/m/Y') }}</div>
-                                                    <div class="text-gray-400">{{ $movimentacao->data_devolucao->format('H:i') }}</div>
+                                                    <div class="text-gray-400 dark:text-gray-500">{{ $movimentacao->data_devolucao->format('H:i') }}</div>
                                                 </div>
                                             @else
                                                 N/A
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
-                                            <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                                            <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }}">
                                                 {{ $movimentacao->comprometido ? 'Sim' : 'Não' }}
                                             </span>
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 max-w-[120px] overflow-hidden">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400 max-w-[120px] overflow-hidden">
                                             @if($movimentacao->observacao)
                                                 <div class="truncate" title="{{ $movimentacao->observacao }}">
                                                     {{ Str::limit($movimentacao->observacao, 20, '...') }}
                                                 </div>
                                             @else
-                                                <span class="text-gray-400">N/A</span>
+                                                <span class="text-gray-400 dark:text-gray-500">N/A</span>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500">
+                                        <td class="px-3 py-2 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                                             @php
                                                 $diasEntre = null;
                                                 $prazoExcedido = false;
@@ -572,25 +574,25 @@
 
                                             @if($diasEntre !== null)
                                                 <div class="text-center">
-                                                    <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 text-red-800 font-bold' : 'bg-blue-100 text-blue-800' }} rounded-full">
+                                                    <span class="px-2 py-1 inline-block text-xs {{ $prazoExcedido ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200 font-bold' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200' }} rounded-full">
                                                         {{ number_format($diasEntre, 0, ',', '.') }} {{ $diasEntre == 1 ? 'dia' : 'dias' }}
                                                     </span>
                                                     @if(isset($prazoSetor))
-                                                        <div class="text-xs mt-1 {{ $prazoExcedido ? 'text-red-600' : 'text-blue-600' }} font-medium">
+                                                        <div class="text-xs mt-1 {{ $prazoExcedido ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400' }} font-medium">
                                                             (Prazo: {{ number_format($prazoSetor, 0, ',', '.') }} {{ $prazoSetor == 1 ? 'dia' : 'dias' }})
                                                         </div>
                                                     @endif
                                                 </div>
                                             @else
                                                 <div class="text-center">
-                                                    <span class="text-gray-400">-</span>
+                                                    <span class="text-gray-400 dark:text-gray-500">-</span>
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="sticky right-0 px-3 py-2 whitespace-nowrap text-right text-xs font-medium bg-white shadow-md z-10">
+                                        <td class="sticky right-0 px-3 py-2 whitespace-nowrap text-right text-xs font-medium bg-white dark:bg-slate-900 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.4)] z-10">
                                             <div class="flex justify-end space-x-1">
                                                 @if(auth()->user() && auth()->user()->canRead('movimentacoes'))
-                                                <a href="{{ route('movimentacoes.show', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-100">
+                                                <a href="{{ route('movimentacoes.show', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -598,14 +600,14 @@
                                                 </a>
                                                 @endif
                                                 @if(auth()->user() && auth()->user()->canUpdate('movimentacoes'))
-                                                <a href="{{ route('movimentacoes.edit', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
+                                                <a href="{{ route('movimentacoes.edit', $movimentacao) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 p-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                     </svg>
                                                 </a>
                                                 @endif
                                                 @if($movimentacao->anexo && auth()->user() && auth()->user()->canRead('movimentacoes'))
-                                                <button type="button" onclick="openImageModal('{{ $movimentacao->anexo_url }}', {{ $movimentacao->id }})" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-100">
+                                                <button type="button" onclick="openImageModal('{{ $movimentacao->anexo_url }}', {{ $movimentacao->id }})" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
@@ -615,7 +617,7 @@
                                                 <form action="{{ route('movimentacoes.destroy', $movimentacao) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta movimentação?');">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-100">
+                                                    <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/50">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
@@ -627,7 +629,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="11" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="11" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                             Nenhuma movimentação encontrada.
                                         </td>
                                     </tr>

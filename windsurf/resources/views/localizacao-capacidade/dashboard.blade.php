@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Planejamento - Dashboard') }}
         </h2>
     </x-slot>
@@ -234,15 +234,15 @@
                     $totalPercentual = $totalCapacidade > 0 ? round(($totalPrevistos / $totalCapacidade) * 100, 1) : 0;
                 @endphp
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-500">Capacidade Total</p>
-                                <p class="mt-1 text-3xl font-semibold text-blue-600">{{ $totalCapacidade }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Capacidade Total</p>
+                                <p class="mt-1 text-3xl font-semibold text-blue-600 dark:text-blue-400">{{ $totalCapacidade }}</p>
                             </div>
                             <div class="flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600 dark:text-blue-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                             </div>
@@ -250,15 +250,15 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-500">Produtos Previstos</p>
-                                <p class="mt-1 text-3xl font-semibold {{ $totalPrevistos > $totalCapacidade ? 'text-red-600' : 'text-green-600' }}">{{ $totalPrevistos }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Produtos Previstos</p>
+                                <p class="mt-1 text-3xl font-semibold {{ $totalPrevistos > $totalCapacidade ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">{{ $totalPrevistos }}</p>
                             </div>
                             <div class="flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 {{ $totalPrevistos > $totalCapacidade ? 'text-red-600' : 'text-green-600' }} opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 {{ $totalPrevistos > $totalCapacidade ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }} opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                 </svg>
                             </div>
@@ -266,15 +266,15 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-500">Total de Referências</p>
-                                <p class="mt-1 text-3xl font-semibold text-purple-600">{{ $totalReferencias }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total de Referências</p>
+                                <p class="mt-1 text-3xl font-semibold text-purple-600 dark:text-purple-400">{{ $totalReferencias }}</p>
                             </div>
                             <div class="flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-600 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-purple-600 dark:text-purple-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
                             </div>
@@ -282,15 +282,15 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-500">Saldo Disponível</p>
-                                <p class="mt-1 text-3xl font-semibold {{ $totalSaldo < 0 ? 'text-red-600' : 'text-green-600' }}">{{ $totalSaldo }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Saldo Disponível</p>
+                                <p class="mt-1 text-3xl font-semibold {{ $totalSaldo < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">{{ $totalSaldo }}</p>
                             </div>
                             <div class="flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 {{ $totalSaldo < 0 ? 'text-red-600' : 'text-green-600' }} opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 {{ $totalSaldo < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }} opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                                 </svg>
                             </div>
@@ -298,15 +298,15 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-500">Taxa de Ocupação</p>
-                                <p class="mt-1 text-3xl font-semibold {{ $totalPercentual > 100 ? 'text-red-600' : ($totalPercentual > 80 ? 'text-yellow-600' : 'text-green-600') }}">{{ $totalPercentual }}%</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Taxa de Ocupação</p>
+                                <p class="mt-1 text-3xl font-semibold {{ $totalPercentual > 100 ? 'text-red-600 dark:text-red-400' : ($totalPercentual > 80 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400') }}">{{ $totalPercentual }}%</p>
                             </div>
                             <div class="flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 {{ $totalPercentual > 100 ? 'text-red-600' : ($totalPercentual > 80 ? 'text-yellow-600' : 'text-green-600') }} opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 {{ $totalPercentual > 100 ? 'text-red-600 dark:text-red-400' : ($totalPercentual > 80 ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400') }} opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                             </div>
@@ -316,17 +316,17 @@
             </div>
 
             <!-- Detalhes por Localização -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Capacidade por Localização</h3>
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Capacidade por Localização</h3>
 
                     @if($dadosDashboard->count() > 0)
                         <div class="space-y-4">
                             @foreach($dadosDashboard as $dado)
-                                <div class="border border-gray-200 rounded-lg p-4 {{ $dado['acima_capacidade'] ? 'bg-red-50 border-red-200' : 'bg-white' }}">
+                                <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-4 {{ $dado['acima_capacidade'] ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-slate-900' }}">
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex items-center gap-3">
-                                            <h4 class="text-lg font-semibold text-gray-800">
+                                            <h4 class="text-lg font-semibold text-gray-800 dark:text-white">
                                                 {{ $dado['localizacao']->nome_localizacao }}
                                             </h4>
                                             @if(!empty($dado['observacoes']))
@@ -354,28 +354,28 @@
 
                                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                                         <div>
-                                            <p class="text-xs text-gray-500 uppercase">Capacidade</p>
-                                            <p class="text-2xl font-bold text-blue-600">{{ $dado['capacidade'] }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Capacidade</p>
+                                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $dado['capacidade'] }}</p>
                                         </div>
                                         <div>
-                                            <p class="text-xs text-gray-500 uppercase">Previstos</p>
-                                            <p class="text-2xl font-bold {{ $dado['acima_capacidade'] ? 'text-red-600' : 'text-green-600' }}">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Previstos</p>
+                                            <p class="text-2xl font-bold {{ $dado['acima_capacidade'] ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
                                                 {{ $dado['produtos_previstos'] }}
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-xs text-gray-500 uppercase">Saldo</p>
-                                            <p class="text-2xl font-bold {{ $dado['saldo'] < 0 ? 'text-red-600' : 'text-green-600' }}">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Saldo</p>
+                                            <p class="text-2xl font-bold {{ $dado['saldo'] < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
                                                 {{ $dado['saldo'] }}
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-xs text-gray-500 uppercase mb-1">Ocupação</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">Ocupação</p>
                                             <div class="flex items-center">
-                                                <div class="flex-1 bg-gray-200 rounded-full h-4 mr-2">
+                                                <div class="flex-1 bg-gray-200 dark:bg-slate-700 rounded-full h-4 mr-2">
                                                     <div class="h-4 rounded-full {{ $dado['percentual'] > 100 ? 'bg-red-600' : ($dado['percentual'] > 80 ? 'bg-yellow-600' : 'bg-green-600') }}" style="width: {{ min($dado['percentual'], 100) }}%"></div>
                                                 </div>
-                                                <span class="text-sm font-bold {{ $dado['percentual'] > 100 ? 'text-red-600' : 'text-gray-700' }}">
+                                                <span class="text-sm font-bold {{ $dado['percentual'] > 100 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300' }}">
                                                     {{ $dado['percentual'] }}%
                                                 </span>
                                             </div>
@@ -385,15 +385,15 @@
                                     <!-- Barra de Comparação Visual -->
                                     <div class="mt-4">
                                         <div class="flex items-center space-x-2">
-                                            <div class="flex-1 h-8 bg-gray-100 rounded-lg relative overflow-hidden">
-                                                <div class="absolute top-0 left-0 h-full bg-blue-200" style="width: 100%"></div>
+                                            <div class="flex-1 h-8 bg-gray-100 dark:bg-slate-700 rounded-lg relative overflow-hidden">
+                                                <div class="absolute top-0 left-0 h-full bg-blue-200 dark:bg-blue-900/50" style="width: 100%"></div>
                                                 <div class="absolute top-0 left-0 h-full {{ $dado['acima_capacidade'] ? 'bg-red-500' : 'bg-green-500' }}" style="width: {{ min($dado['percentual'], 100) }}%"></div>
-                                                <div class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700">
+                                                <div class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-gray-700 dark:text-white">
                                                     {{ $dado['produtos_previstos'] }} / {{ $dado['capacidade'] }}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
                                             <span>0</span>
                                             <span>Capacidade: {{ $dado['capacidade'] }}</span>
                                         </div>
@@ -401,41 +401,41 @@
 
                                     <!-- Lista de Produtos Previstos -->
                                     @if($dado['produtos']->count() > 0)
-                                        <div class="mt-4 border-t pt-4 produtos-previstos-section"
+                                        <div class="mt-4 border-t dark:border-slate-700 pt-4 produtos-previstos-section"
                                              x-data="{ open: {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }} }"
                                              x-on:toggle-all.window="open = $event.detail.show"
                                              x-init="$watch('open', value => $el.dataset.open = value)"
                                              data-open="{{ ($usuarioRestrito ?? false) ? 'true' : 'false' }}">
-                                            <button @click="open = !open" class="produtos-toggle-btn w-full flex items-center justify-between text-left p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                            <button @click="open = !open" class="produtos-toggle-btn w-full flex items-center justify-between text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
                                                 <div class="flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                                     </svg>
-                                                    <span class="font-semibold text-gray-700">Produtos Previstos ({{ $dado['produtos']->count() }})</span>
+                                                    <span class="font-semibold text-gray-700 dark:text-gray-200">Produtos Previstos ({{ $dado['produtos']->count() }})</span>
                                                 </div>
-                                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 icon-expand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400 icon-expand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                                 </svg>
-                                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 icon-collapse" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
+                                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-400 icon-collapse" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                                                 </svg>
                                             </button>
 
                                             <div x-show="open" x-transition class="mt-3 produtos-content" style="display: none;">
                                                 <div class="overflow-x-auto">
-                                                    <table class="min-w-full divide-y divide-gray-200">
-                                                        <thead class="bg-gray-50">
+                                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                                                        <thead class="bg-gray-50 dark:bg-slate-800">
                                                             <tr>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Referência</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 16%;">Descrição</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Marca</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 10%;">Grupo</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 40%;">Produção e Detalhes</th>
-                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase" title="Quantidade total do produto" style="width: 10%;">Qtd Total</th>
-                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase" style="width: 4%;">Status</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" style="width: 10%;">Referência</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" style="width: 16%;">Descrição</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" style="width: 10%;">Marca</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" style="width: 10%;">Grupo</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" style="width: 40%;">Produção e Detalhes</th>
+                                                                <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" title="Quantidade total do produto" style="width: 10%;">Qtd Total</th>
+                                                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase" style="width: 4%;">Status</th>
                                                             </tr>
                                                         </thead>
-                                                        <tbody class="bg-white divide-y divide-gray-200">
+                                                        <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                                             @php
                                                                 // Agrupar produtos por referência + descrição + marca + grupo + qtd total + data + status
                                                                 $produtosAgrupados = $dado['produtos']->groupBy(function($produto) {
@@ -488,10 +488,10 @@
 
                                                                     $etapasNoGrupo = $etapasProducao->whereIn('id', $etapaIdsNoGrupo);
                                                                 @endphp
-                                                                <tr class="hover:bg-gray-50">
+                                                                <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50">
                                                                     {{-- Coluna 1: Referência --}}
-                                                                    <td class="px-3 py-2 text-sm font-medium text-gray-900">
-                                                                        <a href="{{ route('produtos.show', $produtoPrincipal->id) }}?back_url={{ urlencode(request()->fullUrl()) }}" class="text-blue-600 hover:text-blue-900 hover:underline">
+                                                                    <td class="px-3 py-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                                        <a href="{{ route('produtos.show', $produtoPrincipal->id) }}?back_url={{ urlencode(request()->fullUrl()) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline">
                                                                             {{ $produtoPrincipal->referencia }}
                                                                         </a>
                                                                         @php
@@ -521,7 +521,7 @@
                                                                     </td>
 
                                                                     {{-- Coluna 3: Descrição --}}
-                                                                    <td class="px-3 py-2 text-sm text-gray-700">{{ $produtoPrincipal->descricao }}</td>
+                                                                    <td class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{{ $produtoPrincipal->descricao }}</td>
 
                                                                     {{-- Coluna 4: Marca --}}
                                                                     <td class="px-3 py-2 text-sm">
@@ -541,10 +541,10 @@
                                                                     </td>
 
                                                                     {{-- Coluna 5: Grupo --}}
-                                                                    <td class="px-3 py-2 text-sm text-gray-600">{{ $produtoPrincipal->grupoProduto->descricao ?? 'N/A' }}</td>
+                                                                    <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">{{ $produtoPrincipal->grupoProduto->descricao ?? 'N/A' }}</td>
 
                                                                     {{-- Coluna 6: Produção e Detalhes --}}
-                                                                    <td class="px-3 py-2 text-sm text-gray-600">
+                                                                    <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
                                                                         @php
                                                                             // Carregar observações do produto (apenas uma vez)
                                                                             $obs = \App\Models\ProdutoObservacao::where('produto_id', $produtoPrincipal->id)->get();
@@ -717,16 +717,16 @@
                                                                                                     $obsTextoTruncadoLoc = $isTruncatedLoc ? Str::limit($textoLimpoLoc, 40) : $textoCompletoLoc;
                                                                                                 @endphp
                                                                                                 @if($isTruncatedLoc)
-                                                                                                    <span class="text-gray-600" x-data="{ expanded: false }">
+                                                                                                    <span class="text-gray-600 dark:text-gray-400" x-data="{ expanded: false }">
                                                                                                         <span x-show="!expanded">{!! $obsTextoTruncadoLoc !!}</span>
                                                                                                         <span x-show="expanded" x-cloak>{!! $textoCompletoLoc !!}</span>
-                                                                                                        <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
+                                                                                                        <button @click="expanded = !expanded" class="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold focus:outline-none">
                                                                                                             <span x-show="!expanded">[+]</span>
                                                                                                             <span x-show="expanded" x-cloak>[-]</span>
                                                                                                         </button>
                                                                                                     </span>
                                                                                                 @else
-                                                                                                    <span class="text-gray-600">{!! $textoCompletoLoc !!}</span>
+                                                                                                    <span class="text-gray-600 dark:text-gray-400">{!! $textoCompletoLoc !!}</span>
                                                                                                 @endif
                                                                                             @endif
                                                                                         </td>
@@ -735,8 +735,8 @@
 
                                                                                 {{-- Linha de Total quando houver mais de 1 item --}}
                                                                                 @if($todasObsLocalizacoes->count() > 1)
-                                                                                    <tr class="border-t-2 border-gray-300 bg-gray-50">
-                                                                                        <td colspan="2" class="py-2 pr-2 font-bold text-gray-800 whitespace-nowrap">TOTAL:</td>
+                                                                                    <tr class="border-t-2 border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-800">
+                                                                                        <td colspan="2" class="py-2 pr-2 font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">TOTAL:</td>
                                                                                         <td class="py-2 px-2 text-center">
                                                                                             <span class="inline-flex items-center px-2 py-1 rounded-md font-bold bg-green-600 text-white">
                                                                                                 {{ number_format($totalQuantidades, 0, ',', '.') }}
@@ -761,19 +761,19 @@
                                                                         @endphp
 
                                                                         @if($direcionamentoComercial)
-                                                                            <div class="mt-2 pt-2 border-t border-gray-200">
+                                                                            <div class="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700">
                                                                                 <div class="text-xs">
-                                                                                    <span class="font-semibold text-purple-700">Dir. Comercial:</span>
-                                                                                    <span class="text-gray-600">{{ $direcionamentoComercial->descricao }}</span>
+                                                                                    <span class="font-semibold text-purple-700 dark:text-purple-400">Dir. Comercial:</span>
+                                                                                    <span class="text-gray-600 dark:text-gray-400">{{ $direcionamentoComercial->descricao }}</span>
                                                                                 </div>
                                                                             </div>
                                                                         @endif
 
                                                                         {{-- Observações do Produto (movidas para o final) --}}
                                                                         @if($obs->count() > 0)
-                                                                            <div class="mt-2 pt-2 border-t border-dashed border-gray-300">
+                                                                            <div class="mt-2 pt-2 border-t border-dashed border-gray-300 dark:border-slate-600">
                                                                                 <div class="text-xs mb-1">
-                                                                                    <span class="font-semibold text-gray-700">📝 Observações:</span>
+                                                                                    <span class="font-semibold text-gray-700 dark:text-gray-300">📝 Observações:</span>
                                                                                 </div>
                                                                                 @foreach($obs as $observacao)
                                                                                     @php
