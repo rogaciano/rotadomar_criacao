@@ -24,24 +24,38 @@
        Action Buttons - Centralized Styles
        ======================================== */
 
+    /* Reset form styles for action buttons */
+    form.inline {
+        @apply inline-flex items-center m-0 p-0 align-middle;
+    }
+
+    /* Ensure all action buttons (a and button) align correctly */
+    .btn-action-view,
+    .btn-action-edit,
+    .btn-action-delete,
+    .btn-action-restore {
+        @apply inline-flex items-center justify-center align-middle h-8 w-8 leading-none;
+        /* Fix height and centering */
+    }
+
     /* View/Show button */
     .btn-action-view {
-        @apply text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all inline-flex items-center;
+        @apply text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all;
     }
 
     /* Edit button */
     .btn-action-edit {
-        @apply text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300 p-1 rounded hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all inline-flex items-center;
+        @apply text-amber-600 hover:text-amber-900 dark:text-amber-400 dark:hover:text-amber-300 p-1 rounded hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all;
     }
 
     /* Delete button */
     .btn-action-delete {
-        @apply text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-all inline-flex items-center;
+        @apply text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 transition-all;
     }
 
     /* Restore button (for trashed items) */
     .btn-action-restore {
-        @apply text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded hover:bg-green-50 dark:hover:bg-green-900/30 transition-all inline-flex items-center;
+        @apply text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded hover:bg-green-50 dark:hover:bg-green-900/30 transition-all;
     }
 
     /* ========================================
@@ -134,6 +148,54 @@
     /* ========================================
        Primary Action Buttons (Add, Create, etc)
        ======================================== */
+
+    .btn-ghost-primary {
+        @apply inline-flex items-center px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 border border-transparent
+        /* Light Mode: Vibrant Gradient */
+        bg-gradient-to-br from-sky-600 to-sky-700 text-white hover:brightness-110
+        /* Dark Mode: Ghost Style */
+        dark:bg-none dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/50 dark:hover:bg-sky-500 dark:hover:text-white;
+    }
+
+    .btn-ghost-success {
+        @apply inline-flex items-center px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 border border-transparent
+        /* Light Mode: Vibrant Gradient */
+        bg-gradient-to-br from-green-600 to-green-700 text-white hover:brightness-110
+        /* Dark Mode: Ghost Style */
+        dark:bg-none dark:bg-green-500/10 dark:text-green-400 dark:border-green-500/50 dark:hover:bg-green-500 dark:hover:text-white;
+    }
+
+    .btn-ghost-secondary {
+        @apply inline-flex items-center px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 border border-transparent
+        /* Light Mode: Vibrant Gradient */
+        bg-gradient-to-br from-gray-600 to-gray-700 text-white hover:brightness-110
+        /* Dark Mode: Ghost Style */
+        dark:bg-none dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-400/50 dark:hover:bg-slate-600 dark:hover:text-white;
+    }
+
+    .btn-ghost-purple {
+        @apply inline-flex items-center px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 border border-transparent
+        /* Light Mode: Vibrant Gradient */
+        bg-gradient-to-br from-purple-600 to-purple-700 text-white hover:brightness-110
+        /* Dark Mode: Ghost Style */
+        dark:bg-none dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/50 dark:hover:bg-purple-500 dark:hover:text-white;
+    }
+
+    .btn-ghost-warning {
+        @apply inline-flex items-center px-6 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 border border-transparent
+        /* Light Mode: Vibrant Gradient */
+        bg-gradient-to-br from-amber-500 to-amber-600 text-white hover:brightness-110
+        /* Dark Mode: Ghost Style */
+        dark:bg-none dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/50 dark:hover:bg-amber-500 dark:hover:text-white;
+    }
+
+    .btn-ghost-rose {
+        @apply inline-flex items-center px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-200 border-2 shadow-sm active:scale-95
+        /* Light Mode: Solid Red */
+        bg-red-600 border-red-600 text-white hover:bg-red-700 hover:border-red-700
+        /* Dark Mode: Ghost Style (High Contrast) */
+        dark:bg-transparent dark:shadow-none dark:text-rose-400 dark:border-rose-400/80 dark:hover:bg-rose-950/30 dark:hover:border-rose-500 dark:hover:text-rose-300;
+    }
 
     .btn-primary {
         @apply inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200 dark:bg-primary-500 dark:hover:bg-primary-600;

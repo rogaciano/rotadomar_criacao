@@ -1,11 +1,11 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Histórico de Etapas') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <!-- Botão voltar -->
             <div class="mb-4">
@@ -18,7 +18,7 @@
             </div>
 
             <!-- Info da localização -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5 mb-6">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">
                         {{ $produtoLocalizacao->produto->referencia ?? 'Produto' }} - {{ $produtoLocalizacao->localizacao->nome_localizacao ?? 'Localização' }}
@@ -92,7 +92,7 @@
                                                             </p>
                                                         @endif
                                                     </div>
-                                                    <div class="whitespace-nowrap text-right text-xs text-gray-500">
+                                                    <div class="whitespace-nowrap text-right text-xs text-gray-500 dark:text-gray-400">
                                                         <time datetime="{{ $item->created_at->toISOString() }}">
                                                             {{ $item->created_at->format('d/m/Y') }}
                                                             <br>

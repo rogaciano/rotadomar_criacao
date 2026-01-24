@@ -1,6 +1,6 @@
-<!-- Informações do Produto -->
-<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">Informações Básicas</h3>
+﻿<!-- Informações do Produto -->
+<div class="bg-gray-50 dark:bg-slate-800/50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Informações Básicas</h3>
 
     <div class="flex flex-col lg:flex-row gap-8">
         <div class="flex-grow space-y-8">
@@ -12,9 +12,9 @@
                 </h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-8">
                     <div class="sm:col-span-1">
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Referência</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Referência</span>
                         <div class="flex items-center gap-2 mt-1">
-                            <span class="text-sm font-black text-gray-900">{{ $produto->referencia }}</span>
+                            <span class="text-sm font-black text-gray-900 dark:text-white">{{ $produto->referencia }}</span>
                             @if($produto->isReprogramacao())
                                 <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-orange-100 text-orange-700">#{{ str_pad($produto->numero_reprogramacao, 2, '0', STR_PAD_LEFT) }}</span>
                             @endif
@@ -22,74 +22,74 @@
                     </div>
 
                     <div class="sm:col-span-1 lg:col-span-2">
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Descrição</span>
-                        <span class="block mt-1 text-sm font-semibold text-gray-900 leading-tight">{{ $produto->descricao }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Descrição</span>
+                        <span class="block mt-1 text-sm font-semibold text-gray-900 dark:text-white leading-tight">{{ $produto->descricao }}</span>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Marca</span>
-                        <span class="block mt-1 text-sm font-medium text-gray-800">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Marca</span>
+                        <span class="block mt-1 text-sm font-medium text-gray-800 dark:text-gray-200">{{ $produto->marca->nome_marca ?? 'N/A' }}</span>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Estilista</span>
-                        <span class="block mt-1 text-sm font-medium text-gray-800">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Estilista</span>
+                        <span class="block mt-1 text-sm font-medium text-gray-800 dark:text-gray-200">{{ $produto->estilista->nome_estilista ?? 'N/A' }}</span>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Grupo</span>
-                        <span class="block mt-1 text-sm font-medium text-gray-800">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Grupo</span>
+                        <span class="block mt-1 text-sm font-medium text-gray-800 dark:text-gray-200">{{ $produto->grupoProduto->descricao ?? 'N/A' }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Comercial e Produção -->
-            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
                 <h4 class="text-[10px] font-extrabold text-blue-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                     Comercial e Produção
                 </h4>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-4">
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Quantidade</span>
-                        <span class="block mt-1 text-base font-black text-gray-900 tracking-tighter">{{ number_format($produto->quantidade, 0, ',', '.') }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Quantidade</span>
+                        <span class="block mt-1 text-base font-black text-gray-900 dark:text-white tracking-tighter">{{ number_format($produto->quantidade, 0, ',', '.') }}</span>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Status</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Status</span>
                         <div class="mt-1">
-                            <span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-600 border border-gray-200' }}">
+                            <span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600' }}">
                                 {{ $produto->status ? $produto->status->descricao : 'N/A' }}
                             </span>
                         </div>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Localização Atual</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Localização Atual</span>
                         <div class="mt-1">
                             @if($produto->localizacao_atual)
-                                <span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                                <span class="px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                                     {{ $produto->localizacao_atual->nome_localizacao }}
                                 </span>
                             @else
-                                <span class="text-gray-400 text-[10px] italic">Não localizado</span>
+                                <span class="text-gray-400 dark:text-gray-500 text-[10px] italic">Não localizado</span>
                             @endif
                         </div>
                     </div>
 
                     <div class="col-span-2 sm:col-span-1">
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Direcionamento</span>
-                        <span class="block mt-1 text-xs font-bold text-gray-700 uppercase">{{ $produto->direcionamentoComercial ? $produto->direcionamentoComercial->descricao : 'Sem info' }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Direcionamento</span>
+                        <span class="block mt-1 text-xs font-bold text-gray-700 dark:text-gray-300 uppercase">{{ $produto->direcionamentoComercial ? $produto->direcionamentoComercial->descricao : 'Sem info' }}</span>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Preço Atacado</span>
-                        <span class="block mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Preço Atacado</span>
+                        <span class="block mt-1 text-sm font-bold text-gray-900 dark:text-white">R$ {{ number_format($produto->preco_atacado, 2, ',', '.') }}</span>
                     </div>
 
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-tight">Preço Varejo</span>
-                        <span class="block mt-1 text-sm font-bold text-gray-900">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
+                        <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">Preço Varejo</span>
+                        <span class="block mt-1 text-sm font-bold text-gray-900 dark:text-white">R$ {{ number_format($produto->preco_varejo, 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>

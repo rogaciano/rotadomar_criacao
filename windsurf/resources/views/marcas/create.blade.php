@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Nova Marca') }}
             </h2>
             <a href="{{ route('marcas.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -13,10 +13,10 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form action="{{ route('marcas.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         
@@ -33,7 +33,7 @@
                             <!-- Logo da Marca -->
                             <div>
                                 <x-input-label for="logo" :value="__('Logo da Marca')" />
-                                <input id="logo" type="file" name="logo" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" accept="image/*" />
+                                <input id="logo" type="file" name="logo" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" accept="image/*" />
                                 <p class="text-sm text-gray-500 mt-1">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</p>
                                 <x-input-error :messages="$errors->get('logo')" class="mt-2" />
                             </div>
@@ -43,7 +43,7 @@
                                 <x-input-label for="cor_fundo" :value="__('Cor de Fundo')" />
                                 <div class="flex items-center gap-3 mt-1">
                                     <input id="cor_fundo" type="color" name="cor_fundo" value="{{ old('cor_fundo', '#6366F1') }}" class="h-10 w-20 border border-gray-300 rounded cursor-pointer" />
-                                    <input type="text" id="cor_fundo_text" value="{{ old('cor_fundo', '#6366F1') }}" class="block w-28 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#6366F1" />
+                                    <input type="text" id="cor_fundo_text" value="{{ old('cor_fundo', '#6366F1') }}" class="block w-28 border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#6366F1" />
                                     <span class="px-3 py-2 rounded text-white font-semibold text-sm" id="preview_fundo" style="background-color: {{ old('cor_fundo', '#6366F1') }};">Preview</span>
                                 </div>
                                 <p class="text-sm text-gray-500 mt-1">Cor para fundo dos badges da marca</p>
@@ -55,7 +55,7 @@
                                 <x-input-label for="cor_fonte" :value="__('Cor da Fonte')" />
                                 <div class="flex items-center gap-3 mt-1">
                                     <input id="cor_fonte" type="color" name="cor_fonte" value="{{ old('cor_fonte', '#FFFFFF') }}" class="h-10 w-20 border border-gray-300 rounded cursor-pointer" />
-                                    <input type="text" id="cor_fonte_text" value="{{ old('cor_fonte', '#FFFFFF') }}" class="block w-28 border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#FFFFFF" />
+                                    <input type="text" id="cor_fonte_text" value="{{ old('cor_fonte', '#FFFFFF') }}" class="block w-28 border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm" pattern="^#[0-9A-Fa-f]{6}$" placeholder="#FFFFFF" />
                                     <span class="px-3 py-2 rounded font-semibold text-sm border" id="preview_fonte" style="color: {{ old('cor_fonte', '#FFFFFF') }}; background-color: {{ old('cor_fundo', '#6366F1') }};">Preview</span>
                                 </div>
                                 <p class="text-sm text-gray-500 mt-1">Cor do texto sobre o fundo</p>
@@ -65,7 +65,7 @@
                             <!-- Status -->
                             <div>
                                 <x-input-label for="ativo" :value="__('Status')" />
-                                <select id="ativo" name="ativo" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <select id="ativo" name="ativo" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                     <option value="1" {{ old('ativo') == '1' ? 'selected' : '' }}>Ativo</option>
                                     <option value="0" {{ old('ativo') == '0' ? 'selected' : '' }}>Inativo</option>
                                 </select>

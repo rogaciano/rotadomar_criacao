@@ -1,11 +1,11 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Inconsistências de Produtos') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <!-- Botão voltar -->
             <div class="mb-4">
@@ -18,7 +18,7 @@
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     @if($produtos->count() > 0)
                         <div class="mb-4">
                             <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
@@ -39,7 +39,7 @@
 
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gray-50 dark:bg-slate-800">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referência</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
@@ -49,23 +49,23 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                     @foreach($produtos as $produto)
                                         @php
                                             $totalCores = $produto->cores->sum('quantidade');
                                             $diferenca = $produto->quantidade - $totalCores;
                                         @endphp
                                         <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                 {{ $produto->referencia }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $produto->descricao }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                                 {{ number_format($produto->quantidade, 0, ',', '.') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                                 {{ number_format($totalCores, 0, ',', '.') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -87,8 +87,8 @@
                             <svg class="mx-auto h-12 w-12 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma inconsistência encontrada</h3>
-                            <p class="mt-1 text-sm text-gray-500">
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Nenhuma inconsistência encontrada</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 Todos os produtos com variações de cores estão com as quantidades corretas.
                             </p>
                         </div>

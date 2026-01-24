@@ -1,4 +1,4 @@
-<x-guest-layout>
+﻿<x-guest-layout>
     <!-- Título de boas-vindas -->
     <div class="text-center mb-8">
         <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
@@ -45,7 +45,7 @@
                             <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                             </svg>
-                            <p class="text-sm text-gray-500">Nenhuma marca disponível</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nenhuma marca disponível</p>
                         </div>
                     @endif
                 </div>

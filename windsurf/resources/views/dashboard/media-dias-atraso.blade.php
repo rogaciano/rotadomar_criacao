@@ -1,11 +1,11 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Média de Dias por Localização') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
                 <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -22,8 +22,8 @@
                 </button>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5 mb-6">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold mb-2">Média de Dias por Localização (Movimentações não concluídas)</h3>
                         <p class="text-sm text-gray-600">Este gráfico mostra a média de dias úteis que os produtos permanecem em cada localização para movimentações não concluídas.</p>
@@ -45,10 +45,10 @@
                                             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">% Atrasados</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                         @forelse($localizacoesAtivas as $item)
                                             <tr class="hover:bg-gray-50">
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                     {{ $item['localizacao'] }}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
@@ -91,7 +91,7 @@
 
             @if(count($localizacoesInativas) > 0)
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold mb-2">Localizações Inativas</h3>
                         <p class="text-sm text-gray-600">Localizações marcadas como inativas que ainda possuem movimentações não concluídas.</p>
@@ -108,10 +108,10 @@
                                     <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">% Atrasados</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                 @foreach($localizacoesInativas as $item)
                                     <tr class="hover:bg-gray-50 bg-gray-50">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">
                                             {{ $item['localizacao'] }} (Inativa)
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-center">

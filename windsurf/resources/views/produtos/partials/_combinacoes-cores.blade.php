@@ -1,15 +1,15 @@
-<!-- Combinações de Cores -->
-<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">Combinações de Cores</h3>
+﻿<!-- Combinações de Cores -->
+<div class="bg-gray-50 dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Combinações de Cores</h3>
 
     @if($produto->combinacoes && $produto->combinacoes->count() > 0)
         <div class="space-y-6">
             @foreach($produto->combinacoes as $combinacao)
-                <div class="border border-gray-200 rounded-md p-4 bg-white">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-md p-4 bg-white dark:bg-slate-900">
                     <div class="flex justify-between items-start mb-3">
                         <div>
-                            <h4 class="text-md font-medium text-gray-800">{{ $combinacao->descricao }}</h4>
-                            <div class="text-sm text-gray-600">Quantidade pretendida: {{ $combinacao->quantidade_pretendida }}</div>
+                            <h4 class="text-md font-medium text-gray-800 dark:text-gray-200">{{ $combinacao->descricao }}</h4>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Quantidade pretendida: {{ $combinacao->quantidade_pretendida }}</div>
                             @if($combinacao->observacoes)
                                 <div class="text-sm text-gray-500 italic mt-1">{{ $combinacao->observacoes }}</div>
                             @endif
@@ -28,16 +28,16 @@
                         @if($combinacao->componentes && $combinacao->componentes->count() > 0)
                             <div class="grid grid-cols-1 gap-2">
                                 @foreach($combinacao->componentes as $componente)
-                                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200">
+                                    <div class="bg-gray-50 dark:bg-slate-800 p-3 rounded-md border border-gray-200 dark:border-gray-700">
                                         <div class="flex justify-between items-center">
                                             <div class="flex items-center space-x-3">
                                                 <div class="w-6 h-6 rounded border border-gray-300" style="background-color: {{ $componente->codigo_cor || '#FFFFFF' }}"></div>
                                                 <div>
-                                                    <div class="font-medium text-gray-900">{{ $componente->tecido ? $componente->tecido->descricao : 'Tecido não encontrado' }}</div>
+                                                    <div class="font-medium text-gray-900 dark:text-white">{{ $componente->tecido ? $componente->tecido->descricao : 'Tecido não encontrado' }}</div>
                                                     <div class="text-sm text-gray-600">{{ $componente->cor }} {{ $componente->codigo_cor ? "({$componente->codigo_cor})" : '' }}</div>
                                                 </div>
                                             </div>
-                                            <div class="text-sm text-gray-700">Consumo: <span class="font-medium">{{ $componente->consumo }} m</span></div>
+                                            <div class="text-sm text-gray-700 dark:text-gray-300">Consumo: <span class="font-medium">{{ $componente->consumo }} m</span></div>
                                         </div>
 
                                         @if($componente->tecido)
@@ -57,15 +57,15 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
                                                     <div class="flex justify-between sm:justify-start gap-2">
                                                         <span class="text-gray-600 text-xs">Estoque:</span>
-                                                        <span class="font-medium text-gray-900">{{ number_format($estoque, 2, ',', '.') }} m</span>
+                                                        <span class="font-medium text-gray-900 dark:text-white">{{ number_format($estoque, 2, ',', '.') }} m</span>
                                                     </div>
                                                     <div class="flex justify-between sm:justify-start gap-2 border-b border-gray-100 sm:border-0 pb-1 sm:pb-0">
                                                         <span class="text-gray-600 text-xs">Nec. Total:</span>
-                                                        <span class="font-medium text-gray-900">{{ number_format($necessidade, 2, ',', '.') }} m</span>
+                                                        <span class="font-medium text-gray-900 dark:text-white">{{ number_format($necessidade, 2, ',', '.') }} m</span>
                                                     </div>
                                                     <div class="flex justify-between sm:justify-start gap-2">
                                                         <span class="text-gray-600 text-xs">Nec. Produto:</span>
-                                                        <span class="font-medium text-gray-900">{{ number_format($necessidadeProduto, 2, ',', '.') }} m</span>
+                                                        <span class="font-medium text-gray-900 dark:text-white">{{ number_format($necessidadeProduto, 2, ',', '.') }} m</span>
                                                     </div>
                                                     <div class="flex justify-between sm:justify-start gap-2 border-b border-gray-100 sm:border-0 pb-1 sm:pb-0">
                                                         <span class="text-gray-600 text-xs">Saldo:</span>

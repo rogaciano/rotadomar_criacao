@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Estoque por Cor') }} - {{ $tecido->descricao }}
             </h2>
             <div>
@@ -26,28 +26,28 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900">Informações do Tecido</h3>
-                            <div class="text-sm text-gray-500">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Informações do Tecido</h3>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
                                 Última atualização: {{ $tecido->ultima_consulta_estoque ? $tecido->ultima_consulta_estoque->format('d/m/Y H:i') : 'Não disponível' }}
                             </div>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-500">Descrição</p>
-                                <p class="mt-1 text-sm text-gray-900">{{ $tecido->descricao }}</p>
+                            <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Descrição</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $tecido->descricao }}</p>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-500">Referência</p>
-                                <p class="mt-1 text-sm text-gray-900">{{ $tecido->referencia ?: 'Não informada' }}</p>
+                            <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Referência</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $tecido->referencia ?: 'Não informada' }}</p>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-500">Estoque Total</p>
+                            <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estoque Total</p>
                                 <p class="mt-1 text-sm text-gray-900 font-semibold">{{ number_format($tecido->quantidade_estoque, 2, ',', '.') }} metros</p>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                             @csrf
                             <div class="overflow-x-auto bg-white rounded-lg shadow">
                                 <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
+                                    <thead class="bg-gray-50 dark:bg-slate-800">
                                          <tr>
                                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Selecionar</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
@@ -93,11 +93,11 @@
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Atualização</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                         @foreach($tecido->estoquesCores as $estoqueCor)
                                         <tr>
                                             <td class="px-3 py-4 whitespace-nowrap">
-                                                <input type="checkbox" name="cores[{{ $estoqueCor->id }}][selecionada]" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $canUpdate ? '' : 'disabled' }}>
+                                                <input type="checkbox" name="cores[{{ $estoqueCor->id }}][selecionada]" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $canUpdate ? '' : 'disabled' }}>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center">
@@ -108,7 +108,7 @@
                                                     <input type="hidden" name="cores[{{ $estoqueCor->id }}][cor]" value="{{ $estoqueCor->cor }}">
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $estoqueCor->codigo_cor ?: '-' }}
                                                 <input type="hidden" name="cores[{{ $estoqueCor->id }}][codigo_cor]" value="{{ $estoqueCor->codigo_cor }}">
                                             </td>
@@ -131,10 +131,10 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                                 <input type="number" name="cores[{{ $estoqueCor->id }}][quantidade_pretendida]" step="0.01" min="0" class="mt-1 block w-24 mx-auto rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="0.00" {{ $canUpdate ? '' : 'disabled' }}>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500">
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $estoqueCor->observacoes ?: '-' }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $estoqueCor->data_atualizacao ? $estoqueCor->data_atualizacao->format('d/m/Y') : '-' }}
                                             </td>
                                         </tr>
@@ -142,7 +142,7 @@
                                     </tbody>
                                     <tfoot class="bg-gray-50">
                                         <tr>
-                                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                 Total
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">

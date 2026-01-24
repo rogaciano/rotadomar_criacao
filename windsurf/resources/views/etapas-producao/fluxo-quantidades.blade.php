@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Fluxo de Etapas com Quantidades nas Facções') }}
             </h2>
             <div class="flex space-x-2">
@@ -24,7 +24,7 @@
     <div class="py-12 bg-gray-900 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <!-- Container do Diagrama Mermaid -->
                     <div class="overflow-auto bg-white rounded-lg p-4 min-h-[600px] flex flex-col items-center" id="flowContainer">
                         @if(isset($etapasFluxo) && $etapasFluxo->count() > 0)

@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Novo Produto') }}
             </h2>
             <a href="{{ route('produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
@@ -13,13 +13,13 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                 <div class="p-6">
                     <!-- Erros de validação -->
                     @if ($errors->any())
-                        <div class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
+                        <div class="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4">
                             <p class="font-bold">Ocorreram erros. Por favor, verifique:</p>
                             <ul>
                                 @foreach ($errors->all() as $error)
@@ -35,35 +35,35 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Referência -->
                             <div>
-                                <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
-                                <input type="text" name="referencia" id="referencia" value="{{ old('referencia') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <label for="referencia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Referência</label>
+                                <input type="text" name="referencia" id="referencia" value="{{ old('referencia') }}" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
                             <!-- Descrição -->
                             <div>
-                                <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                                <input type="text" name="descricao" id="descricao" value="{{ old('descricao') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <label for="descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
+                                <input type="text" name="descricao" id="descricao" value="{{ old('descricao') }}" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
                             <!-- Data de Cadastro -->
                             <div>
-                                <label for="data_cadastro" class="block text-sm font-medium text-gray-700 mb-1">Data de Cadastro</label>
-                                <input type="date" name="data_cadastro" id="data_cadastro" value="{{ old('data_cadastro', date('Y-m-d')) }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <label for="data_cadastro" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Cadastro</label>
+                                <input type="date" name="data_cadastro" id="data_cadastro" value="{{ old('data_cadastro', date('Y-m-d')) }}" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
                             <!-- Data Prevista para Produção -->
                             <div>
-                                <label for="data_prevista_producao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Produção</label>
-                                <input type="date" name="data_prevista_producao" id="data_prevista_producao" value="{{ old('data_prevista_producao') }}" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <label for="data_prevista_producao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Prevista para Produção</label>
+                                <input type="date" name="data_prevista_producao" id="data_prevista_producao" value="{{ old('data_prevista_producao') }}" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                             </div>
 
                             <!-- Marca -->
                             <div>
-                                <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
-                                <select name="marca_id" id="marca_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
+                                <label for="marca_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marca</label>
+                                <select name="marca_id" id="marca_id" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma marca</option>
                                     @foreach($marcas as $marca)
-                                        <option value="{{ $marca->id }}" {{ old('marca_id') == $marca->id ? 'selected' : '' }} class="text-gray-700">
+                                        <option value="{{ $marca->id }}" {{ old('marca_id') == $marca->id ? 'selected' : '' }}>
                                             {{ $marca->nome_marca }}
                                         </option>
                                     @endforeach
@@ -72,14 +72,14 @@
 
                             <!-- Quantidade -->
                             <div>
-                                <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
-                                <input type="number" name="quantidade" id="quantidade" value="{{ old('quantidade', 0) }}" min="0" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <label for="quantidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade</label>
+                                <input type="number" name="quantidade" id="quantidade" value="{{ old('quantidade', 0) }}" min="0" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
                             <!-- Estilista -->
                             <div>
-                                <label for="estilista_id" class="block text-sm font-medium text-gray-700 mb-1">Estilista</label>
-                                <select name="estilista_id" id="estilista_id" class="estilista-select block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
+                                <label for="estilista_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estilista</label>
+                                <select name="estilista_id" id="estilista_id" class="estilista-select block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um estilista</option>
                                     @foreach($estilistas as $estilista)
                                         <option value="{{ $estilista->id }}" {{ old('estilista_id') == $estilista->id ? 'selected' : '' }} class="text-gray-700">
@@ -91,8 +91,8 @@
 
                             <!-- Grupo -->
                             <div>
-                                <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
-                                <select name="grupo_id" id="grupo_id" class="grupo-select block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
+                                <label for="grupo_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Grupo</label>
+                                <select name="grupo_id" id="grupo_id" class="grupo-select block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um grupo</option>
                                     @foreach($grupos as $grupo)
                                         <option value="{{ $grupo->id }}" {{ old('grupo_id') == $grupo->id ? 'selected' : '' }} class="text-gray-700">
@@ -104,20 +104,20 @@
 
                             <!-- Preço Atacado -->
                             <div>
-                                <label for="preco_atacado" class="block text-sm font-medium text-gray-700 mb-1">Preço Atacado (R\$)</label>
-                                <input type="number" name="preco_atacado" id="preco_atacado" value="{{ old('preco_atacado', '0.00') }}" min="0" step="0.01" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <label for="preco_atacado" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preço Atacado (R\$)</label>
+                                <input type="number" name="preco_atacado" id="preco_atacado" value="{{ old('preco_atacado', '0.00') }}" min="0" step="0.01" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
                             <!-- Preço Varejo -->
                             <div>
-                                <label for="preco_varejo" class="block text-sm font-medium text-gray-700 mb-1">Preço Varejo (R\$)</label>
-                                <input type="number" name="preco_varejo" id="preco_varejo" value="{{ old('preco_varejo', '0.00') }}" min="0" step="0.01" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <label for="preco_varejo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Preço Varejo (R\$)</label>
+                                <input type="number" name="preco_varejo" id="preco_varejo" value="{{ old('preco_varejo', '0.00') }}" min="0" step="0.01" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                             </div>
 
                             <!-- Status -->
                             <div>
-                                <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                <select name="status_id" id="status_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
+                                <label for="status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                <select name="status_id" id="status_id" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700" required>
                                     <option value="">Selecione um status</option>
                                     @foreach($statuses as $status)
                                         <option value="{{ $status->id }}" {{ old('status_id') == $status->id ? 'selected' : '' }} class="text-gray-700">
@@ -129,8 +129,8 @@
 
                             <!-- Direcionamento Comercial -->
                             <div>
-                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial</label>
-                                <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direcionamento Comercial</label>
+                                <select name="direcionamento_comercial_id" id="direcionamento_comercial_id" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
                                     <option value="">Selecione um direcionamento</option>
                                     @foreach($direcionamentosComerciais as $direcionamento)
                                         <option value="{{ $direcionamento->id }}" {{ old('direcionamento_comercial_id') == $direcionamento->id ? 'selected' : '' }} class="text-gray-700">
@@ -142,7 +142,7 @@
 
                             <!-- Foto Principal -->
                             <div>
-                                <label for="foto_principal" class="block text-sm font-medium text-gray-700 mb-1">Foto Principal</label>
+                                <label for="foto_principal" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Foto Principal</label>
                                 <input type="file" name="foto_principal" id="foto_principal" accept="image/*" class="block mt-1 w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                             </div>
 
@@ -150,13 +150,13 @@
 
                         <!-- Seção de Tecidos separada em uma única coluna -->
                         <div class="mt-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tecidos</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tecidos</label>
                             <div class="border border-gray-300 rounded-md p-4">
                                 <div id="tecidos-container">
                                     <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
                                         <div class="flex items-center gap-4">
                                             <div class="flex-grow">
-                                                <select name="tecidos[0][tecido_id]" class="tecido-select select2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
+                                                <select name="tecidos[0][tecido_id]" class="tecido-select select2 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
                                                     <option value="">Selecione um tecido</option>
                                                     @foreach($tecidos as $tecido)
                                                         <option value="{{ $tecido->id }}" class="text-gray-700">
@@ -166,7 +166,7 @@
                                                 </select>
                                             </div>
                                             <div class="w-1/4">
-                                                <input type="number" name="tecidos[0][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                                <input type="number" name="tecidos[0][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                             </div>
                                             <button type="button" class="remove-tecido text-red-500 hover:text-red-700" style="display: none;">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -183,17 +183,17 @@
                                     Adicionar Tecido
                                 </button>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">Adicione um ou mais tecidos utilizados neste produto</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Adicione um ou mais tecidos utilizados neste produto</p>
                         </div>
 
                         <!-- Seção de Variações de Cores -->
                         <div class="mb-4">
-                            <label for="cores" class="block text-sm font-medium text-gray-700">Variações de Cores</label>
+                            <label for="cores" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Variações de Cores</label>
                             <p class="text-blue-500 text-sm mb-2">Todas as cores disponíveis para os tecidos selecionados serão exibidas automaticamente.</p>
                             <div id="cores-container" class="mt-2 p-4 border border-gray-200 rounded-md">
                                 <p class="text-gray-500 text-sm">Selecione tecidos para ver as cores disponíveis</p>
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">As cores disponíveis serão carregadas automaticamente com base nos tecidos selecionados</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">As cores disponíveis serão carregadas automaticamente com base nos tecidos selecionados</p>
                         </div>
 
                         <div class="flex justify-end mt-6">
@@ -342,14 +342,14 @@
                             const tableHeader = `
                                 <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                                     <table class="min-w-full divide-y divide-gray-300">
-                                        <thead class="bg-gray-50">
+                                        <thead class="bg-gray-50 dark:bg-slate-800">
                                             <tr>
                                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
                                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome / Código</th>
                                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="bg-white divide-y divide-gray-200">
+                                        <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                             `;
 
                             let tableRows = '';
@@ -393,8 +393,8 @@
                                  title="${codigoCor || 'N/A'}"></div>
                         </td>
                         <td class="px-4 py-3">
-                            <div class="font-medium text-gray-900">${corNome || ''}</div>
-                            <div class="text-sm text-gray-500">${codigoCor || ''}</div>
+                            <div class="font-medium text-gray-900 dark:text-white">${corNome || ''}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">${codigoCor || ''}</div>
                             <input type="hidden" name="cores[${index}][cor]" value="${corNome || ''}">
                             <input type="hidden" name="cores[${index}][codigo_cor]" value="${codigoCor || ''}">
                         </td>
@@ -403,7 +403,7 @@
                                    name="cores[${index}][quantidade]"
                                    placeholder="0"
                                    min="0"
-                                   class="w-24 text-center border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                   class="w-24 text-center border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                         </td>
                     </tr>
                 `;

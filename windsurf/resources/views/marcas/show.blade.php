@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Detalhes da Marca') }}
             </h2>
             <div class="flex space-x-2">
@@ -21,56 +21,56 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Informações Básicas e Total de Produtos -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5 mb-6">
                 <div class="p-6">
                     <div class="flex flex-col md:flex-row md:justify-between md:items-start">
                         <div class="w-full md:w-2/3">
                             <div class="flex items-start">
                                 @if($marca->logo_path)
                                     <div class="mr-6 mb-4">
-                                        <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="Logo {{ $marca->nome_marca }}" class="w-32 h-32 object-contain rounded-md border border-gray-200 shadow-sm">
+                                        <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="Logo {{ $marca->nome_marca }}" class="w-32 h-32 object-contain rounded-md border border-gray-200 dark:border-slate-600 shadow-sm">
                                     </div>
                                 @endif
                                 <div class="flex-1">
-                                    <h3 class="text-2xl font-bold text-gray-900">{{ $marca->nome_marca }}</h3>
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $marca->nome_marca }}</h3>
                                     
                                     <div class="mt-4 space-y-3">
                                         <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-500 w-32">Status:</span>
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $marca->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Status:</span>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $marca->ativo ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300' }}">
                                                 {{ $marca->ativo ? 'Ativo' : 'Inativo' }}
                                             </span>
                                         </div>
                                         
                                         <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-500 w-32">Data de Cadastro:</span>
-                                            <span class="text-sm text-gray-900">
+                                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Data de Cadastro:</span>
+                                            <span class="text-sm text-gray-900 dark:text-white">
                                                 {{ $marca->created_at ? $marca->created_at->format('d/m/Y') : 'Não registrada' }}
                                             </span>
                                         </div>
                                         
                                         <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-500 w-32">Última Atualização:</span>
-                                            <span class="text-sm text-gray-900">
+                                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Última Atualização:</span>
+                                            <span class="text-sm text-gray-900 dark:text-white">
                                                 {{ $marca->updated_at ? $marca->updated_at->format('d/m/Y') : 'Não registrada' }}
                                             </span>
                                         </div>
                                         
                                         @if(isset($marca->suporte_marca))
                                         <div class="flex items-start">
-                                            <span class="text-sm font-medium text-gray-500 w-32">Suporte:</span>
-                                            <span class="text-sm text-gray-900">
+                                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Suporte:</span>
+                                            <span class="text-sm text-gray-900 dark:text-white">
                                                 {{ $marca->suporte_marca ?: 'Não informado' }}
                                             </span>
                                         </div>
                                         @endif
                                         
                                         <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-500 w-32">Imagem:</span>
-                                            <span class="text-sm text-gray-900">
+                                            <span class="text-sm font-medium text-gray-500 dark:text-gray-400 w-32">Imagem:</span>
+                                            <span class="text-sm text-gray-900 dark:text-white">
                                                 {{ $marca->logo_path ? 'Disponível' : 'Não disponível' }}
                                             </span>
                                         </div>
@@ -121,9 +121,9 @@
             <!-- Estatísticas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Produtos por Estilista -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900">Por Estilista <span class="text-sm font-normal text-gray-500">({{ count($estatisticas['produtosPorEstilista']) }})</span></h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Por Estilista <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ count($estatisticas['produtosPorEstilista']) }})</span></h3>
                         <button id="toggle-estilistas" class="flex items-center text-sm text-gray-500 hover:text-gray-700 focus:outline-none" aria-expanded="false" aria-controls="estilistas-content">
                             <span class="mr-1">Expandir/Recolher</span>
                             <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +136,7 @@
                             <ul class="divide-y divide-gray-200">
                                 @foreach($estatisticas['produtosPorEstilista'] as $estilista => $total)
                                     <li class="py-3 flex justify-between items-center">
-                                        <span class="text-sm font-medium text-gray-900">{{ $estilista }}</span>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $estilista }}</span>
                                         <a href="{{ route('produtos.index', ['marca' => $marca->nome_marca, 'estilista' => $estilista]) }}" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200">
                                             {{ $total }} {{ $total == 1 ? 'produto' : 'produtos' }}
                                         </a>
@@ -144,15 +144,15 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-sm text-gray-500">Nenhum produto associado a um estilista.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum produto associado a um estilista.</p>
                         @endif
                     </div>
                 </div>
 
                 <!-- Produtos por Localização -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900">Por Localização <span class="text-sm font-normal text-gray-500">({{ count($estatisticas['produtosPorLocalizacao']) }})</span></h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Por Localização <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ count($estatisticas['produtosPorLocalizacao']) }})</span></h3>
                         <button id="toggle-localizacoes" class="flex items-center text-sm text-gray-500 hover:text-gray-700 focus:outline-none" aria-expanded="false" aria-controls="localizacoes-content">
                             <span class="mr-1">Expandir/Recolher</span>
                             <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -165,7 +165,7 @@
                             <ul class="divide-y divide-gray-200">
                                 @foreach($estatisticas['produtosPorLocalizacao'] as $localizacao => $total)
                                     <li class="py-3 flex justify-between items-center">
-                                        <span class="text-sm font-medium text-gray-900">{{ $localizacao }}</span>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $localizacao }}</span>
                                         <a href="{{ route('produtos.index', ['marca' => $marca->nome_marca, 'localizacao' => $localizacao]) }}" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 hover:bg-green-200">
                                             {{ $total }} {{ $total == 1 ? 'produto' : 'produtos' }}
                                         </a>
@@ -173,15 +173,15 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-sm text-gray-500">Nenhum produto com localização definida.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum produto com localização definida.</p>
                         @endif
                     </div>
                 </div>
 
                 <!-- Produtos por Grupo -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900">Por Grupo <span class="text-sm font-normal text-gray-500">({{ count($estatisticas['produtosPorGrupo']) }})</span></h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Por Grupo <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ count($estatisticas['produtosPorGrupo']) }})</span></h3>
                         <button id="toggle-grupos" class="flex items-center text-sm text-gray-500 hover:text-gray-700 focus:outline-none" aria-expanded="false" aria-controls="grupos-content">
                             <span class="mr-1">Expandir/Recolher</span>
                             <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,7 +194,7 @@
                             <ul class="divide-y divide-gray-200">
                                 @foreach($estatisticas['produtosPorGrupo'] as $grupo => $total)
                                     <li class="py-3 flex justify-between items-center">
-                                        <span class="text-sm font-medium text-gray-900">{{ $grupo }}</span>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $grupo }}</span>
                                         <a href="{{ route('produtos.index', ['marca' => $marca->nome_marca, 'grupo' => $grupo]) }}" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 hover:bg-purple-200">
                                             {{ $total }} {{ $total == 1 ? 'produto' : 'produtos' }}
                                         </a>
@@ -202,15 +202,15 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-sm text-gray-500">Nenhum produto associado a um grupo.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum produto associado a um grupo.</p>
                         @endif
                     </div>
                 </div>
 
                 <!-- Produtos por Status -->
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                     <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="text-lg font-medium text-gray-900">Por Status <span class="text-sm font-normal text-gray-500">({{ count($estatisticas['produtosPorStatus']) }})</span></h3>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Por Status <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ count($estatisticas['produtosPorStatus']) }})</span></h3>
                         <button id="toggle-status" class="flex items-center text-sm text-gray-500 hover:text-gray-700 focus:outline-none" aria-expanded="false" aria-controls="status-content">
                             <span class="mr-1">Expandir/Recolher</span>
                             <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,7 +223,7 @@
                             <ul class="divide-y divide-gray-200">
                                 @foreach($estatisticas['produtosPorStatus'] as $status => $total)
                                     <li class="py-3 flex justify-between items-center">
-                                        <span class="text-sm font-medium text-gray-900">{{ $status }}</span>
+                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $status }}</span>
                                         <a href="{{ route('produtos.index', ['marca' => $marca->nome_marca, 'status' => $status]) }}" class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 hover:bg-blue-200">
                                             {{ $total }} {{ $total == 1 ? 'produto' : 'produtos' }}
                                         </a>
@@ -231,7 +231,7 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-sm text-gray-500">Nenhum produto com status definido.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum produto com status definido.</p>
                         @endif
                     </div>
                 </div>

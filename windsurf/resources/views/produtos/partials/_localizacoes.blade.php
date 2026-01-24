@@ -1,5 +1,5 @@
-<!-- Localizações -->
-<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+﻿<!-- Localizações -->
+<div class="bg-gray-50 dark:bg-slate-800/50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
     @php
         $canCreateProdutoLocalizacoes = auth()->user()->canCreate('produto_localizacao');
         $canUpdateProdutoLocalizacoes = auth()->user()->canUpdate('produto_localizacao');
@@ -7,7 +7,7 @@
         $canAnyProdutoLocalizacoes = $canUpdateProdutoLocalizacoes || $canDeleteProdutoLocalizacoes;
     @endphp
     <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Localizações do Produto</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Localizações do Produto</h3>
         @if($canCreateProdutoLocalizacoes)
             <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -69,25 +69,25 @@
     @if($produto->localizacoes->count() > 0)
         <!-- Tabela Desktop -->
         <div class="hidden lg:block overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                <thead class="bg-gray-50 dark:bg-slate-700">
                     <tr>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ordem Produção</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantidade</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prev. Facção</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Envio Facção</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Retorno Facção</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrega Prevista Facção</th>
-                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Concluído</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Etapa Atual</th>
-                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Próximas Etapas</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Localização</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ordem Produção</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantidade</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Prev. Facção</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Envio Facção</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Retorno Facção</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Entrega Prevista Facção</th>
+                        <th scope="col" class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Concluído</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Etapa Atual</th>
+                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Próximas Etapas</th>
                         @if($canAnyProdutoLocalizacoes)
-                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ações</th>
                         @endif
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                     @foreach($produto->localizacoes as $localizacao)
                         @php
                             $etapaAtualId = $localizacao->pivot->etapa_atual_id;
@@ -125,7 +125,7 @@
                             $defaultBtnClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm';
                         @endphp
                         <tr>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                     {{ $localizacao->nome_localizacao }}
                                 </span>
@@ -142,28 +142,28 @@
                                 @endif
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($localizacao->pivot->quantidade, 0, ',', '.') }}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 @if($localizacao->pivot->data_prevista_faccao)
                                     {{ is_string($localizacao->pivot->data_prevista_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_prevista_faccao)->format('d/m/Y') : $localizacao->pivot->data_prevista_faccao->format('d/m/Y') }}
                                 @else
                                     N/A
                                 @endif
                             </td>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 @if($localizacao->pivot->data_envio_faccao)
                                     {{ is_string($localizacao->pivot->data_envio_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_envio_faccao)->format('d/m/Y') : $localizacao->pivot->data_envio_faccao->format('d/m/Y') }}
                                 @else
                                     N/A
                                 @endif
                             </td>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 @if($localizacao->pivot->data_retorno_faccao)
                                     {{ is_string($localizacao->pivot->data_retorno_faccao) ? \Carbon\Carbon::parse($localizacao->pivot->data_retorno_faccao)->format('d/m/Y') : $localizacao->pivot->data_retorno_faccao->format('d/m/Y') }}
                                 @else
                                     N/A
                                 @endif
                             </td>
-                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 <div class="flex items-center space-x-2">
                                     @if($localizacao->pivot->data_entrega_faccao)
                                         <span class="text-gray-900 font-medium bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200">
@@ -277,10 +277,10 @@
                         </tr>
                     @endforeach
                 </tbody>
-                <tfoot class="bg-gray-50">
-                    <tr class="border-t-2 border-gray-300">
-                        <td colspan="2" class="px-4 py-2 text-sm font-medium">Total:</td>
-                        <td class="px-4 py-2 text-sm font-bold">{{ number_format($totalLocalizacoes, 0, ',', '.') }}</td>
+                <tfoot class="bg-gray-50 dark:bg-slate-700">
+                    <tr class="border-t-2 border-gray-300 dark:border-slate-600">
+                        <td colspan="2" class="px-4 py-2 text-sm font-medium dark:text-white">Total:</td>
+                        <td class="px-4 py-2 text-sm font-bold dark:text-white">{{ number_format($totalLocalizacoes, 0, ',', '.') }}</td>
                         <td colspan="8"></td>
                     </tr>
                 </tfoot>

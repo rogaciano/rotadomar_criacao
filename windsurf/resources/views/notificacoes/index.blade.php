@@ -1,8 +1,8 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                     {{ __('Notificações') }}
                 </h2>
                 @if($podeVerTodas ?? false)
@@ -19,21 +19,21 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Dashboard de Estatísticas -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <!-- Card Total -->
                 <a href="{{ route('notificacoes.index') }}" 
-                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow {{ !request('tipo') && !request('status') ? 'ring-2 ring-blue-500' : '' }}">
+                   class="glass dark:glass-dark overflow-hidden sm:rounded-lg hover:shadow-md transition-shadow {{ !request('tipo') && !request('status') ? 'ring-2 ring-blue-500' : '' }}">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Total</p>
-                                <p class="text-3xl font-bold text-gray-900">{{ $stats['total'] }}</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
+                                <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $stats['total'] }}</p>
                             </div>
-                            <div class="p-3 bg-gray-100 rounded-full">
-                                <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
+                                <svg class="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
                             </div>
@@ -51,15 +51,15 @@
                     }
                 @endphp
                 <a href="{{ route('notificacoes.index', $statusParams) }}" 
-                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('status') === 'nao_lida' ? 'ring-2 ring-red-500' : '' }}">
+                   class="glass dark:glass-dark overflow-hidden sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('status') === 'nao_lida' ? 'ring-2 ring-red-500' : '' }}">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Não Lidas</p>
-                                <p class="text-3xl font-bold text-red-600">{{ $stats['nao_lidas'] }}</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Não Lidas</p>
+                                <p class="text-3xl font-bold text-red-600 dark:text-red-400">{{ $stats['nao_lidas'] }}</p>
                             </div>
-                            <div class="p-3 bg-red-100 rounded-full">
-                                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-3 bg-red-100 dark:bg-red-900/50 rounded-full">
+                                <svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                 </svg>
                             </div>
@@ -77,15 +77,15 @@
                     }
                 @endphp
                 <a href="{{ route('notificacoes.index', $novaParams) }}" 
-                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'nova_movimentacao' ? 'ring-2 ring-green-500' : '' }}">
+                   class="glass dark:glass-dark overflow-hidden sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'nova_movimentacao' ? 'ring-2 ring-green-500' : '' }}">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Novas</p>
-                                <p class="text-3xl font-bold text-green-600">{{ $stats['novas'] }}</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Novas</p>
+                                <p class="text-3xl font-bold text-green-600 dark:text-green-400">{{ $stats['novas'] }}</p>
                             </div>
-                            <div class="p-3 bg-green-100 rounded-full">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-3 bg-green-100 dark:bg-green-900/50 rounded-full">
+                                <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
                             </div>
@@ -103,15 +103,15 @@
                     }
                 @endphp
                 <a href="{{ route('notificacoes.index', $concluidaParams) }}" 
-                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'movimentacao_concluida' ? 'ring-2 ring-blue-500' : '' }}">
+                   class="glass dark:glass-dark overflow-hidden sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'movimentacao_concluida' ? 'ring-2 ring-blue-500' : '' }}">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Concluídas</p>
-                                <p class="text-3xl font-bold text-blue-600">{{ $stats['concluidas'] }}</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Concluídas</p>
+                                <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['concluidas'] }}</p>
                             </div>
-                            <div class="p-3 bg-blue-100 rounded-full">
-                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-full">
+                                <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
@@ -129,15 +129,15 @@
                     }
                 @endphp
                 <a href="{{ route('notificacoes.index', $etapaParams) }}" 
-                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'mudanca_etapa' ? 'ring-2 ring-purple-500' : '' }}">
+                   class="glass dark:glass-dark overflow-hidden sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'mudanca_etapa' ? 'ring-2 ring-purple-500' : '' }}">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Mudança Etapa</p>
-                                <p class="text-3xl font-bold text-purple-600">{{ $stats['mudancas_etapa'] ?? 0 }}</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Mudança Etapa</p>
+                                <p class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ $stats['mudancas_etapa'] ?? 0 }}</p>
                             </div>
-                            <div class="p-3 bg-purple-100 rounded-full">
-                                <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-3 bg-purple-100 dark:bg-purple-900/50 rounded-full">
+                                <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                                 </svg>
                             </div>
@@ -155,15 +155,15 @@
                     }
                 @endphp
                 <a href="{{ route('notificacoes.index', $atribParams) }}" 
-                   class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'atribuicao_localizacao' ? 'ring-2 ring-indigo-500' : '' }}">
+                   class="glass dark:glass-dark overflow-hidden sm:rounded-lg hover:shadow-md transition-shadow cursor-pointer {{ request('tipo') === 'atribuicao_localizacao' ? 'ring-2 ring-indigo-500' : '' }}">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-gray-600">Atribuições</p>
-                                <p class="text-3xl font-bold text-indigo-600">{{ $stats['atribuicoes'] ?? 0 }}</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Atribuições</p>
+                                <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ $stats['atribuicoes'] ?? 0 }}</p>
                             </div>
-                            <div class="p-3 bg-indigo-100 rounded-full">
-                                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="p-3 bg-indigo-100 dark:bg-indigo-900/50 rounded-full">
+                                <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
@@ -174,11 +174,11 @@
             </div>
 
             <!-- Lista de Notificações -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <!-- Indicador de Filtro Ativo -->
                     @if(request('tipo') || request('status'))
-                        <div class="mb-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="mb-4 flex items-center justify-between bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/50 rounded-lg p-3">
                             <div class="flex items-center space-x-2 flex-wrap">
                                 <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
@@ -223,7 +223,7 @@
                     @if($notificacoes->count() > 0)
                         <div class="space-y-4">
                             @foreach($notificacoes as $notificacao)
-                                <div class="border rounded-lg p-4 {{ $notificacao->isVisualizada() ? 'bg-gray-50' : 'bg-blue-50 border-blue-200' }}">
+                                <div class="border rounded-lg p-4 {{ $notificacao->isVisualizada() ? 'bg-gray-50 dark:bg-gray-800/50' : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800' }}">
                                     <div class="flex items-start justify-between">
                                         <div class="flex-1">
                                             <div class="flex items-center space-x-2">
@@ -253,8 +253,8 @@
                                                     </span>
                                                 @endif
                                             </div>
-                                            <p class="text-gray-600 mt-1">{{ $notificacao->mensagem }}</p>
-                                            <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                                            <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $notificacao->mensagem }}</p>
+                                            <div class="flex items-center space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
                                                 <span>{{ $notificacao->created_at->diffForHumans() }}</span>
                                                 <span>{{ $notificacao->localizacao->nome_localizacao }}</span>
                                                 @if($notificacao->movimentacao && $notificacao->movimentacao->criadoPor)
@@ -282,12 +282,12 @@
                         </div>
                     @else
                         <div class="text-center py-8">
-                            <div class="text-gray-500 text-lg">
-                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="text-gray-500 dark:text-gray-400 text-lg">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5-5-5h5v-12h5v12z" />
                                 </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma notificação</h3>
-                                <p class="mt-1 text-sm text-gray-500">Você não possui notificações no momento.</p>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Nenhuma notificação</h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Você não possui notificações no momento.</p>
                             </div>
                         </div>
                     @endif

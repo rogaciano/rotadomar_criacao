@@ -1,14 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Editar Movimentação') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 border-b border-gray-200 dark:border-slate-700">
                     <form action="{{ route('movimentacoes.update', $movimentacao) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
@@ -19,7 +19,7 @@
                             <!-- Produto -->
                             <div>
                                 <x-label for="produto_id" value="{{ __('Produto') }}" />
-                                <select id="produto_id" name="produto_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="produto_id" name="produto_id" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione um produto</option>
                                     @foreach($produtos as $produto)
                                         <option value="{{ $produto->id }}" {{ old('produto_id', $movimentacao->produto_id) == $produto->id ? 'selected' : '' }}>
@@ -33,7 +33,7 @@
                             <!-- Localização -->
                             <div>
                                 <x-label for="localizacao_id" value="{{ __('Localização') }}" />
-                                <select id="localizacao_id" name="localizacao_id" class="select2 block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="localizacao_id" name="localizacao_id" class="select2 block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma localização</option>
                                     @foreach($localizacoes as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ old('localizacao_id', $movimentacao->localizacao_id) == $localizacao->id ? 'selected' : '' }}>
@@ -47,7 +47,7 @@
                             <!-- Tipo -->
                             <div>
                                 <x-label for="tipo_id" value="{{ __('Tipo de Movimentação') }}" />
-                                <select id="tipo_id" name="tipo_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="tipo_id" name="tipo_id" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione um tipo</option>
                                     @foreach($tipos as $tipo)
                                         <option value="{{ $tipo->id }}" {{ old('tipo_id', $movimentacao->tipo_id) == $tipo->id ? 'selected' : '' }}>
@@ -61,7 +61,7 @@
                             <!-- Situação -->
                             <div>
                                 <x-label for="situacao_id" value="{{ __('Situação') }}" />
-                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <select id="situacao_id" name="situacao_id" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Selecione uma situação</option>
                                     @foreach($situacoes as $situacao)
                                         <option value="{{ $situacao->id }}" {{ old('situacao_id', $movimentacao->situacao_id) == $situacao->id ? 'selected' : '' }}>
@@ -95,15 +95,15 @@
                             <!-- Observação -->
                             <div class="md:col-span-2">
                                 <x-label for="observacao" value="{{ __('Observação (opcional)') }}" />
-                                <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
+                                <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
                                 <x-input-error :messages="$errors->get('observacao')" class="mt-2" />
                             </div>
 
                             <!-- Anexo -->
                             <div class="md:col-span-2">
                                 <x-label for="anexo" value="{{ __('Anexo (opcional)') }}" />
-                                <input type="file" id="anexo" name="anexo" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                <p class="mt-1 text-sm text-gray-500">Formatos aceitos: JPG, JPEG, PNG. Tamanho máximo: 10MB.</p>
+                                <input type="file" id="anexo" name="anexo" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Formatos aceitos: JPG, JPEG, PNG. Tamanho máximo: 10MB.</p>
                                 @if($movimentacao->anexo)
                                 <div class="mt-2">
                                     <div class="flex items-center justify-between">
@@ -129,18 +129,18 @@
                                     <input type="checkbox" id="concluido" name="concluido" value="1" {{ old('concluido', $movimentacao->concluido) ? 'checked' : '' }} class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                                     <label for="concluido" class="ml-2 block text-sm font-medium text-gray-700">Movimentação concluída</label>
                                 </div>
-                                <p class="mt-1 text-sm text-gray-500">Marque esta opção se a movimentação foi finalizada.</p>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Marque esta opção se a movimentação foi finalizada.</p>
                                 <x-input-error :messages="$errors->get('concluido')" class="mt-2" />
                             </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <a href="{{ request('back_url') ? request('back_url') : route('movimentacoes.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 focus:bg-gray-400 active:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150 mr-3">
+                            <a href="{{ request('back_url') ? request('back_url') : route('movimentacoes.index') }}" class="btn-ghost-secondary mr-3">
                                 Cancelar
                             </a>
-                            <x-button>
+                            <button type="submit" class="btn-ghost-primary">
                                 {{ __('Atualizar') }}
-                            </x-button>
+                            </button>
                         </div>
                     </form>
 

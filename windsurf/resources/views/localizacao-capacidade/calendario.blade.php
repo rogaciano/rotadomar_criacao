@@ -1,11 +1,11 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Calendário de Produção') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-screen-2xl mx-auto sm:px-6 lg:px-8">
 
             <!-- Botão Voltar -->
@@ -19,12 +19,12 @@
             </div>
 
             <!-- Filtros -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5 mb-6">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <form method="GET" action="{{ route('localizacao-capacidade.calendario') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div>
                             <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
-                            <select name="localizacao_id" id="localizacao_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <select name="localizacao_id" id="localizacao_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 <option value="">Todas as Localizações</option>
                                 @foreach($localizacoes as $localizacao)
                                     <option value="{{ $localizacao->id }}" {{ ($localizacaoId ?? '') == $localizacao->id ? 'selected' : '' }}>
@@ -36,12 +36,12 @@
 
                         <div>
                             <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
-                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Ex: 1234" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Ex: 1234" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                         </div>
 
                         <div>
                             <label for="mes" class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
-                            <select name="mes" id="mes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <select name="mes" id="mes" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 @foreach(['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'] as $index => $nomeMes)
                                     <option value="{{ $index + 1 }}" {{ $mes == ($index + 1) ? 'selected' : '' }}>{{ $nomeMes }}</option>
                                 @endforeach
@@ -50,7 +50,7 @@
 
                         <div>
                             <label for="ano" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-                            <select name="ano" id="ano" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <select name="ano" id="ano" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 @for($i = now()->year - 1; $i <= now()->year + 2; $i++)
                                     <option value="{{ $i }}" {{ $ano == $i ? 'selected' : '' }}>{{ $i }}</option>
                                 @endfor
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Legenda -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5 mb-6">
                 <div class="p-4">
                     <div class="flex flex-wrap gap-4 justify-center">
                         @foreach($tiposCores as $tipo => $config)
@@ -85,7 +85,7 @@
 
             <!-- Calendário -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-2xl font-bold text-center text-gray-800 mb-6">{{ $mesNome }} {{ $ano }}</h3>
 
                     <!-- Cabeçalho dos dias da semana -->

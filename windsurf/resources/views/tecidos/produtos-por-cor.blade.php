@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Produtos que usam') }} {{ $estoqueCor->cor }}
             </h2>
             <div>
@@ -18,28 +18,28 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900">Informações do Tecido</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Informações do Tecido</h3>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-500">Tecido</p>
-                                <p class="mt-1 text-sm text-gray-900">{{ $tecido->descricao }}</p>
+                            <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tecido</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $tecido->descricao }}</p>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-500">Cor</p>
+                            <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Cor</p>
                                 <div class="mt-1 flex items-center">
                                     <div class="h-4 w-4 rounded-full mr-2" style="background-color: {{ $estoqueCor->codigo_cor ?: '#ccc' }}"></div>
-                                    <p class="text-sm text-gray-900">{{ $estoqueCor->cor }}</p>
+                                    <p class="text-sm text-gray-900 dark:text-white">{{ $estoqueCor->cor }}</p>
                                 </div>
                             </div>
                             
-                            <div class="bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm font-medium text-gray-500">Necessidade Total</p>
+                            <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Necessidade Total</p>
                                 <p class="mt-1 text-sm text-gray-900 font-semibold">{{ number_format($estoqueCor->necessidade, 2, ',', '.') }} metros</p>
                             </div>
                         </div>
@@ -51,7 +51,7 @@
                         @if(count($produtosComNecessidade) > 0)
                             <div class="overflow-x-auto bg-white rounded-lg shadow">
                                 <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
+                                    <thead class="bg-gray-50 dark:bg-slate-800">
                                         <tr>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referência</th>
                                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
@@ -60,16 +60,16 @@
                                             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                         @foreach($produtosComNecessidade as $produto)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                 {{ $produto['referencia'] ?: '-' }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $produto['descricao'] }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $produto['tipo'] }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
@@ -85,7 +85,7 @@
                                     </tbody>
                                     <tfoot class="bg-gray-50">
                                         <tr>
-                                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                 Total
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">

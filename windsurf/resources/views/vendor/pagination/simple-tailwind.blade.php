@@ -1,4 +1,4 @@
-@if ($paginator->hasPages())
+﻿@if ($paginator->hasPages())
     <nav role="navigation" aria-label="Paginação" class="flex items-center justify-center">
         <div class="flex space-x-2">
             {{-- Previous Page Link --}}

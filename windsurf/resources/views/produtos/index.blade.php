@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Produtos') }}
@@ -11,7 +11,7 @@
             <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <div class="flex flex-wrap gap-3">
                     @if(auth()->user()->canCreate('produtos'))
-                    <a href="{{ route('produtos.create') }}" class="inline-flex items-center px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                    <a href="{{ route('produtos.create') }}" class="btn-ghost-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                         </svg>
@@ -19,16 +19,16 @@
                     </a>
                     @endif
                 </div>
-                
+
                 <div class="flex flex-wrap gap-2">
                     @if(auth()->user()->canRead('produtos'))
-                        <button id="btn-gerar-pdf-landscape" class="inline-flex items-center px-4 py-2.5 bg-rose-500/10 border border-rose-200 dark:border-rose-900/30 rounded-xl font-bold text-xs text-rose-600 dark:text-rose-400 uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all duration-200">
+                        <button id="btn-gerar-pdf-landscape" class="btn-ghost-rose">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                             PDF Paisagem
                         </button>
-                        <button id="btn-gerar-pdf-portrait" class="inline-flex items-center px-4 py-2.5 bg-orange-500/10 border border-orange-200 dark:border-orange-900/30 rounded-xl font-bold text-xs text-orange-600 dark:text-orange-400 uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all duration-200">
+                        <button id="btn-gerar-pdf-portrait" class="btn-ghost-warning">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
@@ -46,16 +46,16 @@
                     <div class="mb-4 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtros</h3>
                         <div class="flex flex-wrap items-center justify-end gap-2">
-                            <button type="submit" form="filter-form" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <button type="submit" form="filter-form" class="btn-ghost-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                                 Filtrar
                             </button>
-                            <a href="{{ route('produtos.index', ['limpar_filtros' => 1]) }}" id="btn-clear-filters" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <a href="{{ route('produtos.index', ['limpar_filtros' => 1]) }}" id="btn-clear-filters" class="btn-ghost-secondary">
                                 Limpar Filtros
                             </a>
-                            <button type="button" id="toggle-filters-btn" class="inline-flex items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                            <button type="button" id="toggle-filters-btn" class="btn-ghost-secondary">
                                 <svg id="filter-icon-show" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
@@ -86,17 +86,17 @@
                     <div id="filters-container" class="mb-6 bg-slate-100/50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
                         <form id="filter-form" action="{{ route('produtos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-1">
-                                <label for="referencia" class="block text-sm font-medium text-gray-700 mb-1">Referência</label>
+                                <label for="referencia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Referência</label>
                                 <input type="text" name="referencia" id="referencia" value="{{ $filters['referencia'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a referência do produto">
                             </div>
 
                             <div>
-                                <label for="descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                <label for="descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
                                 <input type="text" name="descricao" id="descricao" value="{{ $filters['descricao'] ?? '' }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" placeholder="Digite a descrição do produto">
                             </div>
 
                             <div>
-                                <label for="marca_id" class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                                <label for="marca_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Marca</label>
                                 <select name="marca_id" id="marca_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todas</option>
                                     @foreach($marcas as $marca)
@@ -111,7 +111,7 @@
                             </div>
 
                             <div>
-                                <label for="tecido_id" class="block text-sm font-medium text-gray-700 mb-1">Tecido (um ou mais)</label>
+                                <label for="tecido_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tecido (um ou mais)</label>
                                 <select name="tecido_id[]" id="tecido_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($tecidos as $tecido)
                                         <option value="{{ $tecido->id }}" {{ !empty($filters['tecido_id']) && in_array($tecido->id, (array)$filters['tecido_id']) ? 'selected' : '' }}>
@@ -122,7 +122,7 @@
                             </div>
 
                             <div>
-                                <label for="estilista_id" class="block text-sm font-medium text-gray-700 mb-1">Estilista</label>
+                                <label for="estilista_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estilista</label>
                                 <select name="estilista_id" id="estilista_id" class="select2 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     @foreach($estilistas as $estilista)
@@ -137,7 +137,7 @@
                             </div>
 
                             <div>
-                                <label for="grupo_id" class="block text-sm font-medium text-gray-700 mb-1">Grupo (um ou mais)</label>
+                                <label for="grupo_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Grupo (um ou mais)</label>
                                 <select name="grupo_id[]" id="grupo_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($grupos as $grupo)
                                         <option value="{{ $grupo->id }}" {{ !empty($filters['grupo_id']) && in_array($grupo->id, (array)$filters['grupo_id']) ? 'selected' : '' }}>
@@ -148,7 +148,7 @@
                             </div>
 
                             <div>
-                                <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status (um ou mais)</label>
+                                <label for="status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status (um ou mais)</label>
                                 <select name="status_id[]" id="status_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($statuses as $status)
                                         <option value="{{ $status->id }}" {{ !empty($filters['status_id']) && in_array($status->id, (array)$filters['status_id']) ? 'selected' : '' }}>
@@ -159,7 +159,7 @@
                             </div>
 
                             <div>
-                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 mb-1">Direcionamento Comercial (um ou mais)</label>
+                                <label for="direcionamento_comercial_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direcionamento Comercial (um ou mais)</label>
                                 <select name="direcionamento_comercial_id[]" id="direcionamento_comercial_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($direcionamentosComerciais as $direcionamento)
                                         <option value="{{ $direcionamento->id }}" {{ !empty($filters['direcionamento_comercial_id']) && in_array($direcionamento->id, (array)$filters['direcionamento_comercial_id']) ? 'selected' : '' }}>
@@ -170,7 +170,7 @@
                             </div>
 
                             <div>
-                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização (uma ou mais)</label>
+                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização (uma ou mais)</label>
                                 <select name="localizacao_id[]" id="localizacao_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($localizacoes as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ !empty($filters['localizacao_id']) && in_array($localizacao->id, (array)$filters['localizacao_id']) ? 'selected' : '' }}>
@@ -181,7 +181,7 @@
                             </div>
 
                             <div>
-                                <label for="situacao_id" class="block text-sm font-medium text-gray-700 mb-1">Situação (uma ou mais)</label>
+                                <label for="situacao_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Situação (uma ou mais)</label>
                                 <select name="situacao_id[]" id="situacao_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($situacoes as $situacao)
                                         <option value="{{ $situacao->id }}" {{ !empty($filters['situacao_id']) && in_array($situacao->id, (array)$filters['situacao_id']) ? 'selected' : '' }}>
@@ -192,7 +192,7 @@
                             </div>
 
                             <div>
-                                <label for="localizacao_planejamento_id" class="block text-sm font-medium text-gray-700 mb-1">Localização Planejamento (uma ou mais)</label>
+                                <label for="localizacao_planejamento_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização Planejamento (uma ou mais)</label>
                                 <select name="localizacao_planejamento_id[]" id="localizacao_planejamento_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     @foreach($localizacoesPlanejamento as $localizacao)
                                         <option value="{{ $localizacao->id }}" {{ !empty($filters['localizacao_planejamento_id']) && in_array($localizacao->id, (array)$filters['localizacao_planejamento_id']) ? 'selected' : '' }}>
@@ -203,7 +203,7 @@
                             </div>
 
                             <div>
-                                <label for="status_concluido" class="block text-sm font-medium text-gray-700 mb-1">Status de Conclusão</label>
+                                <label for="status_concluido" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status de Conclusão</label>
                                 <select name="status_concluido" id="status_concluido" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
                                     <option value="todos_em_processo" {{ ($filters['status_concluido'] ?? '') == 'todos_em_processo' ? 'selected' : '' }}>🔄 Todos em Processo</option>
@@ -215,7 +215,7 @@
 
                                                         <div class="md:col-span-1 flex items-end pb-2">
                                 <div class="flex items-center">
-                                    <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ isset($filters['incluir_excluidos']) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                                    <input type="checkbox" name="incluir_excluidos" id="incluir_excluidos" value="1" {{ isset($filters['incluir_excluidos']) ? 'checked' : '' }} class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
                                     <label for="incluir_excluidos" class="ml-2 block text-sm text-gray-700">Incluir excluídos</label>
                                 </div>
                             </div>
@@ -285,52 +285,52 @@
             @endif
 
                     <!-- Tabela de Produtos -->
-                    <div class="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
-                            <thead class="bg-slate-50 dark:bg-slate-900/50">
+                    <div class="table-container">
+                        <table class="table-base">
+                            <thead class="table-header">
                                 <tr>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Referência
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Descrição
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Prev. Produção
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Facção (1ª Data)
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Marca
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Grupo
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Direcionamento
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-0 py-4 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest w-8">
+                                    <th scope="col" class="table-header-cell text-center w-8">
                                         OK
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Localização
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <th scope="col" class="table-header-cell">
                                         Situação
                                     </th>
-                                    <th scope="col" class="sticky right-0 px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-slate-50 dark:bg-slate-900 shadow-md z-10">
+                                    <th scope="col" class="sticky right-0 table-header-cell text-right bg-gray-50 dark:bg-slate-800 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.4)] z-10">
                                         Ações
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
+                            <tbody class="table-body">
                                 @forelse($produtos as $produto)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/50 {{ $produto->trashed() ? 'bg-red-50 dark:bg-red-900/20' : '' }}">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+                                    <tr class="{{ $produto->trashed() ? 'table-row-trashed' : 'table-row' }}">
+                                        <td class="table-cell table-cell-primary line-clamp-1">
                                             <div class="flex items-center">
                                                 @if($produto->foto_principal)
                                                     <img src="{{ asset('storage/' . $produto->foto_principal) }}" alt="" class="h-10 w-10 rounded-md object-cover mr-3 border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -338,30 +338,30 @@
                                                 <span>{{ $produto->referencia }}</span>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             {{ $produto->descricao }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             {{ $produto->data_prevista_producao_mes_ano }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             @if($produto->primeira_data_prevista_faccao)
                                                 {{ $produto->primeira_data_prevista_faccao->format('d/m/Y') }}
                                             @else
                                                 <span class="text-gray-400 dark:text-gray-500 text-xs italic">Sem data</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             @if($produto->marca && $produto->marca->logo_path)
                                                 <img src="{{ asset('storage/' . $produto->marca->logo_path) }}" alt="{{ $produto->marca->nome_marca }}" class="h-6 w-auto object-contain" title="{{ $produto->marca->nome_marca }}">
                                             @else
                                                 {{ $produto->marca->nome_marca ?? 'N/A' }}
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             {{ $produto->grupoProduto->descricao ?? 'N/A' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                        <td class="table-cell table-cell-secondary">
                                             @if($produto->direcionamentoComercial)
                                                 <span class="font-semibold">
                                                     {{ $produto->direcionamentoComercial->descricao }}
@@ -370,12 +370,12 @@
                                                 <span class="text-gray-400 dark:text-gray-500 text-xs italic">Sem direcionamento</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->status && $produto->status->descricao == 'Ativo' ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }}">
                                                 {{ $produto->status ? $produto->status->descricao : 'N/A' }}
                                             </span>
                                         </td>
-                                        <td class="px-0 py-4 whitespace-nowrap text-xs text-center w-8">
+                                        <td class="table-cell text-center w-8">
                                             @if($produto->concluido_atual)
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mx-auto text-green-600" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -386,7 +386,7 @@
                                                 </svg>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             @if($produto->localizacao_atual)
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                                                     {{ $produto->localizacao_atual->nome_localizacao }}
@@ -395,7 +395,7 @@
                                                 <span class="text-gray-400 dark:text-gray-500 text-xs italic">Não localizado</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="table-cell table-cell-secondary">
                                             @if($produto->situacao_atual)
                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200">
                                                     {{ $produto->situacao_atual->descricao }}
@@ -404,10 +404,10 @@
                                                 <span class="text-gray-400 dark:text-gray-500 text-xs italic">Sem situação</span>
                                             @endif
                                         </td>
-                                        <td class="sticky right-0 px-6 py-4 whitespace-nowrap text-right text-sm font-medium bg-white dark:bg-slate-900 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.4)] z-10">
-                                            <div class="flex justify-end space-x-2">
+                                        <td class="sticky right-0 table-cell text-right bg-white dark:bg-slate-900 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.4)] z-10">
+                                            <div class="flex items-center justify-end space-x-2">
                                                 @if(auth()->user()->canRead('produtos'))
-                                                    <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                    <a href="{{ route('produtos.show', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="btn-action-view">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -416,7 +416,7 @@
                                                 @endif
 
                                                 @if(!$produto->trashed() && auth()->user()->canUpdate('produtos'))
-                                                    <a href="{{ route('produtos.edit', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 p-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900/50">
+                                                    <a href="{{ route('produtos.edit', $produto->id) }}?back_url={{ urlencode(Request::fullUrl()) }}" class="btn-action-edit">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                         </svg>
@@ -427,9 +427,9 @@
                                                     <form action="{{ route('produtos.destroy', $produto->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este produto?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/50">
+                                                        <button type="submit" class="btn-action-delete">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1 1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                             </svg>
                                                         </button>
                                                     </form>
@@ -439,7 +439,7 @@
                                                     <form action="{{ route('produtos.destroy', $produto->id) }}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja restaurar este produto?');">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded hover:bg-green-100 dark:hover:bg-green-900/50">
+                                                        <button type="submit" class="btn-action-restore">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                             </svg>
@@ -451,7 +451,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                        <td colspan="12" class="table-cell table-empty">
                                             Nenhum produto encontrado.
                                         </td>
                                     </tr>

@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Detalhes do Grupo de Produto') }}
             </h2>
             <div class="flex space-x-2">
@@ -21,22 +21,22 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Informações do Grupo de Produto</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Informações do Grupo de Produto</h3>
                             
                             <div class="mt-4 space-y-4">
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Nome do Grupo:</span>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $grupoProduto->grupo_produto }}</p>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Nome do Grupo:</span>
+                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $grupoProduto->grupo_produto }}</p>
                                 </div>
                                 
                                 <div>
-                                    <span class="text-sm font-medium text-gray-500">Status:</span>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Status:</span>
                                     <p class="mt-1">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $grupoProduto->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             {{ $grupoProduto->ativo ? 'Ativo' : 'Inativo' }}
@@ -47,13 +47,13 @@
                         </div>
                         
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Produtos Relacionados</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Produtos Relacionados</h3>
                             
                             <div class="mt-4">
                                 @if($grupoProduto->produtos->count() > 0)
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200">
-                                            <thead class="bg-gray-50">
+                                            <thead class="bg-gray-50 dark:bg-slate-800">
                                                 <tr>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                         Referência
@@ -63,13 +63,13 @@
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200">
+                                            <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                                 @foreach($grupoProduto->produtos as $produto)
                                                     <tr>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                             {{ $produto->referencia }}
                                                         </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                             {{ $produto->descricao }}
                                                         </td>
                                                     </tr>
@@ -78,7 +78,7 @@
                                         </table>
                                     </div>
                                 @else
-                                    <p class="text-sm text-gray-500">Nenhum produto associado a este grupo.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum produto associado a este grupo.</p>
                                 @endif
                             </div>
                         </div>

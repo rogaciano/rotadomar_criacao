@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Editar Usuário') }}
             </h2>
             <div class="flex space-x-2">
@@ -21,9 +21,9 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                 <div class="p-6">
                     <form method="POST" action="{{ route('users.update', $user->id) }}">
                         @csrf
@@ -64,7 +64,7 @@
                                 <div class="mt-2">
                                     <label class="inline-flex items-center">
                                         <input type="hidden" name="is_admin" value="0">
-                                        <input type="checkbox" name="is_admin" id="is_admin" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
+                                        <input type="checkbox" name="is_admin" id="is_admin" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
                                         <span class="ml-2 text-sm text-gray-600">Administrador</span>
                                     </label>
                                 </div>

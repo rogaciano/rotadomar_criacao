@@ -1,7 +1,7 @@
-<!-- Observações -->
-<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+﻿<!-- Observações -->
+<div class="bg-gray-50 dark:bg-slate-800/50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
     <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Observações</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Observações</h3>
         @if(auth()->user()->canUpdate('produtos'))
             <button type="button" onclick="abrirModalObservacao()" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -22,11 +22,11 @@
     @if($observacoes && $observacoes->count() > 0)
         <div class="space-y-3">
             @foreach($observacoes as $obs)
-                <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition">
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            <div class="text-sm text-gray-700 prose prose-sm max-w-none">{!! $obs->observacao !!}</div>
-                            <div class="mt-2 flex items-center text-xs text-gray-500">
+                            <div class="text-sm text-gray-700 dark:text-gray-200 prose prose-sm max-w-none">{!! $obs->observacao !!}</div>
+                            <div class="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                                 </svg>
@@ -50,6 +50,6 @@
             @endforeach
         </div>
     @else
-        <p class="text-gray-400 italic">Nenhuma observação registrada para este produto</p>
+        <p class="text-gray-400 dark:text-gray-500 italic">Nenhuma observação registrada para este produto</p>
     @endif
 </div>

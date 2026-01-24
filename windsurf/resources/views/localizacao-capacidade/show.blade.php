@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Detalhes da Capacidade Mensal') }}
             </h2>
             <div class="flex space-x-2">
@@ -15,7 +15,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
 
@@ -23,25 +23,25 @@
                 <div class="mb-6">
                     <h3 class="text-lg font-medium text-gray-900 mb-4">Informações da Capacidade</h3>
 
-                    <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Localização</p>
-                                <p class="mt-1 text-lg text-gray-900">{{ $capacidade->localizacao->nome_localizacao }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Localização</p>
+                                <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ $capacidade->localizacao->nome_localizacao }}</p>
                             </div>
 
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Período</p>
-                                <p class="mt-1 text-lg text-gray-900">{{ $capacidade->mes_ano_formatado }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Período</p>
+                                <p class="mt-1 text-lg text-gray-900 dark:text-white">{{ $capacidade->mes_ano_formatado }}</p>
                             </div>
 
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Capacidade Planejada</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Capacidade Planejada</p>
                                 <p class="mt-1 text-lg font-semibold text-blue-600">{{ $capacidade->capacidade }} produtos</p>
                             </div>
 
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Produtos Previstos</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Produtos Previstos</p>
                                 @php
                                     $previstos = $capacidade->getProdutosPrevistos();
                                     $isAcima = $capacidade->isAcimaDaCapacidade();
@@ -52,7 +52,7 @@
                             </div>
 
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Saldo</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Saldo</p>
                                 @php
                                     $saldo = $capacidade->getSaldo();
                                 @endphp
@@ -62,7 +62,7 @@
                             </div>
 
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Ocupação</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ocupação</p>
                                 @php
                                     $percentual = $capacidade->getPercentualOcupacao();
                                 @endphp
@@ -78,8 +78,8 @@
 
                             @if($capacidade->observacoes)
                             <div class="md:col-span-2">
-                                <p class="text-sm font-medium text-gray-500">Observações</p>
-                                <p class="mt-1 text-gray-900 whitespace-pre-line">{{ $capacidade->observacoes }}</p>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Observações</p>
+                                <p class="mt-1 text-gray-900 dark:text-white whitespace-pre-line">{{ $capacidade->observacoes }}</p>
                             </div>
                             @endif
                         </div>
@@ -93,7 +93,7 @@
                     @if($produtos->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gray-50 dark:bg-slate-800">
                                     <tr>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Referência
@@ -118,15 +118,15 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                     @foreach($produtos as $produto)
                                         <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                 <a href="{{ route('produtos.show', $produto->id) }}" class="text-blue-600 hover:text-blue-900">
                                                     {{ $produto->referencia }}
                                                 </a>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $produto->descricao }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -144,7 +144,7 @@
                                                     <span class="text-gray-400 italic">N/A</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                 {{ $produto->grupoProduto->descricao ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-600">
@@ -205,14 +205,14 @@
                                                                     <a href="{{ $loc->pivot->ordem_producao_url }}" target="_blank" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline">OP: {{ $loc->pivot->ordem_producao }}</a>
                                                                 @endif
                                                                 @if($loc->pivot->ordem_producao && $loc->pivot->observacao)
-                                                                    <span class="text-gray-500"> - </span>
+                                                                    <span class="text-gray-500 dark:text-gray-400"> - </span>
                                                                 @endif
                                                                 @if($loc->pivot->observacao)
                                                                     @php
                                                                         // Limitar texto de forma segura para HTML
                                                                         $obsLocTexto = strip_tags($loc->pivot->observacao);
                                                                     @endphp
-                                                                    <span class="text-gray-600">{{ Str::limit($obsLocTexto, 60) }}</span>
+                                                                    <span class="text-gray-600 dark:text-gray-400">{{ Str::limit($obsLocTexto, 60) }}</span>
                                                                 @endif
                                                             </div>
                                                         @endforeach
@@ -221,7 +221,7 @@
                                                         @if($produto->direcionamentoComercial)
                                                             <div class="mt-1 text-xs">
                                                                 <span class="font-semibold text-purple-700">Dir. Comercial:</span>
-                                                                <span class="text-gray-600">{{ $produto->direcionamentoComercial->descricao }}</span>
+                                                                <span class="text-gray-600 dark:text-gray-400">{{ $produto->direcionamentoComercial->descricao }}</span>
                                                             </div>
                                                         @endif
                                                     </div>
@@ -231,7 +231,7 @@
                                                         <div class="max-w-xs">
                                                             <div class="text-xs">
                                                                 <span class="font-semibold text-purple-700">Dir. Comercial:</span>
-                                                                <span class="text-gray-600">{{ $produto->direcionamentoComercial->descricao }}</span>
+                                                                <span class="text-gray-600 dark:text-gray-400">{{ $produto->direcionamentoComercial->descricao }}</span>
                                                             </div>
                                                         </div>
                                                     @else
@@ -302,7 +302,7 @@
 
                 <!-- Metadados -->
                 <div class="border-t pt-4 mt-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500 dark:text-gray-400">
                         <div>
                             <span class="font-medium">Criado em:</span> {{ $capacidade->created_at->format('d/m/Y H:i:s') }}
                         </div>

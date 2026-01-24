@@ -1,4 +1,4 @@
-<!-- Modal Nova Observação -->
+﻿<!-- Modal Nova Observação -->
 <div id="modal-nova-observacao" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
         <div class="flex justify-between items-center mb-4 pb-3 border-b">
@@ -24,7 +24,7 @@
                     style="display: none;"
                 ></textarea>
 
-                <div class="mt-2 text-xs text-gray-500">
+                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                     <p>💡 Use a barra de ferramentas acima para formatar o texto com cores, negrito, etc.</p>
                     <p class="mt-1" id="char-counter">
                         <span id="char-count">0</span> / 255 caracteres

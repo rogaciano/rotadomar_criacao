@@ -1,6 +1,6 @@
-<!-- Variações de Cores -->
-<div class="bg-gray-50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">Variações de Cores</h3>
+﻿<!-- Variações de Cores -->
+<div class="bg-gray-50 dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Variações de Cores</h3>
 
     @php
        // Calcular totais para uso em toda a tabela
@@ -15,7 +15,7 @@
        <!-- Vista Desktop -->
        <div class="hidden lg:block overflow-x-auto">
            <table class="min-w-full divide-y divide-gray-200">
-               <thead class="bg-gray-50">
+               <thead class="bg-gray-50 dark:bg-slate-800">
                    <tr>
                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
@@ -40,10 +40,10 @@
                        <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produção Possível</th>
                    </tr>
                </thead>
-               <tbody class="bg-white divide-y divide-gray-200">
+               <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                    @foreach($coresEnriquecidas as $cor)
                        <tr>
-                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                <div class="flex items-center">
                                    @if($cor['codigo_cor'])
                                        <div class="w-4 h-4 rounded-full mr-2 border border-gray-300" style="background-color: {{ $cor['codigo_cor'] }}"></div>
@@ -51,11 +51,11 @@
                                    {{ $cor['cor'] }}
                                </div>
                            </td>
-                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ $cor['codigo_cor'] ?? 'N/A' }}</td>
+                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $cor['codigo_cor'] ?? 'N/A' }}</td>
                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-medium">{{ number_format($cor['quantidade'], 0, ',', '.') }}</td>
-                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ number_format($cor['estoque'], 2, ',', '.') }}</td>
-                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ number_format($cor['necessidade'], 2, ',', '.') }}</td>
-                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{{ number_format($cor['consumo_deste_produto'], 2, ',', '.') }}</td>
+                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ number_format($cor['estoque'], 2, ',', '.') }}</td>
+                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ number_format($cor['necessidade'], 2, ',', '.') }}</td>
+                           <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ number_format($cor['consumo_deste_produto'], 2, ',', '.') }}</td>
                            <td class="px-4 py-2 whitespace-nowrap text-sm {{ $cor['saldo'] >= 0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium' }}">
                                {{ number_format($cor['saldo'], 2, ',', '.') }}
                            </td>
@@ -65,7 +65,7 @@
                        </tr>
                    @endforeach
                 </tbody>
-                <tfoot class="bg-gray-50 font-bold">
+                <tfoot class="bg-gray-50 dark:bg-slate-800 font-bold">
                    <tr>
                        <td colspan="2" class="px-4 py-2 text-sm text-gray-700">Total Variações:</td>
                        <td class="px-4 py-2 text-sm">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</td>
@@ -84,11 +84,11 @@
        <!-- Vista Mobile (Cards) -->
        <div class="lg:hidden space-y-4">
            @foreach($coresEnriquecidas as $cor)
-               <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+               <div class="bg-white dark:bg-slate-700 border border-gray-100 dark:border-gray-600 rounded-xl p-4 shadow-sm">
                    <div class="flex items-center justify-between mb-3">
                        <div class="flex items-center">
                            <div class="w-5 h-5 rounded-full mr-2 border border-gray-200" style="background-color: {{ $cor['codigo_cor'] ?? '#eee' }}"></div>
-                           <span class="font-bold text-gray-900">{{ $cor['cor'] }}</span>
+                           <span class="font-bold text-gray-900 dark:text-white">{{ $cor['cor'] }}</span>
                        </div>
                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ $cor['codigo_cor'] ?? 'S/ CÓDIGO' }}</span>
                    </div>
@@ -96,7 +96,7 @@
                    <div class="grid grid-cols-2 gap-y-3 gap-x-6">
                        <div>
                            <span class="text-[10px] font-bold text-gray-400 uppercase block">Qtd. Pretendida</span>
-                           <span class="text-sm font-bold text-gray-900">{{ number_format($cor['quantidade'], 0, ',', '.') }}</span>
+                           <span class="text-sm font-bold text-gray-900 dark:text-white">{{ number_format($cor['quantidade'], 0, ',', '.') }}</span>
                        </div>
                        <div>
                            <span class="text-[10px] font-bold text-gray-400 uppercase block">Produção Possível</span>
@@ -104,10 +104,10 @@
                                {{ number_format($cor['producao_possivel'], 0, ',', '.') }}
                            </span>
                        </div>
-                       <div class="col-span-2 h-px bg-gray-50 my-1"></div>
+                       <div class="col-span-2 h-px bg-gray-50 dark:bg-slate-600 my-1"></div>
                        <div>
                            <span class="text-[10px] font-bold text-gray-400 uppercase block">Estoque (m)</span>
-                           <span class="text-xs font-semibold text-gray-700">{{ number_format($cor['estoque'], 2, ',', '.') }}</span>
+                           <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ number_format($cor['estoque'], 2, ',', '.') }}</span>
                        </div>
                        <div>
                            <span class="text-[10px] font-bold text-gray-400 uppercase block">Saldo (m)</span>
@@ -117,27 +117,27 @@
                        </div>
                        <div>
                            <span class="text-[10px] font-bold text-gray-400 uppercase block">Consumo Prod.</span>
-                           <span class="text-xs font-semibold text-gray-600">{{ number_format($cor['consumo_deste_produto'], 2, ',', '.') }}</span>
+                           <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">{{ number_format($cor['consumo_deste_produto'], 2, ',', '.') }}</span>
                        </div>
                        <div>
                            <span class="text-[10px] font-bold text-gray-400 uppercase block">Necessidade Total</span>
-                           <span class="text-xs font-semibold text-gray-600">{{ number_format($cor['necessidade'], 2, ',', '.') }}</span>
+                           <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">{{ number_format($cor['necessidade'], 2, ',', '.') }}</span>
                        </div>
                    </div>
                </div>
            @endforeach
 
            <!-- Totais Mobile -->
-           <div class="bg-gray-100 rounded-xl p-4 mt-6 border-2 border-gray-200">
+           <div class="bg-gray-100 dark:bg-slate-800 rounded-xl p-4 mt-6 border-2 border-gray-200 dark:border-gray-600">
                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">Resumo de Produção</h4>
                <div class="space-y-2">
-                   <div class="flex justify-between items-center bg-white p-2 rounded-lg">
+                   <div class="flex justify-between items-center bg-white dark:bg-slate-700 p-2 rounded-lg">
                        <span class="text-xs text-gray-600 font-medium">Total Variações</span>
-                       <span class="text-sm font-bold text-gray-900">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</span>
+                       <span class="text-sm font-bold text-gray-900 dark:text-white">{{ number_format(collect($coresEnriquecidas)->sum('quantidade'), 0, ',', '.') }}</span>
                    </div>
-                   <div class="flex justify-between items-center bg-white p-2 rounded-lg">
+                   <div class="flex justify-between items-center bg-white dark:bg-slate-700 p-2 rounded-lg">
                        <span class="text-xs text-gray-600 font-medium">Total Combinações</span>
-                       <span class="text-sm font-bold text-gray-900">{{ number_format($totalCombinacoes, 0, ',', '.') }}</span>
+                       <span class="text-sm font-bold text-gray-900 dark:text-white">{{ number_format($totalCombinacoes, 0, ',', '.') }}</span>
                    </div>
                    <div class="flex justify-between items-center bg-purple-600 p-3 rounded-lg text-white shadow-md">
                        <div class="flex items-center">

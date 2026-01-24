@@ -1,14 +1,14 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Editar Localização') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 border-b border-gray-200 dark:border-slate-700">
                     <form action="{{ route('localizacoes.update', $localizacao) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -28,7 +28,7 @@
                             <div>
                                 <label for="nome_reduzido" class="block text-sm font-medium text-gray-700 mb-1">
                                     {{ __('Nome Reduzido') }}
-                                    <span class="text-xs text-gray-500">(máx. 20 caracteres, para gráficos)</span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">(máx. 20 caracteres, para gráficos)</span>
                                 </label>
                                 <input id="nome_reduzido" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" type="text" name="nome_reduzido" value="{{ old('nome_reduzido', $localizacao->nome_reduzido) }}" maxlength="20" />
                                 @error('nome_reduzido')
@@ -57,19 +57,19 @@
                             <!-- Status -->
                             <div class="flex items-center mt-8">
                                 <input id="ativo" name="ativo" type="checkbox" value="1" {{ old('ativo', $localizacao->ativo) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
-                                <label for="ativo" class="ml-2 block text-sm text-gray-900">Ativo</label>
+                                <label for="ativo" class="ml-2 block text-sm text-gray-900 dark:text-white">Ativo</label>
                             </div>
 
                             <!-- Faz Movimentação -->
                             <div class="flex items-center mt-8">
                                 <input id="faz_movimentacao" name="faz_movimentacao" type="checkbox" value="1" {{ old('faz_movimentacao', $localizacao->faz_movimentacao) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
-                                <label for="faz_movimentacao" class="ml-2 block text-sm text-gray-900">Faz Movimentação</label>
+                                <label for="faz_movimentacao" class="ml-2 block text-sm text-gray-900 dark:text-white">Faz Movimentação</label>
                             </div>
 
                             <!-- Pode Ver Todas Notificações -->
                             <div class="flex items-center mt-8">
                                 <input id="pode_ver_todas_notificacoes" name="pode_ver_todas_notificacoes" type="checkbox" value="1" {{ old('pode_ver_todas_notificacoes', $localizacao->pode_ver_todas_notificacoes) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
-                                <label for="pode_ver_todas_notificacoes" class="ml-2 block text-sm text-gray-900">Pode Ver Todas Notificações</label>
+                                <label for="pode_ver_todas_notificacoes" class="ml-2 block text-sm text-gray-900 dark:text-white">Pode Ver Todas Notificações</label>
                             </div>
                         </div>
 

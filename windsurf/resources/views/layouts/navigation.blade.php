@@ -1,4 +1,4 @@
-<nav x-data="{ open: false, dropdownOpen: false, darkMode: localStorage.getItem('dark-mode') === 'true' }" 
+﻿<nav x-data="{ open: false, dropdownOpen: false, darkMode: localStorage.getItem('dark-mode') === 'true' }" 
      x-init="$watch('darkMode', val => {
         localStorage.setItem('dark-mode', val);
         if (val) document.documentElement.classList.add('dark');
@@ -17,7 +17,7 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-4 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
@@ -96,14 +96,38 @@
                         </div>
                     </div>
 
-                   <!-- Outros links serão adicionados conforme implementados -->
+                    <!-- Admin Dropdown (visível apenas para administradores) -->
+                    @if(auth()->user()->isAdmin())
+                    <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
+                        <div class="relative">
+                            <button @click="open = !open" @click.away="open = false" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-300 bg-white dark:bg-slate-800 hover:text-gray-700 dark:hover:text-white focus:outline-none transition ease-in-out duration-150" :class="{'text-indigo-600 dark:text-indigo-400': {{ request()->routeIs('users.*') || request()->routeIs('permissions.*') || request()->routeIs('logs.*') || request()->routeIs('activity-log.*') ? 'true' : 'false' }} }">
+                                <div>{{ __('Admin') }}</div>
+
+                                <div class="ms-1">
+                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+
+                            <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute z-50 mt-2 w-48 rounded-md shadow-lg origin-top-right right-0" style="display: none;">
+                                <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-slate-800">
+                                    <a href="{{ route('users.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('users.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Usuários') }}</a>
+                                    <a href="{{ route('permissions.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('permissions.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Permissões') }}</a>
+                                    <a href="{{ route('logs.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('logs.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Logs') }}</a>
+                                    <a href="{{ route('activity-log.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('activity-log.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Log de Atividades') }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
 
             <!-- Right Side Group (Settings + Theme + Notifications) -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
                 <!-- Settings Dropdown -->
-                <div class="me-4 relative">
+                <div class="relative flex items-center">
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
                             <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-300 bg-white dark:bg-slate-800 hover:text-gray-700 dark:hover:text-white focus:outline-none transition ease-in-out duration-150">
@@ -118,20 +142,6 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            @if(auth()->user()->isAdmin())
-                            <x-dropdown-link :href="route('users.index')">
-                                {{ __('Usuários') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('permissions.index')">
-                                {{ __('Permissões') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('logs.index')">
-                                {{ __('Logs') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('activity-log.index')">
-                                {{ __('Log de Atividades') }}
-                            </x-dropdown-link>
-                            @endif
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
@@ -151,7 +161,7 @@
                 </div>
 
                 <!-- Theme Toggle -->
-                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 focus:outline-none ring-1 ring-black/5 dark:ring-white/5 ms-2">
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 focus:outline-none ring-1 ring-black/5 dark:ring-white/5">
                     <svg x-show="!darkMode" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
@@ -161,7 +171,7 @@
                 </button>
 
                 <!-- Notifications Dropdown -->
-                <div class="relative ms-4" x-data="{
+                <div class="relative" x-data="{
                     open: false,
                     notificacoes: [],
                     count: 0,
@@ -395,7 +405,7 @@
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-sm text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">

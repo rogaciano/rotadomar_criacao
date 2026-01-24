@@ -1,4 +1,4 @@
-@props(['for' => null, 'messages' => null])
+﻿@props(['for' => null, 'messages' => null])
 
 @if($for)
     @error($for)

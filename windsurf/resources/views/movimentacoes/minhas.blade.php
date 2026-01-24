@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Minhas Movimentações') }}
             </h2>
             <a href="{{ route('movimentacoes.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -43,10 +43,10 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-sm font-medium text-gray-500">Sua Localização</h3>
-                                    <p class="text-lg font-semibold text-gray-900">{{ $localizacao->nome_localizacao }}</p>
+                                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Sua Localização</h3>
+                                    <p class="text-lg font-semibold text-gray-900 dark:text-white">{{ $localizacao->nome_localizacao }}</p>
                                     @if($localizacao->prazo)
-                                        <p class="text-xs text-gray-500">Prazo: {{ $localizacao->prazo }} dias</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Prazo: {{ $localizacao->prazo }} dias</p>
                                     @endif
                                 </div>
                             </div>
@@ -62,8 +62,8 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-sm font-medium text-gray-500">Movimentações Pendentes</h3>
-                                    <p class="text-2xl font-bold text-gray-900">{{ $totalPendentes }}</p>
+                                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Movimentações Pendentes</h3>
+                                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalPendentes }}</p>
                                 </div>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
                                     </svg>
                                 </div>
                                 <div class="ml-4">
-                                    <h3 class="text-sm font-medium text-gray-500">Movimentações Atrasadas</h3>
+                                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Movimentações Atrasadas</h3>
                                     <p class="text-2xl font-bold text-red-600">{{ $totalAtrasadas }}</p>
                                 </div>
                             </div>
@@ -88,19 +88,19 @@
 
                 <!-- Tabela de Movimentações -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
                         @if($movimentacoes->isEmpty())
                             <div class="text-center py-8">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
-                                <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma movimentação pendente</h3>
-                                <p class="mt-1 text-sm text-gray-500">Parabéns! Você está em dia com todas as suas movimentações.</p>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">Nenhuma movimentação pendente</h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Parabéns! Você está em dia com todas as suas movimentações.</p>
                             </div>
                         @else
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200 table-auto">
-                                    <thead class="bg-gray-50">
+                                    <thead class="bg-gray-50 dark:bg-slate-800">
                                         <tr>
                                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 110px;">Status</th>
                                             <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
@@ -111,7 +111,7 @@
                                             <th scope="col" class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 100px;">Ações</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                         @foreach($movimentacoes as $movimentacao)
                                             <tr class="{{ $movimentacao->esta_atrasado ? 'bg-red-50' : '' }}">
                                                 <td class="px-3 py-4 whitespace-nowrap">
@@ -132,8 +132,8 @@
                                                     @endif
                                                 </td>
                                                 <td class="px-3 py-4">
-                                                    <div class="text-sm font-medium text-gray-900">{{ $movimentacao->produto->referencia ?? '-' }}</div>
-                                                    <div class="text-sm text-gray-500">{{ $movimentacao->produto ? Str::limit($movimentacao->produto->descricao, 50) : '-' }}</div>
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $movimentacao->produto->referencia ?? '-' }}</div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $movimentacao->produto ? Str::limit($movimentacao->produto->descricao, 50) : '-' }}</div>
                                                 </td>
                                                 <td class="px-3 py-4 text-sm text-gray-900" style="max-width: 120px;">
                                                     {{ $movimentacao->tipo->descricao ?? '-' }}
@@ -141,7 +141,7 @@
                                                 <td class="px-3 py-4 text-sm text-gray-900" style="max-width: 120px; word-wrap: break-word;">
                                                     {{ $movimentacao->situacao->descricao ?? '-' }}
                                                 </td>
-                                                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                                     {{ $movimentacao->data_entrada->format('d/m/Y') }}
                                                 </td>
                                                 <td class="px-3 py-4 whitespace-nowrap">
@@ -150,7 +150,7 @@
                                                             {{ number_format($movimentacao->dias_decorridos, 0, ',', '.') }} dias
                                                         </span>
                                                         @if($localizacao->prazo)
-                                                            <div class="text-xs text-gray-500">
+                                                            <div class="text-xs text-gray-500 dark:text-gray-400">
                                                                 @if($movimentacao->esta_atrasado)
                                                                     Atraso: {{ number_format(abs($movimentacao->dias_restantes), 0, ',', '.') }} dias
                                                                 @else

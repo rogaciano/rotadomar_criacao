@@ -1,11 +1,11 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Detalhes do Grupo de Produtos') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-4 flex flex-wrap gap-2">
                 <a href="{{ route('grupo_produtos.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -32,22 +32,22 @@
                 </form>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Informações do Grupo</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Informações do Grupo</h3>
                             <div class="mt-4 space-y-4">
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">Descrição</p>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $grupo_produto->descricao }}</p>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Descrição</p>
+                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ $grupo_produto->descricao }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">Data de Cadastro</p>
-                                    <p class="mt-1 text-sm text-gray-900">{{ date('d/m/Y', strtotime($grupo_produto->data_cadastro)) }}</p>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Data de Cadastro</p>
+                                    <p class="mt-1 text-sm text-gray-900 dark:text-white">{{ date('d/m/Y', strtotime($grupo_produto->data_cadastro)) }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-medium text-gray-500">Status</p>
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Status</p>
                                     <p class="mt-1">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $grupo_produto->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             {{ $grupo_produto->ativo ? 'Ativo' : 'Inativo' }}
@@ -58,12 +58,12 @@
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Produtos neste Grupo</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Produtos neste Grupo</h3>
                             <div class="mt-4">
                                 @if($grupo_produto->produtos->count() > 0)
                                     <div class="overflow-x-auto">
                                         <table class="min-w-full divide-y divide-gray-200">
-                                            <thead class="bg-gray-50">
+                                            <thead class="bg-gray-50 dark:bg-slate-800">
                                                 <tr>
                                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                         Produto
@@ -73,13 +73,13 @@
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="bg-white divide-y divide-gray-200">
+                                            <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                                 @foreach($grupo_produto->produtos as $produto)
                                                     <tr>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                             {{ $produto->descricao }}
                                                         </td>
-                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $produto->ativo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                                 {{ $produto->ativo ? 'Ativo' : 'Inativo' }}
                                                             </span>
@@ -90,7 +90,7 @@
                                         </table>
                                     </div>
                                 @else
-                                    <p class="text-sm text-gray-500">Nenhum produto associado a este grupo.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Nenhum produto associado a este grupo.</p>
                                 @endif
                             </div>
                         </div>

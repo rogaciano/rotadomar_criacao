@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Editar Estilista') }}
             </h2>
             <a href="{{ route('estilistas.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
@@ -13,13 +13,13 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <!-- Erros de validação -->
                     @if ($errors->any())
-                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+                        <div class="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 text-red-700 dark:text-red-300 p-4 mb-4" role="alert">
                             <p class="font-bold">Ocorreram erros de validação:</p>
                             <ul>
                                 @foreach ($errors->all() as $error)
@@ -34,12 +34,12 @@
                         @csrf
                         @method('PUT')
                         <div class="mb-4">
-                            <label for="nome_estilista" class="block text-sm font-medium text-gray-700">Nome do Estilista</label>
-                            <input type="text" name="nome_estilista" id="nome_estilista" value="{{ old('nome_estilista', $estilista->nome_estilista) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <label for="nome_estilista" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome do Estilista</label>
+                            <input type="text" name="nome_estilista" id="nome_estilista" value="{{ old('nome_estilista', $estilista->nome_estilista) }}" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                         </div>
                         <div class="mb-4">
-                            <label for="marca_id" class="block text-sm font-medium text-gray-700">Marca</label>
-                            <select name="marca_id" id="marca_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                            <label for="marca_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
+                            <select name="marca_id" id="marca_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                                 <option value="">Selecione uma marca</option>
                                 @foreach($marcas as $marca)
                                     <option value="{{ $marca->id }}" {{ old('marca_id', $estilista->marca_id) == $marca->id ? 'selected' : '' }}>{{ $marca->nome_marca }}</option>
@@ -47,8 +47,8 @@
                             </select>
                         </div>
                         <div class="mb-4">
-                            <label for="suporte_marca" class="block text-sm font-medium text-gray-700">Suporte Marca</label>
-                            <select name="suporte_marca" id="suporte_marca" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                            <label for="suporte_marca" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Suporte Marca</label>
+                            <select name="suporte_marca" id="suporte_marca" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Selecione uma marca para suporte</option>
                                 @foreach($marcas as $marca)
                                     <option value="{{ $marca->nome_marca }}" {{ old('suporte_marca', $estilista->suporte_marca) == $marca->nome_marca ? 'selected' : '' }}>{{ $marca->nome_marca }}</option>
@@ -59,8 +59,8 @@
 
                         <div class="mb-4">
                             <div class="flex items-center">
-                                <input type="checkbox" name="ativo" id="ativo" value="1" {{ old('ativo', $estilista->ativo) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
-                                <label for="ativo" class="ml-2 block text-sm text-gray-900">Ativo</label>
+                                <input type="checkbox" name="ativo" id="ativo" value="1" {{ old('ativo', $estilista->ativo) ? 'checked' : '' }} class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                                <label for="ativo" class="ml-2 block text-sm text-gray-900 dark:text-white">Ativo</label>
                             </div>
                         </div>
                         
@@ -74,7 +74,7 @@
                                     <p class="text-sm font-medium text-gray-700 mb-1">Foto Atual:</p>
                                     <img src="{{ asset('storage/' . $estilista->foto) }}" alt="Foto do estilista" class="h-40 w-40 object-cover rounded-md border border-gray-200">
                                     <div class="mt-2 flex items-center">
-                                        <input type="checkbox" name="remover_foto" id="remover_foto" value="1" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
+                                        <input type="checkbox" name="remover_foto" id="remover_foto" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50">
                                         <label for="remover_foto" class="ml-2 block text-sm text-red-600">Remover foto atual</label>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@
                             <div class="mt-1 flex items-center">
                                 <input type="file" name="foto" id="foto" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*">
                             </div>
-                            <p class="mt-1 text-xs text-gray-500">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</p>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</p>
                             
                             <!-- Preview da Imagem -->
                             <div id="image-preview" class="mt-2 {{ !$estilista->foto ? 'hidden' : '' }}">

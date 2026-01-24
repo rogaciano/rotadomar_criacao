@@ -1,7 +1,7 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Detalhes do Produto') }}
             </h2>
             <div>
@@ -39,11 +39,11 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8" style="max-width: 95%;">
             <!-- Mensagens de Feedback -->
             @if(session('error'))
-                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-3">
+                <div class="mb-4 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg flex items-center gap-3">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                     </svg>
@@ -51,7 +51,7 @@
                 </div>
             @endif
             @if(session('success'))
-                <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-3">
+                <div class="mb-4 p-4 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg flex items-center gap-3">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
@@ -62,7 +62,7 @@
                 <script>alert('{{ session('alert_error') }}');</script>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
                 <div class="p-6">
                     @include('produtos.partials._informacoes-basicas', ['produto' => $produto])
 
@@ -85,22 +85,22 @@
 
                     <!-- Modal para adicionar localização -->
                     @if($canCreateProdutoLocalizacoes)
-                    <div id="modal-adicionar-localizacao" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
+                    <div id="modal-adicionar-localizacao" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-50 hidden overflow-y-auto">
                         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                             <!-- Overlay de fundo -->
                             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
                             </div>
 
                             <!-- Centralização vertical -->
                             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
                             <!-- Modal propriamente dito -->
-                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                                <div class="px-6 py-4 border-b border-gray-200">
+                            <div class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                                     <div class="flex justify-between items-center">
-                                        <h3 class="text-lg font-medium text-gray-900">Adicionar Localização</h3>
-                                        <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.add('hidden')" class="text-gray-400 hover:text-gray-500">
+                                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Adicionar Localização</h3>
+                                        <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
@@ -111,7 +111,7 @@
                                     @csrf
                                     <div class="px-6 py-4">
                                         <div class="mb-4">
-                                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Localização *</label>
+                                            <label for="localizacao_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização *</label>
                                             <select name="localizacao_id" id="localizacao_id" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
                                                 <option value="">Selecione uma localização</option>
                                                 @foreach(\App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get() as $loc)
@@ -120,44 +120,44 @@
                                             </select>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="ordem_producao" class="block text-sm font-medium text-gray-700 mb-1">Ordem de Produção *</label>
+                                            <label for="ordem_producao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ordem de Produção *</label>
                                             <input type="text" name="ordem_producao" id="ordem_producao" maxlength="30" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
-                                            <p class="mt-1 text-sm text-gray-500">Número/código da ordem de produção</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Número/código da ordem de produção</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade *</label>
+                                            <label for="quantidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade *</label>
                                             <input type="number" name="quantidade" id="quantidade" min="1" step="1" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
-                                            <p class="mt-1 text-sm text-gray-500">Informe a quantidade do produto nesta localização</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Informe a quantidade do produto nesta localização</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="data_prevista_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Facção</label>
+                                            <label for="data_prevista_faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Prevista para Facção</label>
                                             <input type="date" name="data_prevista_faccao" id="data_prevista_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data prevista de facção para esta localização</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="data_envio_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Envio à Facção</label>
+                                            <label for="data_envio_faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Envio à Facção</label>
                                             <input type="date" name="data_envio_faccao" id="data_envio_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data de envio para a facção</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data de envio para a facção</p>
                                         </div>
                                         <div class="mb-4">
                                             <label class="flex items-center">
                                                 <input type="checkbox" name="concluido" id="concluido" value="1" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" onchange="toggleDataRetornoFaccao('add')">
                                                 <span class="ml-2 text-sm font-medium text-gray-700">Concluído</span>
                                             </label>
-                                            <p class="mt-1 text-sm text-gray-500">Marque se esta ordem de produção foi concluída</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Marque se esta ordem de produção foi concluída</p>
                                         </div>
                                         <div id="add-data-retorno-container" class="mb-4 hidden">
-                                            <label for="data_retorno_faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Retorno da Facção *</label>
+                                            <label for="data_retorno_faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Retorno da Facção *</label>
                                             <input type="date" name="data_retorno_faccao" id="data_retorno_faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data de retorno da facção (obrigatório quando concluído)</p>
                                         </div>
                                         <div>
-                                            <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
+                                            <label for="observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observação</label>
                                             <textarea name="observacao" id="observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"></textarea>
-                                            <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Observações adicionais sobre esta ordem de produção</p>
                                         </div>
                                     </div>
-                                    <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
+                                    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800 text-right rounded-b-lg">
                                         <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.add('hidden')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 mr-2">
                                             Cancelar
                                         </button>
@@ -173,22 +173,22 @@
 
                     <!-- Modal para editar localização -->
                     @if($canUpdateProdutoLocalizacoes)
-                    <div id="modal-editar-localizacao" class="fixed inset-0 bg-gray-500 bg-opacity-75 z-50 hidden overflow-y-auto">
+                    <div id="modal-editar-localizacao" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-50 hidden overflow-y-auto">
                         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                             <!-- Overlay de fundo -->
                             <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-                                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                                <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
                             </div>
 
                             <!-- Centralização vertical -->
                             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
                             <!-- Modal propriamente dito -->
-                            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                                <div class="px-6 py-4 border-b border-gray-200">
+                            <div class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                                     <div class="flex justify-between items-center">
-                                        <h3 class="text-lg font-medium text-gray-900">Editar Localização</h3>
-                                        <button type="button" onclick="fecharModalEditarLocalizacao()" class="text-gray-400 hover:text-gray-500">
+                                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Editar Localização</h3>
+                                        <button type="button" onclick="fecharModalEditarLocalizacao()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
@@ -200,49 +200,49 @@
                                     @method('PUT')
                                     <div class="px-6 py-4">
                                         <div class="mb-4">
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Localização</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Localização</label>
                                             <p id="edit-localizacao-nome" class="text-sm text-gray-900 font-semibold bg-purple-50 px-3 py-2 rounded"></p>
                                             <input type="hidden" id="edit-localizacao-id" name="localizacao_id">
                                         </div>
                                         <div class="mb-4">
-                                            <label for="edit-ordem-producao" class="block text-sm font-medium text-gray-700 mb-1">Ordem de Produção *</label>
+                                            <label for="edit-ordem-producao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ordem de Produção *</label>
                                             <input type="text" name="ordem_producao" id="edit-ordem-producao" maxlength="30" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                                            <p class="mt-1 text-sm text-gray-500">Número/código da ordem de produção</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Número/código da ordem de produção</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="edit-quantidade" class="block text-sm font-medium text-gray-700 mb-1">Quantidade *</label>
+                                            <label for="edit-quantidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade *</label>
                                             <input type="number" name="quantidade" id="edit-quantidade" min="1" step="1" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
-                                            <p class="mt-1 text-sm text-gray-500">Informe a quantidade do produto nesta localização</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Informe a quantidade do produto nesta localização</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="edit-data-prevista-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data Prevista para Facção</label>
+                                            <label for="edit-data-prevista-faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Prevista para Facção</label>
                                             <input type="date" name="data_prevista_faccao" id="edit-data-prevista-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data prevista de facção para esta localização</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data prevista de facção para esta localização</p>
                                         </div>
                                         <div class="mb-4">
-                                            <label for="edit-data-envio-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Envio à Facção</label>
+                                            <label for="edit-data-envio-faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Envio à Facção</label>
                                             <input type="date" name="data_envio_faccao" id="edit-data-envio-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data de envio para a facção</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data de envio para a facção</p>
                                         </div>
                                         <div class="mb-4">
                                             <label class="flex items-center">
                                                 <input type="checkbox" name="concluido" id="edit-concluido" value="1" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50" onchange="toggleDataRetornoFaccao('edit')">
                                                 <span class="ml-2 text-sm font-medium text-gray-700">Concluído</span>
                                             </label>
-                                            <p class="mt-1 text-sm text-gray-500">Marque se esta ordem de produção foi concluída</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Marque se esta ordem de produção foi concluída</p>
                                         </div>
                                         <div id="edit-data-retorno-container" class="mb-4 hidden">
-                                            <label for="edit-data-retorno-faccao" class="block text-sm font-medium text-gray-700 mb-1">Data de Retorno da Facção *</label>
+                                            <label for="edit-data-retorno-faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Retorno da Facção *</label>
                                             <input type="date" name="data_retorno_faccao" id="edit-data-retorno-faccao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                            <p class="mt-1 text-sm text-gray-500">Data de retorno da facção (obrigatório quando concluído)</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data de retorno da facção (obrigatório quando concluído)</p>
                                         </div>
                                         <div>
-                                            <label for="edit-observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação</label>
+                                            <label for="edit-observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observação</label>
                                             <textarea name="observacao" id="edit-observacao" rows="2" maxlength="255" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
-                                            <p class="mt-1 text-sm text-gray-500">Observações adicionais sobre esta ordem de produção</p>
+                                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Observações adicionais sobre esta ordem de produção</p>
                                         </div>
                                     </div>
-                                    <div class="px-6 py-4 bg-gray-50 text-right rounded-b-lg">
+                                    <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800 text-right rounded-b-lg">
                                         <button type="button" onclick="fecharModalEditarLocalizacao()" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2">
                                             Cancelar
                                         </button>

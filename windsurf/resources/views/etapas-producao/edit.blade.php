@@ -1,14 +1,14 @@
-<x-app-layout>
+﻿<x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Editar Etapa de Produção') }}: {{ $etapa->nome }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-900">
+    <div class="py-12 bg-slate-50 dark:bg-slate-950">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <!-- Exibição de Erros de Validação -->
                     @if ($errors->any())
                         <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
@@ -92,10 +92,10 @@
                             </div>
 
                             <!-- Setor para Notificação -->
-                            <div class="md:col-span-2">
-                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 mb-1">Setor para Notificação (Opcional)</label>
+                            <div class="md:col-span-2 bg-indigo-50/30 dark:bg-slate-800/50 p-4 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30 border-l-4 border-l-indigo-500">
+                                <label for="localizacao_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Setor para Notificação (Opcional)</label>
                                 <select name="localizacao_id" id="localizacao_id"
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('localizacao_id') border-red-500 @enderror">
+                                    class="w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 @error('localizacao_id') border-red-500 @enderror">
                                     <option value="">Nenhum setor (sem notificação)</option>
                                     @foreach($localizacoes as $loc)
                                         <option value="{{ $loc->id }}" {{ old('localizacao_id', $etapa->localizacao_id) == $loc->id ? 'selected' : '' }}>
@@ -106,14 +106,14 @@
                                 @error('localizacao_id')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
-                                <p class="mt-1 text-xs text-gray-500">Os usuários vinculados a este setor receberão uma notificação quando um produto entrar nesta etapa.</p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Os usuários vinculados a este setor receberão uma notificação quando um produto entrar nesta etapa.</p>
                             </div>
 
                             <!-- Ativo -->
                             <div class="md:col-span-2">
                                 <label class="flex items-center">
                                     <input type="checkbox" name="ativo" value="1" {{ old('ativo', $etapa->ativo) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <span class="ml-2 text-sm text-gray-600">Etapa ativa</span>
                                 </label>
                             </div>
@@ -122,7 +122,7 @@
                             <div class="md:col-span-2">
                                 <label class="flex items-center">
                                     <input type="checkbox" name="obriga_data_entrega_faccao" value="1" {{ old('obriga_data_entrega_faccao', $etapa->obriga_data_entrega_faccao) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     <span class="ml-2 text-sm text-gray-600">Obriga preenchimento da Data de Entrega Prevista</span>
                                 </label>
                                 <p class="mt-1 text-xs text-gray-500 ml-6">Se marcado, será obrigatório preencher a "Entrega Prevista Facção" para avançar para esta etapa.</p>
