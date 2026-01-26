@@ -1163,11 +1163,7 @@
                         method: 'POST',
                         data: {
                             tecido_ids: selectedTecidos,
-                            produto_id: {
-                                {
-                                    $produto - > id
-                                }
-                            },
+                            produto_id: {{ $produto->id }},
                             _token: '{{ csrf_token() }}'
                         },
                         beforeSend: function() {
