@@ -1,0 +1,381 @@
+﻿                    <!-- Pagina��o -->
+                    <div class="mt-4">
+                        {{ $produtos->withQueryString()->links() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializa��o do JavaScript
+
+            // Inicializar Select2 simples (single select)
+            $('.select2').select2({
+                placeholder: "Selecione uma op��o",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Inicializar Select2 multi-select
+            $('.js-select2-multi').select2({
+                placeholder: "Selecione uma ou mais op��es",
+                allowClear: true,
+                width: '100%',
+                language: 'pt-BR',
+                closeOnSelect: false
+            });
+
+            // Ajustar estilo do Select2 para combinar com Tailwind
+            $('.select2-container--default .select2-selection--single').css({
+                'height': '38px',
+                'padding': '5px',
+                'border-color': 'rgb(209, 213, 219)'
+            });
+
+            // Ajustar estilo do Select2 multi para combinar com Tailwind
+            $('.select2-container--default .select2-selection--multiple').css({
+                'min-height': '38px',
+                'border-color': 'rgb(209, 213, 219)'
+            });
+
+            // Fun��o para gerar PDF com orienta��o espec�fica
+            function gerarPdf(btn, orientation) {
+                if (!btn) return;
+
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    // Mostrar indicador de carregamento
+                    const originalContent = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Gerando...';
+
+                    // Obter os filtros do formul�rio
+                    const formData = new FormData(document.getElementById('filter-form'));
+                    const queryParams = new URLSearchParams(formData).toString();
+
+                    // Gerar o PDF diretamente com force_generate=1 para evitar o erro de contagem
+                    const pdfUrl = '{{ route("produtos.lista.pdf") }}?' + queryParams + '&force_generate=1&orientation=' + orientation;
+
+                    // Abrir o PDF em uma nova aba
+                    const pdfWindow = window.open(pdfUrl, '_blank');
+
+                    // Restaurar o bot�o ap�s um curto per�odo
+                    setTimeout(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }, 1500);
+
+                    // Verificar se a janela do PDF foi bloqueada pelo navegador
+                    if (!pdfWindow || pdfWindow.closed || typeof pdfWindow.closed === 'undefined') {
+                        alert('Por favor, permita pop-ups para este site para visualizar o PDF.');
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }
+                });
+            }
+
+            // Gerar PDF Landscape
+            gerarPdf(document.getElementById('btn-gerar-pdf-landscape'), 'landscape');
+
+            // Gerar PDF Portrait
+            gerarPdf(document.getElementById('btn-gerar-pdf-portrait'), 'portrait');
+
+            // Limpar filtros: fun��o utilit�ria e bind do bot�o
+            const form = document.getElementById('filter-form');
+            const clearButton = document.getElementById('btn-clear-filters');
+
+            function resetFiltersUI() {
+                if (!form) return;
+                // Limpar inputs de texto e data
+                form.querySelectorAll('input[type="text"], input[type="date"]').forEach(function(el) {
+                    el.value = '';
+                });
+                // Limpar selects (inclui Select2)
+                form.querySelectorAll('select').forEach(function(sel) {
+                    sel.value = '';
+                });
+                // Resetar Select2 simples explicitamente
+                if (typeof $ !== 'undefined' && $('.select2').length) {
+                    $('.select2').val(null).trigger('change');
+                }
+                // Resetar Select2 multi explicitamente
+                if (typeof $ !== 'undefined' && $('.js-select2-multi').length) {
+                    $('.js-select2-multi').val(null).trigger('change');
+                }
+            }
+
+            // Se a p�gina foi carregada sem query string, garantir que a UI dos filtros esteja limpa
+            if (!window.location.search) {
+                resetFiltersUI();
+            }
+
+            // Ao clicar em Limpar, limpar a UI e submeter o formul�rio vazio para atualizar a listagem
+            if (clearButton) {
+                clearButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetFiltersUI();
+                    const url = this.getAttribute('href');
+                    // Substitui a entrada no hist�rico para evitar back que traga filtros antigos
+                    window.location.replace(url);
+                });
+            }
+
+            // Sistema de Toggle de Filtros com Filtros Ativos
+            const toggleFiltersBtn = document.getElementById('toggle-filters-btn');
+            const filtersContainer = document.getElementById('filters-container');
+            const activeFiltersSummary = document.getElementById('active-filters-summary');
+            const activeFiltersList = document.getElementById('active-filters-list');
+            const filterToggleText = document.getElementById('filter-toggle-text');
+            const filterIconShow = document.getElementById('filter-icon-show');
+            const filterIconHide = document.getElementById('filter-icon-hide');
+
+            // Mapeamento de nomes de filtros para labels amig�veis
+            const filterLabels = {
+                'referencia': 'Refer�ncia',
+                'descricao': 'Descri��o',
+                'concluido': 'Status de Conclus�o',
+                'status_concluido': 'Status de Conclus�o',
+                'incluir_excluidos': 'Incluir Exclu�dos',
+                'marca_id': 'Marca',
+                'tecido_id': 'Tecido',
+                'estilista_id': 'Estilista',
+                'grupo_id': 'Grupo',
+                'status_id': 'Status',
+                'direcionamento_comercial_id': 'Direcionamento Comercial',
+                'localizacao_id': 'Localiza��o',
+                'localizacao_planejamento_id': 'Localiza��o Planejamento',
+                'situacao_id': 'Situa��o',
+                'data_inicio': 'Data Cadastro (De)',
+                'data_fim': 'Data Cadastro (At�)',
+                'data_prevista_inicio': 'Data Prev. Produ��o (De)',
+                'data_prevista_fim': 'Data Prev. Produ��o (At�)',
+                'data_prevista_faccao_inicio': 'Data Prev. Fac��o (De)',
+                'data_prevista_faccao_fim': 'Data Prev. Fac��o (At�)'
+            };
+
+            // Fun��o para obter o texto de um select pelo valor (suporta arrays)
+            function getSelectText(selectId, value) {
+                const select = document.getElementById(selectId);
+                if (!select) return Array.isArray(value) ? value.join(', ') : value;
+
+                // Se for array, mapear cada valor para o texto correspondente
+                if (Array.isArray(value)) {
+                    return value.map(v => {
+                        const option = select.querySelector(`option[value="${v}"]`);
+                        return option ? option.textContent.trim() : v;
+                    }).join(', ');
+                }
+
+                const option = select.querySelector(`option[value="${value}"]`);
+                return option ? option.textContent.trim() : value;
+            }
+
+            // Fun��o para atualizar a lista de filtros ativos
+            function updateActiveFilters() {
+                const filters = @json($filters ?? []);
+                activeFiltersList.innerHTML = '';
+
+                let hasActiveFilters = false;
+
+                Object.keys(filters).forEach(key => {
+                    const value = filters[key];
+                    // Verifica se tem valor (string n�o vazia ou array n�o vazio)
+                    const hasValue = Array.isArray(value) ? value.length > 0 : (value && value !== '');
+
+                    if (hasValue && key !== 'page') {
+                        hasActiveFilters = true;
+                        let displayValue = value;
+
+                        // Formatar valor baseado no tipo de filtro
+                        if (key === 'concluido') {
+                            displayValue = value === '1' ? 'Conclu�dos' : 'N�o Conclu�dos';
+                        } else if (key === 'status_concluido') {
+                            const statusMap = {
+                                'todos_em_processo': '?? Todos em Processo',
+                                'concluido': '? Conclu�dos',
+                                'nao_concluido': '? N�o Conclu�dos',
+                                'sem_movimentacao': '?? Sem Movimenta��o'
+                            };
+                            displayValue = statusMap[value] || value;
+                        } else if (key === 'incluir_excluidos') {
+                            displayValue = 'Sim';
+                        } else if (key.endsWith('_id')) {
+                            displayValue = getSelectText(key, value);
+                        } else if (key.includes('data_')) {
+                            // Formatar datas
+                            const date = new Date(value + 'T00:00:00');
+                            displayValue = date.toLocaleDateString('pt-BR');
+                        } else if (Array.isArray(value)) {
+                            displayValue = value.join(', ');
+                        }
+
+                        const badge = document.createElement('span');
+                        badge.className = 'inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-sm';
+                        badge.innerHTML = `
+                            <span class="font-bold mr-1 text-indigo-900 dark:text-indigo-200">${filterLabels[key] || key}:</span>
+                            <span>${displayValue}</span>
+                        `;
+                        activeFiltersList.appendChild(badge);
+                    }
+                });
+
+                return hasActiveFilters;
+            }
+
+            // Fun��o para alternar visibilidade dos filtros
+            const initialFiltersVisible = @json($filtersVisible ?? true);
+
+            async function salvarPreferenciaFiltrosVisiveis(visible) {
+                try {
+                    await fetch('{{ route("ui.filters-visibility") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            page_type: 'produtos',
+                            filters_visible: !!visible
+                        })
+                    });
+                } catch (e) {
+                }
+            }
+
+            function toggleFilters() {
+                const isHidden = filtersContainer.classList.contains('hidden');
+
+                if (isHidden) {
+                    // Mostrar filtros
+                    filtersContainer.classList.remove('hidden');
+                    activeFiltersSummary.classList.add('hidden');
+                    filterToggleText.textContent = 'Ocultar Filtros';
+                    filterIconShow.classList.remove('hidden');
+                    filterIconHide.classList.add('hidden');
+                    salvarPreferenciaFiltrosVisiveis(true);
+                } else {
+                    // Ocultar filtros
+                    filtersContainer.classList.add('hidden');
+                    const hasFilters = updateActiveFilters();
+                    if (hasFilters) {
+                        activeFiltersSummary.classList.remove('hidden');
+                    }
+                    filterToggleText.textContent = 'Mostrar Filtros';
+                    filterIconShow.classList.add('hidden');
+                    filterIconHide.classList.remove('hidden');
+                    salvarPreferenciaFiltrosVisiveis(false);
+                }
+            }
+
+            // Event listener para o bot�o de toggle
+            if (toggleFiltersBtn) {
+                toggleFiltersBtn.addEventListener('click', toggleFilters);
+            }
+
+            // Restaurar estado dos filtros pelo valor salvo para o usu�rio
+            if (initialFiltersVisible === false) {
+                // Ocultar filtros na carga da p�gina
+                filtersContainer.classList.add('hidden');
+                const hasFilters = updateActiveFilters();
+                if (hasFilters) {
+                    activeFiltersSummary.classList.remove('hidden');
+                }
+                filterToggleText.textContent = 'Mostrar Filtros';
+                filterIconShow.classList.add('hidden');
+                filterIconHide.classList.remove('hidden');
+            }
+
+            // Atualizar filtros ativos na carga inicial
+            updateActiveFilters();
+
+            // Fun��o para destacar campos de filtro com valores preenchidos
+            function highlightFilledFilters() {
+                const filterForm = document.getElementById('filter-form');
+                if (!filterForm) return;
+
+                // Selecionar todos os inputs de texto e data
+                const textInputs = filterForm.querySelectorAll('input[type="text"], input[type="date"]');
+                textInputs.forEach(field => {
+                    const hasValue = field.value && field.value.trim() !== '';
+                    if (hasValue) {
+                        field.classList.add('bg-yellow-100', 'border-yellow-400');
+                        field.classList.remove('bg-white');
+                    } else {
+                        field.classList.remove('bg-yellow-100', 'border-yellow-400');
+                    }
+                });
+
+                // Selecionar todos os selects (simples e m�ltiplos)
+                const selects = filterForm.querySelectorAll('select');
+                selects.forEach(select => {
+                    let hasValue = false;
+
+                    if (select.multiple) {
+                        // Select m�ltiplo - verificar se tem alguma op��o selecionada
+                        hasValue = select.selectedOptions.length > 0;
+                    } else {
+                        // Select simples - verificar se o valor n�o � vazio
+                        hasValue = select.value !== '' && select.value !== null;
+                    }
+
+                    // Verificar se usa Select2
+                    const select2Container = select.nextElementSibling;
+                    if (select2Container && select2Container.classList.contains('select2-container')) {
+                        // Aplicar estilo ao container do Select2
+                        const selection = select2Container.querySelector('.select2-selection');
+                        if (selection) {
+                            if (hasValue) {
+                                selection.style.backgroundColor = '#fef9c3'; // yellow-100
+                                selection.style.borderColor = '#facc15'; // yellow-400
+                            } else {
+                                selection.style.backgroundColor = '';
+                                selection.style.borderColor = '';
+                            }
+                        }
+                    } else {
+                        // Select normal sem Select2
+                        if (hasValue) {
+                            select.classList.add('bg-yellow-100', 'border-yellow-400');
+                            select.classList.remove('bg-white');
+                        } else {
+                            select.classList.remove('bg-yellow-100', 'border-yellow-400');
+                        }
+                    }
+                });
+
+                // Destacar checkboxes marcados
+                const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    const label = checkbox.closest('div');
+                    if (checkbox.checked && label) {
+                        label.classList.add('bg-yellow-100', 'rounded', 'px-2', 'py-1');
+                    } else if (label) {
+                        label.classList.remove('bg-yellow-100', 'rounded', 'px-2', 'py-1');
+                    }
+                });
+            }
+
+            // Chamar fun��o de destaque na inicializa��o (com delay para Select2 carregar)
+            setTimeout(highlightFilledFilters, 100);
+
+            // Atualizar destaque quando campos mudarem
+            const filterForm = document.getElementById('filter-form');
+            if (filterForm) {
+                filterForm.addEventListener('change', highlightFilledFilters);
+                filterForm.addEventListener('input', highlightFilledFilters);
+            }
+
+            // Escutar eventos do Select2
+            $(document).on('select2:select select2:unselect select2:clear', function() {
+                highlightFilledFilters();
+            });
+
+        });
+    </script>
+
+</x-app-layout>
+

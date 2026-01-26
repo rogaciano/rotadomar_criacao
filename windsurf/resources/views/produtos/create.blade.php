@@ -13,10 +13,10 @@
         </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 dark:bg-slate-950">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6 sm:py-12 bg-slate-50 dark:bg-slate-950">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
-                <div class="p-6">
+                <div class="p-4 sm:p-6">
                     <!-- Erros de validação -->
                     @if ($errors->any())
                         <div class="mb-4 bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4">
@@ -32,7 +32,7 @@
                     <form action="{{ route('produtos.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <!-- Referência -->
                             <div>
                                 <label for="referencia" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Referência</label>
@@ -151,10 +151,10 @@
                         <!-- Seção de Tecidos separada em uma única coluna -->
                         <div class="mt-6">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tecidos</label>
-                            <div class="border border-gray-300 rounded-md p-4">
+                            <div class="border border-gray-300 dark:border-slate-600 rounded-md p-3 sm:p-4">
                                 <div id="tecidos-container">
-                                    <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200">
-                                        <div class="flex items-center gap-4">
+                                    <div class="tecido-item mb-3 first:mt-0 mt-3 pt-3 first:pt-0 border-t first:border-t-0 border-gray-200 dark:border-slate-700">
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                                             <div class="flex-grow">
                                                 <select name="tecidos[0][tecido_id]" class="tecido-select select2 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-700">
                                                     <option value="">Selecione um tecido</option>
@@ -165,10 +165,10 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="w-1/4">
+                                            <div class="sm:w-1/4">
                                                 <input type="number" name="tecidos[0][consumo]" placeholder="Consumo" step="0.001" min="0" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                                             </div>
-                                            <button type="button" class="remove-tecido text-red-500 hover:text-red-700" style="display: none;">
+                                            <button type="button" class="remove-tecido text-red-500 hover:text-red-700 self-end sm:self-center" style="display: none;">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                     <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                                 </svg>
@@ -176,7 +176,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" id="add-tecido" class="mt-3 inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <button type="button" id="add-tecido" class="mt-3 inline-flex items-center justify-center sm:justify-start px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 w-full sm:w-auto">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                                     </svg>
@@ -189,15 +189,21 @@
                         <!-- Seção de Variações de Cores -->
                         <div class="mb-4">
                             <label for="cores" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Variações de Cores</label>
-                            <p class="text-blue-500 text-sm mb-2">Todas as cores disponíveis para os tecidos selecionados serão exibidas automaticamente.</p>
-                            <div id="cores-container" class="mt-2 p-4 border border-gray-200 rounded-md">
-                                <p class="text-gray-500 text-sm">Selecione tecidos para ver as cores disponíveis</p>
+                            <p class="text-blue-500 dark:text-blue-400 text-sm mb-2">Todas as cores disponíveis para os tecidos selecionados serão exibidas automaticamente.</p>
+                            <div id="cores-container" class="mt-2 p-3 sm:p-4 border border-gray-200 dark:border-slate-600 rounded-md">
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">Selecione tecidos para ver as cores disponíveis</p>
                             </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">As cores disponíveis serão carregadas automaticamente com base nos tecidos selecionados</p>
                         </div>
 
-                        <div class="flex justify-end mt-6">
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+                            <a href="{{ route('produtos.index') }}" class="btn-ghost-secondary w-full sm:w-auto justify-center order-2 sm:order-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 w-full sm:w-auto order-1 sm:order-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
