@@ -175,10 +175,10 @@
 
                         <!-- Botões -->
                         <div class="mt-8 flex justify-end space-x-3">
-                            <a href="{{ route('etapas-producao.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                            <a href="{{ route('etapas-producao.index') }}" class="btn-ghost-secondary">
                                 Cancelar
                             </a>
-                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                            <button type="submit" class="btn-ghost-primary">
                                 Atualizar Etapa
                             </button>
                         </div>

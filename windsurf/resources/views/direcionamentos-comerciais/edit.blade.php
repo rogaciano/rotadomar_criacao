@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Editar Direcionamento Comercial') }}
             </h2>
-            <a href="{{ route('direcionamentos-comerciais.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+            <a href="{{ route('direcionamentos-comerciais.index') }}" class="btn-ghost-secondary">
                 Voltar
             </a>
         </div>
@@ -35,8 +35,8 @@
                     </div>
 
                     <div class="flex items-center justify-end mt-4">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Atualizar') }}
+                        <button type="submit" class="btn-ghost-primary">
+                            Atualizar
                         </button>
                     </div>
                 </form>

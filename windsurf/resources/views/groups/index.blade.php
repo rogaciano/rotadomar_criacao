@@ -8,7 +8,7 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>Gerenciar Grupos</span>
-                        <a href="{{ route('groups.create') }}" class="btn btn-primary">Novo Grupo</a>
+                        <a href="{{ route('groups.create') }}" class="btn-ghost-primary">Novo Grupo</a>
                     </div>
                 </div>
 
@@ -23,7 +23,7 @@
                         <div class="input-group">
                             <input type="text" name="search" class="form-control" placeholder="Buscar por nome ou descrição" value="{{ request('search') }}">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                                <button class="btn-ghost-primary" type="submit">Buscar</button>
                             </div>
                         </div>
                     </form>
@@ -55,13 +55,13 @@
                                         </td>
                                         <td>{{ $group->permissions->count() }}</td>
                                         <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('groups.show', $group) }}" class="btn btn-sm btn-info">Ver</a>
-                                                <a href="{{ route('groups.edit', $group) }}" class="btn btn-sm btn-primary">Editar</a>
+                                            <div class="flex items-center space-x-2">
+                                                <a href="{{ route('groups.show', $group) }}" class="btn-action-view">Ver</a>
+                                                <a href="{{ route('groups.edit', $group) }}" class="btn-action-edit">Editar</a>
                                                 <form action="{{ route('groups.destroy', $group) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir este grupo?')">Excluir</button>
+                                                    <button type="submit" class="btn-action-delete" onclick="return confirm('Tem certeza que deseja excluir este grupo?')">Excluir</button>
                                                 </form>
                                             </div>
                                         </td>

@@ -8,7 +8,7 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <span>Criar Novo Grupo</span>
-                        <a href="{{ route('groups.index') }}" class="btn btn-sm btn-secondary">Voltar</a>
+                        <a href="{{ route('groups.index') }}" class="btn-ghost-secondary">Voltar</a>
                     </div>
                 </div>
 
@@ -87,7 +87,7 @@
                         </div>
 
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">Salvar</button>
+                            <button type="submit" class="btn-ghost-primary">Salvar</button>
                         </div>
                     </form>
                 </div>

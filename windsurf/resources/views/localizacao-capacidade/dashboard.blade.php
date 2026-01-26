@@ -11,52 +11,58 @@
             <!-- Botões de ação -->
             <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                 <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('localizacao-capacidade.create') }}" class="inline-flex items-center px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                    {{-- Nova Capacidade - Azul --}}
+                    <a href="{{ route('localizacao-capacidade.create') }}" class="btn-ghost-primary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                         </svg>
                         Nova Capacidade
                     </a>
 
-                    <button onclick="openGerarCapacidadesModal()" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);">
+                    {{-- Gerar Capacidades - Verde --}}
+                    <button onclick="openGerarCapacidadesModal()" class="btn-ghost-success">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                         </svg>
                         Gerar Capacidades
                     </button>
 
-                    <a href="{{ route('localizacao-capacidade.index') }}" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #4b5563 0%, #374151 100%);">
+                    {{-- Listagem - Cinza --}}
+                    <a href="{{ route('localizacao-capacidade.index') }}" class="btn-ghost-secondary">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                         </svg>
                         Listagem
                     </a>
 
-                    <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
+                    {{-- Fluxo - Roxo --}}
+                    <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="btn-ghost-purple">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3a1 1 0 10-2 0M15 8l-1.333-2.001L12 4.001l-1.667 1.999L9 8m6 0v8a2 2 0 01-2 2H9a2 2 0 01-2-2V8m8 0h-6" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                         </svg>
                         Fluxo
                     </a>
 
-                    <a href="{{ route('localizacao-capacidade.calendario', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '']) }}" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    {{-- Calendário - Laranja --}}
+                    <a href="{{ route('localizacao-capacidade.calendario', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '']) }}" class="btn-ghost-warning">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         Calendário
                     </a>
                 </div>
-                
+
                 <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'landscape']) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-rose-500/10 border border-rose-200 dark:border-rose-900/30 rounded-xl font-bold text-xs text-rose-600 dark:text-rose-400 uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all duration-200">
+                    {{-- PDF Paisagem --}}
+                    <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'landscape']) }}" target="_blank" class="btn-ghost-rose">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                         PDF Paisagem
                     </a>
 
-                    <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'portrait']) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-orange-500/10 border border-orange-200 dark:border-orange-900/30 rounded-xl font-bold text-xs text-orange-600 dark:text-orange-400 uppercase tracking-widest hover:bg-orange-500 hover:text-white transition-all duration-200">
+                    {{-- PDF Retrato --}}
+                    <a href="{{ route('localizacao-capacidade.relatorio-pdf', ['mes' => $mes, 'ano' => $ano, 'localizacao_id' => $localizacaoId ?? '', 'marca_id' => $marcaId ?? '', 'etapa_id' => $etapaId ?? '', 'referencia' => $referencia ?? '', 'orientation' => 'portrait']) }}" target="_blank" class="btn-ghost-warning">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
@@ -162,6 +168,7 @@
         .dark .select2-container--default .select2-results__group {
             color: #94a3b8 !important;
         }
+
     </style>
     @endpush
 
@@ -266,7 +273,7 @@
                         </div>
 
                         <div class="w-full lg:w-auto">
-                            <button type="submit" class="w-full lg:px-6 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200 h-[42px] flex justify-center items-center" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
+                            <button type="submit" class="btn-ghost-primary w-full lg:w-auto h-[42px] flex justify-center items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
@@ -277,7 +284,7 @@
 
                     <!-- Botão de Toggle Global para Produtos Previstos -->
                     <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                        <button type="button" id="toggleAllProducts" onclick="toggleAllProductsVisibility()" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
+                        <button type="button" id="toggleAllProducts" onclick="toggleAllProductsVisibility()" class="btn-ghost-purple">
                             <svg id="toggleIconShow" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

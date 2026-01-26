@@ -35,19 +35,19 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end mt-6">
-                            <a href="{{ route('tipos.index') }}" class="btn-glass px-4 py-2 mr-3">
+                        <div class="flex items-center justify-end mt-6 gap-3">
+                            <a href="{{ route('tipos.index') }}" class="btn-ghost-secondary">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                                 </svg>
                                 {{ __('Cancelar') }}
                             </a>
-                            <x-button>
+                            <button type="submit" class="btn-ghost-primary">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
                                 {{ __('Salvar') }}
-                            </x-button>
+                            </button>
                     </form>
                 </div>
             </div>

@@ -9,7 +9,7 @@
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Localizações do Produto</h3>
         @if($canCreateProdutoLocalizacoes)
-            <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 active:bg-purple-700 focus:outline-none focus:border-purple-700 focus:ring focus:ring-purple-300 disabled:opacity-25 transition">
+            <button type="button" onclick="document.getElementById('modal-adicionar-localizacao').classList.remove('hidden')" class="btn-ghost-purple">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                 </svg>

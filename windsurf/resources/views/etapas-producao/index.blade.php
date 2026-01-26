@@ -16,14 +16,14 @@
                     Adicionar Etapa
                 </a>
 
-                <a href="{{ route('etapas-producao.visualizar-fluxo') }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
+                <a href="{{ route('etapas-producao.visualizar-fluxo') }}" target="_blank" class="btn-ghost-purple">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     Visualizar Fluxo
                 </a>
 
-                <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest shadow-lg active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);">
+                <a href="{{ route('etapas-producao.visualizar-fluxo-quantidades') }}" target="_blank" class="btn-ghost-success">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3a1 1 0 10-2 0M15 8l-1.333-2.001L12 4.001l-1.667 1.999L9 8m6 0v8a2 2 0 01-2 2H9a2 2 0 01-2-2V8m8 0h-6" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h10M7 16h10" />

@@ -4,8 +4,8 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
                 {{ __('Criar Novo Usuário') }}
             </h2>
-            <a href="{{ route('users.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <a href="{{ route('users.index') }}" class="btn-ghost-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
                 </svg>
                 Voltar
@@ -93,9 +93,9 @@
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
-                            <x-button class="ml-4">
-                                {{ __('Criar Usuário') }}
-                            </x-button>
+                            <button type="submit" class="btn-ghost-primary">
+                                Criar Usuário
+                            </button>
                         </div>
                     </form>
                 </div>

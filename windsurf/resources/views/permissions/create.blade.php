@@ -36,13 +36,13 @@
                             @enderror
                         </div>
 
-                        <div class="flex items-center justify-between">
-                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                                Salvar
-                            </button>
-                            <a href="{{ route('permissions.index') }}" class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800">
+                        <div class="flex items-center justify-end space-x-3">
+                            <a href="{{ route('permissions.index') }}" class="btn-ghost-secondary">
                                 Cancelar
                             </a>
+                            <button type="submit" class="btn-ghost-primary">
+                                Salvar
+                            </button>
                         </div>
                     </form>
                 </div>
