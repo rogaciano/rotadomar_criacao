@@ -381,103 +381,137 @@
     </div>
 
     <!-- Modal para adicionar/editar combinação -->
-    <div id="modal-combinacao" class="fixed z-50 inset-0 overflow-y-auto hidden" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('modal-combinacao').classList.add('hidden')"></div>
+    <div id="modal-combinacao" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <!-- Overlay de fundo -->
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="fecharModalCombinacao()">
+                <div class="absolute inset-0 bg-gray-500 dark:bg-slate-900 opacity-75"></div>
+            </div>
 
-            <!-- Modal panel -->
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-combinacao-title">Nova Combinação</h3>
-                            <div class="mt-4 space-y-4">
-                                <input type="hidden" id="combinacao-id" value="">
-                                <div>
-                                    <label for="combinacao-descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
-                                    <input type="text" id="combinacao-descricao" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                </div>
-                                <div>
-                                    <label for="combinacao-quantidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade Pretendida</label>
-                                    <input type="number" id="combinacao-quantidade" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" min="1" value="1" required>
-                                </div>
-                                <div>
-                                    <label for="combinacao-observacoes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações (opcional)</label>
-                                    <textarea id="combinacao-observacoes" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="2"></textarea>
-                                </div>
-                            </div>
+            <!-- Centralização vertical -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <!-- Modal propriamente dito -->
+            <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:border dark:border-slate-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white" id="modal-combinacao-title">Nova Combinação</h3>
+                        <button type="button" onclick="fecharModalCombinacao()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-white dark:bg-slate-800">
+                    <div class="space-y-4">
+                        <input type="hidden" id="combinacao-id" value="">
+                        <div>
+                            <label for="combinacao-descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
+                            <input type="text" id="combinacao-descricao" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                        </div>
+                        <div>
+                            <label for="combinacao-quantidade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantidade Pretendida</label>
+                            <input type="number" id="combinacao-quantidade" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" min="1" value="1" required>
+                        </div>
+                        <div>
+                            <label for="combinacao-observacoes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Observações (opcional)</label>
+                            <textarea id="combinacao-observacoes" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="2"></textarea>
                         </div>
                     </div>
                 </div>
-                <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="salvar-combinacao" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">Salvar</button>
-                    <button type="button" onclick="document.getElementById('modal-combinacao').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancelar</button>
+
+                <div class="px-6 py-4 bg-gray-50 dark:bg-slate-900 text-right rounded-b-lg flex justify-end gap-2">
+                    <button type="button" onclick="fecharModalCombinacao()" class="btn-ghost-secondary">
+                        Cancelar
+                    </button>
+                    <button type="button" id="salvar-combinacao" class="btn-ghost-primary">
+                        Salvar
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Modal para adicionar/editar componente -->
-    <div id="modal-componente" class="fixed z-50 inset-0 overflow-y-auto hidden" style="display: none;" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="document.getElementById('modal-componente').classList.add('hidden')"></div>
+    <div id="modal-componente" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <!-- Overlay de fundo -->
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="fecharModalComponente()">
+                <div class="absolute inset-0 bg-gray-500 dark:bg-slate-900 opacity-75"></div>
+            </div>
 
-            <!-- Modal panel -->
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-componente-title">Adicionar Componente</h3>
-                            <div class="mt-4 space-y-4">
-                                <input type="hidden" id="componente-id" value="">
-                                <input type="hidden" id="componente-combinacao-id" value="">
-                                <div>
-                                    <label for="componente-tecido" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tecido</label>
-                                    <select id="componente-tecido" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                        <option value="">Selecione um tecido</option>
-                                        <!-- Mostrar apenas os tecidos já selecionados para o produto -->
-                                        @foreach($produto->tecidos as $tecido)
-                                        <option value="{{ $tecido->id }}">{{ $tecido->descricao }} @if($tecido->referencia) ({{ $tecido->referencia }}) @endif</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="componente-cor" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cor</label>
-                                    <select id="componente-cor" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required disabled>
-                                        <option value="">Selecione um tecido primeiro</option>
-                                    </select>
-                                </div>
+            <!-- Centralização vertical -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                                <!-- Informações de estoque -->
-                                <div id="info-estoque" class="hidden bg-gray-50 p-3 rounded-md border border-gray-200">
-                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Informações de Estoque</h4>
-                                    <table class="w-full text-sm">
-                                        <tr>
-                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Estoque:</span></td>
-                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-estoque-valor" class="font-medium text-gray-900 dark:text-white">0 m</span></td>
-                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Necessidade:</span></td>
-                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-necessidade-valor" class="font-medium text-gray-900 dark:text-white">0 m</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Saldo:</span></td>
-                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-saldo-valor" class="font-medium text-gray-900 dark:text-white">0 m</span></td>
-                                            <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Produção possível:</span></td>
-                                            <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-producao-valor" class="font-medium text-gray-900 dark:text-white">0 unidades</span></td>
-                                        </tr>
-                                    </table>
-                                </div>
+            <!-- Modal propriamente dito -->
+            <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full dark:border dark:border-slate-700">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white" id="modal-componente-title">Adicionar Componente</h3>
+                        <button type="button" onclick="fecharModalComponente()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-                                <div>
-                                    <label for="componente-consumo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consumo (metros)</label>
-                                    <input type="number" id="componente-consumo" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" min="0.001" step="0.001" value="1" required>
-                                </div>
-                            </div>
+                <div class="px-6 py-4 bg-white dark:bg-slate-800">
+                    <div class="space-y-4">
+                        <input type="hidden" id="componente-id" value="">
+                        <input type="hidden" id="componente-combinacao-id" value="">
+                        <div>
+                            <label for="componente-tecido" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tecido</label>
+                            <select id="componente-tecido" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                <option value="">Selecione um tecido</option>
+                                <!-- Mostrar apenas os tecidos já selecionados para o produto -->
+                                @foreach($produto->tecidos as $tecido)
+                                <option value="{{ $tecido->id }}">{{ $tecido->descricao }} @if($tecido->referencia) ({{ $tecido->referencia }}) @endif</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label for="componente-cor" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Cor</label>
+                            <select id="componente-cor" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required disabled>
+                                <option value="">Selecione um tecido primeiro</option>
+                            </select>
+                        </div>
+
+                        <!-- Informações de estoque -->
+                        <div id="info-estoque" class="hidden bg-gray-50 dark:bg-slate-700 p-3 rounded-md border border-gray-200 dark:border-gray-600">
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Informações de Estoque</h4>
+                            <table class="w-full text-sm">
+                                <tr>
+                                    <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Estoque:</span></td>
+                                    <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-estoque-valor" class="font-medium text-gray-900 dark:text-white">0 m</span></td>
+                                    <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Necessidade:</span></td>
+                                    <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-necessidade-valor" class="font-medium text-gray-900 dark:text-white">0 m</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Saldo:</span></td>
+                                    <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-saldo-valor" class="font-medium text-gray-900 dark:text-white">0 m</span></td>
+                                    <td class="pr-1 py-0.5 whitespace-nowrap text-right"><span class="text-gray-600 dark:text-gray-400">Produção possível:</span></td>
+                                    <td class="pl-1 py-0.5 whitespace-nowrap"><span id="info-producao-valor" class="font-medium text-gray-900 dark:text-white">0 unidades</span></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div>
+                            <label for="componente-consumo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Consumo (metros)</label>
+                            <input type="number" id="componente-consumo" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" min="0.001" step="0.001" value="1" required>
                         </div>
                     </div>
                 </div>
-                <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="salvar-componente" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">Salvar</button>
-                    <button type="button" onclick="document.getElementById('modal-componente').classList.add('hidden'); document.getElementById('modal-componente').style.display = 'none';" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancelar</button>
+
+                <div class="px-6 py-4 bg-gray-50 dark:bg-slate-900 text-right rounded-b-lg flex justify-end gap-2">
+                    <button type="button" onclick="fecharModalComponente()" class="btn-ghost-secondary">
+                        Cancelar
+                    </button>
+                    <button type="button" id="salvar-componente" class="btn-ghost-primary">
+                        Salvar
+                    </button>
                 </div>
             </div>
         </div>
@@ -522,23 +556,32 @@
     @push('scripts')
     <script>
 
-        // Função global para mostrar o modal de combinação
-        function showCombinacaoModal() {
-            console.log('showCombinacaoModal called');
-            var modal = document.getElementById('modal-combinacao');
-            modal.classList.remove('hidden');
-            modal.style.display = 'block';
-
-            // Adicionar evento para fechar o modal ao clicar fora dele
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
-                    modal.classList.add('hidden');
-                }
+        // Funções globais para gerenciar modais
+        window.showCombinacaoModal = function() {
+            // Chama a função interna se estiver disponível (via jQuery), senão abre apenas o modal
+            if (typeof window.mostrarModalCombinacaoInternal === 'function') {
+                window.mostrarModalCombinacaoInternal();
+            } else {
+                document.getElementById('modal-combinacao').classList.remove('hidden');
             }
-        }
+        };
+
+        window.fecharModalCombinacao = function() {
+            const modal = document.getElementById('modal-combinacao');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        };
+
+        window.fecharModalComponente = function() {
+            const modal = document.getElementById('modal-componente');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        };
+
         // Function to delete attachment
-        function deleteAttachment(anexoId) {
+        window.deleteAttachment = function(anexoId) {
             if (!confirm('Tem certeza que deseja excluir este anexo?')) {
                 return;
             }
@@ -716,10 +759,14 @@
                     $('#modal-combinacao-title').text('Nova Combinação');
                 }
 
-                // Exibir modal
+                // Exibir modal removendo a classe hidden
                 $('#modal-combinacao').removeClass('hidden');
-                document.getElementById('modal-combinacao').style.display = 'block';
+                // Garantir que o estilo inline display: none seja removido se existir
+                document.getElementById('modal-combinacao').style.display = '';
             }
+
+            // Expor a função para o escopo global para que possa ser usada pelo botão
+            window.mostrarModalCombinacaoInternal = mostrarModalCombinacao;
 
             function mostrarModalComponente(combinacaoId, componenteId = null) {
                 // Limpar campos

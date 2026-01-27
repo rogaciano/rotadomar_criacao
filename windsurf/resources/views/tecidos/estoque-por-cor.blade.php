@@ -48,7 +48,7 @@
                             
                             <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
                                 <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estoque Total</p>
-                                <p class="mt-1 text-sm text-gray-900 font-semibold">{{ number_format($tecido->quantidade_estoque, 2, ',', '.') }} metros</p>
+                                <p class="mt-1 text-sm text-gray-900 dark:text-white font-semibold">{{ number_format($tecido->quantidade_estoque, 2, ',', '.') }} metros</p>
                             </div>
                         </div>
 
@@ -112,11 +112,11 @@
                                                 {{ $estoqueCor->codigo_cor ?: '-' }}
                                                 <input type="hidden" name="cores[{{ $estoqueCor->id }}][codigo_cor]" value="{{ $estoqueCor->codigo_cor }}">
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white text-right font-medium">
                                                 {{ number_format($estoqueCor->quantidade, 2, ',', '.') }}
                                                 <input type="hidden" name="cores[{{ $estoqueCor->id }}][quantidade_atual]" value="{{ $estoqueCor->quantidade }}">
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white text-right font-medium">
                                                 {{ number_format($estoqueCor->necessidade, 2, ',', '.') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">
@@ -140,15 +140,15 @@
                                         </tr>
                                         @endforeach
                                     </tbody>
-                                    <tfoot class="bg-gray-50">
+                                    <tfoot class="bg-gray-50 dark:bg-slate-800">
                                         <tr>
                                             <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                                                 Total
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white text-right">
                                                 {{ number_format($tecido->total_estoque_por_cores, 2, ',', '.') }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white text-right">
                                                 @php
                                                     $totalNecessidade = $tecido->estoquesCores->sum('necessidade');
                                                 @endphp
