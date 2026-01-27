@@ -1,9 +1,9 @@
 ﻿<!-- Modal Nova Observação -->
 <div id="modal-nova-observacao" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
-        <div class="flex justify-between items-center mb-4 pb-3 border-b">
-            <h3 class="text-xl font-semibold text-gray-900">Nova Observação</h3>
-            <button onclick="fecharModalObservacao()" class="text-gray-400 hover:text-gray-600">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white dark:bg-slate-800 dark:border-slate-700">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b dark:border-slate-600">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Nova Observação</h3>
+            <button onclick="fecharModalObservacao()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -14,10 +14,10 @@
             <input type="hidden" name="produto_id" value="{{ $produto->id }}">
 
             <div class="mb-4">
-                <label for="observacao" class="block text-sm font-medium text-gray-700 mb-2">Observação *</label>
+                <label for="observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observação *</label>
 
                 <!-- Editor Quill -->
-                <div id="editor-container" style="height: 75px; background: white; border: 1px solid #d1d5db; border-radius: 0.375rem;"></div>
+                <div id="editor-container" class="quill-editor-container"></div>
                 <textarea
                     id="observacao"
                     name="observacao"
@@ -33,7 +33,7 @@
             </div>
 
             <div class="flex justify-end space-x-2">
-                <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
                     Cancelar
                 </button>
                 <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
@@ -43,6 +43,73 @@
         </form>
     </div>
 </div>
+
+<style>
+    /* Estilos para o editor Quill - suporte dark/light mode */
+    .quill-editor-container {
+        height: 75px;
+        background: white;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+    }
+
+    .dark .quill-editor-container {
+        background: #334155;
+        border-color: #475569;
+    }
+
+    /* Texto do editor */
+    .quill-editor-container .ql-editor {
+        color: #1f2937;
+    }
+
+    .dark .quill-editor-container .ql-editor {
+        color: #f3f4f6;
+    }
+
+    /* Placeholder */
+    .quill-editor-container .ql-editor.ql-blank::before {
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    .dark .quill-editor-container .ql-editor.ql-blank::before {
+        color: #9ca3af;
+    }
+
+    /* Toolbar do Quill */
+    .dark .ql-toolbar.ql-snow {
+        background: #475569;
+        border-color: #475569;
+    }
+
+    .dark .ql-toolbar.ql-snow .ql-stroke {
+        stroke: #e5e7eb;
+    }
+
+    .dark .ql-toolbar.ql-snow .ql-fill {
+        fill: #e5e7eb;
+    }
+
+    .dark .ql-toolbar.ql-snow .ql-picker-label {
+        color: #e5e7eb;
+    }
+
+    .dark .ql-toolbar.ql-snow button:hover .ql-stroke,
+    .dark .ql-toolbar.ql-snow button:focus .ql-stroke {
+        stroke: #a78bfa;
+    }
+
+    .dark .ql-toolbar.ql-snow button:hover .ql-fill,
+    .dark .ql-toolbar.ql-snow button:focus .ql-fill {
+        fill: #a78bfa;
+    }
+
+    .dark .ql-snow .ql-picker-options {
+        background: #334155;
+        border-color: #475569;
+    }
+</style>
 
 <!-- Carrossel de Imagens das Movimentações -->
 @php
@@ -101,12 +168,13 @@
 @endif
 
 <!-- Modal de Reprogramação -->
-<div id="modal-reprogramar" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 flex items-center justify-center">
-    <div class="relative p-4 border shadow-lg rounded-md bg-white" style="width: 400px; max-width: 90vw;">
+<!-- Modal de Reprogramação -->
+<div id="modal-reprogramar" class="fixed inset-0 bg-gray-600/50 dark:bg-gray-900/80 hidden z-50 flex items-center justify-center">
+    <div class="relative p-4 border shadow-lg rounded-md bg-white dark:bg-slate-800 dark:border-slate-700" style="width: 400px; max-width: 90vw;">
         <div class="mt-1">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-base font-semibold text-gray-900">Reprogramar Produto</h3>
-                <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="text-gray-400 hover:text-gray-500">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Reprogramar Produto</h3>
+                <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -114,15 +182,15 @@
             </div>
 
             <div class="mt-2 px-2 py-2">
-                <div class="bg-orange-50 border-l-4 border-orange-400 p-2 mb-3">
+                <div class="bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-400 dark:border-orange-500/50 p-2 mb-3">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="h-5 w-5 text-orange-400 dark:text-orange-500" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                             </svg>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-orange-700">
+                            <p class="text-sm text-orange-700 dark:text-orange-200">
                                 <strong>Atenção!</strong> Será criado um novo produto baseado em:
                             </p>
                         </div>
@@ -131,8 +199,8 @@
 
                 <div class="mb-2 space-y-1">
                     <div class="flex justify-between text-xs">
-                        <span class="font-medium text-gray-700">Original:</span>
-                        <span class="text-gray-900 font-semibold">{{ $produto->referencia }}</span>
+                        <span class="font-medium text-gray-700 dark:text-gray-300">Original:</span>
+                        <span class="text-gray-900 dark:text-gray-100 font-semibold">{{ $produto->referencia }}</span>
                     </div>
                     @php
                         $ultimaReprogramacao = $produto->reprogramacoes()->max('numero_reprogramacao') ?? 0;
@@ -140,13 +208,13 @@
                         $novaReferencia = $produto->referencia . '-' . str_pad($proximoNumero, 2, '0', STR_PAD_LEFT);
                     @endphp
                     <div class="flex justify-between text-xs">
-                        <span class="font-medium text-gray-700">Nova (sugerida):</span>
-                        <span class="text-green-600 font-bold" id="preview-referencia">{{ $novaReferencia }}</span>
+                        <span class="font-medium text-gray-700 dark:text-gray-300">Nova (sugerida):</span>
+                        <span class="text-green-600 dark:text-green-400 font-bold" id="preview-referencia">{{ $novaReferencia }}</span>
                     </div>
                 </div>
 
-                <div class="bg-yellow-50 border border-yellow-200 rounded p-2 mb-3">
-                    <label for="numero_reprogramacao_manual" class="block text-xs font-semibold text-yellow-800 mb-1">
+                <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded p-2 mb-3">
+                    <label for="numero_reprogramacao_manual" class="block text-xs font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
                         Número de Reprogramação (opcional)
                     </label>
                     <input
@@ -156,41 +224,41 @@
                         min="1"
                         max="99"
                         placeholder="{{ $proximoNumero }}"
-                        class="w-full text-xs border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 rounded-md shadow-sm"
+                        class="w-full text-xs border-yellow-300 dark:border-yellow-600/50 dark:bg-slate-900 dark:text-white focus:border-yellow-500 focus:ring-yellow-500 rounded-md shadow-sm"
                         onkeyup="atualizarPreviewReferencia({{ Js::from($produto->referencia) }}, {{ $proximoNumero }})"
                     >
-                    <p class="text-xs text-yellow-700 mt-1">
+                    <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
                         Deixe em branco para usar o número sugerido ({{ $proximoNumero }}). Use este campo apenas para reprogramações iniciadas em sistemas antigos.
                     </p>
                 </div>
 
-                <div class="bg-blue-50 border border-blue-200 rounded p-2 mb-2">
-                    <p class="text-xs text-blue-800 mb-1 font-semibold">✔️ Será copiado:</p>
-                    <ul class="text-xs text-blue-700 space-y-0.5 ml-3">
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded p-2 mb-2">
+                    <p class="text-xs text-blue-800 dark:text-blue-200 mb-1 font-semibold">✔️ Será copiado:</p>
+                    <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-0.5 ml-3">
                         <li>• Dados, tecidos, observações, anexos, cores</li>
                     </ul>
                 </div>
 
-                <div class="bg-red-50 border border-red-200 rounded p-2 mb-2">
-                    <p class="text-xs text-red-800 mb-1 font-semibold">❌ NÃO será copiado:</p>
-                    <ul class="text-xs text-red-700 space-y-0.5 ml-3">
+                <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/50 rounded p-2 mb-2">
+                    <p class="text-xs text-red-800 dark:text-red-200 mb-1 font-semibold">❌ NÃO será copiado:</p>
+                    <ul class="text-xs text-red-700 dark:text-red-300 space-y-0.5 ml-3">
                         <li>• Localizações e movimentações</li>
                     </ul>
                 </div>
 
-                <p class="text-xs text-gray-600 mb-2">
-                    <strong>Obs:</strong> Produto reprogramado <strong class="text-red-600">não</strong> pode ser reprogramado novamente.
+                <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">
+                    <strong>Obs:</strong> Produto reprogramado <strong class="text-red-600 dark:text-red-400">não</strong> pode ser reprogramado novamente.
                 </p>
             </div>
 
-            <div class="flex items-center justify-end gap-2 px-2 py-2 bg-gray-50 rounded-b">
-                <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300">
+            <div class="flex items-center justify-end gap-2 px-2 py-2 bg-gray-50 dark:bg-slate-700 rounded-b">
+                <button onclick="document.getElementById('modal-reprogramar').classList.add('hidden')" class="px-3 py-1.5 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded hover:bg-gray-300 dark:hover:bg-slate-500">
                     Cancelar
                 </button>
                 <form id="form-reprogramar" action="{{ route('produtos.reprogramar', $produto->id) }}" method="POST" class="inline">
                     @csrf
                     <input type="hidden" name="numero_reprogramacao" id="numero_reprogramacao_hidden">
-                    <button type="submit" onclick="capturarNumeroReprogramacao()" class="px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600">
+                    <button type="submit" onclick="capturarNumeroReprogramacao()" class="px-3 py-1.5 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600 focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-offset-slate-800 transition-colors">
                         Confirmar
                     </button>
                 </form>
@@ -569,6 +637,58 @@
         });
     });
 </script>
+
+
+<!-- Modal para adicionar anexo -->
+@if(auth()->user()->canUpdate('produtos'))
+<div id="modal-adicionar-anexo" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <!-- Overlay de fundo -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+        </div>
+
+        <!-- Centralização vertical -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <!-- Modal propriamente dito -->
+        <div class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Adicionar Anexo</h3>
+                <button type="button" onclick="document.getElementById('modal-adicionar-anexo').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <form action="{{ route('produtos.anexos.store', $produto->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="px-6 py-4">
+                <div class="mb-4">
+                    <label for="descricao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descrição</label>
+                    <input type="text" name="descricao" id="descricao" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required>
+                </div>
+                <div>
+                    <label for="arquivo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Arquivo</label>
+                    <input type="file" name="arquivo" id="arquivo" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" required>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Formatos aceitos: PNG, JPG, JPEG (máx. 10MB) e PDF (máx. 1MB)</p>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800 text-right rounded-b-lg">
+                <button type="button" onclick="document.getElementById('modal-adicionar-anexo').classList.add('hidden')" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2">
+                    Cancelar
+                </button>
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Salvar
+                </button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+@endif
 
 @push('styles')
 <!-- Quill.js CSS -->
