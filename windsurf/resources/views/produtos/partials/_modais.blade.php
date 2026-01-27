@@ -1,46 +1,62 @@
 ﻿<!-- Modal Nova Observação -->
-<div id="modal-nova-observacao" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white dark:bg-slate-800 dark:border-slate-700">
-        <div class="flex justify-between items-center mb-4 pb-3 border-b dark:border-slate-600">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Nova Observação</h3>
-            <button onclick="fecharModalObservacao()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
+<div id="modal-nova-observacao" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <!-- Overlay de fundo -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 dark:bg-slate-900 opacity-75"></div>
         </div>
-        <form id="form-observacao" onsubmit="salvarObservacao(event)">
-            @csrf
-            <input type="hidden" name="produto_id" value="{{ $produto->id }}">
 
-            <div class="mb-4">
-                <label for="observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observação *</label>
+        <!-- Centralização vertical -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <!-- Editor Quill -->
-                <div id="editor-container" class="quill-editor-container"></div>
-                <textarea
-                    id="observacao"
-                    name="observacao"
-                    style="display: none;"
-                ></textarea>
-
-                <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    <p>💡 Use a barra de ferramentas acima para formatar o texto com cores, negrito, etc.</p>
-                    <p class="mt-1" id="char-counter">
-                        <span id="char-count">0</span> / 255 caracteres
-                    </p>
+        <!-- Modal propriamente dito -->
+        <div class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Nova Observação</h3>
+                    <button onclick="fecharModalObservacao()" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-2">
-                <button type="button" onclick="fecharModalObservacao()" class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    Cancelar
-                </button>
-                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    Salvar Observação
-                </button>
-            </div>
-        </form>
+            <form id="form-observacao" onsubmit="salvarObservacao(event)">
+                @csrf
+                <input type="hidden" name="produto_id" value="{{ $produto->id }}">
+
+                <div class="px-6 py-4">
+                    <div class="mb-4">
+                        <label for="observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Observação *</label>
+
+                        <!-- Editor Quill -->
+                        <div id="editor-container" class="quill-editor-container"></div>
+                        <textarea
+                            id="observacao"
+                            name="observacao"
+                            style="display: none;"
+                        ></textarea>
+
+                        <div class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                            <p>💡 Use a barra de ferramentas acima para formatar o texto com cores, negrito, etc.</p>
+                            <p class="mt-1" id="char-counter">
+                                <span id="char-count">0</span> / 255 caracteres
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800 text-right rounded-b-lg flex justify-end gap-2">
+                    <button type="button" onclick="fecharModalObservacao()" class="btn-ghost-secondary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-ghost-primary">
+                        Salvar Observação
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -268,24 +284,37 @@
 </div>
 
 <!-- Modal Data Entrega Facção -->
-<div id="modal-data-entrega" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-[60]">
-    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div class="mt-3">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-data-entrega-titulo">Data de Entrega</h3>
+<div id="modal-data-entrega" class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 z-[60] hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <!-- Overlay de fundo -->
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 dark:bg-slate-900 opacity-75"></div>
+        </div>
+
+        <!-- Centralização vertical -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <!-- Modal propriamente dito -->
+        <div class="inline-block align-bottom bg-white dark:bg-slate-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white" id="modal-data-entrega-titulo">Data de Entrega</h3>
+            </div>
+            
             <form id="form-data-entrega" method="POST">
                 @csrf
-                <div class="mb-4">
-                    <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 mb-2">Selecione a Data</label>
-                    <input type="date" name="data_entrega_faccao" id="input_data_entrega_faccao"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <div class="px-6 py-4">
+                    <div class="mb-4">
+                        <label for="data_entrega_faccao" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Selecione a Data</label>
+                        <input type="date" name="data_entrega_faccao" id="input_data_entrega_faccao"
+                            class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
                 </div>
-                <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="fecharModalDataEntrega()"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
+                
+                <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800 text-right rounded-b-lg flex justify-end gap-2">
+                    <button type="button" onclick="fecharModalDataEntrega()" class="btn-ghost-secondary">
                         Cancelar
                     </button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition shadow-sm">
+                    <button type="submit" class="btn-ghost-primary">
                         Salvar
                     </button>
                 </div>
