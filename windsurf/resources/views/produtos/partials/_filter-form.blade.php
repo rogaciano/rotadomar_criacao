@@ -122,7 +122,7 @@
             <select name="localizacao_planejamento_id[]" id="localizacao_planejamento_id" multiple class="js-select2-multi w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                 @foreach($localizacoesPlanejamento as $localizacao)
                     <option value="{{ $localizacao->id }}" {{ !empty($filters['localizacao_planejamento_id']) && in_array($localizacao->id, (array)$filters['localizacao_planejamento_id']) ? 'selected' : '' }}>
-                        {{ $localizacao->descricao }}
+                        {{ $localizacao->nome_localizacao }}
                     </option>
                 @endforeach
             </select>
