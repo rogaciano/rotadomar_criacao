@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_localizacao_visualizacao', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('localizacao_id');
-            $table->timestamps();
+        if (!Schema::hasTable('user_localizacao_visualizacao')) {
+            Schema::create('user_localizacao_visualizacao', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('user_id');
+                $table->unsignedBigInteger('localizacao_id');
+                $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('localizacao_id')->references('id')->on('localizacoes')->onDelete('cascade');
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('localizacao_id')->references('id')->on('localizacoes')->onDelete('cascade');
 
-            $table->unique(['user_id', 'localizacao_id']);
-        });
+                $table->unique(['user_id', 'localizacao_id']);
+            });
+        }
     }
 
     /**

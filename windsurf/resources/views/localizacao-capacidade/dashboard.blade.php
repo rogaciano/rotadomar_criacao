@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout maxWidth="max-w-full">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Planejamento - Dashboard') }}
@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-8 bg-slate-50 dark:bg-slate-950">
-        <div class="max-w-screen-2xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
 
             <!-- Botões de ação -->
             <div class="flex flex-wrap justify-between items-center mb-6 gap-4">

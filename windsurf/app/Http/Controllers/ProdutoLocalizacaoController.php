@@ -423,7 +423,7 @@ class ProdutoLocalizacaoController extends Controller
             ->with(['etapaAnterior', 'etapaNova', 'usuario'])
             ->get();
 
-        return view('produtos.partials.historico-etapas', compact('produtoLocalizacao', 'historico'));
+        return view('produtos.historico-etapas', compact('produtoLocalizacao', 'historico'));
     }
 
     /**
@@ -466,5 +466,28 @@ class ProdutoLocalizacaoController extends Controller
         }
 
         return redirect()->back()->with('success', 'Data de entrega atualizada com sucesso!');
+    }
+
+    /**
+     * Atualizar o histórico de etapas (data/hora)
+     */
+    public function updateHistoricoEtapa(Request $request, $historicoId)
+    {
+        $request->validate([
+            'created_at' => 'required|date'
+        ]);
+
+        $historico = \App\Models\ProdutoLocalizacaoHistoricoEtapa::findOrFail($historicoId);
+
+        // Verificar permissão
+        if (!auth()->user()->isAdmin() && !auth()->user()->canUpdate('produto_localizacao_historico_etapas')) {
+             abort(403);
+        }
+
+        $historico->created_at = $request->created_at;
+        $historico->updated_by_user_id = auth()->id();
+        $historico->save();
+
+        return redirect()->back()->with('success', 'Data e hora atualizadas com sucesso!');
     }
 }

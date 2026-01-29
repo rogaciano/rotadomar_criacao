@@ -16,6 +16,7 @@ class ProdutoLocalizacaoHistoricoEtapa extends Model
         'etapa_anterior_id',
         'etapa_nova_id',
         'user_id',
+        'updated_by_user_id',
         'acao',
         'observacao'
     ];
@@ -50,6 +51,14 @@ class ProdutoLocalizacaoHistoricoEtapa extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Usuário que atualizou o registro
+     */
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by_user_id');
     }
 
     /**

@@ -175,6 +175,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/definir-etapa', [ProdutoLocalizacaoController::class, 'definirEtapa'])->name('produtos.localizacoes.definir-etapa');
     Route::post('produtos/{produto}/localizacoes/{produtoLocalizacao}/update-data-entrega', [ProdutoLocalizacaoController::class, 'updateDataEntrega'])->name('produtos.localizacoes.update-data-entrega');
     Route::get('produtos/{produto}/localizacoes/{produtoLocalizacao}/historico-etapas', [ProdutoLocalizacaoController::class, 'historicoEtapas'])->name('produtos.localizacoes.historico-etapas');
+    Route::put('produtos/historico-etapas/{historico}', [ProdutoLocalizacaoController::class, 'updateHistoricoEtapa'])->name('produtos.localizacoes.historico-etapas.update');
 
     // Routes para Observações de Produtos
     Route::post('produtos/observacoes', [ProdutoObservacaoController::class, 'store'])->name('produtos.observacoes.store');

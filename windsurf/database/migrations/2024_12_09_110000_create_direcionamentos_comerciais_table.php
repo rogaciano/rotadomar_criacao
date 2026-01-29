@@ -11,18 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('direcionamentos_comerciais', function (Blueprint $table) {
-            $table->id();
-            $table->string('descricao', 100);
-            $table->boolean('ativo')->default(true);
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        if (!Schema::hasTable('direcionamentos_comerciais')) {
+            Schema::create('direcionamentos_comerciais', function (Blueprint $table) {
+                $table->id();
+                $table->string('descricao', 100);
+                $table->boolean('ativo')->default(true);
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
 
         // Adicionar campo na tabela produtos
-        Schema::table('produtos', function (Blueprint $table) {
-            $table->foreignId('direcionamento_comercial_id')->nullable()->after('status_id')->constrained('direcionamentos_comerciais')->nullOnDelete();
-        });
+        if (Schema::hasTable('produtos') && !Schema::hasColumn('produtos', 'direcionamento_comercial_id')) {
+            Schema::table('produtos', function (Blueprint $table) {
+                $table->foreignId('direcionamento_comercial_id')->nullable()->after('status_id')->constrained('direcionamentos_comerciais')->nullOnDelete();
+            });
+        }
     }
 
     /**

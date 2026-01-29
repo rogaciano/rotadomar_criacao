@@ -55,14 +55,14 @@
             <!-- Page Heading -->
             @isset($header)
                 <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-16 z-30 transition-all duration-300">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <div class="{{ $maxWidth }} mx-auto py-4 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
             <!-- Flash Messages -->
-            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="{{ $maxWidth }} mx-auto py-4 px-4 sm:px-6 lg:px-8">
                 @if(session('success'))
                     <div class="glass border-l-4 border-green-500 bg-green-50/50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-4 rounded-xl mb-4 relative overflow-hidden group transition-all" role="alert">
                         <div class="flex items-center">

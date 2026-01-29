@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('tecido_cor_estoques', function (Blueprint $table) {
-            $table->decimal('quantidade_pretendida', 10, 2)->default(0)->comment('Quantidade pretendida para esta cor');
-
-        });
+        if (Schema::hasTable('tecido_cor_estoques') && !Schema::hasColumn('tecido_cor_estoques', 'quantidade_pretendida')) {
+            Schema::table('tecido_cor_estoques', function (Blueprint $table) {
+                $table->decimal('quantidade_pretendida', 10, 2)->default(0)->comment('Quantidade pretendida para esta cor');
+            });
+        }
     }
 
     /**
