@@ -39,20 +39,20 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50 dark:bg-slate-800">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Permissão</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_create" title="Marcar/desmarcar todas as permissões de Criar">Criar</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_read" title="Marcar/desmarcar todas as permissões de Ler">Ler</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_update" title="Marcar/desmarcar todas as permissões de Atualizar">Atualizar</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_delete" title="Marcar/desmarcar todas as permissões de Excluir">Excluir</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer all-toggle" title="Marcar/desmarcar todas as ações da tabela">Todas</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Permissão</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_create" title="Marcar/desmarcar todas as permissões de Criar">Criar</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_read" title="Marcar/desmarcar todas as permissões de Ler">Ler</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_update" title="Marcar/desmarcar todas as permissões de Atualizar">Atualizar</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_delete" title="Marcar/desmarcar todas as permissões de Excluir">Excluir</th>
+                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer all-toggle" title="Marcar/desmarcar todas as ações da tabela">Todas</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
                                     @foreach($permissions as $permission)
                                         @php($up = $userPermissions->get($permission->id))
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 perm-cell cursor-pointer select-none" title="Clique para marcar/desmarcar todas as ações desta linha">
-                                                <div class="font-medium perm-title cursor-pointer select-none text-indigo-700 hover:underline" title="Marcar/desmarcar todas as ações desta permissão">{{ $permission->display_name ?? $permission->name }}</div>
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-800">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 perm-cell cursor-pointer select-none" title="Clique para marcar/desmarcar todas as ações desta linha">
+                                                <div class="font-medium perm-title cursor-pointer select-none text-indigo-700 dark:text-indigo-400 hover:underline" title="Marcar/desmarcar todas as ações desta permissão">{{ $permission->display_name ?? $permission->name }}</div>
                                                 @if(!empty($permission->description))
                                                     <div class="text-xs text-gray-500 dark:text-gray-400">{{ $permission->description }}</div>
                                                 @endif
@@ -70,7 +70,7 @@
                                                 <input type="checkbox" name="permissions[{{ $permission->id }}][can_delete]" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_delete ? 'checked' : '' }} />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" class="rounded border-gray-300 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 row-toggle" title="Marcar/desmarcar todas as ações desta linha" />
+                                                <input type="checkbox" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 row-toggle" title="Marcar/desmarcar todas as ações desta linha" />
                                             </td>
                                         </tr>
                                     @endforeach
@@ -84,10 +84,10 @@
                             </x-button>
                         </div>
                     </form>
-                    <p class="text-xs text-gray-500 mt-2">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         Dica: clique no nome da permissão para marcar/desmarcar todas as ações da linha.
                     </p>
-                    <p class="text-xs text-gray-500 mt-4">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-4">
                         Dica: desmarque todas as ações de uma permissão para remover a configuração específica deste usuário (o sistema voltará a considerar apenas as permissões do(s) grupo(s)).
                     </p>
                     <script>
