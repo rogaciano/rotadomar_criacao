@@ -194,6 +194,97 @@
                                     @endif
                                 </div>
                             </div>
+
+                            {{-- Controles de Etapa --}}
+                            @php
+                                $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($loc->id);
+                                $transicoes = collect([]);
+                                if ($etapaLinha) {
+                                    $transicoes = $etapaLinha->transicoesOrigem ?? collect([]);
+                                }
+                                
+                                $btnCorClasses = [
+                                    'blue' => 'bg-blue-600 hover:bg-blue-700',
+                                    'green' => 'bg-green-600 hover:bg-green-700',
+                                    'yellow' => 'bg-yellow-500 hover:bg-yellow-600',
+                                    'red' => 'bg-red-600 hover:bg-red-700',
+                                    'purple' => 'bg-purple-600 hover:bg-purple-700',
+                                    'gray' => 'bg-gray-600 hover:bg-gray-700',
+                                    'indigo' => 'bg-indigo-600 hover:bg-indigo-700',
+                                    'pink' => 'bg-pink-500 hover:bg-pink-600',
+                                    'orange' => 'bg-orange-500 hover:bg-orange-600',
+                                ];
+                            @endphp
+
+                            @if($podeGerenciarEtapa)
+                                <div class="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700">
+                                    {{-- 1. Transições (Botões de Ação Principal) --}}
+                                    @if($transicoes && $transicoes->count() > 0)
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            @foreach($transicoes as $transicao)
+                                                <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST" class="flex-1 min-w-[100px]">
+                                                    @csrf
+                                                    <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
+                                                    <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
+                                                    <button type="submit" class="w-full py-1.5 rounded text-[10px] font-bold text-white shadow-sm {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-600' }}">
+                                                        {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
+                                                    </button>
+                                                </form>
+                                            @endforeach
+                                        </div>
+                                    @elseif(!$etapaLinha)
+                                        {{-- 2. Definir Etapa Inicial --}}
+                                        <div x-data="{ openMenu: false }" class="relative mb-2">
+                                            <button @click="openMenu = !openMenu" type="button" class="w-full py-2 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded text-xs font-bold flex justify-center items-center gap-2 hover:bg-indigo-100 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                </svg>
+                                                DEFINIR ETAPA
+                                            </button>
+                                            
+                                            <div x-show="openMenu" @click.away="openMenu = false" class="absolute left-0 right-0 bottom-full mb-1 bg-white dark:bg-slate-800 rounded shadow-xl border border-gray-200 dark:border-slate-600 z-50 overflow-hidden max-h-48 overflow-y-auto" style="display: none;">
+                                                @foreach($etapasProducao as $etapa)
+                                                    <form action="{{ route('produtos.localizacoes.definir-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
+                                                        <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
+                                                        <button type="submit" class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">
+                                                            <span class="w-5 text-center">{{ $etapa->icone ?? '•' }}</span>
+                                                            <span class="font-medium">{{ $etapa->nome }}</span>
+                                                        </button>
+                                                    </form>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- 3. Ações Secundárias (Voltar / Limpar) --}}
+                                    @if($etapaLinha)
+                                        <div class="flex justify-center items-center gap-4">
+                                            @if(isset($loc->pivot->etapa_anterior_id) && $loc->pivot->etapa_anterior_id)
+                                                <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
+                                                    <button type="submit" class="text-[10px] text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 flex items-center gap-1 py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" onclick="return confirm('Voltar etapa?')">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                                                        Voltar
+                                                    </button>
+                                                </form>
+                                                <span class="text-gray-300 dark:text-gray-600">|</span>
+                                            @endif
+
+                                            <form action="{{ route('produtos.localizacoes.limpar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
+                                                <button type="submit" class="text-[10px] text-red-400 hover:text-red-600 flex items-center gap-1 py-1 px-2 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" onclick="return confirm('Limpar etapa?')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                                                    Limpar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
                             
                             {{-- Observação da Localização --}}
                             @if($loc->pivot->observacao)

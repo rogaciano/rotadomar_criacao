@@ -280,6 +280,10 @@ class ProdutoLocalizacaoController extends Controller
         // Notificar setor
         $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
 
+        if ($request->has('back_url')) {
+            return redirect($request->back_url)->with('success', 'Etapa avançada com sucesso!');
+        }
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa avançada com sucesso!');
     }
@@ -320,6 +324,10 @@ class ProdutoLocalizacaoController extends Controller
         // Notificar setor
         $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
 
+        if ($request->has('back_url')) {
+            return redirect($request->back_url)->with('success', 'Etapa revertida com sucesso!');
+        }
+
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa revertida com sucesso!');
     }
@@ -358,6 +366,10 @@ class ProdutoLocalizacaoController extends Controller
                 'produto_localizacao_id' => $produtoLocalizacaoId,
             ])
             ->log('Etapa da localização limpa (resetada)');
+
+        if ($request->has('back_url')) {
+            return redirect($request->back_url)->with('success', 'Etapa limpa com sucesso!');
+        }
 
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa limpa com sucesso!');
@@ -403,6 +415,10 @@ class ProdutoLocalizacaoController extends Controller
 
         // Notificar setor
         $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
+
+        if ($request->has('back_url')) {
+            return redirect($request->back_url)->with('success', 'Etapa definida com sucesso!');
+        }
 
         return redirect()->route('produtos.show', $produtoId)
             ->with('success', 'Etapa definida com sucesso!');
