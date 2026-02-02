@@ -7,7 +7,7 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6">
                 <div class="bg-blue-600 text-white p-4 rounded-t-lg">
                     <h5 class="text-lg font-medium">
@@ -18,9 +18,9 @@
                         Produtos por Estilista ({{ $titulo ?? 'Últimos 12 meses' }})
                     </h5>
                 </div>
-                <div class="bg-white p-6 rounded-b-lg shadow">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-b-lg shadow">
                     <div class="mb-6">
-                        <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 text-blue-700 dark:text-blue-300 p-4 rounded">
                             <div class="flex">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -32,12 +32,12 @@
                     </div>
                     
                     <div class="mb-6">
-                        <form id="periodo-form" action="{{ route('dashboard.produtos-por-estilista') }}" method="GET" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <h3 class="text-lg font-medium text-gray-700 mb-3">Filtros</h3>
+                        <form id="periodo-form" action="{{ route('dashboard.produtos-por-estilista') }}" method="GET" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-3">Filtros</h3>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
-                                    <label for="periodo" class="block text-sm font-medium text-gray-700 mb-1">Período Predefinido</label>
-                                    <select id="periodo" name="periodo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <label for="periodo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Período Predefinido</label>
+                                    <select id="periodo" name="periodo" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                         <option value="ultimos_12_meses" {{ request('periodo', 'ultimos_12_meses') == 'ultimos_12_meses' ? 'selected' : '' }}>Últimos 12 meses</option>
                                         <option value="ultimos_6_meses" {{ request('periodo') == 'ultimos_6_meses' ? 'selected' : '' }}>Últimos 6 meses</option>
                                         <option value="ultimos_3_meses" {{ request('periodo') == 'ultimos_3_meses' ? 'selected' : '' }}>Últimos 3 meses</option>
@@ -48,8 +48,8 @@
                                 </div>
 
                                 <div>
-                                    <label for="status_id" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                                    <select id="status_id" name="status_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <label for="status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                    <select id="status_id" name="status_id" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                         <option value="todos" {{ request('status_id', 'todos') == 'todos' ? 'selected' : '' }}>Todos os Status</option>
                                         @foreach($status as $statusItem)
                                             <option value="{{ $statusItem->id }}" {{ request('status_id') == $statusItem->id ? 'selected' : '' }}>
@@ -60,13 +60,13 @@
                                 </div>
                                 
                                 <div id="data-inicio-container" class="{{ request('periodo') == 'personalizado' ? '' : 'hidden' }}">
-                                    <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                                    <input type="date" id="data_inicio" name="data_inicio" value="{{ request('data_inicio', Carbon\Carbon::now()->subMonths(12)->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <label for="data_inicio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
+                                    <input type="date" id="data_inicio" name="data_inicio" value="{{ request('data_inicio', Carbon\Carbon::now()->subMonths(12)->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 </div>
                                 
                                 <div id="data-fim-container" class="{{ request('periodo') == 'personalizado' ? '' : 'hidden' }}">
-                                    <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                                    <input type="date" id="data_fim" name="data_fim" value="{{ request('data_fim', Carbon\Carbon::now()->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <label for="data_fim" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
+                                    <input type="date" id="data_fim" name="data_fim" value="{{ request('data_fim', Carbon\Carbon::now()->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 </div>
                             </div>
                             
@@ -89,7 +89,7 @@
                         </div>
                         <div>
                             <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white">
+                                <table class="min-w-full bg-white dark:bg-gray-800">
                                     <thead class="bg-gray-800 text-white">
                                         <tr>
                                             <th class="py-3 px-4 text-left">Estilista</th>
@@ -103,12 +103,12 @@
                                         @endphp
                                         
                                         @foreach($dadosGrafico as $index => $item)
-                                        <tr class="hover:bg-gray-50">
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200">
                                             <td class="py-3 px-4">
                                                 <div class="flex items-center">
                                                     <span class="color-indicator" style="background-color: {{ $cores[$index] }}"></span>
                                                     @if(isset($item['estilista_id']) && $item['estilista_id'])
-                                                        <a href="{{ route('estilistas.show', $item['estilista_id']) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                                        <a href="{{ route('estilistas.show', $item['estilista_id']) }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline">
                                                             {{ $item['nome_estilista'] }}
                                                         </a>
                                                     @else
@@ -122,7 +122,7 @@
                                         @endforeach
                                         
                                     </tbody>
-                                    <tfoot class="bg-gray-100">
+                                    <tfoot class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white">
                                         <tr>
                                             <th class="py-3 px-4 text-left font-bold">Total</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ array_sum($data) }}</th>
@@ -134,7 +134,7 @@
                         </div>
                     </div>
                     
-                    <div class="border-t border-gray-200 my-6 pt-6"></div>
+                    <div class="border-t border-gray-200 dark:border-gray-700 my-6 pt-6"></div>
                     
                     <div class="flex justify-between items-center">
                         <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
@@ -204,6 +204,7 @@
                     legend: {
                         position: 'bottom',
                         labels: {
+                            color: document.documentElement.classList.contains('dark') ? '#e5e7eb' : '#374151',
                             padding: 20,
                             boxWidth: 12
                         }

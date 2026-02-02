@@ -415,7 +415,7 @@
                                         $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoCompleto;
                                     @endphp
                                     @if($isTruncated)
-                                        <div class="text-xs text-gray-700 mb-1" x-data="{ expanded: false }">
+                                        <div class="text-xs text-white mb-1" x-data="{ expanded: false }">
                                             <span x-show="!expanded">{!! $obsTextoTruncado !!}</span>
                                             <span x-show="expanded" x-cloak>{!! $textoCompleto !!}</span>
                                             <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
@@ -424,7 +424,7 @@
                                             </button>
                                         </div>
                                     @else
-                                        <div class="text-xs text-gray-700 mb-1">
+                                        <div class="text-xs text-white mb-1">
                                             {!! $textoCompleto !!}
                                         </div>
                                     @endif

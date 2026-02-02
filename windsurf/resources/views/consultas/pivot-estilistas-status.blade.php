@@ -7,7 +7,7 @@
 
     <div class="py-6">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="bg-indigo-600 text-white p-4 rounded-t-lg">
                         <h5 class="text-lg font-medium">
@@ -17,9 +17,9 @@
                             Pivot Table: Estilistas x Status ({{ $titulo ?? 'Últimos 12 meses' }})
                         </h5>
                     </div>
-                    <div class="bg-white p-6 rounded-b-lg shadow">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-b-lg shadow">
                         <div class="mb-6">
-                            <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded">
+                            <div class="bg-indigo-50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 text-indigo-700 dark:text-indigo-300 p-4 rounded">
                                 <div class="flex">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -31,12 +31,12 @@
                         </div>
                         
                         <div class="mb-6">
-                            <form action="{{ route('consultas.pivot-estilistas-status') }}" method="GET" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                <h3 class="text-lg font-medium text-gray-700 mb-3">Filtros</h3>
+                            <form action="{{ route('consultas.pivot-estilistas-status') }}" method="GET" class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <h3 class="text-lg font-medium text-gray-700 dark:text-gray-200 mb-3">Filtros</h3>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
-                                        <label for="periodo" class="block text-sm font-medium text-gray-700 mb-1">Período Predefinido</label>
-                                        <select id="periodo" name="periodo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <label for="periodo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Período Predefinido</label>
+                                        <select id="periodo" name="periodo" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                             <option value="ultimos_12_meses" {{ request('periodo', 'ultimos_12_meses') == 'ultimos_12_meses' ? 'selected' : '' }}>Últimos 12 meses</option>
                                             <option value="ultimos_6_meses" {{ request('periodo') == 'ultimos_6_meses' ? 'selected' : '' }}>Últimos 6 meses</option>
                                             <option value="ultimos_3_meses" {{ request('periodo') == 'ultimos_3_meses' ? 'selected' : '' }}>Últimos 3 meses</option>
@@ -47,13 +47,13 @@
                                     </div>
                                     
                                     <div id="data-inicio-container" class="{{ request('periodo') == 'personalizado' ? '' : 'hidden' }}">
-                                        <label for="data_inicio" class="block text-sm font-medium text-gray-700 mb-1">Data Início</label>
-                                        <input type="date" id="data_inicio" name="data_inicio" value="{{ request('data_inicio', Carbon\Carbon::now()->subMonths(12)->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <label for="data_inicio" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Início</label>
+                                        <input type="date" id="data_inicio" name="data_inicio" value="{{ request('data_inicio', Carbon\Carbon::now()->subMonths(12)->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     </div>
                                     
                                     <div id="data-fim-container" class="{{ request('periodo') == 'personalizado' ? '' : 'hidden' }}">
-                                        <label for="data_fim" class="block text-sm font-medium text-gray-700 mb-1">Data Fim</label>
-                                        <input type="date" id="data_fim" name="data_fim" value="{{ request('data_fim', Carbon\Carbon::now()->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                        <label for="data_fim" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Fim</label>
+                                        <input type="date" id="data_fim" name="data_fim" value="{{ request('data_fim', Carbon\Carbon::now()->format('Y-m-d')) }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                     </div>
                                 </div>
                                 
@@ -70,7 +70,7 @@
                         
                         <!-- Pivot Table -->
                         <div class="overflow-x-auto">
-                            <table class="min-w-full bg-white border border-gray-200">
+                            <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                                 <thead>
                                     <tr class="bg-gray-800 text-white">
                                         <th class="py-3 px-4 text-left border-r border-gray-600 sticky left-0 bg-gray-800 z-10">Estilista</th>
@@ -84,14 +84,14 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200">
                                     @forelse($pivotData as $linha)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="py-3 px-4 font-medium text-gray-900 border-r border-gray-200 sticky left-0 bg-white z-10">
-                                            <a href="{{ route('estilistas.show', $linha['estilista_id']) }}" class="text-indigo-600 hover:text-indigo-800 hover:underline">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <td class="py-3 px-4 font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700 sticky left-0 bg-white dark:bg-gray-800 z-10">
+                                            <a href="{{ route('estilistas.show', $linha['estilista_id']) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline">
                                                 {{ $linha['nome_estilista'] }}
                                             </a>
                                         </td>
                                         @foreach($todosStatus as $status)
-                                            <td class="py-3 px-4 text-center border-r border-gray-200">
+                                            <td class="py-3 px-4 text-center border-r border-gray-200 dark:border-gray-700">
                                                 @php
                                                     $quantidade = $linha['status'][$status->id] ?? 0;
                                                 @endphp
@@ -104,7 +104,7 @@
                                                 @endif
                                             </td>
                                         @endforeach
-                                        <td class="py-3 px-4 text-center font-bold bg-gray-50">
+                                        <td class="py-3 px-4 text-center font-bold bg-gray-50 dark:bg-gray-700">
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
                                                 {{ $linha['total_estilista'] }}
                                             </span>
@@ -124,19 +124,19 @@
                                     </tr>
                                     @endforelse
                                 </tbody>
-                                <tfoot class="bg-gray-100">
+                                <tfoot class="bg-gray-100 dark:bg-gray-700">
                                     <tr class="font-bold">
-                                        <td class="py-3 px-4 text-left border-r border-gray-300 sticky left-0 bg-gray-100 z-10">
+                                        <td class="py-3 px-4 text-left border-r border-gray-300 dark:border-gray-600 sticky left-0 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white z-10">
                                             Total por Status
                                         </td>
                                         @foreach($todosStatus as $status)
-                                            <td class="py-3 px-4 text-center border-r border-gray-300">
-                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gray-200 text-gray-800">
+                                            <td class="py-3 px-4 text-center border-r border-gray-300 dark:border-gray-600">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white">
                                                     {{ $totaisPorStatus[$status->id] ?? 0 }}
                                                 </span>
                                             </td>
                                         @endforeach
-                                        <td class="py-3 px-4 text-center bg-gray-200">
+                                        <td class="py-3 px-4 text-center bg-gray-200 dark:bg-gray-600">
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-indigo-200 text-indigo-800">
                                                 {{ $totalGeral }}
                                             </span>
@@ -148,44 +148,44 @@
                         
                         <!-- Estatísticas Resumidas -->
                         <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                                 <div class="flex items-center">
                                     <svg class="h-8 w-8 text-blue-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                     <div>
-                                        <p class="text-sm font-medium text-blue-600">Total de Estilistas</p>
-                                        <p class="text-2xl font-bold text-blue-800">{{ count($pivotData) }}</p>
+                                        <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Total de Estilistas</p>
+                                        <p class="text-2xl font-bold text-blue-800 dark:text-blue-200">{{ count($pivotData) }}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
                                 <div class="flex items-center">
                                     <svg class="h-8 w-8 text-green-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                     </svg>
                                     <div>
-                                        <p class="text-sm font-medium text-green-600">Total de Produtos</p>
-                                        <p class="text-2xl font-bold text-green-800">{{ $totalGeral }}</p>
+                                        <p class="text-sm font-medium text-green-600 dark:text-green-400">Total de Produtos</p>
+                                        <p class="text-2xl font-bold text-green-800 dark:text-green-200">{{ $totalGeral }}</p>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
                                 <div class="flex items-center">
                                     <svg class="h-8 w-8 text-purple-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                     </svg>
                                     <div>
-                                        <p class="text-sm font-medium text-purple-600">Período</p>
-                                        <p class="text-sm font-bold text-purple-800">{{ $periodoInicio }} a {{ $periodoFim }}</p>
+                                        <p class="text-sm font-medium text-purple-600 dark:text-purple-400">Período</p>
+                                        <p class="text-sm font-bold text-purple-800 dark:text-purple-200">{{ $periodoInicio }} a {{ $periodoFim }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="border-t border-gray-200 my-6 pt-6"></div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 my-6 pt-6"></div>
                         
                         <div class="flex justify-between items-center">
                             <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">

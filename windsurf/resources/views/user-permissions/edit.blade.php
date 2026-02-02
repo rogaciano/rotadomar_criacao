@@ -15,9 +15,9 @@
         </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 dark:bg-slate-950">
+    <div class="py-12 bg-gray-100 dark:bg-gray-900">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="glass dark:glass-dark overflow-hidden rounded-2xl border-none ring-1 ring-black/5">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden rounded-2xl border-none shadow-sm ring-1 ring-black/5">
                 <div class="p-6">
                     @if(session('success'))
                         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
@@ -37,7 +37,7 @@
 
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50 dark:bg-slate-800">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Permissão</th>
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer col-toggle" data-col="can_create" title="Marcar/desmarcar todas as permissões de Criar">Criar</th>
@@ -47,10 +47,10 @@
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer all-toggle" title="Marcar/desmarcar todas as ações da tabela">Todas</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white dark:bg-slate-900 divide-y divide-gray-200 dark:divide-slate-700">
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach($permissions as $permission)
                                         @php($up = $userPermissions->get($permission->id))
-                                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-800">
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 perm-cell cursor-pointer select-none" title="Clique para marcar/desmarcar todas as ações desta linha">
                                                 <div class="font-medium perm-title cursor-pointer select-none text-indigo-700 dark:text-indigo-400 hover:underline" title="Marcar/desmarcar todas as ações desta permissão">{{ $permission->display_name ?? $permission->name }}</div>
                                                 @if(!empty($permission->description))
@@ -58,19 +58,19 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_create]" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_create ? 'checked' : '' }} />
+                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_create]" value="1" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_create ? 'checked' : '' }} />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_read]" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_read ? 'checked' : '' }} />
+                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_read]" value="1" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_read ? 'checked' : '' }} />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_update]" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_update ? 'checked' : '' }} />
+                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_update]" value="1" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_update ? 'checked' : '' }} />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_delete]" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_delete ? 'checked' : '' }} />
+                                                <input type="checkbox" name="permissions[{{ $permission->id }}][can_delete]" value="1" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" {{ $up && $up->can_delete ? 'checked' : '' }} />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 row-toggle" title="Marcar/desmarcar todas as ações desta linha" />
+                                                <input type="checkbox" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-900 text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 row-toggle" title="Marcar/desmarcar todas as ações desta linha" />
                                             </td>
                                         </tr>
                                     @endforeach

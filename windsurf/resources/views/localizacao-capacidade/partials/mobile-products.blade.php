@@ -337,7 +337,7 @@
 
             {{-- Observações do Produto --}}
             @if($obs->count() > 0)
-                <div class="text-xs bg-yellow-50 dark:bg-yellow-900/10 p-2 rounded border border-yellow-100 dark:border-yellow-900/30">
+                <div class="text-xs bg-yellow-50 dark:bg-slate-800 p-2 rounded border border-yellow-100 dark:border-slate-700">
                     <div class="font-bold text-yellow-800 dark:text-yellow-500 mb-1">📝 Observações:</div>
                     @foreach($obs as $observacao)
                         <div class="mb-1 last:mb-0 text-gray-700 dark:text-gray-300">
