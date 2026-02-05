@@ -446,7 +446,15 @@ class MovimentacaoController extends Controller
         }
 
         $backUrl = $request->query('back_url');
-        return view('movimentacoes.show', compact('movimentacao', 'backUrl'));
+
+        // Buscar histórico de atividades desta movimentação
+        $activities = \Spatie\Activitylog\Models\Activity::where('subject_type', Movimentacao::class)
+            ->where('subject_id', $movimentacao->id)
+            ->with('causer')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('movimentacoes.show', compact('movimentacao', 'backUrl', 'activities'));
     }
 
     /**

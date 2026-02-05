@@ -143,6 +143,61 @@
                             </div>
                         </div>
                     @endif
+
+                    {{-- Histórico de Alterações --}}
+                    @if(isset($activities) && $activities->count() > 0)
+                        <div class="mt-8">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Histórico de Alterações
+                            </h3>
+                            <div class="mt-4 space-y-3">
+                                @foreach($activities as $activity)
+                                    <div class="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <span class="font-medium text-gray-900 dark:text-white">
+                                                    {{ $activity->causer ? $activity->causer->name : 'Sistema' }}
+                                                </span>
+                                                <span class="text-gray-600 dark:text-gray-400">
+                                                    @if($activity->event == 'created')
+                                                        criou este registro
+                                                    @elseif($activity->event == 'updated')
+                                                        atualizou este registro
+                                                    @elseif($activity->event == 'deleted')
+                                                        excluiu este registro
+                                                    @else
+                                                        {{ $activity->event }}
+                                                    @endif
+                                                </span>
+                                            </div>
+                                            <span class="text-sm text-gray-500 dark:text-gray-400">
+                                                {{ $activity->created_at->format('d/m/Y H:i') }}
+                                            </span>
+                                        </div>
+                                        @if($activity->event == 'updated' && $activity->properties->has('old'))
+                                            <div class="mt-3 text-sm space-y-1">
+                                                @foreach($activity->properties['attributes'] ?? [] as $key => $value)
+                                                    @if(isset($activity->properties['old'][$key]) && $activity->properties['old'][$key] != $value)
+                                                        <div class="flex items-start gap-2">
+                                                            <span class="font-medium text-gray-700 dark:text-gray-300 min-w-[120px]">{{ ucfirst(str_replace('_', ' ', $key)) }}:</span>
+                                                            <span class="text-red-600 dark:text-red-400 line-through">{{ is_array($activity->properties['old'][$key]) ? json_encode($activity->properties['old'][$key]) : $activity->properties['old'][$key] }}</span>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                            </svg>
+                                                            <span class="text-green-600 dark:text-green-400">{{ is_array($value) ? json_encode($value) : $value }}</span>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

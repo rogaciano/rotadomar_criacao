@@ -438,9 +438,9 @@
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Saldo</p>
-                                            <p class="text-2xl font-bold {{ $dado['saldo'] < 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
-                                                {{ $dado['saldo'] }}
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ $dado['saldo'] > 0 ? 'Capacidade Disponível' : 'Acima da Capacidade' }}</p>
+                                            <p class="text-2xl font-bold {{ $dado['saldo'] > 0 ? ' text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                                @if($dado['saldo'] > 0)+@endif{{ abs($dado['saldo']) }}
                                             </p>
                                         </div>
                                         <div>

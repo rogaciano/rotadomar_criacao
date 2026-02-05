@@ -1,4 +1,4 @@
-﻿<nav x-data="{ open: false, dropdownOpen: false, darkMode: localStorage.getItem('dark-mode') === 'true' }" 
+﻿<nav x-data="{ open: false, dropdownOpen: false, darkMode: localStorage.getItem('dark-mode') === 'true' }"
      x-init="$watch('darkMode', val => {
         localStorage.setItem('dark-mode', val);
         if (val) document.documentElement.classList.add('dark');
@@ -96,31 +96,6 @@
                         </div>
                     </div>
 
-                    <!-- Admin Dropdown (visível apenas para administradores) -->
-                    @if(auth()->user()->isAdmin())
-                    <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
-                        <div class="relative">
-                            <button @click="open = !open" @click.away="open = false" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-300 bg-white dark:bg-slate-800 hover:text-gray-700 dark:hover:text-white focus:outline-none transition ease-in-out duration-150" :class="{'text-indigo-600 dark:text-indigo-400': {{ request()->routeIs('users.*') || request()->routeIs('permissions.*') || request()->routeIs('logs.*') || request()->routeIs('activity-log.*') ? 'true' : 'false' }} }">
-                                <div>{{ __('Admin') }}</div>
-
-                                <div class="ms-1">
-                                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                            </button>
-
-                            <div x-show="open" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute z-50 mt-2 w-48 rounded-md shadow-lg origin-top-right right-0" style="display: none;">
-                                <div class="rounded-md ring-1 ring-black ring-opacity-5 py-1 bg-white dark:bg-slate-800">
-                                    <a href="{{ route('users.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('users.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Usuários') }}</a>
-                                    <a href="{{ route('permissions.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('permissions.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Permissões') }}</a>
-                                    <a href="{{ route('logs.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('logs.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Logs') }}</a>
-                                    <a href="{{ route('activity-log.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('activity-log.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Log de Atividades') }}</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
 
@@ -142,8 +117,24 @@
                         </x-slot>
 
                         <x-slot name="content">
+                            @if(auth()->user()->isAdmin())
+                                <x-dropdown-link :href="route('users.index')">
+                                    {{ __('Usuários') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('permissions.index')">
+                                    {{ __('Permissões') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('logs.index')">
+                                    {{ __('Logs') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('activity-log.index')">
+                                    {{ __('Log de Atividades') }}
+                                </x-dropdown-link>
+                                <div class="border-t border-gray-200 dark:border-slate-700 my-1"></div>
+                            @endif
+
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('Perfil') }}
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -153,7 +144,7 @@
                                 <x-dropdown-link :href="route('logout')"
                                         onclick="event.preventDefault();
                                                     this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('Sair') }}
                                 </x-dropdown-link>
                             </form>
                         </x-slot>
@@ -208,12 +199,12 @@
                                 class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
                     </button>
 
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-200" 
-                         x-transition:enter-start="transform opacity-0 scale-95" 
-                         x-transition:enter-end="transform opacity-100 scale-100" 
-                         x-transition:leave="transition ease-in duration-75" 
-                         x-transition:leave-start="transform opacity-100 scale-100" 
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
                          x-transition:leave-end="transform opacity-0 scale-95"
                          class="absolute z-50 mt-2 w-80 rounded-2xl shadow-2xl origin-top-right right-0 bg-white dark:bg-slate-800 ring-1 ring-black/5 dark:ring-white/10" style="display: none;">
                         <div class="py-1">
@@ -374,43 +365,34 @@
                 </div>
             </div>
 
-            <!-- Responsive Admin Menu (visível apenas para administradores) -->
-            @if(auth()->user()->isAdmin())
-            <div x-data="{ open: {{ request()->routeIs('users.*') || request()->routeIs('permissions.*') || request()->routeIs('logs.*') || request()->routeIs('activity-log.*') ? 'true' : 'false' }} }" class="pt-2">
-                <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
-                    <span>{{ __('Admin') }}</span>
-                    <svg class="h-4 w-4 transition-transform duration-200" :class="{'rotate-180': open}" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                    </svg>
-                </button>
-                <div x-show="open" style="display: none;" class="space-y-1 bg-gray-50/50 pb-2">
-                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="pl-6">
-                        {{ __('Usuários') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')" class="pl-6">
-                        {{ __('Permissões') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('logs.index')" :active="request()->routeIs('logs.*')" class="pl-6">
-                        {{ __('Logs') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')" class="pl-6">
-                        {{ __('Log de Atividades') }}
-                    </x-responsive-nav-link>
-                </div>
-            </div>
-            @endif
         </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-base text-gray-800 dark:text-white">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
+                @if(auth()->user()->isAdmin())
+                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        {{ __('Usuários') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('permissions.index')" :active="request()->routeIs('permissions.*')">
+                        {{ __('Permissões') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('logs.index')" :active="request()->routeIs('logs.*')">
+                        {{ __('Logs') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('activity-log.index')" :active="request()->routeIs('activity-log.*')">
+                        {{ __('Log de Atividades') }}
+                    </x-responsive-nav-link>
+                    <div class="border-t border-gray-200 dark:border-slate-700 my-2 mx-4"></div>
+                @endif
+
                 <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
+                    {{ __('Perfil') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
@@ -420,7 +402,7 @@
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
-                        {{ __('Log Out') }}
+                        {{ __('Sair') }}
                     </x-responsive-nav-link>
                 </form>
             </div>
