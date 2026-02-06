@@ -92,10 +92,19 @@
                                 <x-input-error :messages="$errors->get('data_devolucao')" class="mt-2" />
                             </div>
 
-                            <!-- Observação -->
+                            <!-- Observações -->
                             <div class="md:col-span-2">
-                                <x-label for="observacao" value="{{ __('Observação (opcional)') }}" />
-                                <textarea id="observacao" name="observacao" rows="3" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('observacao', $movimentacao->observacao) }}</textarea>
+                                <div class="flex justify-between items-center mb-2">
+                                    <x-label for="observacao" value="{{ __('Observações') }}" />
+                                    <button type="button" onclick="openObservacaoModal({{ $movimentacao->id }})" class="btn-ghost-primary text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Adicionar Observação
+                                    </button>
+                                </div>
+                                <textarea id="observacao" name="observacao" rows="5" class="block mt-1 w-full border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" readonly>{{ old('observacao', $movimentacao->observacao) }}</textarea>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">As observações são exibidas em ordem cronológica. Use o botão acima para adicionar novas observações.</p>
                                 <x-input-error :messages="$errors->get('observacao')" class="mt-2" />
                             </div>
 
@@ -176,7 +185,7 @@
             function validarConcluido() {
                 const dataDevolucao = $('#data_devolucao').val();
                 const checkboxConcluido = $('#concluido');
-                
+
                 if (checkboxConcluido.is(':checked') && (!dataDevolucao || dataDevolucao.trim() === '')) {
                     alert('Para marcar como concluído, é necessário preencher a Data de Devolução.');
                     checkboxConcluido.prop('checked', false);
@@ -189,7 +198,7 @@
             function autoMarcarConcluido() {
                 const dataDevolucao = $('#data_devolucao').val();
                 const checkboxConcluido = $('#concluido');
-                
+
                 if (dataDevolucao && dataDevolucao.trim() !== '') {
                     // Se data de devolução foi preenchida, marcar como concluído
                     checkboxConcluido.prop('checked', true);
@@ -226,6 +235,100 @@
                 document.getElementById('form-remover-anexo').submit();
             }
         }
+    </script>
+    @endpush
+
+    <!-- Modal de Observação -->
+    <div id="observacaoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-slate-800">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Adicionar Observação</h3>
+                <div class="mt-4">
+                    <textarea id="observacaoTexto" rows="4" class="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600" placeholder="Digite a observação..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button onclick="closeObservacaoModal()" class="btn-ghost-secondary">
+                        Cancelar
+                    </button>
+                    <button onclick="saveObservacao()" class="btn-ghost-primary">
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        let currentMovimentacaoId = null;
+
+        function openObservacaoModal(movimentacaoId) {
+            currentMovimentacaoId = movimentacaoId;
+            document.getElementById('observacaoModal').classList.remove('hidden');
+            document.getElementById('observacaoTexto').value = '';
+            document.getElementById('observacaoTexto').focus();
+        }
+
+        function closeObservacaoModal() {
+            document.getElementById('observacaoModal').classList.add('hidden');
+            document.getElementById('observacaoTexto').value = '';
+            currentMovimentacaoId = null;
+        }
+
+        function saveObservacao() {
+            const observacao = document.getElementById('observacaoTexto').value.trim();
+
+            if (!observacao) {
+                alert('Por favor, digite uma observação.');
+                return;
+            }
+
+            fetch(`/movimentacoes/${currentMovimentacaoId}/observacao`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    observacao: observacao
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Atualizar o campo de observações
+                    const textarea = document.getElementById('observacao');
+                    textarea.value = data.observacoes;
+
+                    closeObservacaoModal();
+
+                    // Mostrar mensagem de sucesso centralizada
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-xl shadow-2xl z-[9999] text-center';
+                    successDiv.innerHTML = '<div class="flex items-center gap-2 justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><p class="font-semibold text-base">' + data.message + '</p></div>';
+                    document.body.appendChild(successDiv);
+
+                    setTimeout(() => {
+                        successDiv.style.transition = 'opacity 0.5s';
+                        successDiv.style.opacity = '0';
+                        setTimeout(() => successDiv.remove(), 500);
+                    }, 5000);
+                } else {
+                    alert('Erro ao salvar observação. Tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao salvar observação. Tente novamente.');
+            });
+        }
+
+        // Fechar modal ao clicar fora dele
+        document.getElementById('observacaoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeObservacaoModal();
+            }
+        });
     </script>
     @endpush
 </x-app-layout>

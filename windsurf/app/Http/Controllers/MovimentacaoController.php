@@ -798,4 +798,28 @@ class MovimentacaoController extends Controller
 
         return back()->with('error', 'Nenhum anexo encontrado para remover.');
     }
+
+    /**
+     * Adicionar nova observação à movimentação
+     */
+    public function storeObservacao(Request $request, Movimentacao $movimentacao)
+    {
+        if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $request->validate([
+            'observacao' => 'required|string|max:5000'
+        ]);
+
+        $movimentacao->observacoes()->create([
+            'observacao' => $request->observacao
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Observação adicionada com sucesso!',
+            'observacoes' => $movimentacao->fresh()->observacao
+        ]);
+    }
 }

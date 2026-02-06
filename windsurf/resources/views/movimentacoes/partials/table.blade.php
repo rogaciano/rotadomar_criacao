@@ -1,5 +1,5 @@
 <div class="hidden md:block overflow-x-auto relative shadow-md sm:rounded-lg">
-    <table class="table-base">
+    <table class="table-base table-compact">
         <thead class="table-header">
             <tr>
                 <th scope="col" class="table-header-cell">
@@ -118,20 +118,6 @@
                     </a>
                 </th>
                 <th scope="col" class="table-header-cell">
-                    <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'comprometido', 'direction' => request('sort') == 'comprometido' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
-                        Comprometido
-                        @if(request('sort') == 'comprometido')
-                            <svg class="w-3 h-3 ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                @if(request('direction') == 'asc')
-                                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
-                                @else
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                                @endif
-                            </svg>
-                        @endif
-                    </a>
-                </th>
-                <th scope="col" class="table-header-cell">
                     <a href="{{ route('movimentacoes.index', array_merge(request()->query(), ['sort' => 'observacao', 'direction' => request('sort') == 'observacao' && request('direction') == 'asc' ? 'desc' : 'asc'])) }}" class="flex items-center hover:text-gray-700">
                         Observação
                         @if(request('sort') == 'observacao')
@@ -198,6 +184,10 @@
                                 </span>
                             </div>
                         @endif
+
+                        <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                            Comprometido: <span class="font-semibold {{ $movimentacao->comprometido ? 'text-blue-600 dark:text-blue-400' : '' }}">{{ $movimentacao->comprometido ? 'Sim' : 'Não' }}</span>
+                        </div>
                     </td>
                     <td class="table-cell text-center">
                         @if($movimentacao->concluido)
@@ -267,18 +257,16 @@
                             N/A
                         @endif
                     </td>
-                    <td class="table-cell table-cell-secondary">
-                        <span class="px-2 py-1 rounded-full text-xs {{ $movimentacao->comprometido ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }}">
-                            {{ $movimentacao->comprometido ? 'Sim' : 'Não' }}
-                        </span>
-                    </td>
                     <td class="table-cell table-cell-secondary max-w-[120px] overflow-hidden">
                         @if($movimentacao->observacao)
-                            <div class="truncate" title="{{ $movimentacao->observacao }}">
-                                {{ Str::limit($movimentacao->observacao, 20, '...') }}
-                            </div>
+                            <button type="button" onclick="openObsPopup(this, {{ $movimentacao->id }})" class="flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 hover:text-blue-700 cursor-pointer transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <template id="obs-text-{{ $movimentacao->id }}">{{ $movimentacao->observacao }}</template>
                         @else
-                            <span class="text-gray-400 dark:text-gray-500">N/A</span>
+                            <span class="text-gray-400 dark:text-gray-500">-</span>
                         @endif
                     </td>
                     <td class="table-cell table-cell-secondary">

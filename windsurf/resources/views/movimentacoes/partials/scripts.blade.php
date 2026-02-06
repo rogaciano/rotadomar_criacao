@@ -323,6 +323,63 @@
             highlightFilledFilters();
         });
 
+        // Mini-modal de observações (clicável)
+        window.openObsPopup = function(btn, movimentacaoId) {
+            // Fechar qualquer popup aberto
+            closeObsPopup();
+
+            const template = document.getElementById('obs-text-' + movimentacaoId);
+            if (!template) return;
+
+            const obsText = template.innerHTML.trim();
+
+            // Criar overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'obs-popup-overlay';
+            overlay.className = 'fixed inset-0 bg-black/40 z-[9998]';
+            overlay.addEventListener('click', closeObsPopup);
+
+            // Criar popup
+            const popup = document.createElement('div');
+            popup.id = 'obs-popup';
+            popup.className = 'fixed z-[9999] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-600 p-0 max-w-md w-[90vw]';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+
+            popup.innerHTML = `
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-slate-700">
+                    <h4 class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" />
+                        </svg>
+                        Observações
+                    </h4>
+                    <button onclick="closeObsPopup()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200 whitespace-pre-line max-h-[60vh] overflow-y-auto leading-relaxed">${obsText}</div>
+            `;
+
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+        };
+
+        window.closeObsPopup = function() {
+            const overlay = document.getElementById('obs-popup-overlay');
+            const popup = document.getElementById('obs-popup');
+            if (overlay) overlay.remove();
+            if (popup) popup.remove();
+        };
+
+        // Fechar com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeObsPopup();
+        });
+
         // Funções para o modal de imagem
         window.openImageModal = function(imageUrl, id) {
             const modal = document.getElementById('imageModal');

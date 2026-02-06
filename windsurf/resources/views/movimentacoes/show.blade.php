@@ -115,14 +115,26 @@
                         </div>
                     </div>
 
-                    @if($movimentacao->observacao)
-                        <div class="mt-8">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Observação</h3>
-                            <div class="mt-4 p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-900 dark:text-gray-200">
+                    <div class="mt-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Observações</h3>
+                            <button onclick="openObservacaoModal({{ $movimentacao->id }})" class="btn-ghost-primary text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Adicionar Observação
+                            </button>
+                        </div>
+                        @if($movimentacao->observacao)
+                            <div class="p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-900 dark:text-gray-200 whitespace-pre-line" id="observacoes-container">
                                 {{ $movimentacao->observacao }}
                             </div>
-                        </div>
-                    @endif
+                        @else
+                            <div class="p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-500 dark:text-gray-400" id="observacoes-container">
+                                Nenhuma observação registrada.
+                            </div>
+                        @endif
+                    </div>
 
                     @if($movimentacao->anexo)
                         <div class="mt-8">
@@ -202,4 +214,99 @@
             </div>
         </div>
     </div>
+    <!-- Modal de Observação -->
+    <div id="observacaoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-slate-800">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Adicionar Observação</h3>
+                <div class="mt-4">
+                    <textarea id="observacaoTexto" rows="4" class="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600" placeholder="Digite a observação..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button onclick="closeObservacaoModal()" class="btn-ghost-secondary">
+                        Cancelar
+                    </button>
+                    <button onclick="saveObservacao()" class="btn-ghost-primary">
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script>
+        let currentMovimentacaoId = null;
+
+        function openObservacaoModal(movimentacaoId) {
+            currentMovimentacaoId = movimentacaoId;
+            document.getElementById('observacaoModal').classList.remove('hidden');
+            document.getElementById('observacaoTexto').value = '';
+            document.getElementById('observacaoTexto').focus();
+        }
+
+        function closeObservacaoModal() {
+            document.getElementById('observacaoModal').classList.add('hidden');
+            document.getElementById('observacaoTexto').value = '';
+            currentMovimentacaoId = null;
+        }
+
+        function saveObservacao() {
+            const observacao = document.getElementById('observacaoTexto').value.trim();
+
+            if (!observacao) {
+                alert('Por favor, digite uma observação.');
+                return;
+            }
+
+            fetch(`/movimentacoes/${currentMovimentacaoId}/observacao`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    observacao: observacao
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Atualizar o container de observações
+                    const container = document.getElementById('observacoes-container');
+                    container.textContent = data.observacoes;
+                    container.classList.remove('text-gray-500', 'dark:text-gray-400');
+                    container.classList.add('text-gray-900', 'dark:text-gray-200', 'whitespace-pre-line');
+
+                    closeObservacaoModal();
+
+                    // Mostrar mensagem de sucesso centralizada
+                    const successDiv = document.createElement('div');
+                    successDiv.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-xl shadow-2xl z-[9999] text-center';
+                    successDiv.innerHTML = '<div class="flex items-center gap-2 justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><p class="font-semibold text-base">' + data.message + '</p></div>';
+                    document.body.appendChild(successDiv);
+
+                    setTimeout(() => {
+                        successDiv.style.transition = 'opacity 0.5s';
+                        successDiv.style.opacity = '0';
+                        setTimeout(() => successDiv.remove(), 500);
+                    }, 5000);
+                } else {
+                    alert('Erro ao salvar observação. Tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao salvar observação. Tente novamente.');
+            });
+        }
+
+        // Fechar modal ao clicar fora dele
+        document.getElementById('observacaoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeObservacaoModal();
+            }
+        });
+    </script>
+    @endpush
 </x-app-layout>

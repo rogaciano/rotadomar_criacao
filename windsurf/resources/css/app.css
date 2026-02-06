@@ -140,6 +140,14 @@
         @apply text-sm text-gray-500 dark:text-gray-400;
     }
 
+    /* Table compact variant - for tables with many columns */
+    .table-compact .table-header-cell {
+        @apply px-2 py-2;
+    }
+    .table-compact .table-cell {
+        @apply px-2 py-3;
+    }
+
     /* Table empty state */
     .table-empty {
         @apply text-center py-4 text-gray-500 dark:text-gray-400;

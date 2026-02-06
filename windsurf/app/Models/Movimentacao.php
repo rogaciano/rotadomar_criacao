@@ -92,6 +92,35 @@ class Movimentacao extends Model
     }
 
     /**
+     * Relacionamento com observações
+     */
+    public function observacoes()
+    {
+        return $this->hasMany(MovimentacaoObservacao::class);
+    }
+
+    /**
+     * Accessor para manter compatibilidade com código existente
+     * Retorna todas as observações concatenadas
+     */
+    public function getObservacaoAttribute($value)
+    {
+        // Se não houver observações relacionadas, retorna o valor original do campo
+        if ($this->observacoes()->count() === 0) {
+            return $value;
+        }
+
+        // Retorna todas as observações concatenadas com linha divisória e data
+        return $this->observacoes()
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($obs) {
+                return '[' . $obs->created_at->format('d/m/Y H:i') . '] ' . $obs->observacao;
+            })
+            ->implode("\n──────────────────────────────────\n");
+    }
+
+    /**
      * Configuração do registro de atividades
      */
     public function getActivitylogOptions(): LogOptions

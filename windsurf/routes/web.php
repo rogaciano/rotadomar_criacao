@@ -199,6 +199,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
         'movimentacoes' => 'movimentacao'
     ]);
     Route::delete('movimentacoes/{movimentacao}/remover-anexo', [MovimentacaoController::class, 'removerAnexo'])->name('movimentacoes.remover-anexo');
+    Route::post('movimentacoes/{movimentacao}/observacao', [MovimentacaoController::class, 'storeObservacao'])->name('movimentacoes.observacao.store');
     Route::get('movimentacoes/{movimentacao}/pdf', [MovimentacaoController::class, 'generatePdf'])->name('movimentacoes.pdf');
     Route::get('movimentacoes-lista-pdf', [MovimentacaoController::class, 'generateListPdf'])->name('movimentacoes.lista.pdf');
 
