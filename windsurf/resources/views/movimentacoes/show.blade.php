@@ -446,7 +446,12 @@
                     observacao: observacao
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 403) {
+                    throw new Error('permission');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     const list = document.getElementById('observacoes-list');
@@ -458,12 +463,16 @@
                     closeObservacaoModal();
                     showSuccessToast(data.message || 'Observação adicionada com sucesso!');
                 } else {
-                    alert('Erro ao salvar observação. Tente novamente.');
+                    alert(data.message || 'Erro ao salvar observação. Tente novamente.');
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao salvar observação. Tente novamente.');
+                if (error.message === 'permission') {
+                    alert('Você não tem permissão para adicionar observações. Solicite acesso ao administrador.');
+                } else {
+                    alert('Erro ao salvar observação. Tente novamente.');
+                }
             });
         }
 
@@ -485,7 +494,12 @@
                     observacao: observacao
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 403) {
+                    throw new Error('permission');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     const item = document.getElementById(`observacao-item-${currentEditObservacaoId}`);
@@ -508,12 +522,16 @@
                     closeEditObservacaoModal();
                     showSuccessToast(data.message || 'Observação atualizada com sucesso!');
                 } else {
-                    alert('Erro ao atualizar observação. Tente novamente.');
+                    alert(data.message || 'Erro ao atualizar observação. Tente novamente.');
                 }
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao atualizar observação. Tente novamente.');
+                if (error.message === 'permission') {
+                    alert('Você não tem permissão para editar observações. Solicite acesso ao administrador.');
+                } else {
+                    alert('Erro ao atualizar observação. Tente novamente.');
+                }
             });
         }
 
@@ -529,7 +547,12 @@
                     'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 403) {
+                    throw new Error('permission');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     const item = document.getElementById(`observacao-item-${observacaoId}`);
@@ -542,7 +565,11 @@
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao excluir observação. Tente novamente.');
+                if (error.message === 'permission') {
+                    alert('Você não tem permissão para excluir observações. Solicite acesso ao administrador.');
+                } else {
+                    alert('Erro ao excluir observação. Tente novamente.');
+                }
             });
         }
 
