@@ -118,22 +118,52 @@
                     <div class="mt-8">
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-medium text-gray-900 dark:text-white">Observações</h3>
-                            <button onclick="openObservacaoModal({{ $movimentacao->id }})" class="btn-ghost-primary text-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                Adicionar Observação
-                            </button>
+                            @if(auth()->user()->canCreate('movimentacoes_observacoes'))
+                                <button onclick="openObservacaoModal({{ $movimentacao->id }})" class="btn-ghost-primary text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Adicionar Observação
+                                </button>
+                            @endif
                         </div>
-                        @if($movimentacao->observacao)
-                            <div class="p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-900 dark:text-gray-200 whitespace-pre-line" id="observacoes-container">
-                                {{ $movimentacao->observacao }}
-                            </div>
-                        @else
-                            <div class="p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-500 dark:text-gray-400" id="observacoes-container">
-                                Nenhuma observação registrada.
-                            </div>
-                        @endif
+
+                        <div class="space-y-3" id="observacoes-list">
+                            @forelse($movimentacao->observacoes as $obs)
+                                <div id="observacao-item-{{ $obs->id }}" class="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                                    <div class="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-line" data-observacao-text>{{ $obs->observacao }}</div>
+                                    <div class="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                        <div class="flex items-center" data-observacao-created>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span data-observacao-created-at>Criado em {{ $obs->created_at->format('d/m/Y H:i') }}</span>
+                                        </div>
+                                        <div class="flex items-center {{ $obs->updated_at && $obs->updated_at->ne($obs->created_at) ? '' : 'hidden' }}" data-observacao-updated>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span data-observacao-updated-at>Atualizado em {{ $obs->updated_at->format('d/m/Y H:i') }}</span>
+                                        </div>
+                                    </div>
+                                    @if(auth()->user()->canUpdate('movimentacoes_observacoes') || auth()->user()->canDelete('movimentacoes_observacoes'))
+                                        <div class="mt-2 flex items-center gap-3 text-xs" data-observacao-actions>
+                                            @if(auth()->user()->canUpdate('movimentacoes_observacoes'))
+                                                <button type="button" onclick="openEditObservacaoModal({{ $obs->id }})" class="text-blue-600 hover:text-blue-800">Editar</button>
+                                            @endif
+                                            @if(auth()->user()->canDelete('movimentacoes_observacoes'))
+                                                <button type="button" onclick="confirmDeleteObservacao({{ $obs->id }})" class="text-red-600 hover:text-red-800">Excluir</button>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    <template id="observacao-text-{{ $obs->id }}">{{ $obs->observacao }}</template>
+                                </div>
+                            @empty
+                                <div id="observacoes-empty" class="p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-500 dark:text-gray-400">
+                                    Nenhuma observação registrada.
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
 
                     @if($movimentacao->anexo)
@@ -159,13 +189,17 @@
                     {{-- Histórico de Alterações --}}
                     @if(isset($activities) && $activities->count() > 0)
                         <div class="mt-8">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button type="button" onclick="document.getElementById('historicoContent').classList.toggle('hidden'); document.getElementById('historicoChevron').classList.toggle('rotate-90');" class="flex items-center gap-2 text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer w-full text-left">
+                                <svg id="historicoChevron" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Histórico de Alterações
-                            </h3>
-                            <div class="mt-4 space-y-3">
+                                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">({{ $activities->count() }})</span>
+                            </button>
+                            <div id="historicoContent" class="mt-4 space-y-3 hidden">
                                 @foreach($activities as $activity)
                                     <div class="p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                                         <div class="flex justify-between items-start">
@@ -180,6 +214,12 @@
                                                         atualizou este registro
                                                     @elseif($activity->event == 'deleted')
                                                         excluiu este registro
+                                                    @elseif($activity->event == 'observacao_criada')
+                                                        adicionou uma observação
+                                                    @elseif($activity->event == 'observacao_atualizada')
+                                                        atualizou uma observação
+                                                    @elseif($activity->event == 'observacao_excluida')
+                                                        excluiu uma observação
                                                     @else
                                                         {{ $activity->event }}
                                                     @endif
@@ -189,7 +229,31 @@
                                                 {{ $activity->created_at->format('d/m/Y H:i') }}
                                             </span>
                                         </div>
-                                        @if($activity->event == 'updated' && $activity->properties->has('old'))
+                                        @php
+                                            $isObsEvent = in_array($activity->event, ['observacao_criada', 'observacao_atualizada', 'observacao_excluida']);
+                                        @endphp
+                                        @if($isObsEvent)
+                                            <div class="mt-3 text-sm space-y-2">
+                                                @if($activity->event == 'observacao_criada')
+                                                    <div class="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                                        {{ data_get($activity->properties, 'observacao') }}
+                                                    </div>
+                                                @elseif($activity->event == 'observacao_atualizada')
+                                                    <div class="space-y-1">
+                                                        <div class="text-red-600 dark:text-red-400 line-through whitespace-pre-line">
+                                                            {{ data_get($activity->properties, 'observacao_antiga') }}
+                                                        </div>
+                                                        <div class="text-green-600 dark:text-green-400 whitespace-pre-line">
+                                                            {{ data_get($activity->properties, 'observacao_nova') }}
+                                                        </div>
+                                                    </div>
+                                                @elseif($activity->event == 'observacao_excluida')
+                                                    <div class="text-gray-700 dark:text-gray-300 line-through whitespace-pre-line">
+                                                        {{ data_get($activity->properties, 'observacao') }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @elseif($activity->event == 'updated' && $activity->properties->has('old'))
                                             <div class="mt-3 text-sm space-y-1">
                                                 @foreach($activity->properties['attributes'] ?? [] as $key => $value)
                                                     @if(isset($activity->properties['old'][$key]) && $activity->properties['old'][$key] != $value)
@@ -214,9 +278,29 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Edição de Observação -->
+    <div id="editObservacaoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-[56rem] max-w-[95vw] shadow-lg rounded-md bg-white dark:bg-slate-800">
+            <div class="mt-3">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Editar Observação</h3>
+                <div class="mt-4">
+                    <textarea id="editObservacaoTexto" rows="4" class="w-full px-3 py-2 text-gray-700 dark:text-gray-200 border rounded-lg focus:outline-none focus:border-blue-500 dark:bg-slate-700 dark:border-slate-600" placeholder="Digite a observação..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 mt-4">
+                    <button onclick="closeEditObservacaoModal()" class="btn-ghost-secondary">
+                        Cancelar
+                    </button>
+                    <button onclick="saveEditObservacao()" class="btn-ghost-primary">
+                        Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Modal de Observação -->
     <div id="observacaoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-slate-800">
+        <div class="relative top-20 mx-auto p-5 border w-[56rem] max-w-[95vw] shadow-lg rounded-md bg-white dark:bg-slate-800">
             <div class="mt-3">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">Adicionar Observação</h3>
                 <div class="mt-4">
@@ -237,6 +321,82 @@
     @push('scripts')
     <script>
         let currentMovimentacaoId = null;
+        let currentEditObservacaoId = null;
+        const canUpdateObservacao = @json(auth()->user()->canUpdate('movimentacoes_observacoes'));
+        const canDeleteObservacao = @json(auth()->user()->canDelete('movimentacoes_observacoes'));
+
+        function showSuccessToast(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-xl shadow-2xl z-[9999] text-center';
+            successDiv.innerHTML = '<div class="flex items-center gap-2 justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><p class="font-semibold text-base">' + message + '</p></div>';
+            document.body.appendChild(successDiv);
+
+            setTimeout(() => {
+                successDiv.style.transition = 'opacity 0.5s';
+                successDiv.style.opacity = '0';
+                setTimeout(() => successDiv.remove(), 500);
+            }, 5000);
+        }
+
+        function buildObservacaoItem(obs) {
+            const wrapper = document.createElement('div');
+            wrapper.id = `observacao-item-${obs.id}`;
+            wrapper.className = 'p-4 bg-gray-50 dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700';
+
+            const actionsHtml = (canUpdateObservacao || canDeleteObservacao)
+                ? `<div class="mt-2 flex items-center gap-3 text-xs" data-observacao-actions>
+                        ${canUpdateObservacao ? `<button type="button" onclick="openEditObservacaoModal(${obs.id})" class="text-blue-600 hover:text-blue-800">Editar</button>` : ''}
+                        ${canDeleteObservacao ? `<button type="button" onclick="confirmDeleteObservacao(${obs.id})" class="text-red-600 hover:text-red-800">Excluir</button>` : ''}
+                   </div>`
+                : '';
+
+            const showUpdated = obs.updated_at && obs.updated_at !== obs.created_at;
+            wrapper.innerHTML = `
+                <div class="text-sm text-gray-900 dark:text-gray-200 whitespace-pre-line" data-observacao-text></div>
+                <div class="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                    <div class="flex items-center" data-observacao-created>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                        </svg>
+                        <span data-observacao-created-at>Criado em ${obs.created_at}</span>
+                    </div>
+                    <div class="flex items-center ${showUpdated ? '' : 'hidden'}" data-observacao-updated>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                        </svg>
+                        <span data-observacao-updated-at>${showUpdated ? `Atualizado em ${obs.updated_at}` : ''}</span>
+                    </div>
+                </div>
+                ${actionsHtml}
+                <template id="observacao-text-${obs.id}"></template>
+            `;
+
+            const textEl = wrapper.querySelector('[data-observacao-text]');
+            textEl.textContent = obs.texto;
+            const templateEl = wrapper.querySelector(`#observacao-text-${obs.id}`);
+            if (templateEl) {
+                templateEl.textContent = obs.texto;
+            }
+
+            return wrapper;
+        }
+
+        function updateEmptyState() {
+            const list = document.getElementById('observacoes-list');
+            if (!list) return;
+            const items = list.querySelectorAll('[id^="observacao-item-"]');
+            const empty = document.getElementById('observacoes-empty');
+
+            if (items.length === 0 && !empty) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.id = 'observacoes-empty';
+                emptyDiv.className = 'p-4 bg-gray-50 dark:bg-slate-800 rounded-md text-gray-500 dark:text-gray-400';
+                emptyDiv.textContent = 'Nenhuma observação registrada.';
+                list.appendChild(emptyDiv);
+            } else if (items.length > 0 && empty) {
+                empty.remove();
+            }
+        }
 
         function openObservacaoModal(movimentacaoId) {
             currentMovimentacaoId = movimentacaoId;
@@ -249,6 +409,23 @@
             document.getElementById('observacaoModal').classList.add('hidden');
             document.getElementById('observacaoTexto').value = '';
             currentMovimentacaoId = null;
+        }
+
+        function openEditObservacaoModal(observacaoId) {
+            currentEditObservacaoId = observacaoId;
+            const item = document.getElementById(`observacao-item-${observacaoId}`);
+            const textEl = item ? item.querySelector('[data-observacao-text]') : null;
+            const template = document.getElementById(`observacao-text-${observacaoId}`);
+            const texto = (textEl && textEl.textContent) ? textEl.textContent : (template ? template.textContent : '');
+            document.getElementById('editObservacaoTexto').value = texto.trim();
+            document.getElementById('editObservacaoModal').classList.remove('hidden');
+            document.getElementById('editObservacaoTexto').focus();
+        }
+
+        function closeEditObservacaoModal() {
+            document.getElementById('editObservacaoModal').classList.add('hidden');
+            document.getElementById('editObservacaoTexto').value = '';
+            currentEditObservacaoId = null;
         }
 
         function saveObservacao() {
@@ -272,25 +449,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Atualizar o container de observações
-                    const container = document.getElementById('observacoes-container');
-                    container.textContent = data.observacoes;
-                    container.classList.remove('text-gray-500', 'dark:text-gray-400');
-                    container.classList.add('text-gray-900', 'dark:text-gray-200', 'whitespace-pre-line');
-
+                    const list = document.getElementById('observacoes-list');
+                    if (list && data.observacao) {
+                        const item = buildObservacaoItem(data.observacao);
+                        list.appendChild(item);
+                        updateEmptyState();
+                    }
                     closeObservacaoModal();
-
-                    // Mostrar mensagem de sucesso centralizada
-                    const successDiv = document.createElement('div');
-                    successDiv.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-xl shadow-2xl z-[9999] text-center';
-                    successDiv.innerHTML = '<div class="flex items-center gap-2 justify-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><p class="font-semibold text-base">' + data.message + '</p></div>';
-                    document.body.appendChild(successDiv);
-
-                    setTimeout(() => {
-                        successDiv.style.transition = 'opacity 0.5s';
-                        successDiv.style.opacity = '0';
-                        setTimeout(() => successDiv.remove(), 500);
-                    }, 5000);
+                    showSuccessToast(data.message || 'Observação adicionada com sucesso!');
                 } else {
                     alert('Erro ao salvar observação. Tente novamente.');
                 }
@@ -301,10 +467,95 @@
             });
         }
 
+        function saveEditObservacao() {
+            const observacao = document.getElementById('editObservacaoTexto').value.trim();
+
+            if (!observacao) {
+                alert('Por favor, digite uma observação.');
+                return;
+            }
+
+            fetch(`/movimentacoes/observacoes/${currentEditObservacaoId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    observacao: observacao
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const item = document.getElementById(`observacao-item-${currentEditObservacaoId}`);
+                    if (item) {
+                        const textEl = item.querySelector('[data-observacao-text]');
+                        if (textEl) textEl.textContent = observacao;
+                        const templateEl = document.getElementById(`observacao-text-${currentEditObservacaoId}`);
+                        if (templateEl) templateEl.textContent = observacao;
+                        if (data.observacao && data.observacao.updated_at) {
+                            const updatedWrapper = item.querySelector('[data-observacao-updated]');
+                            const updatedText = item.querySelector('[data-observacao-updated-at]');
+                            if (updatedText) {
+                                updatedText.textContent = `Atualizado em ${data.observacao.updated_at}`;
+                            }
+                            if (updatedWrapper) {
+                                updatedWrapper.classList.remove('hidden');
+                            }
+                        }
+                    }
+                    closeEditObservacaoModal();
+                    showSuccessToast(data.message || 'Observação atualizada com sucesso!');
+                } else {
+                    alert('Erro ao atualizar observação. Tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao atualizar observação. Tente novamente.');
+            });
+        }
+
+        function confirmDeleteObservacao(observacaoId) {
+            if (!confirm('Tem certeza que deseja excluir esta observação?')) {
+                return;
+            }
+
+            fetch(`/movimentacoes/observacoes/${observacaoId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const item = document.getElementById(`observacao-item-${observacaoId}`);
+                    if (item) item.remove();
+                    updateEmptyState();
+                    showSuccessToast(data.message || 'Observação excluída com sucesso!');
+                } else {
+                    alert('Erro ao excluir observação. Tente novamente.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao excluir observação. Tente novamente.');
+            });
+        }
+
         // Fechar modal ao clicar fora dele
         document.getElementById('observacaoModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeObservacaoModal();
+            }
+        });
+
+        document.getElementById('editObservacaoModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditObservacaoModal();
             }
         });
     </script>

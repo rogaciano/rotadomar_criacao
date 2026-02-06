@@ -9,6 +9,7 @@ use App\Models\GrupoProduto;
 use App\Models\Localizacao;
 use App\Models\Marca;
 use App\Models\Movimentacao;
+use App\Models\MovimentacaoObservacao;
 use App\Models\Produto;
 use App\Models\Situacao;
 use App\Models\Status;
@@ -400,7 +401,6 @@ class MovimentacaoController extends Controller
             $movimentacao->data_entrada = $validated['data_entrada'];
             $movimentacao->data_saida = $validated['data_saida'] ?? null;
             $movimentacao->data_devolucao = $validated['data_devolucao'] ?? null;
-            $movimentacao->observacao = $validated['observacao'] ?? null;
             $movimentacao->comprometido = 0; // Valor padrão
             $movimentacao->created_by = auth()->id(); // Salvar o usuário que criou
 
@@ -415,6 +415,13 @@ class MovimentacaoController extends Controller
             }
 
             $movimentacao->save();
+
+            // Salvar observação na tabela movimentacoes_observacoes
+            if (!empty($validated['observacao'])) {
+                $movimentacao->observacoes()->create([
+                    'observacao' => $validated['observacao']
+                ]);
+            }
 
             // Criar notificação para nova movimentação
             $notificacaoService = new NotificacaoService();
@@ -446,6 +453,12 @@ class MovimentacaoController extends Controller
         }
 
         $backUrl = $request->query('back_url');
+
+        $movimentacao->load([
+            'observacoes' => function ($query) {
+                $query->orderBy('created_at', 'asc');
+            }
+        ]);
 
         // Buscar histórico de atividades desta movimentação
         $activities = \Spatie\Activitylog\Models\Activity::where('subject_type', Movimentacao::class)
@@ -549,6 +562,9 @@ class MovimentacaoController extends Controller
         // Tratar checkbox concluido (quando não marcado, não vem no request)
         $concluidoAntes = $movimentacao->concluido;
         $validated['concluido'] = $request->has('concluido');
+
+        // Remover observacao do update direto - observações são gerenciadas pela tabela movimentacoes_observacoes
+        unset($validated['observacao']);
 
         $movimentacao->update($validated);
 
@@ -804,7 +820,7 @@ class MovimentacaoController extends Controller
      */
     public function storeObservacao(Request $request, Movimentacao $movimentacao)
     {
-        if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
+        if (!auth()->user() || !auth()->user()->canCreate('movimentacoes_observacoes')) {
             abort(403, 'Acesso negado.');
         }
 
@@ -812,14 +828,104 @@ class MovimentacaoController extends Controller
             'observacao' => 'required|string|max:5000'
         ]);
 
-        $movimentacao->observacoes()->create([
+        $observacao = $movimentacao->observacoes()->create([
             'observacao' => $request->observacao
         ]);
+
+        activity()
+            ->performedOn($movimentacao)
+            ->causedBy(auth()->user())
+            ->event('observacao_criada')
+            ->withProperties([
+                'observacao_id' => $observacao->id,
+                'observacao' => $observacao->observacao,
+            ])
+            ->log('Observação adicionada');
 
         return response()->json([
             'success' => true,
             'message' => 'Observação adicionada com sucesso!',
-            'observacoes' => $movimentacao->fresh()->observacao
+            'observacoes' => $movimentacao->fresh()->observacao,
+            'observacao' => [
+                'id' => $observacao->id,
+                'texto' => $observacao->observacao,
+                'created_at' => $observacao->created_at->format('d/m/Y H:i')
+            ]
+        ]);
+    }
+
+    /**
+     * Atualizar uma observação existente
+     */
+    public function updateObservacao(Request $request, MovimentacaoObservacao $observacao)
+    {
+        if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes_observacoes')) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $request->validate([
+            'observacao' => 'required|string|max:5000'
+        ]);
+
+        $textoAnterior = $observacao->observacao;
+        $observacao->update([
+            'observacao' => $request->observacao
+        ]);
+
+        $movimentacao = $observacao->movimentacao;
+        if ($movimentacao) {
+            activity()
+                ->performedOn($movimentacao)
+                ->causedBy(auth()->user())
+                ->event('observacao_atualizada')
+                ->withProperties([
+                    'observacao_id' => $observacao->id,
+                    'observacao_antiga' => $textoAnterior,
+                    'observacao_nova' => $observacao->observacao,
+                ])
+                ->log('Observação atualizada');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Observação atualizada com sucesso!',
+            'observacao' => [
+                'id' => $observacao->id,
+                'texto' => $observacao->observacao,
+                'updated_at' => $observacao->updated_at->format('d/m/Y H:i')
+            ]
+        ]);
+    }
+
+    /**
+     * Excluir uma observação
+     */
+    public function destroyObservacao(MovimentacaoObservacao $observacao)
+    {
+        if (!auth()->user() || !auth()->user()->canDelete('movimentacoes_observacoes')) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $textoObservacao = $observacao->observacao;
+        $movimentacao = $observacao->movimentacao;
+
+        $observacao->delete();
+
+        if ($movimentacao) {
+            activity()
+                ->performedOn($movimentacao)
+                ->causedBy(auth()->user())
+                ->event('observacao_excluida')
+                ->withProperties([
+                    'observacao_id' => $observacao->id,
+                    'observacao' => $textoObservacao,
+                ])
+                ->log('Observação excluída');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Observação excluída com sucesso!'
         ]);
     }
 }
