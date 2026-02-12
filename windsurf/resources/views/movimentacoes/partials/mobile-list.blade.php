@@ -80,9 +80,9 @@
 
                         if ($movimentacao->data_entrada) {
                             if ($movimentacao->data_saida) {
-                                $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
+                                $diasEntre = \App\Helpers\MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
                             } else {
-                                $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
+                                $diasEntre = \App\Helpers\MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada, now());
                             }
 
                             // Verificar prazo: prioridade para situação, depois localização

@@ -31,16 +31,18 @@ class MigrateMovimentacaoObservacoes extends Command
     public function handle()
     {
         $isDryRun = $this->option('dry-run');
-        
+
         if ($isDryRun) {
             $this->info('Executando em modo DRY RUN - nenhuma alteração será feita.');
         }
 
         $this->info('Iniciando migração de observações...');
 
-        // Buscar todas as movimentações com observações não vazias
-        $movimentacoes = Movimentacao::whereNotNull('observacao')
+        // Usar DB::table para evitar o accessor getObservacaoAttribute que retorna dados da relação
+        $movimentacoes = DB::table('movimentacoes')
+            ->whereNotNull('observacao')
             ->where('observacao', '!=', '')
+            ->whereNull('deleted_at')
             ->get();
 
         $this->info("Encontradas {$movimentacoes->count()} movimentações com observações.");
@@ -51,7 +53,7 @@ class MigrateMovimentacaoObservacoes extends Command
         foreach ($movimentacoes as $movimentacao) {
             // Verificar se já existem observações migradas para esta movimentação
             $existingObservacoes = MovimentacaoObservacao::where('movimentacao_id', $movimentacao->id)->count();
-            
+
             if ($existingObservacoes > 0) {
                 $this->line("Movimentação ID {$movimentacao->id} já possui observações migradas. Pulando...");
                 $skipped++;
@@ -61,8 +63,8 @@ class MigrateMovimentacaoObservacoes extends Command
             if (!$isDryRun) {
                 try {
                     DB::beginTransaction();
-                    
-                    // Criar nova observação com o conteúdo original
+
+                    // Criar nova observação com o conteúdo original (usando valor bruto da coluna)
                     MovimentacaoObservacao::create([
                         'movimentacao_id' => $movimentacao->id,
                         'observacao' => $movimentacao->observacao,

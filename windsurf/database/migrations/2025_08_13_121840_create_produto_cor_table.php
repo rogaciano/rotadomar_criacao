@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('produto_cor')) {
+            return;
+        }
+
         Schema::create('produto_cor', function (Blueprint $table) {
             $table->id();
             $table->foreignId('produto_id')->constrained('produtos')->onDelete('cascade');
@@ -19,7 +23,7 @@ return new class extends Migration
             $table->string('cor_rgb', 7)->nullable(); // Formato #RRGGBB
             $table->integer('quantidade'); // Quantidade desta cor específica
             $table->timestamps();
-            
+
             // Ensure unique combination of produto_id, cor and codigo_cor
             $table->unique(['produto_id', 'cor', 'codigo_cor']);
         });

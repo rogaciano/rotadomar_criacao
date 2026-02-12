@@ -18,6 +18,7 @@ use App\Models\Tipo;
 use App\Services\NotificacaoService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class MovimentacaoController extends Controller
 {
@@ -231,7 +232,7 @@ class MovimentacaoController extends Controller
         // Ordenação
         if ($request->filled('sort') && $request->filled('direction')) {
             $sortField = $request->sort;
-            $direction = $request->direction;
+            $direction = in_array(strtolower($request->direction), ['asc', 'desc']) ? $request->direction : 'asc';
 
             // Mapear os campos de ordenação para as colunas corretas no banco de dados
             switch ($sortField) {
@@ -409,7 +410,7 @@ class MovimentacaoController extends Controller
             // Upload de anexo se existir
             if ($request->hasFile('anexo')) {
                 $anexo = $request->file('anexo');
-                $nomeArquivo = time() . '_' . $anexo->getClientOriginalName();
+                $nomeArquivo = time() . '_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $anexo->getClientOriginalName());
                 $anexo->move(public_path('uploads/movimentacoes'), $nomeArquivo);
                 $movimentacao->anexo = $nomeArquivo;
             }
@@ -551,7 +552,7 @@ class MovimentacaoController extends Controller
             }
 
             $anexo = $request->file('anexo');
-            $nomeArquivo = time() . '_' . $anexo->getClientOriginalName();
+            $nomeArquivo = time() . '_' . preg_replace('/[^A-Za-z0-9\-\.]/', '_', $anexo->getClientOriginalName());
             $anexo->move(public_path('uploads/movimentacoes'), $nomeArquivo);
             $validated['anexo'] = $nomeArquivo;
         } else {
@@ -575,7 +576,7 @@ class MovimentacaoController extends Controller
         }
 
         // Verificar se existe back_url para retornar à página de origem
-        if ($request->has('back_url') && $request->back_url) {
+        if ($request->has('back_url') && $request->back_url && Str::startsWith($request->back_url, ['/', url('/')])) {
             return redirect($request->back_url)
                     ->with('success', 'Movimentação atualizada com sucesso!');
         }
@@ -737,7 +738,7 @@ class MovimentacaoController extends Controller
         // Ordenação
         if ($request->filled('sort') && $request->filled('direction')) {
             $sortField = $request->sort;
-            $direction = $request->direction;
+            $direction = in_array(strtolower($request->direction), ['asc', 'desc']) ? $request->direction : 'asc';
 
             // Mapear os campos de ordenação para as colunas corretas no banco de dados
             switch ($sortField) {

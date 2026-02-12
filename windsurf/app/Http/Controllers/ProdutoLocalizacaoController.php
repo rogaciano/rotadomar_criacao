@@ -6,6 +6,7 @@ use App\Models\Produto;
 use App\Models\Localizacao;
 use App\Models\ProdutoLocalizacao;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProdutoLocalizacaoController extends Controller
 {
@@ -280,7 +281,7 @@ class ProdutoLocalizacaoController extends Controller
         // Notificar setor
         $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
 
-        if ($request->has('back_url')) {
+        if ($request->has('back_url') && Str::startsWith($request->back_url, ['/', url('/')])) {
             return redirect($request->back_url)->with('success', 'Etapa avançada com sucesso!');
         }
 
@@ -324,7 +325,7 @@ class ProdutoLocalizacaoController extends Controller
         // Notificar setor
         $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
 
-        if ($request->has('back_url')) {
+        if ($request->has('back_url') && Str::startsWith($request->back_url, ['/', url('/')])) {
             return redirect($request->back_url)->with('success', 'Etapa revertida com sucesso!');
         }
 
@@ -367,7 +368,7 @@ class ProdutoLocalizacaoController extends Controller
             ])
             ->log('Etapa da localização limpa (resetada)');
 
-        if ($request->has('back_url')) {
+        if ($request->has('back_url') && Str::startsWith($request->back_url, ['/', url('/')])) {
             return redirect($request->back_url)->with('success', 'Etapa limpa com sucesso!');
         }
 
@@ -416,7 +417,7 @@ class ProdutoLocalizacaoController extends Controller
         // Notificar setor
         $this->notificacaoService->criarNotificacaoMudancaEtapa($produtoLocalizacao);
 
-        if ($request->has('back_url')) {
+        if ($request->has('back_url') && Str::startsWith($request->back_url, ['/', url('/')])) {
             return redirect($request->back_url)->with('success', 'Etapa definida com sucesso!');
         }
 

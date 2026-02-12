@@ -6,33 +6,6 @@
     </x-slot>
 
     <div class="py-8 bg-slate-50 dark:bg-slate-950">
-        @php
-        // Função para calcular dias úteis entre duas datas (excluindo sábados e domingos)
-        if (!function_exists('calcularDiasUteis')) {
-            function calcularDiasUteis($dataInicio, $dataFim) {
-                if (!$dataInicio) return null;
-
-                if (!$dataFim) {
-                    $dataFim = now();
-                }
-
-                $diasUteis = 0;
-                $dataAtual = clone $dataInicio;
-
-                while ($dataAtual <= $dataFim) {
-                    // 6 = sábado, 0 = domingo
-                    $diaDaSemana = $dataAtual->dayOfWeek;
-                    if ($diaDaSemana != 0 && $diaDaSemana != 6) {
-                        $diasUteis++;
-                    }
-                    $dataAtual->addDay();
-                }
-
-                return $diasUteis;
-            }
-        }
-        @endphp
-
         <div class="w-[98%] mx-auto px-2">
             <!-- Botões de ação -->
             @include('movimentacoes.partials.header-actions')

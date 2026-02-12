@@ -278,10 +278,10 @@
                             if ($movimentacao->data_entrada) {
                                 if ($movimentacao->data_saida) {
                                     // Se tem data de saída, calcular dias úteis entre entrada e saída
-                                    $diasEntre = calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
+                                    $diasEntre = \App\Helpers\MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada, $movimentacao->data_saida);
                                 } else {
                                     // Se não tem data de saída, calcular dias úteis entre entrada e data atual
-                                    $diasEntre = calcularDiasUteis($movimentacao->data_entrada, now());
+                                    $diasEntre = \App\Helpers\MovimentacaoHelper::calcularDiasUteis($movimentacao->data_entrada, now());
                                 }
 
                                 // Verificar prazo: prioridade para situação, depois localização

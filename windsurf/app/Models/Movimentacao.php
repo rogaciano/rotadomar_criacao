@@ -105,15 +105,18 @@ class Movimentacao extends Model
      */
     public function getObservacaoAttribute($value)
     {
+        // Usar a relação já carregada se disponível, evitando queries N+1
+        $observacoes = $this->relationLoaded('observacoes')
+            ? $this->getRelation('observacoes')->sortBy('created_at')
+            : $this->observacoes()->orderBy('created_at', 'asc')->get();
+
         // Se não houver observações relacionadas, retorna o valor original do campo
-        if ($this->observacoes()->count() === 0) {
+        if ($observacoes->isEmpty()) {
             return $value;
         }
 
         // Retorna todas as observações concatenadas com linha divisória e data
-        return $this->observacoes()
-            ->orderBy('created_at', 'asc')
-            ->get()
+        return $observacoes
             ->map(function ($obs) {
                 return '[' . $obs->created_at->format('d/m/Y H:i') . '] ' . $obs->observacao;
             })
