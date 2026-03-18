@@ -1,5 +1,22 @@
 ﻿<!-- Localizações -->
-<div class="bg-gray-50 dark:bg-slate-800/50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6">
+<div class="bg-gray-50 dark:bg-slate-800/50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6"
+    x-data="{
+        modalEtapaAberto: false,
+        modalEtapaAction: '',
+        modalEtapaId: null,
+        modalEtapaNome: '',
+        modalEtapaObservacao: '',
+        abrirModalEtapa(action, etapaId, etapaNome) {
+            this.modalEtapaAction = action;
+            this.modalEtapaId = etapaId;
+            this.modalEtapaNome = etapaNome;
+            this.modalEtapaObservacao = '';
+            this.modalEtapaAberto = true;
+        },
+        fecharModalEtapa() {
+            this.modalEtapaAberto = false;
+        }
+    }">
     @php
         $canCreateProdutoLocalizacoes = auth()->user()->canCreate('produto_localizacao');
         $canUpdateProdutoLocalizacoes = auth()->user()->canUpdate('produto_localizacao');
@@ -238,11 +255,11 @@
                                         @endif
                                         <div x-show="showEtapaMenu" x-transition class="absolute z-20 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200">
                                             @foreach($etapasProducao as $etapa)
-                                                <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
-                                                    <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1">{{ $etapa->icone ?? '' }} {{ $etapa->nome }}</button>
-                                                </form>
+                                                <button type="button"
+                                                    @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $etapa->id }}, {{ Js::from($etapa->nome) }}); showEtapaMenu = false"
+                                                    class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1">
+                                                    {{ $etapa->icone ?? '' }} {{ $etapa->nome }}
+                                                </button>
                                             @endforeach
                                         </div>
                                     </div>
@@ -252,11 +269,11 @@
                                 @if($transicoes->count() > 0 && $podeGerenciarEtapa)
                                     <div class="space-y-1">
                                         @foreach($transicoes as $transicao)
-                                            <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                <button type="submit" class="w-full text-left px-2 py-0.5 rounded text-[10px] font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">→ {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</button>
-                                            </form>
+                                            <button type="button"
+                                                @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $transicao->etapa_destino_id }}, {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }})"
+                                                class="w-full text-left px-2 py-0.5 rounded text-[10px] font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
+                                                → {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
+                                            </button>
                                         @endforeach
                                     </div>
                                 @endif
@@ -411,16 +428,14 @@
                                     @if($transicoes && $transicoes->count() > 0)
                                         <div class="grid grid-cols-{{ min($transicoes->count(), 2) }} gap-2">
                                             @foreach($transicoes as $transicao)
-                                                <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="w-full">
-                                                    @csrf
-                                                    <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                    <button type="submit" class="w-full py-2.5 rounded-lg text-xs font-bold text-white shadow-md flex items-center justify-center gap-1 {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
-                                                        <span>{{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</span>
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                                        </svg>
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                    @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $transicao->etapa_destino_id }}, {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }})"
+                                                    class="w-full py-2.5 rounded-lg text-xs font-bold text-white shadow-md flex items-center justify-center gap-1 {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
+                                                    <span>{{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</span>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
                                             @endforeach
                                         </div>
                                     @elseif(!$etapaAtual)
@@ -432,17 +447,15 @@
                                                 </svg>
                                                 INICIAR PRODUÇÃO (DEFINIR ETAPA)
                                             </button>
-                                            
+
                                             <div x-show="openMenu" @click.away="openMenu = false" class="absolute left-0 right-0 bottom-full mb-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-600 z-50 overflow-hidden max-h-60 overflow-y-auto" style="display: none;">
                                                 @foreach($etapasProducao as $etapa)
-                                                    <form action="{{ route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
-                                                        <button type="submit" class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">
-                                                            <span class="w-5 text-center">{{ $etapa->icone ?? '•' }}</span>
-                                                            <span class="font-medium">{{ $etapa->nome }}</span>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                        @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $etapa->id }}, {{ Js::from($etapa->nome) }}); openMenu = false"
+                                                        class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">
+                                                        <span class="w-5 text-center">{{ $etapa->icone ?? '•' }}</span>
+                                                        <span class="font-medium">{{ $etapa->nome }}</span>
+                                                    </button>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -504,4 +517,55 @@
             </div>
         </div>
     @endif
+
+    <!-- Modal de Observação para Mudança de Etapa -->
+    <div x-show="modalEtapaAberto"
+         x-transition
+         class="fixed inset-0 z-50 overflow-y-auto"
+         style="display: none;"
+         aria-labelledby="modal-title"
+         role="dialog"
+         aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="fecharModalEtapa()"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                <form :action="modalEtapaAction" method="POST">
+                    @csrf
+                    <input type="hidden" name="etapa_id" :value="modalEtapaId">
+
+                    <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 id="modal-title" class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">
+                            Confirmar mudança de etapa
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            Etapa selecionada: <span class="font-medium" x-text="modalEtapaNome"></span>
+                        </p>
+
+                        <div class="mt-4">
+                            <label for="observacao_etapa" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observação (opcional)</label>
+                            <textarea id="observacao_etapa"
+                                      name="observacao"
+                                      rows="4"
+                                      maxlength="255"
+                                      x-model="modalEtapaObservacao"
+                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                                      placeholder="Digite uma observação para registrar no histórico..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">
+                            Confirmar
+                        </button>
+                        <button type="button" @click="fecharModalEtapa()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-slate-800 dark:text-gray-300 dark:border-slate-600 dark:hover:bg-slate-700">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

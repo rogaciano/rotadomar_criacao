@@ -12,6 +12,7 @@ use App\Models\Status;
 use App\Models\Situacao;
 use App\Models\GrupoProduto;
 use App\Models\Localizacao;
+use App\Models\Sugestao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -25,10 +26,14 @@ class DashboardController extends Controller
     public function index()
     {
         // Estatísticas gerais
+        $user = auth()->user();
         $totalProdutos = Produto::count();
         $totalMovimentacoes = Movimentacao::count();
         $movimentacoesHoje = Movimentacao::whereDate('created_at', Carbon::today())->count();
         $totalGrupoProdutos = GrupoProduto::count();
+        $sugestoesNaoLidas = Sugestao::visiveisPara($user)
+            ->where('status', Sugestao::STATUS_NAO_LIDA)
+            ->count();
 
         // Estatísticas de produtos por ano
         $anoAtual = Carbon::now()->year;
@@ -176,10 +181,10 @@ class DashboardController extends Controller
         // Dados de Capacidade das Localizações (3 meses: atual + 2 futuros)
         $mesAtual = Carbon::now()->month;
         $anoAtual = Carbon::now()->year;
-        
+
         $capacidadeLocalizacoes = [];
         $mesesCapacidade = [];
-        
+
         // Gerar os 3 meses (atual + 2 futuros)
         for ($i = 0; $i < 3; $i++) {
             $data = Carbon::now()->copy()->addMonths($i);
@@ -189,7 +194,7 @@ class DashboardController extends Controller
                 'label' => ucfirst($data->locale('pt_BR')->translatedFormat('F/Y'))
             ];
         }
-        
+
         // Buscar localizações que possuem capacidade mensal cadastrada nos próximos 3 meses
         $localizacoesComCapacidade = \App\Models\LocalizacaoCapacidadeMensal::where(function($query) use ($mesesCapacidade) {
                 foreach ($mesesCapacidade as $mesData) {
@@ -204,7 +209,7 @@ class DashboardController extends Controller
             ->pluck('localizacao_id')
             ->unique()
             ->toArray();
-        
+
         // Se não encontrou localizações com capacidade mensal, retornar vazio
         if (empty($localizacoesComCapacidade)) {
             $localizacoes = collect();
@@ -214,21 +219,21 @@ class DashboardController extends Controller
                 ->orderBy('nome_localizacao')
                 ->get();
         }
-        
+
         foreach ($localizacoes as $localizacao) {
             $dadosPorMes = [];
-            
+
             foreach ($mesesCapacidade as $mesData) {
                 // Buscar capacidade mensal
                 $capacidadeMensal = \App\Models\LocalizacaoCapacidadeMensal::where('localizacao_id', $localizacao->id)
                     ->where('mes', $mesData['mes'])
                     ->where('ano', $mesData['ano'])
                     ->first();
-                
+
                 // Usar apenas capacidade mensal cadastrada
                 $capacidade = $capacidadeMensal ? $capacidadeMensal->capacidade : 0;
                 $previsto = $capacidadeMensal ? $capacidadeMensal->getProdutosPrevistos() : 0;
-                
+
                 $dadosPorMes[] = [
                     'capacidade' => (int) $capacidade,
                     'previsto' => (int) $previsto,
@@ -236,7 +241,7 @@ class DashboardController extends Controller
                     'percentual' => $capacidade > 0 ? round(($previsto / $capacidade) * 100, 1) : 0
                 ];
             }
-            
+
             $capacidadeLocalizacoes[] = [
                 'nome' => $localizacao->nome_localizacao,
                 'nome_reduzido' => $localizacao->nome_reduzido,
@@ -249,6 +254,7 @@ class DashboardController extends Controller
             'totalMovimentacoes',
             'movimentacoesHoje',
             'totalGrupoProdutos',
+            'sugestoesNaoLidas',
             'produtosAnoAtual',
             'produtosAnoPassado',
             'produtosAnoAtualAteHoje',
@@ -455,7 +461,7 @@ class DashboardController extends Controller
         // Preparar dados para o gráfico
         $labels = array_column($dadosGrafico, 'nome_estilista');
         $data = array_column($dadosGrafico, 'total');
-        
+
         // Gerar cores aleatórias para o gráfico
         $cores = [];
         foreach ($labels as $index => $label) {
@@ -463,14 +469,14 @@ class DashboardController extends Controller
             $hue = ($index * 137) % 360; // Fórmula para distribuir bem as cores
             $cores[] = "hsl($hue, 70%, 60%)";
         }
-        
+
         // Período do relatório
         $periodoInicio = $dataInicio->format('d/m/Y');
         $periodoFim = $dataFim->format('d/m/Y');
-        
+
         // Buscar todos os status para o filtro
         $status = Status::where('ativo', true)->orderBy('descricao')->get();
-        
+
         // Passar os dados completos dos estilistas para a view
         return view('dashboard.produtos-por-estilista', compact('labels', 'data', 'cores', 'periodoInicio', 'periodoFim', 'titulo', 'dadosGrafico', 'status'));
     }
@@ -715,12 +721,12 @@ class DashboardController extends Controller
         $periodoFim = $dataFim->format('d/m/Y');
 
         return view('consultas.pivot-estilistas-status', compact(
-            'pivotData', 
-            'todosStatus', 
-            'totaisPorStatus', 
-            'totalGeral', 
-            'periodoInicio', 
-            'periodoFim', 
+            'pivotData',
+            'todosStatus',
+            'totaisPorStatus',
+            'totalGeral',
+            'periodoInicio',
+            'periodoFim',
             'titulo'
         ));
     }

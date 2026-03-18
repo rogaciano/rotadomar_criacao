@@ -42,6 +42,10 @@
                         {{ __('Planejamento') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('sugestoes.index')" :active="request()->routeIs('sugestoes.*')">
+                        {{ __('Sugestões') }}
+                    </x-nav-link>
+
                     <!-- Cadastros Dropdown -->
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
                         <div class="relative">
@@ -160,6 +164,36 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                 </button>
+
+                <!-- Sugestões (Envelope) -->
+                <div x-data="{
+                    count: 0,
+                    async loadCount() {
+                        try {
+                            const response = await fetch('{{ route("api.sugestoes.nao-lidas-count") }}', {
+                                headers: { 'Accept': 'application/json' }
+                            });
+                            const data = await response.json();
+                            this.count = data.count ?? 0;
+                        } catch (error) {
+                            console.error('Erro ao carregar contador de sugestões:', error);
+                        }
+                    },
+                    init() {
+                        this.loadCount();
+                        setInterval(() => this.loadCount(), 30000);
+                    }
+                }">
+                    <a href="{{ route('sugestoes.index') }}"
+                       class="relative p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 focus:outline-none ring-1 ring-black/5 dark:ring-white/5"
+                       title="Sugestões">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.945a2 2 0 002.22 0L21 8m-2 10H5a2 2 0 01-2-2V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2z" />
+                        </svg>
+                        <span x-show="count > 0" x-text="count"
+                            class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                    </a>
+                </div>
 
                 <!-- Notifications Dropdown -->
                 <div class="relative" x-data="{
@@ -294,6 +328,10 @@
 
             <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')">
                 {{ __('Planejamento') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link :href="route('sugestoes.index')" :active="request()->routeIs('sugestoes.*')">
+                {{ __('Sugestões') }}
             </x-responsive-nav-link>
 
             <!-- Responsive Cadastros -->

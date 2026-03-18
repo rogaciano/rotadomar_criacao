@@ -23,6 +23,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\DirecionamentoComercialController;
 use App\Http\Controllers\EtapaProducaoController;
+use App\Http\Controllers\SugestaoController;
 use App\Http\Controllers\UiPreferenceController;
 use Illuminate\Support\Facades\Route;
 
@@ -213,6 +214,15 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('notificacoes/{id}/visualizar', [NotificacaoController::class, 'visualizar'])->name('notificacoes.visualizar');
     Route::get('api/notificacoes/nao-visualizadas', [NotificacaoController::class, 'naoVisualizadas'])->name('api.notificacoes.nao-visualizadas');
     Route::post('api/notificacoes/marcar-todas-visualizadas', [NotificacaoController::class, 'marcarTodasComoVisualizadas'])->name('api.notificacoes.marcar-todas-visualizadas');
+
+    // Routes para Sugestões
+    Route::get('sugestoes', [SugestaoController::class, 'index'])->name('sugestoes.index');
+    Route::get('sugestoes/minhas', [SugestaoController::class, 'minhasSugestoes'])->name('sugestoes.minhas');
+    Route::get('sugestoes/create', [SugestaoController::class, 'create'])->name('sugestoes.create');
+    Route::post('sugestoes', [SugestaoController::class, 'store'])->name('sugestoes.store');
+    Route::get('sugestoes/{sugestao}', [SugestaoController::class, 'show'])->name('sugestoes.show');
+    Route::put('sugestoes/{sugestao}/status', [SugestaoController::class, 'updateStatus'])->name('sugestoes.update-status');
+    Route::get('api/sugestoes/nao-lidas-count', [SugestaoController::class, 'countNaoLidas'])->name('api.sugestoes.nao-lidas-count');
 
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');

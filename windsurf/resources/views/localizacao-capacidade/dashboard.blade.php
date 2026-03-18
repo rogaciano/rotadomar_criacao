@@ -50,6 +50,14 @@
                         </svg>
                         Calendário
                     </a>
+
+                    {{-- Sugestões - Verde Água --}}
+                    <a href="{{ route('sugestoes.index') }}" class="btn-ghost-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.945a2 2 0 002.22 0L21 8m-2 10H5a2 2 0 01-2-2V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2z" />
+                        </svg>
+                        Sugestões
+                    </a>
                 </div>
 
                 <div class="flex flex-wrap gap-2">

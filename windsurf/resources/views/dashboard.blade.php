@@ -30,7 +30,7 @@
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Cards estatísticos - Linha 1: Indicadores Base -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
                 <!-- Card Tecidos -->
                 <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">
                     <div class="p-6 relative text-white">
@@ -150,6 +150,30 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Card Sugestões -->
+                <div class="card-hover relative group rounded-2xl overflow-hidden shadow-lg border border-white/10" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);">
+                    <div class="p-6 relative text-white">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="p-2 bg-white/20 backdrop-blur-md rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.945a2 2 0 002.22 0L21 8m-2 10H5a2 2 0 01-2-2V8a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-white/70 uppercase tracking-widest">Comunicados</span>
+                        </div>
+                        <h3 class="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Sugestões Não Lidas</h3>
+                        <div class="flex items-baseline mb-2">
+                            <span class="text-4xl font-black text-white">{{ $sugestoesNaoLidas ?? 0 }}</span>
+                        </div>
+                        <p class="text-[10px] text-white/60">Acompanhe e responda sugestões</p>
+                    </div>
+                    <div class="px-6 py-3 bg-black/10 flex justify-between items-center group-hover:bg-black/20 transition-colors">
+                        <a href="{{ route('sugestoes.index') }}" class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center">
+                            Abrir módulo <svg class="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Cards de Análise - Segunda Linha -->
@@ -168,7 +192,7 @@
                                 </svg>
                             </div>
                         </div>
-                        
+
                         <div class="grid grid-cols-2 gap-6 mb-6">
                             <div class="p-4 bg-white/10 rounded-2xl border border-white/10">
                                 <span class="block text-[10px] uppercase font-black text-blue-200 mb-1">Ano Atual</span>
@@ -215,7 +239,7 @@
                                 </svg>
                             </div>
                         </div>
-                        
+
                         <div class="flex items-baseline mb-8">
                             <span class="text-6xl font-black text-white tracking-tighter">{{ $projecaoProdutosAnoAtual }}</span>
                             <span class="ml-3 text-indigo-200 text-sm font-bold uppercase tracking-widest">Produtos</span>
@@ -656,7 +680,7 @@
                         // Garantir conversão para número inteiro
                         const capacidade = parseInt(dado.capacidade) || 0;
                         const previsto = parseInt(dado.previsto) || 0;
-                        
+
                         totalCapacidadePorMes[index] += capacidade;
                         totalPrevistoPorMes[index] += previsto;
                     });
@@ -764,10 +788,10 @@
                                         footer: function(tooltipItems) {
                                             const capacidade = tooltipItems.find(item => item.dataset.tipo === 'capacidade')?.parsed.y || 0;
                                             const previsto = tooltipItems.find(item => item.dataset.tipo === 'previsto')?.parsed.y || 0;
-                                            
+
                                             const saldo = capacidade - previsto;
                                             const ocupacao = capacidade > 0 ? ((previsto / capacidade) * 100).toFixed(1) : 0;
-                                            
+
                                             return `\nSaldo: ${saldo} | Ocupação: ${ocupacao}%`;
                                         }
                                     }
@@ -788,18 +812,18 @@
                 const modal = document.getElementById('modalDetalhamentoMes');
                 const titulo = document.getElementById('modalTitulo');
                 const tbody = document.getElementById('tabelaDetalhamento');
-                
+
                 // Atualizar título
                 titulo.textContent = `Detalhamento - ${mesLabel}`;
-                
+
                 // Limpar tabela
                 tbody.innerHTML = '';
-                
+
                 // Totais
                 let totalCap = 0;
                 let totalPrev = 0;
                 let totalSaldo = 0;
-                
+
                 // Preencher tabela com dados de cada localização
                 dados.forEach(loc => {
                     const dadoMes = loc.dados[mesIndex];
@@ -807,14 +831,14 @@
                     const previsto = parseInt(dadoMes.previsto) || 0;
                     const saldo = capacidade - previsto;
                     const ocupacao = capacidade > 0 ? ((previsto / capacidade) * 100).toFixed(1) : 0;
-                    
+
                     totalCap += capacidade;
                     totalPrev += previsto;
                     totalSaldo += saldo;
-                    
+
                     const saldoClass = saldo >= 0 ? 'text-green-600' : 'text-red-600';
                     const ocupacaoClass = ocupacao > 100 ? 'text-red-600 font-semibold' : (ocupacao > 80 ? 'text-yellow-600' : 'text-green-600');
-                    
+
                     const row = `
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
@@ -836,22 +860,22 @@
                     `;
                     tbody.innerHTML += row;
                 });
-                
+
                 // Atualizar totais
                 const totalOcupacao = totalCap > 0 ? ((totalPrev / totalCap) * 100).toFixed(1) : 0;
                 const totalSaldoClass = totalSaldo >= 0 ? 'text-green-600' : 'text-red-600';
                 const totalOcupacaoClass = totalOcupacao > 100 ? 'text-red-600' : (totalOcupacao > 80 ? 'text-yellow-600' : 'text-green-600');
-                
+
                 document.getElementById('totalCapacidade').textContent = totalCap.toLocaleString('pt-BR');
                 document.getElementById('totalPrevisto').textContent = totalPrev.toLocaleString('pt-BR');
                 document.getElementById('totalSaldo').innerHTML = `<span class="${totalSaldoClass} font-bold">${totalSaldo.toLocaleString('pt-BR')}</span>`;
                 document.getElementById('totalOcupacao').innerHTML = `<span class="${totalOcupacaoClass} font-bold">${totalOcupacao}%</span>`;
-                
+
                 // Mostrar modal
                 modal.classList.remove('hidden');
                 @endif
             }
-            
+
             window.fecharModalDetalhamento = function() {
                 console.log('Fechando modal...');
                 const modal = document.getElementById('modalDetalhamentoMes');
@@ -862,13 +886,13 @@
                     console.error('Modal não encontrado!');
                 }
             }
-            
+
             // Confirmar que as funções estão disponíveis
             console.log('Funções do modal registradas:', {
                 fechar: typeof window.fecharModalDetalhamento,
                 abrir: typeof window.abrirModalDetalhamento
             });
-            
+
             // Configurar eventos do modal (fechar ao clicar fora ou pressionar ESC)
             setTimeout(function() {
                 const modal = document.getElementById('modalDetalhamentoMes');
@@ -880,7 +904,7 @@
                         }
                     });
                 }
-                
+
                 // Fechar ao pressionar ESC
                 document.addEventListener('keydown', function(e) {
                     const modal = document.getElementById('modalDetalhamentoMes');

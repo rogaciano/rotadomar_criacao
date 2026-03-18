@@ -75,7 +75,7 @@ class ProdutoLocalizacaoController extends Controller
                 'produto_referencia' => $produto->referencia,
                 'produto_localizacao_id' => $produtoLocalizacao->id,
                 'localizacao_id' => $request->localizacao_id,
-                'localizacao_nome' => $localizacao?->nome_localizacao,
+                'localizacao_nome' => optional($localizacao)->nome_localizacao,
                 'ordem_producao' => $request->ordem_producao,
                 'quantidade' => (int) $request->quantidade,
                 'data_prevista_faccao' => $request->data_prevista_faccao,
@@ -159,7 +159,7 @@ class ProdutoLocalizacaoController extends Controller
                 'produto_referencia' => $produto->referencia,
                 'produto_localizacao_id' => $produtoLocalizacao->id,
                 'localizacao_id' => $produtoLocalizacao->localizacao_id,
-                'localizacao_nome' => $localizacao?->nome_localizacao,
+                'localizacao_nome' => optional($localizacao)->nome_localizacao,
                 'before' => $before,
                 'after' => $produtoLocalizacao->getAttributes(),
             ])
@@ -211,12 +211,12 @@ class ProdutoLocalizacaoController extends Controller
                 'produto_referencia' => $produto->referencia,
                 'produto_localizacao_id' => $produtoLocalizacaoId,
                 'localizacao_id' => $localizacaoId,
-                'localizacao_nome' => $localizacao?->nome_localizacao,
+                'localizacao_nome' => optional($localizacao)->nome_localizacao,
                 'ordem_producao' => $ordemProducao,
                 'snapshot' => $snapshot,
             ])
             ->event('deleted')
-            ->log("Localização  $localizacao?->nome_localizacao da OP $ordemProducao removida do produto com Ref. {$produto->referencia}");
+            ->log('Localização ' . optional($localizacao)->nome_localizacao . ' da OP ' . $ordemProducao . ' removida do produto com Ref. ' . $produto->referencia);
 
         // Log para debug
         \Log::info("Localização removida do produto", [
@@ -491,7 +491,8 @@ class ProdutoLocalizacaoController extends Controller
     public function updateHistoricoEtapa(Request $request, $historicoId)
     {
         $request->validate([
-            'created_at' => 'required|date'
+            'created_at' => 'required|date',
+            'observacao' => 'nullable|string|max:255'
         ]);
 
         $historico = \App\Models\ProdutoLocalizacaoHistoricoEtapa::findOrFail($historicoId);
@@ -502,6 +503,7 @@ class ProdutoLocalizacaoController extends Controller
         }
 
         $historico->created_at = $request->created_at;
+        $historico->observacao = $request->observacao;
         $historico->updated_by_user_id = auth()->id();
         $historico->save();
 

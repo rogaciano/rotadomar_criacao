@@ -44,7 +44,7 @@
                     <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Histórico de Mudanças de Etapa</h4>
 
                     @if($historico->count() > 0)
-                        <div class="flow-root" x-data="{ editingId: null, editDate: '', actionUrl: '' }">
+                        <div class="flow-root" x-data="{ editingId: null, editDate: '', editObservacao: '', actionUrl: '' }">
                             <ul role="list" class="-mb-8">
                                 @foreach($historico as $item)
                                     <li>
@@ -103,10 +103,10 @@
                                                             <br>
                                                             {{ $item->created_at->format('H:i') }}
                                                         </time>
-                                                        
+
                                                         @if(auth()->user()->isAdmin() || auth()->user()->canUpdate('produto_localizacao_historico_etapas'))
-                                                            <button type="button" 
-                                                                    @click="editingId = {{ $item->id }}; editDate = '{{ $item->created_at->format('Y-m-d\TH:i') }}'; actionUrl = '{{ route('produtos.localizacoes.historico-etapas.update', $item->id) }}'"
+                                                            <button type="button"
+                                                                    @click="editingId = {{ $item->id }}; editDate = '{{ $item->created_at->format('Y-m-d\TH:i') }}'; editObservacao = {{ Js::from($item->observacao) }}; actionUrl = '{{ route('produtos.localizacoes.historico-etapas.update', $item->id) }}'"
                                                                     class="mt-1 text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 transition-colors" title="Editar Data/Hora">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -150,6 +150,10 @@
                                                             <div>
                                                                 <label for="created_at" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Data e Hora</label>
                                                                 <input type="datetime-local" name="created_at" id="created_at" x-model="editDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white">
+                                                            </div>
+                                                            <div class="mt-4">
+                                                                <label for="observacao" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observação</label>
+                                                                <textarea name="observacao" id="observacao" rows="4" maxlength="255" x-model="editObservacao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" placeholder="Digite uma observação para esta mudança de etapa..."></textarea>
                                                             </div>
                                                         </div>
                                                     </div>
