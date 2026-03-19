@@ -1,0 +1,45 @@
+/* Custom styles for Motorista PWA */
+
+/* Safe area for notched phones */
+body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: contain;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Prevent text selection on buttons */
+button {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Card press effect */
+.card-press:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+}
+
+/* Status bar color for standalone mode */
+@media (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top);
+    }
+    header {
+        padding-top: env(safe-area-inset-top);
+    }
+}

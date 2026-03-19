@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Minhas Coletas - Motorista</title>
+    <link rel="manifest" href="/motorista/manifest.json">
+    <link rel="icon" type="image/png" href="/motorista/icons/icon-192.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .loading-spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .pull-indicator { transition: transform 0.2s; }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen">
+
+<div x-data="motoristaApp()" x-init="init()" class="max-w-lg mx-auto pb-20">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 py-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-sm leading-tight">Minhas Coletas</h1>
+                    <p class="text-slate-400 text-xs" x-text="user?.name || ''"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button @click="loadColetas()" class="p-2 text-slate-400 hover:text-white transition-colors" title="Atualizar">
+                    <svg class="w-5 h-5" :class="{ 'loading-spinner': loading }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+                <button @click="doLogout()" class="p-2 text-slate-400 hover:text-red-400 transition-colors" title="Sair">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex mt-3 bg-slate-800 rounded-lg p-0.5">
+            <button @click="tab = 'ativas'; loadColetas()"
+                    :class="tab === 'ativas' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'"
+                    class="flex-1 py-2 text-xs font-bold rounded-md transition-all">
+                Ativas
+                <span x-show="coletas.length > 0 && tab === 'ativas'" x-text="'(' + coletas.length + ')'" class="ml-1"></span>
+            </button>
+            <button @click="tab = 'historico'; loadColetas()"
+                    :class="tab === 'historico' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'"
+                    class="flex-1 py-2 text-xs font-bold rounded-md transition-all">
+                Histórico
+            </button>
+        </div>
+    </header>
+
+    <!-- Toast message -->
+    <div x-show="toast.show" x-transition
+         :class="toast.type === 'success' ? 'bg-green-900/90 border-green-700 text-green-200' : 'bg-red-900/90 border-red-700 text-red-200'"
+         class="fixed top-20 left-4 right-4 max-w-lg mx-auto z-50 p-3 rounded-lg border text-sm font-medium text-center"
+         x-text="toast.message"
+         style="display: none;">
+    </div>
+
+    <!-- Loading -->
+    <div x-show="loading && coletas.length === 0" class="flex flex-col items-center justify-center py-20">
+        <svg class="loading-spinner w-10 h-10 text-indigo-500 mb-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <p class="text-slate-400 text-sm">Carregando coletas...</p>
+    </div>
+
+    <!-- Error -->
+    <div x-show="error && !loading" class="p-4">
+        <div class="bg-red-900/30 border border-red-800 rounded-xl p-4 text-center">
+            <svg class="w-10 h-10 text-red-400 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            </svg>
+            <p class="text-red-300 text-sm mb-3" x-text="error"></p>
+            <button @click="loadColetas()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-red-200 text-xs font-bold rounded-lg transition-colors">
+                Tentar novamente
+            </button>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div x-show="!loading && !error && coletas.length === 0" class="p-4">
+        <div class="bg-slate-800 rounded-2xl p-8 text-center border border-slate-700">
+            <div class="w-16 h-16 bg-slate-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <svg class="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                </svg>
+            </div>
+            <p class="text-white font-semibold mb-1" x-text="tab === 'ativas' ? 'Nenhuma coleta ativa' : 'Nenhuma coleta no histórico'"></p>
+            <p class="text-slate-400 text-sm" x-text="tab === 'ativas' ? 'Quando houver coletas agendadas para você, elas aparecerão aqui.' : 'Coletas finalizadas aparecerão aqui.'"></p>
+        </div>
+    </div>
+
+    <!-- Coletas List -->
+    <div x-show="!loading || coletas.length > 0" class="p-4 space-y-3">
+        <template x-for="coleta in coletas" :key="coleta.id">
+            <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg"
+                 :class="{
+                     'border-yellow-700/50': coleta.status === 'agendado',
+                     'border-blue-700/50': coleta.status === 'em_transito',
+                     'border-green-700/50': coleta.status === 'finalizado',
+                     'border-slate-700': coleta.status === 'cancelado'
+                 }">
+
+                <!-- Card Header -->
+                <div class="px-4 py-3 flex items-center justify-between"
+                     :class="{
+                         'bg-yellow-900/20': coleta.status === 'agendado',
+                         'bg-blue-900/20': coleta.status === 'em_transito',
+                         'bg-green-900/20': coleta.status === 'finalizado',
+                         'bg-slate-800': coleta.status === 'cancelado'
+                     }">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg" x-text="coleta.status === 'agendado' ? '📋' : coleta.status === 'em_transito' ? '🚛' : coleta.status === 'finalizado' ? '✅' : '❌'"></span>
+                        <div>
+                            <p class="text-white font-bold text-sm" x-text="'Ref. ' + coleta.produto.referencia"></p>
+                            <p class="text-slate-400 text-xs" x-text="coleta.produto.descricao"></p>
+                        </div>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase"
+                          :class="{
+                              'bg-yellow-900/50 text-yellow-300 border border-yellow-700': coleta.status === 'agendado',
+                              'bg-blue-900/50 text-blue-300 border border-blue-700': coleta.status === 'em_transito',
+                              'bg-green-900/50 text-green-300 border border-green-700': coleta.status === 'finalizado',
+                              'bg-slate-700 text-slate-400 border border-slate-600': coleta.status === 'cancelado'
+                          }"
+                          x-text="coleta.status === 'agendado' ? 'Agendado' : coleta.status === 'em_transito' ? 'Em Trânsito' : coleta.status === 'finalizado' ? 'Finalizado' : 'Cancelado'">
+                    </span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="px-4 py-3 space-y-2">
+                    <!-- Rota -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex flex-col items-center">
+                            <div class="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                            <div class="w-px h-4 bg-slate-600"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="flex-1 space-y-1">
+                            <div class="flex items-center justify-between">
+                                <p class="text-slate-300 text-xs font-semibold" x-text="coleta.origem.nome"></p>
+                                <span class="text-slate-500 text-[10px]">ORIGEM</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <p class="text-slate-300 text-xs font-semibold" x-text="coleta.destino.nome"></p>
+                                <span class="text-slate-500 text-[10px]">DESTINO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="grid grid-cols-3 gap-2 pt-1">
+                        <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Qtd</p>
+                            <p class="text-white font-bold text-sm" x-text="coleta.quantidade"></p>
+                        </div>
+                        <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Veículo</p>
+                            <p class="text-white font-bold text-sm" x-text="coleta.veiculo.placa"></p>
+                        </div>
+                        <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase">Previsão</p>
+                            <p class="text-white font-bold text-xs" x-text="coleta.inicio_previsto || '-'"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Actions -->
+                <div class="px-4 py-3 border-t border-slate-700/50">
+                    <!-- Agendado: botão confirmar chegada -->
+                    <template x-if="coleta.status === 'agendado'">
+                        <div x-data="{ showObs: false, obs: '', submitting: false }">
+                            <div x-show="!showObs">
+                                <button @click="showObs = true"
+                                        class="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Confirmar Chegada na Origem
+                                </button>
+                            </div>
+                            <div x-show="showObs" class="space-y-2">
+                                <textarea x-model="obs" rows="2" placeholder="Observação (opcional)"
+                                          class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                                <div class="flex gap-2">
+                                    <button @click="showObs = false" class="flex-1 py-2 bg-slate-700 text-slate-300 text-sm font-semibold rounded-lg">Cancelar</button>
+                                    <button @click="submitting = true; $dispatch('confirmar-chegada', { id: coleta.id, obs: obs })"
+                                            :disabled="submitting"
+                                            class="flex-1 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50">
+                                        <span x-show="!submitting">Confirmar</span>
+                                        <span x-show="submitting">Enviando...</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Em Trânsito: botão confirmar entrega -->
+                    <template x-if="coleta.status === 'em_transito'">
+                        <div x-data="{ showObs: false, obs: '', submitting: false }">
+                            <div x-show="!showObs">
+                                <button @click="showObs = true"
+                                        class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Confirmar Entrega no Destino
+                                </button>
+                            </div>
+                            <div x-show="showObs" class="space-y-2">
+                                <textarea x-model="obs" rows="2" placeholder="Observação (opcional)"
+                                          class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+                                <div class="flex gap-2">
+                                    <button @click="showObs = false" class="flex-1 py-2 bg-slate-700 text-slate-300 text-sm font-semibold rounded-lg">Cancelar</button>
+                                    <button @click="submitting = true; $dispatch('confirmar-entrega', { id: coleta.id, obs: obs })"
+                                            :disabled="submitting"
+                                            class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50">
+                                        <span x-show="!submitting">Confirmar</span>
+                                        <span x-show="submitting">Enviando...</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Finalizado/Cancelado: info timestamps -->
+                    <template x-if="coleta.status === 'finalizado' || coleta.status === 'cancelado'">
+                        <div class="text-xs text-slate-500 flex items-center justify-between">
+                            <span x-show="coleta.chegada_origem" x-text="'Chegada: ' + coleta.chegada_origem"></span>
+                            <span x-show="coleta.recebido_destino" x-text="'Entrega: ' + coleta.recebido_destino"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Install PWA prompt -->
+    <div x-show="installPrompt" x-transition
+         class="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-indigo-900/95 backdrop-blur border border-indigo-700 rounded-2xl p-4 z-50 shadow-2xl"
+         style="display: none;">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-white text-sm font-bold">Instalar App</p>
+                <p class="text-indigo-300 text-xs">Adicione à tela inicial para acesso rápido</p>
+            </div>
+            <button @click="installPWA()" class="px-3 py-1.5 bg-white text-indigo-700 text-xs font-bold rounded-lg">Instalar</button>
+            <button @click="installPrompt = null" class="text-indigo-400 hover:text-white">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="/motorista/js/api.js"></script>
+<script src="/motorista/js/push.js"></script>
+<script>
+    function motoristaApp() {
+        return {
+            user: API.getUser(),
+            tab: 'ativas',
+            coletas: [],
+            loading: false,
+            error: null,
+            toast: { show: false, message: '', type: 'success' },
+            installPrompt: null,
+            refreshInterval: null,
+
+            async init() {
+                if (!API.isAuthenticated()) {
+                    window.location.href = '/motorista/index.html';
+                    return;
+                }
+
+                await this.loadColetas();
+
+                // Auto-refresh every 30s
+                this.refreshInterval = setInterval(() => this.loadColetas(), 30000);
+
+                // Listen for action events
+                this.$el.addEventListener('confirmar-chegada', (e) => this.handleConfirmarChegada(e.detail));
+                this.$el.addEventListener('confirmar-entrega', (e) => this.handleConfirmarEntrega(e.detail));
+
+                // Push notifications
+                if (typeof PushManager !== 'undefined') {
+                    initPush();
+                }
+
+                // PWA install prompt
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    this.installPrompt = e;
+                });
+            },
+
+            async loadColetas() {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    const data = await API.getColetas(this.tab === 'ativas' ? 'ativas' : 'historico');
+                    if (data) {
+                        this.coletas = data.coletas || [];
+                    }
+                } catch (err) {
+                    this.error = err?.data?.message || 'Erro ao carregar coletas.';
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async handleConfirmarChegada({ id, obs }) {
+                try {
+                    const data = await API.confirmarChegada(id, obs);
+                    this.showToast(data?.message || 'Chegada confirmada!', 'success');
+                    await this.loadColetas();
+                } catch (err) {
+                    this.showToast(err?.data?.message || 'Erro ao confirmar chegada.', 'error');
+                }
+            },
+
+            async handleConfirmarEntrega({ id, obs }) {
+                try {
+                    const data = await API.confirmarEntrega(id, obs);
+                    this.showToast(data?.message || 'Entrega confirmada!', 'success');
+                    await this.loadColetas();
+                } catch (err) {
+                    this.showToast(err?.data?.message || 'Erro ao confirmar entrega.', 'error');
+                }
+            },
+
+            showToast(message, type = 'success') {
+                this.toast = { show: true, message, type };
+                setTimeout(() => { this.toast.show = false; }, 4000);
+            },
+
+            async doLogout() {
+                if (confirm('Deseja sair do app?')) {
+                    await API.logout();
+                    window.location.href = '/motorista/index.html';
+                }
+            },
+
+            async installPWA() {
+                if (this.installPrompt) {
+                    this.installPrompt.prompt();
+                    const result = await this.installPrompt.userChoice;
+                    this.installPrompt = null;
+                }
+            },
+        };
+    }
+</script>
+</body>
+</html>
