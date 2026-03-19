@@ -187,8 +187,8 @@
 
             {{-- ===== SEÇÃO 2: FILTROS + PRODUTOS AGUARDANDO RETIRADA ===== --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
-                    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                <div class="px-4 py-4 border-b border-gray-200 dark:border-slate-700 bg-indigo-50 dark:bg-indigo-900/30">
+                    <h3 class="text-base font-extrabold text-indigo-900 dark:text-indigo-100 uppercase tracking-wider">
                         📍 Produtos Aguardando Retirada ({{ $aguardandoRetirada->count() }})
                     </h3>
                 </div>
