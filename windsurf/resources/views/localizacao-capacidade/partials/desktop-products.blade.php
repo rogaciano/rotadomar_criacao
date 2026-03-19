@@ -163,7 +163,7 @@
                                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-800' }} uppercase">
                                                         {{ $etapaLinha->icone ?? '' }} {{ $etapaLinha->nome }}
                                                     </span>
-                                                    <a href="{{ route('produtos.localizacoes.historico-etapas', [$produtoPrincipal->id, $loc->pivot->id]) }}"
+                                                    <a href="{{ route('produtos.localizacoes.historico-etapas', [$produtoPrincipal->id, $loc->pivot->id]) }}?back_url={{ urlencode(request()->fullUrlWithQuery(['expand_produtos' => 1])) }}"
                                                        class="text-gray-400 hover:text-indigo-600 transition-colors" title="Ver histórico de etapas">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -291,14 +291,15 @@
                                                 <div class="flex flex-col gap-1 items-end">
                                                     @if($transicoes->count() > 0)
                                                         @foreach($transicoes as $transicao)
-                                                            <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST" class="w-full">
-                                                                @csrf
-                                                                <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                                <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
-                                                                <button type="submit" class="w-full py-1 px-2 rounded text-[10px] font-bold text-white shadow-sm {{ $btnCorClassesDesktop[$transicao->cor_botao] ?? 'bg-blue-600' }} hover:shadow-md transition-shadow">
-                                                                    {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }} →
-                                                                </button>
-                                                            </form>
+                                                            <button type="button"
+                                                                @click.prevent="$dispatch('abrir-modal-etapa', {
+                                                                    action: {{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produtoPrincipal->id, $loc->pivot->id])) }},
+                                                                    etapaId: {{ $transicao->etapa_destino_id }},
+                                                                    etapaNome: {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }}
+                                                                })"
+                                                                class="w-full py-1 px-2 rounded text-[10px] font-bold text-white shadow-sm {{ $btnCorClassesDesktop[$transicao->cor_botao] ?? 'bg-blue-600' }} hover:shadow-md transition-shadow">
+                                                                {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }} →
+                                                            </button>
                                                         @endforeach
                                                     @elseif(!$etapaLinha)
                                                         {{-- Definir Etapa Inicial --}}
@@ -307,18 +308,19 @@
                                                                 <span>Definir</span>
                                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                                                             </button>
-                                                            
+
                                                             <div x-show="openMenu" @click.away="openMenu = false" class="absolute right-0 top-full mt-1 w-40 bg-white dark:bg-slate-800 rounded shadow-lg border border-gray-200 z-50 overflow-hidden" style="display: none;">
                                                                 @foreach($etapasProducao as $etapa)
-                                                                    <form action="{{ route('produtos.localizacoes.definir-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">
-                                                                        @csrf
-                                                                        <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
-                                                                        <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
-                                                                        <button type="submit" class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 last:border-0">
-                                                                            <span class="w-4 text-center">{{ $etapa->icone ?? '•' }}</span>
-                                                                            <span>{{ $etapa->nome }}</span>
-                                                                        </button>
-                                                                    </form>
+                                                                    <button type="button"
+                                                                        @click.prevent="$dispatch('abrir-modal-etapa', {
+                                                                            action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produtoPrincipal->id, $loc->pivot->id])) }},
+                                                                            etapaId: {{ $etapa->id }},
+                                                                            etapaNome: {{ Js::from($etapa->nome) }}
+                                                                        }); openMenu = false"
+                                                                        class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 last:border-0">
+                                                                        <span class="w-4 text-center">{{ $etapa->icone ?? '•' }}</span>
+                                                                        <span>{{ $etapa->nome }}</span>
+                                                                    </button>
                                                                 @endforeach
                                                             </div>
                                                         </div>

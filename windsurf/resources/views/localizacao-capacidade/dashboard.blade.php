@@ -398,7 +398,24 @@
             </div>
 
             <!-- Detalhes por Localização -->
-            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg"
+                 @abrir-modal-etapa.window="
+                    modalEtapaAction = $event.detail.action;
+                    modalEtapaId = $event.detail.etapaId;
+                    modalEtapaNome = $event.detail.etapaNome;
+                    modalEtapaObservacao = '';
+                    modalEtapaAberto = true;
+                 "
+                 x-data="{
+                    modalEtapaAberto: false,
+                    modalEtapaAction: '',
+                    modalEtapaId: null,
+                    modalEtapaNome: '',
+                    modalEtapaObservacao: '',
+                    fecharModalEtapa() {
+                        this.modalEtapaAberto = false;
+                    }
+                 }">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Capacidade por Localização</h3>
 
@@ -484,10 +501,10 @@
                                     <!-- Lista de Produtos Previstos -->
                                     @if($dado['produtos']->count() > 0)
                                         <div class="mt-4 border-t dark:border-slate-700 pt-4 produtos-previstos-section"
-                                             x-data="{ open: {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }} }"
+                                             x-data="{ open: {{ (request()->boolean('expand_produtos') || ($usuarioRestrito ?? false)) ? 'true' : 'false' }} }"
                                              x-on:toggle-all.window="open = $event.detail.show"
                                              x-init="$watch('open', value => $el.dataset.open = value)"
-                                             data-open="{{ ($usuarioRestrito ?? false) ? 'true' : 'false' }}">
+                                             data-open="{{ (request()->boolean('expand_produtos') || ($usuarioRestrito ?? false)) ? 'true' : 'false' }}">
                                             <button @click="open = !open" class="produtos-toggle-btn w-full flex items-center justify-between text-left p-2 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors">
                                                 <div class="flex items-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -563,6 +580,54 @@
                                     @endif
                                 </div>
                             @endforeach
+                        </div>
+
+                        <!-- Modal de Observação para Mudança de Etapa -->
+                        <div x-show="modalEtapaAberto"
+                             x-transition
+                             class="fixed inset-0 z-50 overflow-y-auto"
+                             style="display: none;"
+                             role="dialog"
+                             aria-modal="true">
+                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="fecharModalEtapa()"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                                <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                                    <form :action="modalEtapaAction" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="etapa_id" :value="modalEtapaId">
+                                        <input type="hidden" name="back_url" value="{{ request()->fullUrlWithQuery(['expand_produtos' => 1]) }}">
+
+                                        <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                            <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">Confirmar mudança de etapa</h3>
+                                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                                Etapa selecionada: <span class="font-medium" x-text="modalEtapaNome"></span>
+                                            </p>
+
+                                            <div class="mt-4">
+                                                <label for="observacao_etapa_planejamento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observação (opcional)</label>
+                                                <textarea id="observacao_etapa_planejamento"
+                                                          name="observacao"
+                                                          rows="4"
+                                                          maxlength="255"
+                                                          x-model="modalEtapaObservacao"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                                                          placeholder="Digite uma observação para registrar no histórico..."></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                                Confirmar
+                                            </button>
+                                            <button type="button" @click="fecharModalEtapa()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-slate-800 dark:text-gray-300 dark:border-slate-600 dark:hover:bg-slate-700">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     @else
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
@@ -706,7 +771,7 @@
         });
 
         // ===== TOGGLE GLOBAL DE PRODUTOS PREVISTOS =====
-        let allProductsVisible = {{ ($usuarioRestrito ?? false) ? 'true' : 'false' }};
+        let allProductsVisible = {{ (request()->boolean('expand_produtos') || ($usuarioRestrito ?? false)) ? 'true' : 'false' }};
 
         function toggleAllProductsVisibility() {
             allProductsVisible = !allProductsVisible;

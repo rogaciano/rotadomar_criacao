@@ -2,7 +2,7 @@
     @foreach($produtosAgrupados as $chave => $produtosGrupo)
         @php
             $produtoPrincipal = $produtosGrupo->first();
-            
+
             // Identificar todas as etapas presentes neste grupo de produtos
             $etapaIdsNoGrupo = $produtosGrupo->flatMap(function($p) {
                 return $p->localizacoes->pluck('pivot.etapa_atual_id');
@@ -10,7 +10,7 @@
 
             $etapasNoGrupo = $etapasProducao->whereIn('id', $etapaIdsNoGrupo);
         @endphp
-        
+
         <div class="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
             {{-- Header: Referência, Descrição e Badge Data --}}
             <div class="flex justify-between items-start mb-2">
@@ -22,7 +22,7 @@
                         {{ $produtoPrincipal->descricao }}
                     </div>
                 </div>
-                
+
                 @php
                     // Buscar a data prevista para produção
                     $dataPrevista = null;
@@ -71,9 +71,9 @@
                     </span>
                 @endif
             </div>
-            
+
             <div class="border-t border-gray-100 dark:border-slate-800 my-2"></div>
-            
+
             {{-- Detalhes de Produção --}}
             @php
                 // Carregar observações do produto (apenas uma vez)
@@ -95,7 +95,7 @@
 
                 $temObservacoes = $obs->count() > 0 || $todasObsLocalizacoes->count() > 0;
             @endphp
-            
+
             @if($todasObsLocalizacoes->count() > 0)
                 <div class="space-y-3 mb-3">
                     @php $totalQuantidades = 0; @endphp
@@ -124,7 +124,7 @@
                                 ? (is_string($loc->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('d/m/Y') : $loc->pivot->data_entrega_faccao->format('d/m/Y'))
                                 : null;
                         @endphp
-                        
+
                         <div class="bg-gray-50 dark:bg-slate-800/50 rounded p-2 text-xs">
                             <div class="flex justify-between items-center mb-1">
                                 <div class="flex items-center gap-1">
@@ -135,19 +135,19 @@
                                     @else
                                         <span class="text-gray-400">Sem OP</span>
                                     @endif
-                                    
+
                                     @if($loc->pivot->concluido == 1)
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-green-600" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                                         </svg>
                                     @endif
                                 </div>
-                                
+
                                 <span class="bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 px-1.5 py-0.5 rounded font-bold">
                                     {{ number_format($qtdAlocada, 0, ',', '.') }}
                                 </span>
                             </div>
-                            
+
                             {{-- Etapa --}}
                             @php
                                 $etapaLinhaId = $loc->pivot->etapa_atual_id;
@@ -158,7 +158,7 @@
                                     <span class="inline-flex items-center px-1 py-0.5 rounded text-[9px] font-bold border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-800' }} uppercase">
                                         {{ $etapaLinha->icone ?? '' }} {{ $etapaLinha->nome }}
                                     </span>
-                                    <a href="{{ route('produtos.localizacoes.historico-etapas', [$produtoPrincipal->id, $loc->pivot->id]) }}"
+                                    <a href="{{ route('produtos.localizacoes.historico-etapas', [$produtoPrincipal->id, $loc->pivot->id]) }}?back_url={{ urlencode(request()->fullUrlWithQuery(['expand_produtos' => 1])) }}"
                                        class="ml-1 text-gray-400 hover:text-indigo-600 inline-block align-middle" title="Ver histórico de etapas">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -166,7 +166,7 @@
                                     </a>
                                 </div>
                             @endif
-                            
+
                             {{-- Datas Grid (Envio, Retorno, Entrega) --}}
                             <div class="grid grid-cols-3 gap-1 mt-1.5">
                                 <div class="text-center">
@@ -202,7 +202,7 @@
                                 if ($etapaLinha) {
                                     $transicoes = $etapaLinha->transicoesOrigem ?? collect([]);
                                 }
-                                
+
                                 $btnCorClasses = [
                                     'blue' => 'bg-blue-600 hover:bg-blue-700',
                                     'green' => 'bg-green-600 hover:bg-green-700',
@@ -222,14 +222,15 @@
                                     @if($transicoes && $transicoes->count() > 0)
                                         <div class="flex flex-wrap gap-2 mb-2">
                                             @foreach($transicoes as $transicao)
-                                                <form action="{{ route('produtos.localizacoes.avancar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST" class="flex-1 min-w-[100px]">
-                                                    @csrf
-                                                    <input type="hidden" name="etapa_id" value="{{ $transicao->etapa_destino_id }}">
-                                                    <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
-                                                    <button type="submit" class="w-full py-1.5 rounded text-[10px] font-bold text-white shadow-sm {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-600' }}">
-                                                        {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
-                                                    </button>
-                                                </form>
+                                                <button type="button"
+                                                    @click.prevent="$dispatch('abrir-modal-etapa', {
+                                                        action: {{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produtoPrincipal->id, $loc->pivot->id])) }},
+                                                        etapaId: {{ $transicao->etapa_destino_id }},
+                                                        etapaNome: {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }}
+                                                    })"
+                                                    class="flex-1 min-w-[100px] w-full py-1.5 rounded text-[10px] font-bold text-white shadow-sm {{ $btnCorClasses[$transicao->cor_botao] ?? 'bg-blue-600' }}">
+                                                    {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
+                                                </button>
                                             @endforeach
                                         </div>
                                     @elseif(!$etapaLinha)
@@ -241,18 +242,19 @@
                                                 </svg>
                                                 DEFINIR ETAPA
                                             </button>
-                                            
+
                                             <div x-show="openMenu" @click.away="openMenu = false" class="absolute left-0 right-0 bottom-full mb-1 bg-white dark:bg-slate-800 rounded shadow-xl border border-gray-200 dark:border-slate-600 z-50 overflow-hidden max-h-48 overflow-y-auto" style="display: none;">
                                                 @foreach($etapasProducao as $etapa)
-                                                    <form action="{{ route('produtos.localizacoes.definir-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="etapa_id" value="{{ $etapa->id }}">
-                                                        <input type="hidden" name="back_url" value="{{ request()->fullUrl() }}">
-                                                        <button type="submit" class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">
-                                                            <span class="w-5 text-center">{{ $etapa->icone ?? '•' }}</span>
-                                                            <span class="font-medium">{{ $etapa->nome }}</span>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button"
+                                                        @click.prevent="$dispatch('abrir-modal-etapa', {
+                                                            action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produtoPrincipal->id, $loc->pivot->id])) }},
+                                                            etapaId: {{ $etapa->id }},
+                                                            etapaNome: {{ Js::from($etapa->nome) }}
+                                                        }); openMenu = false"
+                                                        class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">
+                                                        <span class="w-5 text-center">{{ $etapa->icone ?? '•' }}</span>
+                                                        <span class="font-medium">{{ $etapa->nome }}</span>
+                                                    </button>
                                                 @endforeach
                                             </div>
                                         </div>
@@ -285,7 +287,7 @@
                                     @endif
                                 </div>
                             @endif
-                            
+
                             {{-- Observação da Localização --}}
                             @if($loc->pivot->observacao)
                                 @php
@@ -307,7 +309,7 @@
                             @endif
                         </div>
                     @endforeach
-                    
+
                     {{-- Total Quantidade --}}
                     @if($todasObsLocalizacoes->count() > 1)
                         <div class="flex justify-between items-center px-2 py-1 bg-gray-100 dark:bg-slate-800 rounded font-bold text-xs">
@@ -341,12 +343,12 @@
                     <div class="font-bold text-yellow-800 dark:text-yellow-500 mb-1">📝 Observações:</div>
                     @foreach($obs as $observacao)
                         <div class="mb-1 last:mb-0 text-gray-700 dark:text-gray-300">
-                             {!! $observacao->observacao !!} 
+                             {!! $observacao->observacao !!}
                         </div>
                     @endforeach
                 </div>
             @endif
-            
+
             <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100 dark:border-slate-800">
                <span class="text-xs text-gray-500 uppercase font-bold">Qtd Total</span>
                <span class="text-sm font-bold text-blue-600 dark:text-blue-400">{{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}</span>

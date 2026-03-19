@@ -1,5 +1,12 @@
 ﻿<!-- Localizações -->
 <div class="bg-gray-50 dark:bg-slate-800/50 overflow-hidden shadow-sm sm:rounded-lg p-6 mb-6"
+    @abrir-modal-etapa.window="
+        modalEtapaAction = $event.detail.action;
+        modalEtapaId = $event.detail.etapaId;
+        modalEtapaNome = $event.detail.etapaNome;
+        modalEtapaObservacao = '';
+        modalEtapaAberto = true;
+    "
     x-data="{
         modalEtapaAberto: false,
         modalEtapaAction: '',
@@ -256,7 +263,7 @@
                                         <div x-show="showEtapaMenu" x-transition class="absolute z-20 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200">
                                             @foreach($etapasProducao as $etapa)
                                                 <button type="button"
-                                                    @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $etapa->id }}, {{ Js::from($etapa->nome) }}); showEtapaMenu = false"
+                                                    @click.prevent="$dispatch('abrir-modal-etapa', { action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, etapaId: {{ $etapa->id }}, etapaNome: {{ Js::from($etapa->nome) }} }); showEtapaMenu = false"
                                                     class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1">
                                                     {{ $etapa->icone ?? '' }} {{ $etapa->nome }}
                                                 </button>
@@ -270,7 +277,7 @@
                                     <div class="space-y-1">
                                         @foreach($transicoes as $transicao)
                                             <button type="button"
-                                                @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $transicao->etapa_destino_id }}, {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }})"
+                                                @click.prevent="$dispatch('abrir-modal-etapa', { action: {{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id])) }}, etapaId: {{ $transicao->etapa_destino_id }}, etapaNome: {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }} })"
                                                 class="w-full text-left px-2 py-0.5 rounded text-[10px] font-bold {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
                                                 → {{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}
                                             </button>
@@ -429,7 +436,7 @@
                                         <div class="grid grid-cols-{{ min($transicoes->count(), 2) }} gap-2">
                                             @foreach($transicoes as $transicao)
                                                 <button type="button"
-                                                    @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $transicao->etapa_destino_id }}, {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }})"
+                                                    @click.prevent="$dispatch('abrir-modal-etapa', { action: {{ Js::from(route('produtos.localizacoes.avancar-etapa', [$produto->id, $localizacao->pivot->id])) }}, etapaId: {{ $transicao->etapa_destino_id }}, etapaNome: {{ Js::from($transicao->label_botao ?: $transicao->etapaDestino->nome) }} })"
                                                     class="w-full py-2.5 rounded-lg text-xs font-bold text-white shadow-md flex items-center justify-center gap-1 {{ $btnCorClasses[$transicao->cor_botao] ?? $defaultBtnClass }}">
                                                     <span>{{ $transicao->label_botao ?: $transicao->etapaDestino->nome }}</span>
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -451,7 +458,7 @@
                                             <div x-show="openMenu" @click.away="openMenu = false" class="absolute left-0 right-0 bottom-full mb-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-600 z-50 overflow-hidden max-h-60 overflow-y-auto" style="display: none;">
                                                 @foreach($etapasProducao as $etapa)
                                                     <button type="button"
-                                                        @click.prevent="abrirModalEtapa({{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, {{ $etapa->id }}, {{ Js::from($etapa->nome) }}); openMenu = false"
+                                                        @click.prevent="$dispatch('abrir-modal-etapa', { action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, etapaId: {{ $etapa->id }}, etapaNome: {{ Js::from($etapa->nome) }} }); openMenu = false"
                                                         class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">
                                                         <span class="w-5 text-center">{{ $etapa->icone ?? '•' }}</span>
                                                         <span class="font-medium">{{ $etapa->nome }}</span>

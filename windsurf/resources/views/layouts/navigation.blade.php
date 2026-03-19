@@ -173,9 +173,22 @@
                             const response = await fetch('{{ route("api.sugestoes.nao-lidas-count") }}', {
                                 headers: { 'Accept': 'application/json' }
                             });
+
+                            if (!response.ok) {
+                                this.count = 0;
+                                return;
+                            }
+
+                            const contentType = response.headers.get('content-type') || '';
+                            if (!contentType.includes('application/json')) {
+                                this.count = 0;
+                                return;
+                            }
+
                             const data = await response.json();
-                            this.count = data.count ?? 0;
+                            this.count = Number(data?.count ?? 0);
                         } catch (error) {
+                            this.count = 0;
                             console.error('Erro ao carregar contador de sugestões:', error);
                         }
                     },
@@ -210,10 +223,26 @@
                                     'Accept': 'application/json'
                                 }
                             });
+
+                            if (!response.ok) {
+                                this.notificacoes = [];
+                                this.count = 0;
+                                return;
+                            }
+
+                            const contentType = response.headers.get('content-type') || '';
+                            if (!contentType.includes('application/json')) {
+                                this.notificacoes = [];
+                                this.count = 0;
+                                return;
+                            }
+
                             const data = await response.json();
-                            this.notificacoes = data.notificacoes;
-                            this.count = data.count;
+                            this.notificacoes = Array.isArray(data?.notificacoes) ? data.notificacoes : [];
+                            this.count = Number(data?.count ?? this.notificacoes.length);
                         } catch (error) {
+                            this.notificacoes = [];
+                            this.count = 0;
                             console.error('Erro ao carregar notificações:', error);
                         } finally {
                             this.loading = false;
@@ -259,7 +288,7 @@
                                     </div>
                                 </template>
 
-                                <template x-if="!loading && notificacoes.length === 0">
+                                <template x-if="!loading && (!Array.isArray(notificacoes) || notificacoes.length === 0)">
                                     <div class="px-4 py-8 text-center text-slate-500 text-xs italic">
                                         Nenhuma notificação nova
                                     </div>
