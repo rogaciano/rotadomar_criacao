@@ -16,14 +16,15 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             {{-- Mensagens de sucesso/erro --}}
-            @if(session('success'))
-                <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                    <p class="text-sm text-green-700 dark:text-green-300">{{ session('success') }}</p>
-                </div>
-            @endif
-            @if(session('error'))
+            {{-- Erros de validação (não exibidos pelo toast global) --}}
+            @if($errors->any())
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                    <p class="text-sm text-red-700 dark:text-red-300">{{ session('error') }}</p>
+                    <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-1">Erro ao agendar coleta:</p>
+                    <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
                 </div>
             @endif
 
@@ -290,7 +291,8 @@
                                         </td>
                                     </tr>
 
-                                    {{-- Modal: Agendar Coleta --}}
+                                    {{-- Modal: Agendar Coleta (só se não tem coleta ativa) --}}
+                                    @if(!$temColeta)
                                     <div id="modal-agendar-{{ $pl->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6">
                                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Agendar Coleta</h3>
@@ -344,6 +346,7 @@
                                             </form>
                                         </div>
                                     </div>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>

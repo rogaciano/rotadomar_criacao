@@ -406,6 +406,15 @@
                     modalEtapaObservacao = '';
                     modalEtapaAberto = true;
                  "
+                 @abrir-modal-confirmar-chegada.window="
+                    modalChegadaAction = $event.detail.action;
+                    modalChegadaReferencia = $event.detail.referencia;
+                    modalChegadaMotorista = $event.detail.motorista;
+                    modalChegadaVeiculo = $event.detail.veiculo;
+                    modalChegadaBackUrl = $event.detail.backUrl;
+                    modalChegadaObservacao = '';
+                    modalChegadaAberto = true;
+                 "
                  x-data="{
                     modalEtapaAberto: false,
                     modalEtapaAction: '',
@@ -414,6 +423,16 @@
                     modalEtapaObservacao: '',
                     fecharModalEtapa() {
                         this.modalEtapaAberto = false;
+                    },
+                    modalChegadaAberto: false,
+                    modalChegadaAction: '',
+                    modalChegadaReferencia: '',
+                    modalChegadaMotorista: '',
+                    modalChegadaVeiculo: '',
+                    modalChegadaBackUrl: '',
+                    modalChegadaObservacao: '',
+                    fecharModalChegada() {
+                        this.modalChegadaAberto = false;
                     }
                  }">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
@@ -622,6 +641,55 @@
                                                 Confirmar
                                             </button>
                                             <button type="button" @click="fecharModalEtapa()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-slate-800 dark:text-gray-300 dark:border-slate-600 dark:hover:bg-slate-700">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal de Confirmar Chegada do Motorista (Logística) -->
+                        <div x-show="modalChegadaAberto"
+                             x-transition
+                             class="fixed inset-0 z-50 overflow-y-auto"
+                             style="display: none;"
+                             role="dialog"
+                             aria-modal="true">
+                            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="fecharModalChegada()"></div>
+                                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+                                <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full">
+                                    <form :action="modalChegadaAction" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="back_url" :value="modalChegadaBackUrl">
+
+                                        <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                            <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">Confirmar Chegada do Motorista</h3>
+                                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                                Produto: <strong x-text="modalChegadaReferencia"></strong>
+                                            </p>
+                                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                                Motorista: <strong x-text="modalChegadaMotorista"></strong> · Veículo: <strong x-text="modalChegadaVeiculo"></strong>
+                                            </p>
+
+                                            <div class="mt-4">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observação (opcional)</label>
+                                                <textarea name="observacao_origem"
+                                                          rows="3"
+                                                          maxlength="1000"
+                                                          x-model="modalChegadaObservacao"
+                                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                                                          placeholder="Ex: Motorista chegou às 14h..."></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-500 text-base font-medium text-white hover:bg-orange-600 sm:ml-3 sm:w-auto sm:text-sm">
+                                                Confirmar Chegada
+                                            </button>
+                                            <button type="button" @click="fecharModalChegada()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-slate-800 dark:text-gray-300 dark:border-slate-600 dark:hover:bg-slate-700">
                                                 Cancelar
                                             </button>
                                         </div>

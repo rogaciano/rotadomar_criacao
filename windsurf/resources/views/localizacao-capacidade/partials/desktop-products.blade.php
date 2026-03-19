@@ -159,7 +159,7 @@
                                                 $etapaLinha = $etapaLinhaId ? $etapasProducao->firstWhere('id', $etapaLinhaId) : null;
                                             @endphp
                                             @if($etapaLinha)
-                                                <div class="flex items-center gap-1">
+                                                <div class="flex items-center gap-1 flex-wrap">
                                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border {{ $corClasses[$etapaLinha->cor] ?? 'bg-gray-100 text-gray-800' }} uppercase">
                                                         {{ $etapaLinha->icone ?? '' }} {{ $etapaLinha->nome }}
                                                     </span>
@@ -169,6 +169,36 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                         </svg>
                                                     </a>
+                                                    @php
+                                                        $isEtapaAguardandoMotorista = $etapaLinha->slug === 'aguardando_motorista';
+                                                        $coletaAtivaPl = null;
+                                                        if ($isEtapaAguardandoMotorista && \Illuminate\Support\Facades\Schema::hasTable('coletas_logisticas')) {
+                                                            $coletaAtivaPl = \App\Models\ColetaLogistica::where('produto_localizacao_id', $loc->pivot->id)
+                                                                ->whereIn('status', ['agendado'])
+                                                                ->with(['motorista', 'veiculo'])
+                                                                ->first();
+                                                        }
+                                                    @endphp
+                                                    @if($isEtapaAguardandoMotorista && $coletaAtivaPl)
+                                                        <div class="w-full mt-1 flex items-center gap-1.5 flex-wrap">
+                                                            <span class="text-[9px] text-gray-500 dark:text-gray-400">
+                                                                🚛 {{ $coletaAtivaPl->motorista?->name ?? '?' }} · {{ $coletaAtivaPl->veiculo?->placa ?? '?' }}
+                                                            </span>
+                                                            @if(auth()->user()->podeGerenciarEtapa($loc->id) || auth()->user()->isAdmin())
+                                                                <button type="button"
+                                                                    @click.prevent="$dispatch('abrir-modal-confirmar-chegada', {
+                                                                        action: {{ Js::from(route('logistica-coleta.confirmar-chegada-origem', $coletaAtivaPl->id)) }},
+                                                                        referencia: {{ Js::from($produtoPrincipal->referencia) }},
+                                                                        motorista: {{ Js::from($coletaAtivaPl->motorista?->name ?? '?') }},
+                                                                        veiculo: {{ Js::from($coletaAtivaPl->veiculo?->placa ?? '?') }},
+                                                                        backUrl: {{ Js::from(request()->fullUrlWithQuery(['expand_produtos' => 1])) }}
+                                                                    })"
+                                                                    class="inline-flex items-center px-1.5 py-0.5 bg-orange-500 text-white text-[9px] font-bold rounded hover:bg-orange-600 transition-colors">
+                                                                    Confirmar Chegada
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             @else
                                                 <span class="text-gray-400 text-[9px]">—</span>
@@ -347,6 +377,7 @@
                                             @endif
                                         </td>
                                     </tr>
+
                                 @endforeach
 
                                 {{-- Linha de Total quando houver mais de 1 item --}}

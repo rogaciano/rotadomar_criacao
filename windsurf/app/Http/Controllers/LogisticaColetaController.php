@@ -104,7 +104,7 @@ class LogisticaColetaController extends Controller
             'produto_localizacao_id' => 'required|integer|exists:produto_localizacao,id',
             'veiculo_id' => 'required|integer|exists:veiculos,id',
             'destino_localizacao_id' => 'required|integer|exists:localizacoes,id',
-            'inicio_previsto_em' => 'required|date|after_or_equal:now',
+            'inicio_previsto_em' => 'required|date|after_or_equal:today',
             'retorno_previsto_em' => 'required|date|after:inicio_previsto_em',
             'observacao_motorista' => 'nullable|string|max:1000',
         ]);
@@ -195,6 +195,7 @@ class LogisticaColetaController extends Controller
 
         $validated = $request->validate([
             'observacao_origem' => 'nullable|string|max:1000',
+            'back_url' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -216,6 +217,11 @@ class LogisticaColetaController extends Controller
             }
 
             DB::commit();
+
+            $backUrl = $request->input('back_url');
+            if ($backUrl) {
+                return redirect($backUrl)->with('success', 'Chegada confirmada! Produto em trânsito.');
+            }
             return redirect()->route('logistica-coleta.index')->with('success', 'Chegada confirmada! Produto em trânsito.');
         } catch (\Exception $e) {
             DB::rollBack();
