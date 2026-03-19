@@ -78,10 +78,10 @@ const API = {
 
     // ===== Auth =====
 
-    async login(email, password) {
+    async login(login, password) {
         const data = await this.request('/motorista/login', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify({ login, password }),
         });
         if (data && data.token) {
             this.setToken(data.token);
@@ -120,6 +120,27 @@ const API = {
         return this.request(`/motorista/coletas/${id}/confirmar-entrega`, {
             method: 'POST',
             body: JSON.stringify({ observacao }),
+        });
+    },
+
+    // ===== Disponíveis + Agendar =====
+
+    async getDisponiveis() {
+        return this.request('/motorista/disponiveis');
+    },
+
+    async getVeiculos() {
+        return this.request('/motorista/veiculos');
+    },
+
+    async getDestinos() {
+        return this.request('/motorista/destinos');
+    },
+
+    async agendarColeta(data) {
+        return this.request('/motorista/agendar', {
+            method: 'POST',
+            body: JSON.stringify(data),
         });
     },
 

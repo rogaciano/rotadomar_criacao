@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4f46e5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Motorista - Rota do Amar</title>
-    <link rel="manifest" href="/motorista/manifest.json">
-    <link rel="icon" type="image/png" href="/motorista/icons/icon-192.png">
+    <title>Motorista - Rota do Marr</title>
+    <meta name="version" content="260319.1">
+    <link rel="manifest" href="/motorista/manifest.json?v=260319.1">
+    <link rel="icon" type="image/svg+xml" href="/motorista/icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="/motorista/icons/icon-192.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -39,7 +41,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-white">Rota do Amar</h1>
+            <h1 class="text-2xl font-bold text-white">Rota do Mar</h1>
             <p class="text-slate-400 text-sm mt-1">Painel do Motorista</p>
         </div>
 
@@ -65,10 +67,10 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">E-mail</label>
-                    <input type="email" id="email" required autocomplete="email"
+                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Usuário ou E-mail</label>
+                    <input type="text" id="login" required autocomplete="username"
                            class="w-full px-3 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                           placeholder="seu@email.com">
+                           placeholder="Nome ou e-mail">
                 </div>
 
                 <div class="mb-6">
@@ -89,10 +91,10 @@
             </form>
         </div>
 
-        <p class="text-center text-slate-600 text-xs mt-6">v1.0 · Rota do Amar</p>
+        <p class="text-center text-slate-600 text-xs mt-6">v260319.1 · Rota do Mar</p>
     </div>
 
-    <script src="/motorista/js/api.js"></script>
+    <script src="/motorista/js/api.js?v=260319.1"></script>
     <script>
         // Redirect if already logged in
         if (API.isAuthenticated()) {
@@ -115,7 +117,7 @@
         async function handleLogin(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email').value.trim();
+            const login = document.getElementById('login').value.trim();
             const password = document.getElementById('password').value;
             const apiUrl = document.getElementById('api-url').value.trim();
             const errorEl = document.getElementById('error-msg');
@@ -135,10 +137,10 @@
             btnLogin.disabled = true;
 
             try {
-                await API.login(email, password);
+                await API.login(login, password);
                 window.location.href = '/motorista/app.html';
             } catch (err) {
-                const msg = err?.data?.message || err?.data?.errors?.email?.[0] || 'Erro ao fazer login.';
+                const msg = err?.data?.message || err?.data?.errors?.login?.[0] || 'Erro ao fazer login.';
                 errorEl.textContent = msg;
                 errorEl.classList.remove('hidden');
             } finally {
@@ -150,7 +152,7 @@
 
         // Register service worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/motorista/sw.js', { scope: '/motorista/' }).catch(err => console.log('SW registration failed:', err));
+            navigator.serviceWorker.register('/motorista/sw.js?v=260319.1', { scope: '/motorista/' }).catch(err => console.log('SW registration failed:', err));
         }
     </script>
 </body>

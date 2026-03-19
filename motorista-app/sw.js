@@ -1,4 +1,7 @@
-const CACHE_NAME = 'motorista-v1';
+// Versão: AAMMDD.N (alterar a cada deploy para forçar atualização do cache)
+const APP_VERSION = '260319.1';
+const CACHE_NAME = 'motorista-' + APP_VERSION;
+
 const ASSETS_TO_CACHE = [
     '/motorista/',
     '/motorista/index.html',
@@ -13,6 +16,7 @@ const ASSETS_TO_CACHE = [
 
 // Install: cache shell assets
 self.addEventListener('install', (event) => {
+    console.log('[SW] Instalando versão', APP_VERSION);
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
     );
@@ -21,9 +25,13 @@ self.addEventListener('install', (event) => {
 
 // Activate: clean old caches
 self.addEventListener('activate', (event) => {
+    console.log('[SW] Ativando versão', APP_VERSION);
     event.waitUntil(
         caches.keys().then((keys) =>
-            Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+            Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => {
+                console.log('[SW] Removendo cache antigo:', k);
+                return caches.delete(k);
+            }))
         )
     );
     self.clients.claim();
@@ -33,8 +41,18 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // API requests: always network
-    if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/motorista/api/')) {
+    // Ignorar requests que não são HTTP/HTTPS (ex: chrome-extension://)
+    if (!url.protocol.startsWith('http')) {
+        return;
+    }
+
+    // API requests: always network (não cachear)
+    if (url.pathname.startsWith('/api/')) {
+        return;
+    }
+
+    // CDN requests: não cachear (tailwind, alpine, etc)
+    if (url.hostname !== self.location.hostname) {
         return;
     }
 

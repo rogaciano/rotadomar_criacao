@@ -22,15 +22,21 @@ class MotoristaApiController extends Controller
     public function login(Request $request): JsonResponse
     {
         $request->validate([
-            'email' => 'required|email',
+            'login' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $login = $request->input('login');
+
+        // Tenta por e-mail primeiro, depois por nome (mesmo comportamento do sistema web)
+        $user = \App\Models\User::where('email', $login)->first();
+        if (!$user) {
+            $user = \App\Models\User::where('name', $login)->first();
+        }
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Credenciais inválidas.'],
+                'login' => ['Credenciais inválidas.'],
             ]);
         }
 
@@ -243,6 +249,163 @@ class MotoristaApiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Erro ao confirmar entrega: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Lista produtos disponíveis para coleta (AGUARDANDO RETIRADA sem coleta ativa)
+     */
+    public function disponiveis(Request $request): JsonResponse
+    {
+        if (!Schema::hasTable('coletas_logisticas')) {
+            return response()->json(['produtos' => []]);
+        }
+
+        $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
+        if (!$etapaAguardandoRetirada) {
+            return response()->json(['produtos' => []]);
+        }
+
+        $produtos = \App\Models\ProdutoLocalizacao::with(['produto', 'localizacao'])
+            ->where('etapa_atual_id', $etapaAguardandoRetirada->id)
+            ->whereDoesntHave('coletasLogisticas', function ($q) {
+                $q->ativas();
+            })
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($pl) {
+                return [
+                    'id' => $pl->id,
+                    'referencia' => $pl->produto?->referencia ?? '-',
+                    'descricao' => $pl->produto?->descricao ?? '-',
+                    'quantidade' => $pl->quantidade ?? 0,
+                    'origem' => $pl->localizacao?->nome_reduzido ?? $pl->localizacao?->nome_localizacao ?? '-',
+                    'origem_id' => $pl->localizacao_id,
+                    'aguardando_desde' => $pl->created_at?->diffForHumans(),
+                ];
+            });
+
+        return response()->json(['produtos' => $produtos]);
+    }
+
+    /**
+     * Lista veículos ativos
+     */
+    public function veiculos(Request $request): JsonResponse
+    {
+        if (!Schema::hasTable('veiculos')) {
+            return response()->json(['veiculos' => []]);
+        }
+
+        $veiculos = \App\Models\Veiculo::where('ativo', true)
+            ->orderBy('placa')
+            ->get()
+            ->map(function ($v) {
+                return [
+                    'id' => $v->id,
+                    'placa' => $v->placa,
+                    'descricao' => $v->descricao,
+                ];
+            });
+
+        return response()->json(['veiculos' => $veiculos]);
+    }
+
+    /**
+     * Lista destinos (localizações permitidas do motorista)
+     */
+    public function destinos(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
+
+        $destinos = \App\Models\Localizacao::where('ativo', true)
+            ->whereIn('id', $localizacoesPermitidas)
+            ->orderBy('nome_localizacao')
+            ->get()
+            ->map(function ($loc) {
+                return [
+                    'id' => $loc->id,
+                    'nome' => $loc->nome_reduzido ?? $loc->nome_localizacao,
+                ];
+            });
+
+        return response()->json(['destinos' => $destinos]);
+    }
+
+    /**
+     * Motorista agenda coleta via app
+     */
+    public function agendar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'produto_localizacao_id' => 'required|integer|exists:produto_localizacao,id',
+            'veiculo_id' => 'required|integer|exists:veiculos,id',
+            'destino_localizacao_id' => 'required|integer|exists:localizacoes,id',
+            'inicio_previsto_em' => 'required|date|after_or_equal:today',
+            'retorno_previsto_em' => 'required|date|after:inicio_previsto_em',
+            'observacao' => 'nullable|string|max:1000',
+        ]);
+
+        $user = $request->user();
+
+        // Validar destino nas localizações permitidas
+        $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
+        if (!in_array((int) $request->destino_localizacao_id, $localizacoesPermitidas)) {
+            return response()->json(['message' => 'Destino não permitido para você.'], 422);
+        }
+
+        $produtoLocalizacao = \App\Models\ProdutoLocalizacao::findOrFail($request->produto_localizacao_id);
+
+        // Verificar etapa
+        $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
+        if (!$etapaAguardandoRetirada || $produtoLocalizacao->etapa_atual_id !== $etapaAguardandoRetirada->id) {
+            return response()->json(['message' => 'Produto não está aguardando retirada.'], 422);
+        }
+
+        $inicio = $request->inicio_previsto_em;
+        $retorno = $request->retorno_previsto_em;
+
+        if (ColetaLogistica::temColetaAtiva($produtoLocalizacao->id)) {
+            return response()->json(['message' => 'Já existe uma coleta ativa para este produto.'], 422);
+        }
+
+        if (ColetaLogistica::temConflitoMotorista($user->id, $inicio, $retorno)) {
+            return response()->json(['message' => 'Você já possui uma coleta neste horário.'], 422);
+        }
+
+        if (ColetaLogistica::temConflitoVeiculo($request->veiculo_id, $inicio, $retorno)) {
+            return response()->json(['message' => 'Veículo já agendado neste horário.'], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $coleta = ColetaLogistica::create([
+                'produto_localizacao_id' => $produtoLocalizacao->id,
+                'motorista_user_id' => $user->id,
+                'veiculo_id' => $request->veiculo_id,
+                'destino_localizacao_id' => $request->destino_localizacao_id,
+                'inicio_previsto_em' => $inicio,
+                'retorno_previsto_em' => $retorno,
+                'status' => ColetaLogistica::STATUS_AGENDADO,
+                'observacao_motorista' => $request->observacao,
+            ]);
+
+            $etapaAguardandoMotorista = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_MOTORISTA);
+            if ($etapaAguardandoMotorista) {
+                $produtoLocalizacao->avancarEtapa(
+                    $etapaAguardandoMotorista->id,
+                    $user->id,
+                    'Coleta agendada via app pelo motorista ' . $user->name
+                );
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Coleta agendada com sucesso!']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Erro ao agendar: ' . $e->getMessage()], 500);
         }
     }
 

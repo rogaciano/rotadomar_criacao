@@ -1,4 +1,4 @@
-# 🚛 Motorista PWA - Rota do Amar
+# 🚛 Motorista PWA - Rota do Mar
 
 App PWA para motoristas acompanharem e gerenciarem coletas logísticas.
 
@@ -80,7 +80,7 @@ Substituir `icons/icon-192.svg` por PNGs reais:
 - `icons/icon-192.png` (192x192px)
 - `icons/icon-512.png` (512x512px)
 
-Use o logo da Rota do Amar com fundo indigo (#4f46e5).
+Use o logo da Rota do Mar com fundo indigo (#4f46e5).
 
 ### 4. Push Notifications (opcional)
 

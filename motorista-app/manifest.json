@@ -1,5 +1,5 @@
 {
-    "name": "Rota do Amar - Motorista",
+    "name": "Rota do Mar - Motorista",
     "short_name": "Motorista",
     "description": "App de coleta logística para motoristas",
     "start_url": "/motorista/",
@@ -8,6 +8,12 @@
     "background_color": "#0f172a",
     "theme_color": "#4f46e5",
     "icons": [
+        {
+            "src": "/motorista/icons/icon-192.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
         {
             "src": "/motorista/icons/icon-192.png",
             "sizes": "192x192",

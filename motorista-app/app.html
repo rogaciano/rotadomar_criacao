@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4f46e5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Minhas Coletas - Motorista</title>
-    <link rel="manifest" href="/motorista/manifest.json">
-    <link rel="icon" type="image/png" href="/motorista/icons/icon-192.png">
+    <meta name="version" content="260319.1">
+    <link rel="manifest" href="/motorista/manifest.json?v=260319.1">
+    <link rel="icon" type="image/svg+xml" href="/motorista/icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="/motorista/icons/icon-192.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
@@ -65,6 +67,12 @@
 
         <!-- Tabs -->
         <div class="flex mt-3 bg-slate-800 rounded-lg p-0.5">
+            <button @click="tab = 'disponiveis'; loadDisponiveis()"
+                    :class="tab === 'disponiveis' ? 'bg-orange-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'"
+                    class="flex-1 py-2 text-xs font-bold rounded-md transition-all">
+                Disponíveis
+                <span x-show="disponiveis.length > 0 && tab === 'disponiveis'" x-text="'(' + disponiveis.length + ')'" class="ml-1"></span>
+            </button>
             <button @click="tab = 'ativas'; loadColetas()"
                     :class="tab === 'ativas' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'"
                     class="flex-1 py-2 text-xs font-bold rounded-md transition-all">
@@ -88,12 +96,12 @@
     </div>
 
     <!-- Loading -->
-    <div x-show="loading && coletas.length === 0" class="flex flex-col items-center justify-center py-20">
+    <div x-show="loading" class="flex flex-col items-center justify-center py-20">
         <svg class="loading-spinner w-10 h-10 text-indigo-500 mb-4" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
-        <p class="text-slate-400 text-sm">Carregando coletas...</p>
+        <p class="text-slate-400 text-sm">Carregando...</p>
     </div>
 
     <!-- Error -->
@@ -103,14 +111,172 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
             <p class="text-red-300 text-sm mb-3" x-text="error"></p>
-            <button @click="loadColetas()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-red-200 text-xs font-bold rounded-lg transition-colors">
+            <button @click="tab === 'disponiveis' ? loadDisponiveis() : loadColetas()" class="px-4 py-2 bg-red-800 hover:bg-red-700 text-red-200 text-xs font-bold rounded-lg transition-colors">
                 Tentar novamente
             </button>
         </div>
     </div>
 
-    <!-- Empty state -->
-    <div x-show="!loading && !error && coletas.length === 0" class="p-4">
+    <!-- ==================== DISPONÍVEIS TAB ==================== -->
+    <div x-show="tab === 'disponiveis' && !loading && !error">
+        <!-- Empty disponíveis -->
+        <div x-show="disponiveis.length === 0" class="p-4">
+            <div class="bg-slate-800 rounded-2xl p-8 text-center border border-slate-700">
+                <div class="w-16 h-16 bg-slate-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <p class="text-white font-semibold mb-1">Nenhum produto disponível</p>
+                <p class="text-slate-400 text-sm">Todos os produtos já foram agendados para coleta.</p>
+            </div>
+        </div>
+
+        <!-- Disponíveis list -->
+        <div x-show="disponiveis.length > 0" class="p-4 space-y-3">
+            <template x-for="prod in disponiveis" :key="prod.id">
+                <div class="bg-slate-800 rounded-2xl border border-orange-700/30 overflow-hidden shadow-lg">
+                    <div class="px-4 py-3 bg-orange-900/20 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">📦</span>
+                            <div>
+                                <p class="text-white font-bold text-sm" x-text="'Ref. ' + prod.referencia"></p>
+                                <p class="text-slate-400 text-xs" x-text="prod.descricao"></p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-orange-900/50 text-orange-300 border border-orange-700">
+                            Disponível
+                        </span>
+                    </div>
+                    <div class="px-4 py-3">
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                <p class="text-slate-500 text-[10px] font-bold uppercase">Qtd</p>
+                                <p class="text-white font-bold text-sm" x-text="prod.quantidade"></p>
+                            </div>
+                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                <p class="text-slate-500 text-[10px] font-bold uppercase">Origem</p>
+                                <p class="text-white font-bold text-xs" x-text="prod.origem"></p>
+                            </div>
+                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                <p class="text-slate-500 text-[10px] font-bold uppercase">Esperando</p>
+                                <p class="text-white font-bold text-xs" x-text="prod.aguardando_desde"></p>
+                            </div>
+                        </div>
+                        <button @click="openAgendar(prod)"
+                                class="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Agendar Coleta
+                        </button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL AGENDAR ==================== -->
+    <div x-show="modalAgendar" x-transition.opacity
+         class="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-0"
+         @click.self="modalAgendar = false" style="display: none;">
+        <div x-show="modalAgendar" x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
+             class="bg-slate-800 w-full max-w-lg rounded-t-3xl border-t border-slate-700 shadow-2xl max-h-[85vh] overflow-y-auto">
+
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-slate-800 px-4 py-4 border-b border-slate-700 flex items-center justify-between rounded-t-3xl z-10">
+                <div>
+                    <h3 class="text-white font-bold">Agendar Coleta</h3>
+                    <p class="text-slate-400 text-xs" x-text="'Ref. ' + (agendarProduto?.referencia || '')"></p>
+                </div>
+                <button @click="modalAgendar = false" class="p-2 text-slate-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-4 space-y-4">
+                <!-- Info do produto -->
+                <div class="bg-slate-700/50 rounded-xl p-3 flex items-center gap-3">
+                    <span class="text-2xl">📦</span>
+                    <div>
+                        <p class="text-white font-bold text-sm" x-text="agendarProduto?.descricao"></p>
+                        <p class="text-slate-400 text-xs" x-text="'Origem: ' + (agendarProduto?.origem || '') + ' · Qtd: ' + (agendarProduto?.quantidade || 0)"></p>
+                    </div>
+                </div>
+
+                <!-- Veículo -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Veículo</label>
+                    <select x-model="agendarForm.veiculo_id"
+                            class="w-full px-3 py-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="">Selecione...</option>
+                        <template x-for="v in veiculosList" :key="v.id">
+                            <option :value="v.id" x-text="v.placa + (v.descricao ? ' - ' + v.descricao : '')"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Destino -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Destino</label>
+                    <select x-model="agendarForm.destino_localizacao_id"
+                            class="w-full px-3 py-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="">Selecione...</option>
+                        <template x-for="d in destinosList" :key="d.id">
+                            <option :value="d.id" x-text="d.nome"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Datas -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Saída prevista</label>
+                        <input type="datetime-local" x-model="agendarForm.inicio_previsto_em"
+                               class="w-full px-3 py-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Retorno previsto</label>
+                        <input type="datetime-local" x-model="agendarForm.retorno_previsto_em"
+                               class="w-full px-3 py-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    </div>
+                </div>
+
+                <!-- Observação -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Observação (opcional)</label>
+                    <textarea x-model="agendarForm.observacao" rows="2" placeholder="Ex: retirar pela manhã"
+                              class="w-full px-3 py-2.5 bg-slate-700 border border-slate-600 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+                </div>
+
+                <!-- Error -->
+                <div x-show="agendarError" class="p-3 bg-red-900/50 border border-red-700 rounded-xl text-red-300 text-sm" x-text="agendarError"></div>
+
+                <!-- Buttons -->
+                <div class="flex gap-3 pb-2">
+                    <button @click="modalAgendar = false" class="flex-1 py-3 bg-slate-700 text-slate-300 font-semibold rounded-xl">
+                        Cancelar
+                    </button>
+                    <button @click="submitAgendar()" :disabled="agendarLoading"
+                            class="flex-1 py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                        <span x-show="!agendarLoading">Agendar</span>
+                        <span x-show="agendarLoading">Agendando...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== COLETAS TABS (Ativas / Histórico) ==================== -->
+
+    <!-- Empty state (coletas) -->
+    <div x-show="tab !== 'disponiveis' && !loading && !error && coletas.length === 0" class="p-4">
         <div class="bg-slate-800 rounded-2xl p-8 text-center border border-slate-700">
             <div class="w-16 h-16 bg-slate-700 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <svg class="w-8 h-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,12 +284,12 @@
                 </svg>
             </div>
             <p class="text-white font-semibold mb-1" x-text="tab === 'ativas' ? 'Nenhuma coleta ativa' : 'Nenhuma coleta no histórico'"></p>
-            <p class="text-slate-400 text-sm" x-text="tab === 'ativas' ? 'Quando houver coletas agendadas para você, elas aparecerão aqui.' : 'Coletas finalizadas aparecerão aqui.'"></p>
+            <p class="text-slate-400 text-sm" x-text="tab === 'ativas' ? 'Vá em Disponíveis para agendar uma coleta.' : 'Coletas finalizadas aparecerão aqui.'"></p>
         </div>
     </div>
 
     <!-- Coletas List -->
-    <div x-show="!loading || coletas.length > 0" class="p-4 space-y-3">
+    <div x-show="tab !== 'disponiveis' && (!loading || coletas.length > 0)" class="p-4 space-y-3">
         <template x-for="coleta in coletas" :key="coleta.id">
             <div class="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-lg"
                  :class="{
@@ -292,19 +458,29 @@
     </div>
 </div>
 
-<script src="/motorista/js/api.js"></script>
-<script src="/motorista/js/push.js"></script>
+<script src="/motorista/js/api.js?v=260319.1"></script>
+<script src="/motorista/js/push.js?v=260319.1"></script>
 <script>
     function motoristaApp() {
         return {
             user: API.getUser(),
-            tab: 'ativas',
+            tab: 'disponiveis',
             coletas: [],
+            disponiveis: [],
+            veiculosList: [],
+            destinosList: [],
             loading: false,
             error: null,
             toast: { show: false, message: '', type: 'success' },
             installPrompt: null,
             refreshInterval: null,
+
+            // Modal agendar
+            modalAgendar: false,
+            agendarProduto: null,
+            agendarForm: { veiculo_id: '', destino_localizacao_id: '', inicio_previsto_em: '', retorno_previsto_em: '', observacao: '' },
+            agendarError: '',
+            agendarLoading: false,
 
             async init() {
                 if (!API.isAuthenticated()) {
@@ -312,10 +488,13 @@
                     return;
                 }
 
-                await this.loadColetas();
+                await this.loadDisponiveis();
 
                 // Auto-refresh every 30s
-                this.refreshInterval = setInterval(() => this.loadColetas(), 30000);
+                this.refreshInterval = setInterval(() => {
+                    if (this.tab === 'disponiveis') this.loadDisponiveis();
+                    else this.loadColetas();
+                }, 30000);
 
                 // Listen for action events
                 this.$el.addEventListener('confirmar-chegada', (e) => this.handleConfirmarChegada(e.detail));
@@ -331,6 +510,76 @@
                     e.preventDefault();
                     this.installPrompt = e;
                 });
+            },
+
+            async loadDisponiveis() {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const data = await API.getDisponiveis();
+                    if (data) this.disponiveis = data.produtos || [];
+                } catch (err) {
+                    this.error = err?.data?.message || 'Erro ao carregar produtos.';
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async openAgendar(prod) {
+                this.agendarProduto = prod;
+                this.agendarForm = { veiculo_id: '', destino_localizacao_id: '', inicio_previsto_em: '', retorno_previsto_em: '', observacao: '' };
+                this.agendarError = '';
+                this.agendarLoading = false;
+
+                // Carregar veículos e destinos
+                try {
+                    const [vRes, dRes] = await Promise.all([API.getVeiculos(), API.getDestinos()]);
+                    this.veiculosList = vRes?.veiculos || [];
+                    this.destinosList = dRes?.destinos || [];
+                } catch (e) {
+                    this.veiculosList = [];
+                    this.destinosList = [];
+                }
+
+                // Default: saída agora, retorno +4h
+                const now = new Date();
+                const ret = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+                this.agendarForm.inicio_previsto_em = this.toLocalDatetime(now);
+                this.agendarForm.retorno_previsto_em = this.toLocalDatetime(ret);
+
+                this.modalAgendar = true;
+            },
+
+            toLocalDatetime(date) {
+                const pad = n => String(n).padStart(2, '0');
+                return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            },
+
+            async submitAgendar() {
+                this.agendarError = '';
+                if (!this.agendarForm.veiculo_id) { this.agendarError = 'Selecione um veículo.'; return; }
+                if (!this.agendarForm.destino_localizacao_id) { this.agendarError = 'Selecione um destino.'; return; }
+                if (!this.agendarForm.inicio_previsto_em) { this.agendarError = 'Informe a saída prevista.'; return; }
+                if (!this.agendarForm.retorno_previsto_em) { this.agendarError = 'Informe o retorno previsto.'; return; }
+
+                this.agendarLoading = true;
+                try {
+                    const data = await API.agendarColeta({
+                        produto_localizacao_id: this.agendarProduto.id,
+                        veiculo_id: parseInt(this.agendarForm.veiculo_id),
+                        destino_localizacao_id: parseInt(this.agendarForm.destino_localizacao_id),
+                        inicio_previsto_em: this.agendarForm.inicio_previsto_em,
+                        retorno_previsto_em: this.agendarForm.retorno_previsto_em,
+                        observacao: this.agendarForm.observacao,
+                    });
+                    this.modalAgendar = false;
+                    this.showToast(data?.message || 'Coleta agendada!', 'success');
+                    await this.loadDisponiveis();
+                } catch (err) {
+                    this.agendarError = err?.data?.message || err?.data?.errors ? Object.values(err.data.errors).flat().join(' ') : 'Erro ao agendar.';
+                } finally {
+                    this.agendarLoading = false;
+                }
             },
 
             async loadColetas() {
