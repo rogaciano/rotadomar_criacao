@@ -22,35 +22,50 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
+                    @if(auth()->user()->hasPermission('produtos'))
                     <x-nav-link :href="route('produtos.index')" :active="request()->routeIs('produtos.*')">
                         {{ __('Produtos') }}
                     </x-nav-link>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('cadastros'))
                     <x-nav-link :href="route('tecidos.index')" :active="request()->routeIs('tecidos.*')">
                         {{ __('Tecidos') }}
                     </x-nav-link>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('movimentacoes'))
                     <x-nav-link :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
                         {{ __('Movimentações') }}
                     </x-nav-link>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('kanban'))
                     <x-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
                         {{ __('Kanban') }}
                     </x-nav-link>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('planejamento'))
                     <x-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')">
                         {{ __('Planejamento') }}
                     </x-nav-link>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('sugestoes'))
                     <x-nav-link :href="route('sugestoes.index')" :active="request()->routeIs('sugestoes.*')">
                         {{ __('Sugestões') }}
                     </x-nav-link>
+                    @endif
 
+                    @if(auth()->user()->hasPermission('logistica'))
                     <x-nav-link :href="route('logistica-coleta.index')" :active="request()->routeIs('logistica-coleta.*') || request()->routeIs('veiculos.*')">
                         {{ __('Logística') }}
                     </x-nav-link>
+                    @endif
 
                     <!-- Cadastros Dropdown -->
+                    @if(auth()->user()->hasPermission('cadastros'))
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
                         <div class="relative">
                             <button @click="open = !open" @click.away="open = false" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-300 bg-white dark:bg-slate-800 hover:text-gray-700 dark:hover:text-white focus:outline-none transition ease-in-out duration-150" :class="{'text-indigo-600 dark:text-indigo-400': {{ request()->routeIs('produtos.*') || request()->routeIs('tecidos.*') || request()->routeIs('estilistas.*') || request()->routeIs('marcas.*') || request()->routeIs('grupo_produtos.*') ? 'true' : 'false' }} }">
@@ -79,8 +94,10 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     <!-- Consultas Dropdown -->
+                    @if(auth()->user()->hasPermission('consultas'))
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
                         <div class="relative">
                             <button @click="open = !open" @click.away="open = false" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-300 bg-white dark:bg-slate-800 hover:text-gray-700 dark:hover:text-white focus:outline-none transition ease-in-out duration-150" :class="{'text-indigo-600 dark:text-indigo-400': {{ request()->routeIs('consultas.*') ? 'true' : 'false' }} }">
@@ -104,6 +121,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                 </div>
             </div>
@@ -342,13 +360,17 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
+            @if(auth()->user()->hasPermission('produtos'))
             <x-responsive-nav-link :href="route('produtos.index')" :active="request()->routeIs('produtos.*')">
                 {{ __('Produtos') }}
             </x-responsive-nav-link>
+            @endif
 
+            @if(auth()->user()->hasPermission('movimentacoes'))
             <x-responsive-nav-link :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
                 {{ __('Movimentações') }}
             </x-responsive-nav-link>
+            @endif
 
             @if(auth()->user()->localizacao_id)
             <x-responsive-nav-link :href="route('movimentacoes.minhas')" :active="request()->routeIs('movimentacoes.minhas')">
@@ -356,23 +378,32 @@
             </x-responsive-nav-link>
             @endif
 
+            @if(auth()->user()->hasPermission('kanban'))
             <x-responsive-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
                 {{ __('Kanban') }}
             </x-responsive-nav-link>
+            @endif
 
+            @if(auth()->user()->hasPermission('planejamento'))
             <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')">
                 {{ __('Planejamento') }}
             </x-responsive-nav-link>
+            @endif
 
+            @if(auth()->user()->hasPermission('sugestoes'))
             <x-responsive-nav-link :href="route('sugestoes.index')" :active="request()->routeIs('sugestoes.*')">
                 {{ __('Sugestões') }}
             </x-responsive-nav-link>
+            @endif
 
+            @if(auth()->user()->hasPermission('logistica'))
             <x-responsive-nav-link :href="route('logistica-coleta.index')" :active="request()->routeIs('logistica-coleta.*') || request()->routeIs('veiculos.*')">
                 {{ __('Logística') }}
             </x-responsive-nav-link>
+            @endif
 
             <!-- Responsive Cadastros -->
+            @if(auth()->user()->hasPermission('cadastros'))
             <div x-data="{ open: {{ request()->routeIs('tecidos.*') || request()->routeIs('estilistas.*') || request()->routeIs('marcas.*') || request()->routeIs('grupo_produtos.*') || request()->routeIs('tipos.*') || request()->routeIs('status.*') || request()->routeIs('situacoes.*') || request()->routeIs('localizacoes.*') || request()->routeIs('direcionamentos-comerciais.*') || request()->routeIs('etapas-producao.*') || request()->routeIs('localizacao-capacidade.*') ? 'true' : 'false' }} }" class="pt-2">
                 <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
                     <span>{{ __('Cadastros') }}</span>
@@ -419,8 +450,10 @@
                     </x-responsive-nav-link>
                 </div>
             </div>
+            @endif
 
             <!-- Responsive Consultas Menu -->
+            @if(auth()->user()->hasPermission('consultas'))
             <div x-data="{ open: {{ request()->routeIs('consultas.*') || request()->routeIs('dashboard.produtos-por-estilista') ? 'true' : 'false' }} }" class="pt-2">
                 <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
                     <span>{{ __('Consultas') }}</span>
@@ -443,6 +476,7 @@
                     </x-responsive-nav-link>
                 </div>
             </div>
+            @endif
 
         </div>
 

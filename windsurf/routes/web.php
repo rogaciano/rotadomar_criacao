@@ -40,7 +40,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('/dashboard/produtos-por-estilista', [DashboardController::class, 'produtosPorEstilista'])->name('dashboard.produtos-por-estilista');
 
     // Kanban - Visualização de produtos por localização
-    Route::get('/kanban', [KanbanController::class, 'index'])->name('kanban.index');
+    Route::get('/kanban', [KanbanController::class, 'index'])->middleware('permission:kanban')->name('kanban.index');
 
     // Rota para servir arquivos de rede
     Route::get('/arquivo/rede', [\App\Http\Controllers\ArquivoController::class, 'servirArquivoRede'])->name('arquivo.rede');
@@ -86,32 +86,58 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
         Route::get('activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
     });
 
-    // Routes para Tecidos
-    Route::resource('tecidos', TecidoController::class);
-    Route::get('tecidos/{tecido}/atualizar-estoque', [TecidoController::class, 'atualizarEstoque'])->name('tecidos.atualizar-estoque');
-    Route::get('tecidos-atualizar-todos-estoques', [TecidoController::class, 'atualizarTodosEstoques'])->name('tecidos.atualizar-todos-estoques');
-    Route::get('tecidos/{tecido}/estoque-por-cor', [TecidoController::class, 'estoquePorCor'])->name('tecidos.estoque-por-cor');
-    Route::get('tecidos/{tecidoId}/cores/{corId}/produtos', [TecidoController::class, 'produtosPorCor'])->name('tecidos.produtos-por-cor');
-    Route::post('tecidos/{tecido}/salvar-quantidades', [TecidoController::class, 'salvarQuantidades'])->name('tecidos.salvar-quantidades');
-    Route::get('tecidos-importar-estoque', [TecidoController::class, 'importarEstoqueForm'])->name('tecidos.importar-estoque-form');
-    Route::post('tecidos-importar-estoque', [TecidoController::class, 'importarEstoque'])->name('tecidos.importar-estoque');
-    Route::get('debug-estoque/{referencia}', [TecidoController::class, 'debugEstoque'])->name('tecidos.debug-estoque');
+    // === CADASTROS (protegido por permissão) ===
+    Route::middleware('permission:cadastros')->group(function () {
+        // Routes para Tecidos
+        Route::resource('tecidos', TecidoController::class);
+        Route::get('tecidos/{tecido}/atualizar-estoque', [TecidoController::class, 'atualizarEstoque'])->name('tecidos.atualizar-estoque');
+        Route::get('tecidos-atualizar-todos-estoques', [TecidoController::class, 'atualizarTodosEstoques'])->name('tecidos.atualizar-todos-estoques');
+        Route::get('tecidos/{tecido}/estoque-por-cor', [TecidoController::class, 'estoquePorCor'])->name('tecidos.estoque-por-cor');
+        Route::get('tecidos/{tecidoId}/cores/{corId}/produtos', [TecidoController::class, 'produtosPorCor'])->name('tecidos.produtos-por-cor');
+        Route::post('tecidos/{tecido}/salvar-quantidades', [TecidoController::class, 'salvarQuantidades'])->name('tecidos.salvar-quantidades');
+        Route::get('tecidos-importar-estoque', [TecidoController::class, 'importarEstoqueForm'])->name('tecidos.importar-estoque-form');
+        Route::post('tecidos-importar-estoque', [TecidoController::class, 'importarEstoque'])->name('tecidos.importar-estoque');
+        Route::get('debug-estoque/{referencia}', [TecidoController::class, 'debugEstoque'])->name('tecidos.debug-estoque');
 
-    // Routes para Estilistas
-    Route::resource('estilistas', EstilistaController::class);
+        // Routes para Estilistas
+        Route::resource('estilistas', EstilistaController::class);
 
-    // Routes para Marcas
-    Route::resource('marcas', MarcaController::class);
+        // Routes para Marcas
+        Route::resource('marcas', MarcaController::class);
 
-    // Routes para Grupo de Produtos
-    Route::resource('grupo_produtos', GrupoProdutoController::class);
+        // Routes para Grupo de Produtos
+        Route::resource('grupo_produtos', GrupoProdutoController::class);
 
-    // Routes para Localização
-    Route::get('localizacoes/pdf/gerar', [LocalizacaoController::class, 'gerarPdf'])->name('localizacoes.pdf');
-    Route::put('localizacoes/{id}/restore', [LocalizacaoController::class, 'restore'])->name('localizacoes.restore');
-    Route::resource('localizacoes', LocalizacaoController::class);
+        // Routes para Localização
+        Route::get('localizacoes/pdf/gerar', [LocalizacaoController::class, 'gerarPdf'])->name('localizacoes.pdf');
+        Route::put('localizacoes/{id}/restore', [LocalizacaoController::class, 'restore'])->name('localizacoes.restore');
+        Route::resource('localizacoes', LocalizacaoController::class);
 
-    // Routes para Capacidade Mensal das Localizações
+        // Routes para Tipos
+        Route::resource('tipos', TipoController::class);
+        Route::post('tipos/{tipo}/restore', [TipoController::class, 'restore'])->name('tipos.restore');
+        Route::delete('tipos/{tipo}/force-delete', [TipoController::class, 'forceDelete'])->name('tipos.force-delete');
+
+        // Routes para Situações
+        Route::resource('situacoes', SituacaoController::class);
+        Route::post('situacoes/{situacao}/restore', [SituacaoController::class, 'restore'])->name('situacoes.restore');
+        Route::delete('situacoes/{situacao}/force-delete', [SituacaoController::class, 'forceDelete'])->name('situacoes.force-delete');
+
+        // Routes para Direcionamentos Comerciais
+        Route::resource('direcionamentos-comerciais', DirecionamentoComercialController::class);
+        Route::post('direcionamentos-comerciais/{id}/restore', [DirecionamentoComercialController::class, 'restore'])->name('direcionamentos-comerciais.restore');
+
+        // Routes para Etapas de Produção
+        Route::get('etapas-producao/fluxo', [EtapaProducaoController::class, 'visualizarFluxo'])->name('etapas-producao.visualizar-fluxo');
+        Route::get('etapas-producao/fluxo-quantidades', [EtapaProducaoController::class, 'visualizarFluxoQuantidades'])->name('etapas-producao.visualizar-fluxo-quantidades');
+        Route::resource('etapas-producao', EtapaProducaoController::class);
+
+        // Routes para Status
+        Route::resource('status', StatusController::class);
+    }); // fim cadastros
+
+    // === PLANEJAMENTO (protegido por permissão) ===
+    Route::middleware('permission:planejamento')->group(function () {
     Route::get('localizacao-capacidade/dashboard', [LocalizacaoCapacidadeMensalController::class, 'dashboard'])->name('localizacao-capacidade.dashboard');
     Route::get('localizacao-capacidade/calendario', [LocalizacaoCapacidadeMensalController::class, 'calendario'])->name('localizacao-capacidade.calendario');
     Route::get('localizacao-capacidade/relatorio-pdf', [LocalizacaoCapacidadeMensalController::class, 'gerarRelatorioPDF'])->name('localizacao-capacidade.relatorio-pdf');
@@ -123,39 +149,16 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Route::post('localizacao-capacidade/reverter-redistribuicao', [LocalizacaoCapacidadeMensalController::class, 'reverterRedistribuicao'])->name('localizacao-capacidade.reverter-redistribuicao');
     Route::post('localizacao-capacidade/gerar-mes', [LocalizacaoCapacidadeMensalController::class, 'gerarCapacidadesMes'])->name('localizacao-capacidade.gerar-mes');
     Route::resource('localizacao-capacidade', LocalizacaoCapacidadeMensalController::class);
+    }); // fim planejamento
 
-    // Routes para Tipos
-    Route::resource('tipos', TipoController::class);
-    Route::post('tipos/{tipo}/restore', [TipoController::class, 'restore'])->name('tipos.restore');
-    Route::delete('tipos/{tipo}/force-delete', [TipoController::class, 'forceDelete'])->name('tipos.force-delete');
-
-    // Routes para Situações
-    Route::resource('situacoes', SituacaoController::class);
-    Route::post('situacoes/{situacao}/restore', [SituacaoController::class, 'restore'])->name('situacoes.restore');
-    Route::delete('situacoes/{situacao}/force-delete', [SituacaoController::class, 'forceDelete'])->name('situacoes.force-delete');
-
-    // Routes para Direcionamentos Comerciais
-    Route::resource('direcionamentos-comerciais', DirecionamentoComercialController::class);
-    Route::post('direcionamentos-comerciais/{id}/restore', [DirecionamentoComercialController::class, 'restore'])->name('direcionamentos-comerciais.restore');
-
-    // Routes para Etapas de Produção
-    Route::get('etapas-producao/fluxo', [EtapaProducaoController::class, 'visualizarFluxo'])->name('etapas-producao.visualizar-fluxo');
-    Route::get('etapas-producao/fluxo-quantidades', [EtapaProducaoController::class, 'visualizarFluxoQuantidades'])->name('etapas-producao.visualizar-fluxo-quantidades');
-    Route::resource('etapas-producao', EtapaProducaoController::class);
-
-    // Routes para Status
-    Route::resource('status', StatusController::class);
-
-    // Routes para Produtos
+    // === PRODUTOS (protegido por permissão) ===
+    Route::middleware('permission:produtos')->group(function () {
     Route::resource('produtos', ProdutoController::class);
     Route::get('produtos/{id}/pdf', [ProdutoController::class, 'generatePdf'])->name('produtos.pdf');
     Route::post('produtos/get-available-colors', [ProdutoController::class, 'getAvailableColors'])->name('produtos.get-available-colors');
     Route::get('produtos-inconsistencias', [ProdutoController::class, 'inconsistencias'])->name('produtos.inconsistencias');
     Route::get('produtos-lista-pdf', [ProdutoController::class, 'generateListPdf'])->name('produtos.lista.pdf');
     Route::post('produtos/{id}/reprogramar', [ProdutoController::class, 'reprogramar'])->name('produtos.reprogramar');
-
-    // Preferências de UI (por usuário)
-    Route::post('ui/filters-visibility', [UiPreferenceController::class, 'setFiltersVisibility'])->name('ui.filters-visibility');
 
     // Routes para Anexos de Produtos
     Route::get('produtos/anexos/{anexo}', [ProdutoAnexoController::class, 'show'])->name('produtos.anexos.show');
@@ -196,7 +199,13 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::delete('combinacoes/componentes/{componente}', [ProdutoCombinacaoController::class, 'removeComponente'])->name('combinacoes.componentes.remove');
     Route::get('tecidos/{tecido}/cores', [ProdutoCombinacaoController::class, 'getTecidoCores'])->name('tecidos.cores.get');
 
-    // Routes para Movimentações
+    }); // fim produtos
+
+    // Preferências de UI (por usuário) - acessível a todos
+    Route::post('ui/filters-visibility', [UiPreferenceController::class, 'setFiltersVisibility'])->name('ui.filters-visibility');
+
+    // === MOVIMENTAÇÕES (protegido por permissão) ===
+    Route::middleware('permission:movimentacoes')->group(function () {
     Route::get('movimentacoes/minhas', [MovimentacaoController::class, 'minhasMovimentacoes'])->name('movimentacoes.minhas');
     Route::resource('movimentacoes', MovimentacaoController::class)->parameters([
         'movimentacoes' => 'movimentacao'
@@ -211,13 +220,16 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     // Filtro de Movimentações por Status de Dias
     Route::get('movimentacoes/filtro/status-dias', [MovimentacaoFilterController::class, 'filtrarPorStatusDias'])->name('movimentacoes.filtro.status-dias');
 
-    // Routes para Notificações
+    }); // fim movimentações
+
+    // Routes para Notificações - acessível a todos
     Route::get('notificacoes', [NotificacaoController::class, 'index'])->name('notificacoes.index');
     Route::get('notificacoes/{id}/visualizar', [NotificacaoController::class, 'visualizar'])->name('notificacoes.visualizar');
     Route::get('api/notificacoes/nao-visualizadas', [NotificacaoController::class, 'naoVisualizadas'])->name('api.notificacoes.nao-visualizadas');
     Route::post('api/notificacoes/marcar-todas-visualizadas', [NotificacaoController::class, 'marcarTodasComoVisualizadas'])->name('api.notificacoes.marcar-todas-visualizadas');
 
-    // Routes para Sugestões
+    // === SUGESTÕES (protegido por permissão) ===
+    Route::middleware('permission:sugestoes')->group(function () {
     Route::get('sugestoes', [SugestaoController::class, 'index'])->name('sugestoes.index');
     Route::get('sugestoes/minhas', [SugestaoController::class, 'minhasSugestoes'])->name('sugestoes.minhas');
     Route::get('sugestoes/create', [SugestaoController::class, 'create'])->name('sugestoes.create');
@@ -226,20 +238,26 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::put('sugestoes/{sugestao}/status', [SugestaoController::class, 'updateStatus'])->name('sugestoes.update-status');
     Route::get('api/sugestoes/nao-lidas-count', [SugestaoController::class, 'countNaoLidas'])->name('api.sugestoes.nao-lidas-count');
 
-    // Routes para Logística de Coleta
+    }); // fim sugestões
+
+    // === LOGÍSTICA (protegido por permissão) ===
+    Route::middleware('permission:logistica')->group(function () {
     Route::get('logistica-coleta', [LogisticaColetaController::class, 'index'])->name('logistica-coleta.index');
     Route::post('logistica-coleta/agendar', [LogisticaColetaController::class, 'agendar'])->name('logistica-coleta.agendar');
     Route::post('logistica-coleta/{coleta}/confirmar-chegada-origem', [LogisticaColetaController::class, 'confirmarChegadaOrigem'])->name('logistica-coleta.confirmar-chegada-origem');
     Route::post('logistica-coleta/{coleta}/confirmar-recebimento-destino', [LogisticaColetaController::class, 'confirmarRecebimentoDestino'])->name('logistica-coleta.confirmar-recebimento-destino');
     Route::post('logistica-coleta/{coleta}/cancelar', [LogisticaColetaController::class, 'cancelar'])->name('logistica-coleta.cancelar');
 
-    // Routes para Veículos
     Route::resource('veiculos', VeiculoController::class)->except(['show']);
+    }); // fim logística
 
+    // === CONSULTAS (protegido por permissão) ===
+    Route::middleware('permission:consultas')->group(function () {
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');
     Route::get('consultas/media-dias-atraso', [DashboardController::class, 'mediaDiasAtraso'])->name('consultas.media-dias-atraso');
     Route::get('consultas/pivot-estilistas-status', [DashboardController::class, 'pivotEstilistasStatus'])->name('consultas.pivot-estilistas-status');
+    }); // fim consultas
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

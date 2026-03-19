@@ -18,14 +18,14 @@ class AuthenticatedSessionController extends Controller
     {
         // Busca marcas ativas e que tenham logo
         $todasMarcas = \App\Models\Marca::where('ativo', true)->whereNotNull('logo_path')->get();
-        
+
         // Seleciona apenas uma marca aleatória
         if ($todasMarcas->count() > 0) {
             $marca = $todasMarcas->random(1)->first();
         } else {
             $marca = null;
         }
-        
+
         return view('auth.login', [
             'marca' => $marca
         ]);
@@ -39,7 +39,7 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
-        
+
         // Registrar a atividade de login
         activity('access')
             ->causedBy(Auth::user())
@@ -51,6 +51,12 @@ class AuthenticatedSessionController extends Controller
             ->event('login')
             ->log('Access system');
 
+        // Se o usuário só tem permissão de logística, redireciona direto para logística
+        $user = Auth::user();
+        if (!$user->isAdmin() && $user->hasPermission('logistica') && !$user->hasPermission('produtos')) {
+            return redirect()->intended(route('logistica-coleta.index', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -60,7 +66,7 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $request): RedirectResponse
     {
         $user = Auth::user();
-        
+
         if ($user) {
             // Registrar a atividade de logout antes de deslogar o usuário
             activity('access')
@@ -73,7 +79,7 @@ class AuthenticatedSessionController extends Controller
                 ->event('logout')
                 ->log('Access system');
         }
-        
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
