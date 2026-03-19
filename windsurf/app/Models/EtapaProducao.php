@@ -12,8 +12,14 @@ class EtapaProducao extends Model
 
     protected $table = 'etapas_producao';
 
+    const SLUG_AGUARDANDO_RETIRADA = 'aguardando_retirada';
+    const SLUG_AGUARDANDO_MOTORISTA = 'aguardando_motorista';
+    const SLUG_EM_TRANSITO = 'em_transito';
+    const SLUG_COLETADO = 'coletado';
+
     protected $fillable = [
         'nome',
+        'slug',
         'descricao',
         'cor',
         'icone',
@@ -106,6 +112,22 @@ class EtapaProducao extends Model
     /**
      * Cores disponíveis para etapas
      */
+    /**
+     * Buscar etapa por slug imutável
+     */
+    public static function porSlug(string $slug): ?self
+    {
+        return static::where('slug', $slug)->first();
+    }
+
+    /**
+     * Verifica se esta etapa faz parte do fluxo logístico (possui slug protegido)
+     */
+    public function isLogistica(): bool
+    {
+        return !empty($this->slug);
+    }
+
     public static function coresDisponiveis(): array
     {
         return [

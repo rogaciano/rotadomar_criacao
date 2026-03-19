@@ -25,6 +25,8 @@ use App\Http\Controllers\DirecionamentoComercialController;
 use App\Http\Controllers\EtapaProducaoController;
 use App\Http\Controllers\SugestaoController;
 use App\Http\Controllers\UiPreferenceController;
+use App\Http\Controllers\LogisticaColetaController;
+use App\Http\Controllers\VeiculoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -223,6 +225,16 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::get('sugestoes/{sugestao}', [SugestaoController::class, 'show'])->name('sugestoes.show');
     Route::put('sugestoes/{sugestao}/status', [SugestaoController::class, 'updateStatus'])->name('sugestoes.update-status');
     Route::get('api/sugestoes/nao-lidas-count', [SugestaoController::class, 'countNaoLidas'])->name('api.sugestoes.nao-lidas-count');
+
+    // Routes para Logística de Coleta
+    Route::get('logistica-coleta', [LogisticaColetaController::class, 'index'])->name('logistica-coleta.index');
+    Route::post('logistica-coleta/agendar', [LogisticaColetaController::class, 'agendar'])->name('logistica-coleta.agendar');
+    Route::post('logistica-coleta/{coleta}/confirmar-chegada-origem', [LogisticaColetaController::class, 'confirmarChegadaOrigem'])->name('logistica-coleta.confirmar-chegada-origem');
+    Route::post('logistica-coleta/{coleta}/confirmar-recebimento-destino', [LogisticaColetaController::class, 'confirmarRecebimentoDestino'])->name('logistica-coleta.confirmar-recebimento-destino');
+    Route::post('logistica-coleta/{coleta}/cancelar', [LogisticaColetaController::class, 'cancelar'])->name('logistica-coleta.cancelar');
+
+    // Routes para Veículos
+    Route::resource('veiculos', VeiculoController::class)->except(['show']);
 
     // Routes para Consultas
     Route::get('consultas/produtos-ativos-por-localizacao', [\App\Http\Controllers\ConsultaController::class, 'produtosAtivosPorLocalizacao'])->name('consultas.produtos-ativos-por-localizacao');

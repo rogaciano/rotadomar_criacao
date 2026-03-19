@@ -230,6 +230,11 @@ class EtapaProducaoController extends Controller
      */
     public function destroy(EtapaProducao $etapasProducao)
     {
+        if ($etapasProducao->isLogistica()) {
+            return redirect()->route('etapas-producao.index')
+                ->with('error', 'Etapas do fluxo logístico não podem ser excluídas (slug: ' . $etapasProducao->slug . ').');
+        }
+
         $etapasProducao->delete();
 
         return redirect()->route('etapas-producao.index')

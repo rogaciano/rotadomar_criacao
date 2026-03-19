@@ -32,6 +32,20 @@
                         </div>
                     @endif
 
+                    @if($etapa->slug)
+                        <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-400 rounded-md">
+                            <div class="flex">
+                                <div class="flex-shrink-0 text-amber-500">🔒</div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-amber-800 dark:text-amber-300">
+                                        <strong>Etapa do fluxo logístico</strong> — identificador interno: <code class="bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded text-xs font-mono">{{ $etapa->slug }}</code>.
+                                        Este identificador é usado pelo sistema e não pode ser alterado ou excluído.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <form action="{{ route('etapas-producao.update', $etapa) }}" method="POST">
                         @csrf
                         @method('PUT')

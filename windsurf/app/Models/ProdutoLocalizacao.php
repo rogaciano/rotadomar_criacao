@@ -167,6 +167,24 @@ class ProdutoLocalizacao extends Pivot
     }
 
     /**
+     * Coleta logística ativa (agendado ou em_transito)
+     */
+    public function coletaLogisticaAtiva()
+    {
+        return $this->hasOne(ColetaLogistica::class, 'produto_localizacao_id')
+            ->whereIn('status', [ColetaLogistica::STATUS_AGENDADO, ColetaLogistica::STATUS_EM_TRANSITO])
+            ->latest();
+    }
+
+    /**
+     * Todas as coletas logísticas (histórico)
+     */
+    public function coletasLogisticas()
+    {
+        return $this->hasMany(ColetaLogistica::class, 'produto_localizacao_id');
+    }
+
+    /**
      * Obter a URL da ordem de produção
      */
     public function getOrdemProducaoUrlAttribute(): ?string

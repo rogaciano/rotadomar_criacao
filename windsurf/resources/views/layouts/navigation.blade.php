@@ -46,6 +46,10 @@
                         {{ __('Sugestões') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('logistica-coleta.index')" :active="request()->routeIs('logistica-coleta.*') || request()->routeIs('veiculos.*')">
+                        {{ __('Logística') }}
+                    </x-nav-link>
+
                     <!-- Cadastros Dropdown -->
                     <div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
                         <div class="relative">
@@ -70,6 +74,7 @@
                                     <a href="{{ route('localizacoes.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('localizacoes.*') && !request()->routeIs('localizacao-capacidade.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Localizações') }}</a>
                                     <a href="{{ route('direcionamentos-comerciais.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('direcionamentos-comerciais.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Direcionamentos Comerciais') }}</a>
                                     <a href="{{ route('etapas-producao.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('etapas-producao.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Etapas de Produção') }}</a>
+                                    <a href="{{ route('veiculos.index') }}" class="block px-4 py-2 text-sm leading-5 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:bg-gray-100 dark:focus:bg-slate-700 transition duration-150 ease-in-out {{ request()->routeIs('veiculos.*') ? 'bg-gray-100 dark:bg-slate-700' : '' }}">{{ __('Veículos') }}</a>
                                 </div>
                             </div>
                         </div>
@@ -363,6 +368,10 @@
                 {{ __('Sugestões') }}
             </x-responsive-nav-link>
 
+            <x-responsive-nav-link :href="route('logistica-coleta.index')" :active="request()->routeIs('logistica-coleta.*') || request()->routeIs('veiculos.*')">
+                {{ __('Logística') }}
+            </x-responsive-nav-link>
+
             <!-- Responsive Cadastros -->
             <div x-data="{ open: {{ request()->routeIs('tecidos.*') || request()->routeIs('estilistas.*') || request()->routeIs('marcas.*') || request()->routeIs('grupo_produtos.*') || request()->routeIs('tipos.*') || request()->routeIs('status.*') || request()->routeIs('situacoes.*') || request()->routeIs('localizacoes.*') || request()->routeIs('direcionamentos-comerciais.*') || request()->routeIs('etapas-producao.*') || request()->routeIs('localizacao-capacidade.*') ? 'true' : 'false' }} }" class="pt-2">
                 <button @click="open = !open" class="flex justify-between items-center w-full pl-3 pr-4 py-2 font-medium text-base text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition duration-150 ease-in-out">
@@ -401,6 +410,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('etapas-producao.index')" :active="request()->routeIs('etapas-producao.*')" class="pl-6">
                         {{ __('Etapas de Produção') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('veiculos.index')" :active="request()->routeIs('veiculos.*')" class="pl-6">
+                        {{ __('Veículos') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')" class="pl-6">
                         {{ __('Capacidade Mensal') }}
