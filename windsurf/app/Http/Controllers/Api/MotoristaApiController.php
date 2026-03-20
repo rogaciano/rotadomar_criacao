@@ -410,6 +410,46 @@ class MotoristaApiController extends Controller
     }
 
     /**
+     * Motorista cancela coleta agendada via app
+     */
+    public function cancelar(Request $request, ColetaLogistica $coleta): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($coleta->motorista_user_id !== $user->id) {
+            return response()->json(['message' => 'Você não tem permissão para cancelar esta coleta.'], 403);
+        }
+
+        if (!$coleta->podeCancelar()) {
+            return response()->json(['message' => 'Esta coleta não pode ser cancelada (só é possível cancelar coletas em status agendado).'], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $coleta->update([
+                'status' => ColetaLogistica::STATUS_CANCELADO,
+            ]);
+
+            // Reverter etapa para AGUARDANDO RETIRADA
+            $produtoLocalizacao = $coleta->produtoLocalizacao;
+            $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
+            if ($etapaAguardandoRetirada) {
+                $produtoLocalizacao->avancarEtapa(
+                    $etapaAguardandoRetirada->id,
+                    $user->id,
+                    'Coleta cancelada via app pelo motorista ' . $user->name
+                );
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Coleta cancelada. Produto retornou para Aguardando Retirada.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Erro ao cancelar: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Registrar push subscription
      */
     public function pushSubscribe(Request $request): JsonResponse

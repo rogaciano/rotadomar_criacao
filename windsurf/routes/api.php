@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->prefix('motorista')->group(function () {
     Route::get('/veiculos', [MotoristaApiController::class, 'veiculos']);
     Route::get('/destinos', [MotoristaApiController::class, 'destinos']);
     Route::post('/agendar', [MotoristaApiController::class, 'agendar']);
+    Route::post('/coletas/{coleta}/cancelar', [MotoristaApiController::class, 'cancelar']);
     Route::post('/push-subscribe', [MotoristaApiController::class, 'pushSubscribe']);
     Route::delete('/push-unsubscribe', [MotoristaApiController::class, 'pushUnsubscribe']);
 });

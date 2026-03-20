@@ -448,7 +448,7 @@
                                         $obsTextoTruncado = $isTruncated ? Str::limit($textoLimpo, 80) : $textoCompleto;
                                     @endphp
                                     @if($isTruncated)
-                                        <div class="text-xs text-white mb-1" x-data="{ expanded: false }">
+                                        <div class="text-xs text-gray-700 dark:text-gray-300 mb-1" x-data="{ expanded: false }">
                                             <span x-show="!expanded">{!! $obsTextoTruncado !!}</span>
                                             <span x-show="expanded" x-cloak>{!! $textoCompleto !!}</span>
                                             <button @click="expanded = !expanded" class="ml-1 text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
@@ -457,7 +457,7 @@
                                             </button>
                                         </div>
                                     @else
-                                        <div class="text-xs text-white mb-1">
+                                        <div class="text-xs text-gray-700 dark:text-gray-300 mb-1">
                                             {!! $textoCompleto !!}
                                         </div>
                                     @endif
@@ -469,12 +469,12 @@
                             <div class="text-xs text-gray-400 italic">-</div>
                         @endif
                     </td>
-                    <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900" title="Quantidade total do produto">
+                    <td class="px-3 py-2 text-sm text-center font-semibold text-gray-900 dark:text-white" title="Quantidade total do produto">
                         {{ number_format($produtoPrincipal->quantidade ?? 0, 0, ',', '.') }}
                     </td>
                     <td class="px-3 py-2 text-sm">
                         @if($produtoPrincipal->status)
-                            <span class="px-2 py-1 text-xs rounded-full {{ $produtoPrincipal->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                            <span class="px-2 py-1 text-xs rounded-full {{ $produtoPrincipal->status->descricao == 'Ativo' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-gray-300' }}">
                                 {{ $produtoPrincipal->status->descricao }}
                             </span>
                         @else
