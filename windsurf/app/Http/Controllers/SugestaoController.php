@@ -37,12 +37,23 @@ class SugestaoController extends Controller
 
         $sugestoes = $query->paginate(15)->appends($request->query());
 
+        // Contadores por status (usando mesma visibilidade do usuário)
+        $baseQuery = Sugestao::visiveisPara($user);
+        $contadores = [
+            'total' => (clone $baseQuery)->count(),
+            'nao_lida' => (clone $baseQuery)->where('status', 'nao_lida')->count(),
+            'em_analise' => (clone $baseQuery)->where('status', 'em_analise')->count(),
+            'aceito' => (clone $baseQuery)->where('status', 'aceito')->count(),
+            'negado' => (clone $baseQuery)->where('status', 'negado')->count(),
+        ];
+
         return view('sugestoes.index', [
             'sugestoes' => $sugestoes,
             'statusSelecionado' => $status,
             'assuntoSelecionado' => $assunto,
             'usuarioSelecionado' => $usuario,
             'statusValidos' => Sugestao::STATUS_VALIDOS,
+            'contadores' => $contadores,
         ]);
     }
 

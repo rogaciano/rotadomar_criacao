@@ -48,6 +48,31 @@
                 </form>
             </div>
 
+            @if(isset($contadores))
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <a href="{{ request()->url() }}" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow {{ empty($statusSelecionado) ? 'ring-2 ring-indigo-500' : '' }}">
+                    <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Total</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ $contadores['total'] }}</p>
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['status' => 'nao_lida']) }}" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow {{ ($statusSelecionado ?? '') === 'nao_lida' ? 'ring-2 ring-red-500' : '' }}">
+                    <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Não Lidas</p>
+                    <p class="text-2xl font-bold text-red-600 mt-1">{{ $contadores['nao_lida'] }}</p>
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['status' => 'em_analise']) }}" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow {{ ($statusSelecionado ?? '') === 'em_analise' ? 'ring-2 ring-amber-500' : '' }}">
+                    <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Em Análise</p>
+                    <p class="text-2xl font-bold text-amber-600 mt-1">{{ $contadores['em_analise'] }}</p>
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['status' => 'aceito']) }}" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow {{ ($statusSelecionado ?? '') === 'aceito' ? 'ring-2 ring-green-500' : '' }}">
+                    <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Aceitas</p>
+                    <p class="text-2xl font-bold text-green-600 mt-1">{{ $contadores['aceito'] }}</p>
+                </a>
+                <a href="{{ request()->fullUrlWithQuery(['status' => 'negado']) }}" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow {{ ($statusSelecionado ?? '') === 'negado' ? 'ring-2 ring-gray-400' : '' }}">
+                    <p class="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">Negadas</p>
+                    <p class="text-2xl font-bold text-gray-500 mt-1">{{ $contadores['negado'] }}</p>
+                </a>
+            </div>
+            @endif
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if($sugestoes->count() > 0)
                     <div class="overflow-x-auto">
