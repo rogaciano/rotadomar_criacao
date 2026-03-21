@@ -7,6 +7,7 @@ use App\Models\EtapaProducao;
 use App\Models\Localizacao;
 use App\Models\ProdutoLocalizacao;
 use App\Models\Veiculo;
+use App\Http\Requests\AgendarColetaRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -129,16 +130,9 @@ class LogisticaColetaController extends Controller
     /**
      * Motorista agenda coleta
      */
-    public function agendar(Request $request): RedirectResponse
+    public function agendar(AgendarColetaRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'produto_localizacao_id' => 'required|integer|exists:produto_localizacao,id',
-            'veiculo_id' => 'required|integer|exists:veiculos,id',
-            'destino_localizacao_id' => 'required|integer|exists:localizacoes,id',
-            'inicio_previsto_em' => 'required|date|after_or_equal:today',
-            'retorno_previsto_em' => 'required|date|after:inicio_previsto_em',
-            'observacao_motorista' => 'nullable|string|max:1000',
-        ]);
+        $validated = $request->validated();
 
         $user = auth()->user();
 

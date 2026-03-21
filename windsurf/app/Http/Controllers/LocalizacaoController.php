@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreLocalizacaoRequest;
+use App\Http\Requests\UpdateLocalizacaoRequest;
 use Illuminate\Http\Request;
 
 class LocalizacaoController extends Controller
@@ -33,19 +35,19 @@ class LocalizacaoController extends Controller
             // Se o parâmetro não estiver no request (primeira visita), mostra apenas ativos
             $query->where('ativo', 1);
         }
-        
+
         // Filtro de capacidade maior que zero
         if ($request->filled('capacidade_maior_zero')) {
             $query->where('capacidade', '>', 0);
         }
-        
+
         // Incluir excluídos se solicitado
         if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
         }
 
         $localizacoes = $query->orderBy('nome_localizacao')->paginate(10)->withQueryString();
-        
+
         return view('localizacoes.index', compact('localizacoes'));
     }
 
@@ -60,35 +62,28 @@ class LocalizacaoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreLocalizacaoRequest $request)
     {
-        $validated = $request->validate([
-            'nome_localizacao' => 'required|string|max:255',
-            'prazo' => 'nullable|integer|min:0',
-            'capacidade' => 'nullable|integer|min:0',
-            'ativo' => 'sometimes|boolean',
-            'faz_movimentacao' => 'sometimes|boolean',
-            'pode_ver_todas_notificacoes' => 'sometimes|boolean',
-        ]);
-        
+        $validated = $request->validated();
+
         // Definir ativo como false se não estiver presente no request
         if (!isset($validated['ativo'])) {
             $validated['ativo'] = false;
         }
-        
+
         // Definir faz_movimentacao como false se não estiver presente no request
         if (!isset($validated['faz_movimentacao'])) {
             $validated['faz_movimentacao'] = false;
         }
-        
+
         // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
         if (!isset($validated['pode_ver_todas_notificacoes'])) {
             $validated['pode_ver_todas_notificacoes'] = false;
         }
-        
+
         try {
             $localizacao = \App\Models\Localizacao::create($validated);
-            
+
             return redirect()->route('localizacoes.index')
                 ->with('success', 'Localização criada com sucesso!');
         } catch (\Illuminate\Database\QueryException $e) {
@@ -101,7 +96,7 @@ class LocalizacaoController extends Controller
                         ->with('error', 'Já existe uma localização com este nome. Por favor, escolha outro nome.');
                 }
             }
-            
+
             // Para outros erros de banco de dados
             return redirect()->back()
                 ->withInput()
@@ -115,15 +110,15 @@ class LocalizacaoController extends Controller
     public function show(Request $request, string $id)
     {
         $localizacao = \App\Models\Localizacao::withTrashed()->findOrFail($id);
-        
+
         // Filtros de período
         $mesAtual = now()->month;
         $anoAtual = now()->year;
         $mostrarTodos = $request->has('mostrar_todos') && $request->mostrar_todos == '1';
-        
+
         // Buscar capacidades mensais desta localização
         $query = \App\Models\LocalizacaoCapacidadeMensal::where('localizacao_id', $id);
-        
+
         if (!$mostrarTodos) {
             // Filtrar para mês atual e futuros
             $query->where(function($q) use ($anoAtual, $mesAtual) {
@@ -134,16 +129,16 @@ class LocalizacaoController extends Controller
                   });
             });
         }
-        
+
         $capacidades = $query->orderBy('ano', 'asc')
             ->orderBy('mes', 'asc')
             ->get();
-        
+
         // Enriquecer capacidades com dados calculados
         $resumoMensal = $capacidades->map(function($capacidade) {
             // NOTA: produto_alocacao_mensal foi removido
             // Agora os produtos são buscados diretamente de produto_localizacao
-            
+
             return [
                 'capacidade' => $capacidade,
                 'produtos_previstos' => $capacidade->getProdutosPrevistos(),
@@ -154,7 +149,7 @@ class LocalizacaoController extends Controller
                 'total_alocacoes' => 0
             ];
         });
-        
+
         return view('localizacoes.show', compact('localizacao', 'resumoMensal', 'mostrarTodos'));
     }
 
@@ -170,40 +165,33 @@ class LocalizacaoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateLocalizacaoRequest $request, string $id)
     {
         $localizacao = \App\Models\Localizacao::findOrFail($id);
-        
-        $validated = $request->validate([
-            'nome_localizacao' => 'required|string|max:255',
-            'prazo' => 'nullable|integer|min:0',
-            'capacidade' => 'nullable|integer|min:0',
-            'ativo' => 'sometimes|boolean',
-            'faz_movimentacao' => 'sometimes|boolean',
-            'pode_ver_todas_notificacoes' => 'sometimes|boolean',
-        ]);
-        
+
+        $validated = $request->validated();
+
         // Definir ativo como false se não estiver presente no request
         if (!isset($validated['ativo'])) {
             $validated['ativo'] = false;
         }
-        
+
         // Definir faz_movimentacao como false se não estiver presente no request
         if (!isset($validated['faz_movimentacao'])) {
             $validated['faz_movimentacao'] = false;
         }
-        
+
         // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
         if (!isset($validated['pode_ver_todas_notificacoes'])) {
             $validated['pode_ver_todas_notificacoes'] = false;
         }
-        
+
         try {
             $localizacao->update($validated);
-            
+
             // Redirecionar para a mesma página que estava antes
             $page = $request->input('current_page') ? ['page' => $request->input('current_page')] : [];
-            
+
             return redirect()->route('localizacoes.index', $page)
                 ->with('success', 'Localização atualizada com sucesso!');
         } catch (\Illuminate\Database\QueryException $e) {
@@ -216,7 +204,7 @@ class LocalizacaoController extends Controller
                         ->with('error', 'Já existe uma localização com este nome. Por favor, escolha outro nome.');
                 }
             }
-            
+
             // Para outros erros de banco de dados
             return redirect()->back()
                 ->withInput()
@@ -230,16 +218,16 @@ class LocalizacaoController extends Controller
     public function destroy(string $id)
     {
         $localizacao = \App\Models\Localizacao::findOrFail($id);
-        
+
         // Verifica se existem movimentações associadas a esta localização
         $movimentacoesCount = $localizacao->movimentacoes()->count();
-        
+
         if ($movimentacoesCount > 0) {
             return redirect()->back()
                 ->with('error', "Não é possível excluir esta localização pois existem $movimentacoesCount movimentação(ões) associadas a ela.")
                 ->with('error_type', 'has_relations');
         }
-        
+
         try {
             $localizacao->delete();
             return redirect()->route('localizacoes.index')
@@ -277,22 +265,22 @@ class LocalizacaoController extends Controller
         } else {
             $query->where('ativo', 1);
         }
-        
+
         // Filtro de capacidade maior que zero
         if ($request->filled('capacidade_maior_zero')) {
             $query->where('capacidade', '>', 0);
         }
-        
+
         if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
         }
 
         $localizacoes = $query->orderBy('nome_localizacao')->get();
-        
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('localizacoes.pdf_lista', compact('localizacoes'));
-        
+
         $pdf->setPaper('a4', 'portrait');
-        
+
         return $pdf->stream('localizacoes_' . now()->format('Y-m-d_H-i-s') . '.pdf');
     }
 
@@ -303,7 +291,7 @@ class LocalizacaoController extends Controller
     {
         $localizacao = \App\Models\Localizacao::withTrashed()->findOrFail($id);
         $localizacao->restore();
-        
+
         return redirect()->route('localizacoes.index')
             ->with('success', 'Localização restaurada com sucesso!');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sugestao;
+use App\Http\Requests\StoreSugestaoRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -98,12 +99,9 @@ class SugestaoController extends Controller
         return view('sugestoes.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSugestaoRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'assunto' => 'required|string|max:255',
-            'texto' => 'required|string|max:5000',
-        ]);
+        $validated = $request->validated();
 
         $user = auth()->user();
 

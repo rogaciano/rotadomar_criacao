@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Localizacao;
+use App\Http\Requests\StoreUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
@@ -56,17 +57,8 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'localizacao_id' => ['required', 'exists:localizacoes,id'],
-            'is_admin' => ['boolean'],
-            'visualizacoes' => ['nullable', 'array'],
-            'visualizacoes.*' => ['exists:localizacoes,id'],
-        ]);
 
         $user = User::create([
             'name' => $request->name,

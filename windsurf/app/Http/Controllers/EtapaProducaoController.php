@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\EtapaProducao;
 use App\Models\EtapaTransicao;
+use App\Http\Requests\StoreEtapaProducaoRequest;
+use App\Http\Requests\UpdateEtapaProducaoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -93,21 +95,9 @@ class EtapaProducaoController extends Controller
     /**
      * Salvar nova etapa
      */
-    public function store(Request $request)
+    public function store(StoreEtapaProducaoRequest $request)
     {
-        $validated = $request->validate([
-            'nome' => 'required|string|max:100',
-            'descricao' => 'nullable|string|max:255',
-            'cor' => 'required|string|max:20',
-            'icone' => 'nullable|string|max:50',
-            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
-            'ativo' => 'sometimes|boolean',
-            'ordem' => 'required|integer|min:0',
-            'transicoes' => 'nullable|array',
-            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
-            'transicoes.*.label_botao' => 'nullable|string|max:50',
-            'transicoes.*.cor_botao' => 'nullable|string|max:20'
-        ]);
+        $validated = $request->validated();
 
         $etapa = EtapaProducao::create([
             'nome' => $validated['nome'],
@@ -175,21 +165,9 @@ class EtapaProducaoController extends Controller
     /**
      * Atualizar etapa
      */
-    public function update(Request $request, EtapaProducao $etapasProducao)
+    public function update(UpdateEtapaProducaoRequest $request, EtapaProducao $etapasProducao)
     {
-        $validated = $request->validate([
-            'nome' => 'required|string|max:100',
-            'descricao' => 'nullable|string|max:255',
-            'cor' => 'required|string|max:20',
-            'icone' => 'nullable|string|max:50',
-            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
-            'ativo' => 'sometimes|boolean',
-            'ordem' => 'required|integer|min:0',
-            'transicoes' => 'nullable|array',
-            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
-            'transicoes.*.label_botao' => 'nullable|string|max:50',
-            'transicoes.*.cor_botao' => 'nullable|string|max:20'
-        ]);
+        $validated = $request->validated();
 
         $etapasProducao->update([
             'nome' => $validated['nome'],

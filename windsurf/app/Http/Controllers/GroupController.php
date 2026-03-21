@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Group;
 use App\Models\Permission;
+use App\Observers\PermissionCacheObserver;
+use App\Http\Requests\StoreGroupRequest;
+use App\Http\Requests\UpdateGroupRequest;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -14,7 +17,7 @@ class GroupController extends Controller
     public function index(Request $request)
     {
         $query = Group::query();
-        
+
         // Apply search filter if provided
         if ($request->has('search')) {
             $search = $request->get('search');
@@ -24,9 +27,9 @@ class GroupController extends Controller
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
-        
+
         $groups = $query->paginate(10);
-        
+
         return view('groups.index', compact('groups'));
     }
 
@@ -37,35 +40,29 @@ class GroupController extends Controller
     {
         $permissions = Permission::orderBy('module')->orderBy('name')->get();
         $modules = Permission::distinct('module')->pluck('module');
-        
+
         return view('groups.create', compact('permissions', 'modules'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreGroupRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:groups,name',
-            'display_name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'exists:permissions,id',
-        ]);
-        
+        $validated = $request->validated();
+
         $group = Group::create([
             'name' => $validated['name'],
             'display_name' => $validated['display_name'],
             'description' => $validated['description'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
-        
+
         if (isset($validated['permissions'])) {
             $group->permissions()->attach($validated['permissions']);
         }
-        
+        PermissionCacheObserver::clearGroupUsersCache($group);
+
         return redirect()->route('groups.index')
             ->with('success', 'Grupo criado com sucesso.');
     }
@@ -86,33 +83,27 @@ class GroupController extends Controller
         $permissions = Permission::orderBy('module')->orderBy('name')->get();
         $modules = Permission::distinct('module')->pluck('module');
         $groupPermissions = $group->permissions->pluck('id')->toArray();
-        
+
         return view('groups.edit', compact('group', 'permissions', 'modules', 'groupPermissions'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Group $group)
+    public function update(UpdateGroupRequest $request, Group $group)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:groups,name,' . $group->id,
-            'display_name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
-            'permissions' => 'nullable|array',
-            'permissions.*' => 'exists:permissions,id',
-        ]);
-        
+        $validated = $request->validated();
+
         $group->update([
             'name' => $validated['name'],
             'display_name' => $validated['display_name'],
             'description' => $validated['description'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
         ]);
-        
+
         $group->permissions()->sync($validated['permissions'] ?? []);
-        
+        PermissionCacheObserver::clearGroupUsersCache($group);
+
         return redirect()->route('groups.index')
             ->with('success', 'Grupo atualizado com sucesso.');
     }
@@ -122,12 +113,13 @@ class GroupController extends Controller
      */
     public function destroy(Group $group)
     {
+        PermissionCacheObserver::clearGroupUsersCache($group);
         $group->delete();
-        
+
         return redirect()->route('groups.index')
             ->with('success', 'Grupo excluído com sucesso.');
     }
-    
+
     /**
      * Restore a soft-deleted group.
      */
@@ -135,11 +127,11 @@ class GroupController extends Controller
     {
         $group = Group::withTrashed()->findOrFail($id);
         $group->restore();
-        
+
         return redirect()->route('groups.index')
             ->with('success', 'Grupo restaurado com sucesso.');
     }
-    
+
     /**
      * Permanently delete a group.
      */
@@ -149,7 +141,7 @@ class GroupController extends Controller
         $group->permissions()->detach();
         $group->users()->detach();
         $group->forceDelete();
-        
+
         return redirect()->route('groups.index')
             ->with('success', 'Grupo excluído permanentemente.');
     }
