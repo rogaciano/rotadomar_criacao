@@ -13,5 +13,5 @@ return [
     | a alteração sem tocar no código.
     */
 
-    'bypass' => env('PERMISSIONS_BYPASS', true),
+    'bypass' => env('PERMISSIONS_BYPASS', false),
 ];
