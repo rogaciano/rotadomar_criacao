@@ -119,6 +119,16 @@
                             $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
                             $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
                             $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($localizacao->id);
+
+                            // Bloquear transições logísticas para facção
+                            $slugAtualLoc = $etapaAtual?->slug ?? '';
+                            $isUsuarioFaccaoLoc = auth()->user()->isUsuarioFaccao();
+                            $slugsLogisticosLoc = ['aguardando_retirada', 'aguardando_motorista', 'em_transito', 'coletado'];
+                            $bloquearLogistica = $isUsuarioFaccaoLoc && in_array($slugAtualLoc, $slugsLogisticosLoc);
+                            if ($bloquearLogistica) {
+                                $transicoes = collect([]);
+                            }
+
                             $dataEntregaRaw = $localizacao->pivot->data_entrega_faccao;
                             $possuiDataEntrega = !empty($dataEntregaRaw) && $dataEntregaRaw != '0000-00-00';
 
@@ -235,7 +245,7 @@
                                                 </svg>
                                             </a>
                                         </div>
-                                        @if($podeGerenciarEtapa)
+                                        @if($podeGerenciarEtapa && !$bloquearLogistica)
                                             <div class="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
                                                 @if($etapaAnteriorId)
                                                     <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST" class="inline">
@@ -325,6 +335,16 @@
                     $etapaAtual = $etapaAtualId ? $etapasProducao->firstWhere('id', $etapaAtualId) : null;
                     $transicoes = $etapaAtual ? ($etapaAtual->transicoesOrigem ?? collect([])) : collect([]);
                     $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($localizacao->id);
+
+                    // Bloquear transições logísticas para facção (mobile cards)
+                    $slugAtualLoc = $etapaAtual?->slug ?? '';
+                    $isUsuarioFaccaoLoc = auth()->user()->isUsuarioFaccao();
+                    $slugsLogisticosLoc = ['aguardando_retirada', 'aguardando_motorista', 'em_transito', 'coletado'];
+                    $bloquearLogistica = $isUsuarioFaccaoLoc && in_array($slugAtualLoc, $slugsLogisticosLoc);
+                    if ($bloquearLogistica) {
+                        $transicoes = collect([]);
+                    }
+
                     $podeEditarEntrega = auth()->user()->podeGerenciarEtapa($localizacao->id);
 
                     $corClasses = [
@@ -469,7 +489,7 @@
                                     @endif
 
                                     {{-- 3. Ações Secundárias (Voltar / Limpar) --}}
-                                    @if($etapaAtual)
+                                    @if($etapaAtual && !$bloquearLogistica)
                                         <div class="flex justify-center items-center gap-4 pt-1">
                                             @if($etapaAnteriorId)
                                                 <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produto->id, $localizacao->pivot->id]) }}" method="POST">
@@ -525,54 +545,56 @@
         </div>
     @endif
 
-    <!-- Modal de Observação para Mudança de Etapa -->
-    <div x-show="modalEtapaAberto"
-         x-transition
-         class="fixed inset-0 z-50 overflow-y-auto"
-         style="display: none;"
-         aria-labelledby="modal-title"
-         role="dialog"
-         aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="fecharModalEtapa()"></div>
+    <!-- Modal de Observação para Mudança de Etapa (teleportado para body para evitar overflow-hidden) -->
+    <template x-teleport="body">
+        <div x-show="modalEtapaAberto"
+             x-transition
+             class="fixed inset-0 z-[70] overflow-y-auto"
+             style="display: none;"
+             aria-labelledby="modal-title"
+             role="dialog"
+             aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="fecharModalEtapa()"></div>
 
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                <form :action="modalEtapaAction" method="POST">
-                    @csrf
-                    <input type="hidden" name="etapa_id" :value="modalEtapaId">
+                <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                    <form :action="modalEtapaAction" method="POST">
+                        @csrf
+                        <input type="hidden" name="etapa_id" :value="modalEtapaId">
 
-                    <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 id="modal-title" class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">
-                            Confirmar mudança de etapa
-                        </h3>
-                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                            Etapa selecionada: <span class="font-medium" x-text="modalEtapaNome"></span>
-                        </p>
+                        <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <h3 id="modal-title" class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">
+                                Confirmar mudança de etapa
+                            </h3>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                Etapa selecionada: <span class="font-medium" x-text="modalEtapaNome"></span>
+                            </p>
 
-                        <div class="mt-4">
-                            <label for="observacao_etapa" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observação (opcional)</label>
-                            <textarea id="observacao_etapa"
-                                      name="observacao"
-                                      rows="4"
-                                      maxlength="255"
-                                      x-model="modalEtapaObservacao"
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
-                                      placeholder="Digite uma observação para registrar no histórico..."></textarea>
+                            <div class="mt-4">
+                                <label for="observacao_etapa" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Observação (opcional)</label>
+                                <textarea id="observacao_etapa"
+                                          name="observacao"
+                                          rows="4"
+                                          maxlength="255"
+                                          x-model="modalEtapaObservacao"
+                                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+                                          placeholder="Digite uma observação para registrar no histórico..."></textarea>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">
-                            Confirmar
-                        </button>
-                        <button type="button" @click="fecharModalEtapa()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-slate-800 dark:text-gray-300 dark:border-slate-600 dark:hover:bg-slate-700">
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
+                        <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 sm:ml-3 sm:w-auto sm:text-sm">
+                                Confirmar
+                            </button>
+                            <button type="button" @click="fecharModalEtapa()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-slate-800 dark:text-gray-300 dark:border-slate-600 dark:hover:bg-slate-700">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    </template>
 </div>

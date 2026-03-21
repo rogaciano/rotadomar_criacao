@@ -123,6 +123,12 @@ const API = {
         });
     },
 
+    async cancelarColeta(id) {
+        return this.request(`/motorista/coletas/${id}/cancelar`, {
+            method: 'POST',
+        });
+    },
+
     // ===== Disponíveis + Agendar =====
 
     async getDisponiveis() {

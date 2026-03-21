@@ -135,6 +135,7 @@
                                         $dataEntrega = $loc->pivot->data_entrega_faccao
                                             ? (is_string($loc->pivot->data_entrega_faccao) ? \Carbon\Carbon::parse($loc->pivot->data_entrega_faccao)->format('d/m/Y') : $loc->pivot->data_entrega_faccao->format('d/m/Y'))
                                             : null;
+                                        $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($loc->id);
                                     @endphp
                                     <tr class="{{ !$loop->last ? 'border-b border-gray-200' : '' }}">
                                         {{-- Coluna 1: OP --}}
@@ -240,20 +241,27 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        {{-- Coluna 5: Entrega (NOVO) --}}
+                                        {{-- Coluna 5: Entrega Prevista Facção --}}
                                         <td class="py-1 px-2 align-top whitespace-nowrap">
                                             <div class="flex items-center space-x-1">
                                                 @if($dataEntrega)
-                                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 uppercase">
-                                                         P.ENTREGA: {{ $dataEntrega }}
-                                                     </span>
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 uppercase">
+                                                        P.ENTREGA: {{ $dataEntrega }}
+                                                    </span>
                                                 @else
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-50 text-gray-400 italic">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-50 text-gray-400 italic text-[10px]">
                                                         Sem Data
                                                     </span>
                                                 @endif
-
-
+                                                @if($podeGerenciarEtapa)
+                                                    <button type="button"
+                                                        onclick="abrirModalDataEntregaDash({{ $produtoPrincipal->id }}, {{ $loc->pivot->id }}, {{ Js::from($loc->pivot->data_entrega_faccao ? (is_string($loc->pivot->data_entrega_faccao) ? $loc->pivot->data_entrega_faccao : $loc->pivot->data_entrega_faccao->format('Y-m-d')) : '') }}, {{ Js::from($loc->nome_localizacao ?? '') }})"
+                                                        class="text-blue-600 hover:text-blue-800 transition-colors" title="Editar Data de Entrega">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
                                         {{-- Coluna 5: Observação --}}
@@ -298,10 +306,28 @@
                                         {{-- Coluna 6: Ações (Botões de Etapa) --}}
                                         <td class="py-1 pl-2 align-top text-right" style="min-width: 140px;">
                                             @php
-                                                $podeGerenciarEtapa = auth()->user()->podeGerenciarEtapa($loc->id);
                                                 $transicoes = collect([]);
+                                                $slugAtual = $etapaLinha?->slug ?? '';
+                                                $isUsuarioFaccao = auth()->user()->isUsuarioFaccao();
+                                                $isAdmin = auth()->user()->isAdmin();
+                                                $slugsLogisticos = ['aguardando_retirada', 'aguardando_motorista', 'em_transito', 'coletado'];
+
                                                 if ($etapaLinha) {
                                                     $transicoes = $etapaLinha->transicoesOrigem ?? collect([]);
+
+                                                    // Regras de negócio logística:
+                                                    // aguardando_retirada → aguardando_motorista: só via tela de logística
+                                                    if ($slugAtual === 'aguardando_retirada' && $isUsuarioFaccao) {
+                                                        $transicoes = collect([]);
+                                                    }
+                                                    // aguardando_motorista → em_transito: facção NÃO pode (só Confirmar Chegada)
+                                                    elseif ($slugAtual === 'aguardando_motorista' && $isUsuarioFaccao) {
+                                                        $transicoes = collect([]);
+                                                    }
+                                                    // em_transito → coletado: só admin/fábrica, facção NÃO pode
+                                                    elseif ($slugAtual === 'em_transito' && $isUsuarioFaccao) {
+                                                        $transicoes = collect([]);
+                                                    }
                                                 }
                                                 // Definindo cores aqui localmente caso não venha do pai
                                                 $btnCorClassesDesktop = [
@@ -356,7 +382,7 @@
                                                         </div>
                                                     @endif
 
-                                                    @if($etapaLinha)
+                                                    @if($etapaLinha && !($isUsuarioFaccao && in_array($slugAtual, $slugsLogisticos)))
                                                         <div class="flex gap-1 justify-end w-full">
                                                             @if(isset($loc->pivot->etapa_anterior_id) && $loc->pivot->etapa_anterior_id)
                                                                 <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">

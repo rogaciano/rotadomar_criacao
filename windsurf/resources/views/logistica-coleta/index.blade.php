@@ -189,7 +189,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-4 py-4 border-b border-gray-200 dark:border-slate-700 bg-indigo-50 dark:bg-indigo-900/30">
                     <h3 class="text-base font-extrabold text-indigo-900 dark:text-indigo-100 uppercase tracking-wider">
-                        📍 Produtos Aguardando Retirada ({{ $aguardandoRetirada->count() }})
+                        📍 Produtos Aguardando Retirada ({{ $aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator ? $aguardandoRetirada->total() : $aguardandoRetirada->count() }})
                     </h3>
                 </div>
 
@@ -220,7 +220,7 @@
                 </div>
 
                 {{-- Lista de produtos --}}
-                @if($aguardandoRetirada->count() > 0)
+                @if(($aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator ? $aguardandoRetirada->total() : $aguardandoRetirada->count()) > 0)
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                             <thead class="bg-gray-50 dark:bg-slate-700">
@@ -351,9 +351,131 @@
                             </tbody>
                         </table>
                     </div>
+                    {{-- Paginação Aguardando Retirada --}}
+                    @if($aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator && $aguardandoRetirada->hasPages())
+                        <div class="px-4 py-3 border-t border-gray-200 dark:border-slate-700">
+                            {{ $aguardandoRetirada->appends(request()->query())->links() }}
+                        </div>
+                    @endif
                 @else
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
                         Nenhum produto aguardando retirada no momento.
+                    </div>
+                @endif
+            </div>
+
+            {{-- ===== SEÇÃO 3: HISTÓRICO DE COLETAS ===== --}}
+            @php
+                $historicoTotal = $historicoColetas instanceof \Illuminate\Pagination\LengthAwarePaginator ? $historicoColetas->total() : 0;
+            @endphp
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 bg-green-50 dark:bg-green-900/20">
+                    <h3 class="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wider">
+                        ✅ Histórico de Coletas ({{ $historicoTotal }})
+                    </h3>
+                </div>
+
+                {{-- Filtro por período --}}
+                <div class="p-4 border-b border-gray-200 dark:border-slate-700">
+                    <form method="GET" action="{{ route('logistica-coleta.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:items-end">
+                        {{-- Manter filtros da seção de retirada --}}
+                        @if(request('localizacao_id'))
+                            <input type="hidden" name="localizacao_id" value="{{ request('localizacao_id') }}">
+                        @endif
+                        @if(request('referencia'))
+                            <input type="hidden" name="referencia" value="{{ request('referencia') }}">
+                        @endif
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">De</label>
+                            <input type="date" name="historico_de" value="{{ $historicoDataDe ?? '' }}"
+                                   class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Até</label>
+                            <input type="date" name="historico_ate" value="{{ $historicoDataAte ?? '' }}"
+                                   class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="submit" class="px-4 py-2 rounded-md bg-green-600 text-white text-sm font-semibold hover:bg-green-700">Filtrar</button>
+                            <a href="{{ route('logistica-coleta.index', array_filter(['localizacao_id' => request('localizacao_id'), 'referencia' => request('referencia')])) }}" class="px-4 py-2 rounded-md bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-300 text-sm font-semibold hover:bg-gray-300">Limpar</a>
+                        </div>
+                    </form>
+                </div>
+
+                @if($historicoTotal > 0)
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+                        <thead class="bg-gray-50 dark:bg-slate-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Referência</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Motorista</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Início</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Finalizado em</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                            @foreach($historicoColetas as $coleta)
+                                @php
+                                    $pl = $coleta->produtoLocalizacao;
+                                    $produto = $pl?->produto;
+                                    $statusClasses = [
+                                        'finalizado' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+                                        'cancelado' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+                                    ];
+                                    $statusLabels = [
+                                        'finalizado' => '✅ Coletado',
+                                        'cancelado' => '❌ Cancelado',
+                                    ];
+                                @endphp
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                    <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                                        {{ $produto?->referencia ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $pl?->localizacao?->nome_reduzido ?? $pl?->localizacao?->nome_localizacao ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $coleta->destinoLocalizacao?->nome_reduzido ?? $coleta->destinoLocalizacao?->nome_localizacao ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $pl?->quantidade ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $coleta->motorista?->name ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $coleta->veiculo?->placa ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $coleta->inicio_previsto_em?->format('d/m H:i') }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $coleta->updated_at?->format('d/m/Y H:i') }}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$coleta->status] ?? 'bg-gray-100 text-gray-700' }}">
+                                            {{ $statusLabels[$coleta->status] ?? $coleta->status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                {{-- Paginação --}}
+                @if($historicoColetas->hasPages())
+                    <div class="px-4 py-3 border-t border-gray-200 dark:border-slate-700">
+                        {{ $historicoColetas->appends(request()->query())->links() }}
+                    </div>
+                @endif
+                @else
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        Nenhuma coleta finalizada no período selecionado.
                     </div>
                 @endif
             </div>

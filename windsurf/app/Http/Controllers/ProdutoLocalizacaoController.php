@@ -267,6 +267,20 @@ class ProdutoLocalizacaoController extends Controller
         // Buscar a etapa destino para verificar se obriga data_entrega_faccao
         $etapaDestino = \App\Models\EtapaProducao::find($request->etapa_id);
 
+        // Bloquear facção de avançar etapas logísticas (só via tela de logística ou admin)
+        if (!$user->isAdmin() && $user->isUsuarioFaccao()) {
+            $etapaAtual = $produtoLocalizacao->etapaAtual;
+            $slugsLogisticos = [
+                \App\Models\EtapaProducao::SLUG_AGUARDANDO_RETIRADA,
+                \App\Models\EtapaProducao::SLUG_AGUARDANDO_MOTORISTA,
+                \App\Models\EtapaProducao::SLUG_EM_TRANSITO,
+                \App\Models\EtapaProducao::SLUG_COLETADO,
+            ];
+            if ($etapaAtual && in_array($etapaAtual->slug, $slugsLogisticos)) {
+                return redirect()->back()->with('error', 'As etapas logísticas só podem ser alteradas pela tela de Logística de Coleta.');
+            }
+        }
+
         // Validação: Apenas se a etapa destino obriga data_entrega_faccao
         if ($etapaDestino && $etapaDestino->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
             return redirect()->back()->with('alert_error', 'Para avançar para esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');

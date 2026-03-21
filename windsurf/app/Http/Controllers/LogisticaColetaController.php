@@ -29,6 +29,8 @@ class LogisticaColetaController extends Controller
         // Filtros
         $localizacaoId = $request->get('localizacao_id');
         $referencia = trim((string) $request->get('referencia', ''));
+        $historicoDataDe = $request->get('historico_de');
+        $historicoDataAte = $request->get('historico_ate');
 
         $tabelaColetasExiste = Schema::hasTable('coletas_logisticas');
         $tabelaVeiculosExiste = Schema::hasTable('veiculos');
@@ -53,7 +55,7 @@ class LogisticaColetaController extends Controller
                 });
             }
 
-            $aguardandoRetirada = $query->orderBy('created_at', 'asc')->get();
+            $aguardandoRetirada = $query->orderBy('created_at', 'asc')->paginate(20, ['*'], 'retirada_page');
         }
 
         // Coletas ativas (para todos ou só do motorista)
@@ -75,6 +77,32 @@ class LogisticaColetaController extends Controller
             $coletasAtivas = $coletasAtivasQuery->get();
         }
 
+        // Histórico de coletas finalizadas (coletado + cancelado)
+        $historicoColetas = collect();
+        if ($tabelaColetasExiste) {
+            $historicoQuery = ColetaLogistica::with([
+                'produtoLocalizacao.produto',
+                'produtoLocalizacao.localizacao',
+                'motorista',
+                'veiculo',
+                'destinoLocalizacao',
+            ])->whereIn('status', [ColetaLogistica::STATUS_FINALIZADO, ColetaLogistica::STATUS_CANCELADO])
+              ->orderBy('updated_at', 'desc');
+
+            if (!$user->isAdmin()) {
+                $historicoQuery->where('motorista_user_id', $user->id);
+            }
+
+            if ($historicoDataDe) {
+                $historicoQuery->whereDate('updated_at', '>=', $historicoDataDe);
+            }
+            if ($historicoDataAte) {
+                $historicoQuery->whereDate('updated_at', '<=', $historicoDataAte);
+            }
+
+            $historicoColetas = $historicoQuery->paginate(15, ['*'], 'historico_page');
+        }
+
         // Dados para filtros
         $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         $veiculos = $tabelaVeiculosExiste ? Veiculo::ativos()->orderBy('placa')->get() : collect();
@@ -87,11 +115,14 @@ class LogisticaColetaController extends Controller
         return view('logistica-coleta.index', compact(
             'aguardandoRetirada',
             'coletasAtivas',
+            'historicoColetas',
             'localizacoes',
             'veiculos',
             'destinosDisponiveis',
             'localizacaoId',
             'referencia',
+            'historicoDataDe',
+            'historicoDataAte',
         ));
     }
 
