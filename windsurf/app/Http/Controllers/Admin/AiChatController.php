@@ -90,9 +90,30 @@ class AiChatController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            $msg = $e->getMessage();
+
+            // Traduzir erros conhecidos para português
+            if (str_contains($msg, 'rate limit')) {
+                $erro = 'O serviço de IA está temporariamente sobrecarregado. Aguarde alguns segundos e tente novamente.';
+            } elseif (str_contains($msg, 'Could not resolve host') || str_contains($msg, 'Connection refused')) {
+                $erro = 'Não foi possível conectar ao serviço de IA. Verifique a conexão com a internet.';
+            } elseif (str_contains($msg, 'API key') || str_contains($msg, 'authentication') || str_contains($msg, 'Unauthenticated')) {
+                $erro = 'Chave de API inválida ou não configurada. Contacte o administrador do sistema.';
+            } elseif (str_contains($msg, 'SQLSTATE')) {
+                $erro = 'Erro ao consultar o banco de dados. A consulta gerada pela IA pode estar incorreta. Tente reformular sua pergunta.';
+            } elseif (str_contains($msg, 'Apenas queries SELECT')) {
+                $erro = 'Por segurança, apenas consultas de leitura são permitidas.';
+            } elseif (str_contains($msg, 'Operação não permitida')) {
+                $erro = 'A consulta gerada contém operações não permitidas. Tente reformular sua pergunta.';
+            } else {
+                $erro = 'Ocorreu um erro inesperado. Tente novamente em alguns instantes.';
+            }
+
+            \Log::error('AiChat erro: ' . $msg);
+
             return response()->json([
                 'success' => false,
-                'error'   => 'Erro ao processar a pergunta. Detalhes: ' . $e->getMessage()
+                'error'   => $erro,
             ], 500);
         }
     }
