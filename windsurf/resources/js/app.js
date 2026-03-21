@@ -12,6 +12,22 @@ Alpine.data('floatingAiChat', () => ({
     messages: [],
 
     init() {
+        // Restaurar conversa da sessão
+        try {
+            const saved = sessionStorage.getItem('aiChatMessages');
+            if (saved) {
+                this.messages = JSON.parse(saved).filter(m => !m.isLoading);
+            }
+        } catch (e) {}
+
+        // Salvar conversa sempre que messages mudar
+        this.$watch('messages', value => {
+            try {
+                const toSave = value.filter(m => !m.isLoading);
+                sessionStorage.setItem('aiChatMessages', JSON.stringify(toSave));
+            } catch (e) {}
+        });
+
         this.$watch('isOpen', value => {
             if (value) {
                 setTimeout(() => {
@@ -49,6 +65,25 @@ Alpine.data('floatingAiChat', () => ({
         }, 50);
     },
 
+    async sendFeedback(historicoId, util) {
+        if (!historicoId || !window.aiFeedbackRoute) return;
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        const url = window.aiFeedbackRoute.replace('__ID__', historicoId);
+        try {
+            await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : '',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ util })
+            });
+        } catch (e) {
+            // silencioso
+        }
+    },
+
     async sendMessage() {
         if (!this.input.trim() || this.isLoading) return;
 
@@ -60,7 +95,7 @@ Alpine.data('floatingAiChat', () => ({
         this.scrollToBottom();
 
         this.isLoading = true;
-        this.messages.push({ role: 'ai', content: '', isLoading: true });
+        this.messages.push({ role: 'ai', content: '', isLoading: true, historicoId: null, feedback: null });
         this.scrollToBottom();
 
         try {
@@ -76,12 +111,15 @@ Alpine.data('floatingAiChat', () => ({
             });
 
             const data = await response.json();
-            this.messages[this.messages.length - 1].isLoading = false;
+            const last = this.messages[this.messages.length - 1];
+            last.isLoading = false;
 
             if (response.ok && data.success) {
-                this.messages[this.messages.length - 1].content = data.reply;
+                last.content = data.reply;
+                last.historicoId = data.historico_id || null;
+                last.feedback = null;
             } else {
-                this.messages[this.messages.length - 1].content = data.error || 'Ocorreu um erro no servidor.';
+                last.content = data.error || 'Ocorreu um erro no servidor.';
             }
 
         } catch (error) {

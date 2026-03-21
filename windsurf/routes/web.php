@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
         // Assistente IA Rota do Mar
         Route::get('ai-chat', [\App\Http\Controllers\Admin\AiChatController::class, 'index'])->name('admin.ai-chat');
         Route::post('ai-chat/message', [\App\Http\Controllers\Admin\AiChatController::class, 'message'])->name('admin.ai-chat.message');
+        Route::patch('ai-chat/feedback/{historico}', [\App\Http\Controllers\Admin\AiChatController::class, 'feedback'])->name('admin.ai-chat.feedback');
     });
 
     // === CADASTROS (protegido por permissão) ===
