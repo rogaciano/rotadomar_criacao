@@ -4,10 +4,56 @@ namespace App\Services;
 
 use App\Models\AiChatHistorico;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Prism\Prism\Facades\Prism;
 
 class AiQueryService
 {
+    /**
+     * Lista de provedores de IA em ordem de prioridade.
+     * O sistema tenta o primeiro; se falhar, vai para o próximo.
+     */
+    protected array $providers = [
+        ['provider' => 'gemini',   'model' => 'gemini-2.5-flash',           'env_key' => 'GEMINI_API_KEY'],
+        ['provider' => 'groq',     'model' => 'llama-3.3-70b-versatile',    'env_key' => 'GROQ_API_KEY'],
+        ['provider' => 'deepseek', 'model' => 'deepseek-chat',              'env_key' => 'DEEPSEEK_API_KEY'],
+        ['provider' => 'openai',   'model' => 'gpt-4o-mini',               'env_key' => 'OPENAI_API_KEY'],
+    ];
+
+    /**
+     * Chama a IA com fallback automático entre provedores.
+     * Tenta cada provedor configurado em ordem até obter resposta.
+     */
+    protected function callAI(string $prompt): string
+    {
+        $errors = [];
+
+        foreach ($this->providers as $config) {
+            // Pular provedores sem chave configurada
+            if (empty(env($config['env_key']))) {
+                continue;
+            }
+
+            try {
+                $resposta = Prism::text()
+                    ->using($config['provider'], $config['model'])
+                    ->withPrompt($prompt)
+                    ->generate();
+
+                return $resposta->text;
+            } catch (\Exception $e) {
+                $errors[] = "{$config['provider']}: {$e->getMessage()}";
+                Log::warning("AiChat fallback: {$config['provider']}/{$config['model']} falhou", [
+                    'error' => $e->getMessage(),
+                ]);
+                continue;
+            }
+        }
+
+        throw new \RuntimeException(
+            'Todos os provedores de IA falharam. Erros: ' . implode(' | ', $errors)
+        );
+    }
     /**
      * Schema do banco de dados para contexto da IA.
      */
@@ -136,12 +182,7 @@ class AiQueryService
             . "- Para tecido mais utilizado: use COUNT(pt.produto_id) ou SUM(p.quantidade * pt.consumo) agrupado por t.descricao\n\n"
             . "Pergunta: " . $question;
 
-        $resposta = Prism::text()
-            ->using('gemini', 'gemini-2.5-flash')
-            ->withPrompt($prompt)
-            ->generate();
-
-        $sql = trim($resposta->text);
+        $sql = trim($this->callAI($prompt));
 
         // Se a IA disse que não precisa de query
         if (strtoupper($sql) === 'NO_QUERY' || str_contains(strtoupper($sql), 'NO_QUERY')) {
@@ -205,11 +246,14 @@ class AiQueryService
             . "Se os dados estiverem vazios, informe que não foram encontrados registros.\n\n"
             . "Pergunta: " . $question;
 
-        $resposta = Prism::text()
-            ->using('gemini', 'gemini-2.5-flash')
-            ->withPrompt($prompt)
-            ->generate();
+        return $this->callAI($prompt);
+    }
 
-        return $resposta->text;
+    /**
+     * Chamada direta à IA (perguntas conceituais sem SQL).
+     */
+    public function askDirect(string $prompt): string
+    {
+        return $this->callAI($prompt);
     }
 }

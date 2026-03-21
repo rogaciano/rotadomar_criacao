@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\AiChatHistorico;
 use App\Services\AiQueryService;
 use Illuminate\Http\Request;
-use Prism\Prism\Facades\Prism;
 
 class AiChatController extends Controller
 {
@@ -63,15 +62,10 @@ class AiChatController extends Controller
                 // Passo 3: formatar resposta com os dados reais
                 $reply = $this->queryService->formatAnswer($question, $results, $systemContext);
             } else {
-                // Pergunta conceitual/operacional — resposta direta
+                // Pergunta conceitual/operacional — resposta direta (usa fallback via service)
                 $finalPrompt = $systemContext . "\n\nPergunta do usuário:\n" . $question;
 
-                $resposta = Prism::text()
-                    ->using('gemini', 'gemini-2.5-flash')
-                    ->withPrompt($finalPrompt)
-                    ->generate();
-
-                $reply = $resposta->text;
+                $reply = $this->queryService->askDirect($finalPrompt);
             }
 
             // Salvar interação no histórico
@@ -93,7 +87,9 @@ class AiChatController extends Controller
             $msg = $e->getMessage();
 
             // Traduzir erros conhecidos para português
-            if (str_contains($msg, 'rate limit')) {
+            if (str_contains($msg, 'Todos os provedores de IA falharam')) {
+                $erro = 'Todos os serviços de IA estão indisponíveis no momento. Aguarde alguns instantes e tente novamente.';
+            } elseif (str_contains($msg, 'rate limit')) {
                 $erro = 'O serviço de IA está temporariamente sobrecarregado. Aguarde alguns segundos e tente novamente.';
             } elseif (str_contains($msg, 'Could not resolve host') || str_contains($msg, 'Connection refused')) {
                 $erro = 'Não foi possível conectar ao serviço de IA. Verifique a conexão com a internet.';
