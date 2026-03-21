@@ -425,6 +425,7 @@ class MovimentacaoController extends Controller
         $backUrl = $request->query('back_url');
 
         $movimentacao->load([
+            'produto', 'localizacao', 'tipo', 'situacao',
             'observacoes' => function ($query) {
                 $query->orderBy('created_at', 'asc');
             }
@@ -448,6 +449,8 @@ class MovimentacaoController extends Controller
         if (!auth()->user() || !auth()->user()->canUpdate('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
+
+        $movimentacao->load(['produto', 'localizacao', 'tipo', 'situacao']);
 
         $produtos = Produto::orderBy('referencia')->get();
         $situacoes = Situacao::orderBy('descricao')->get();
@@ -563,6 +566,8 @@ class MovimentacaoController extends Controller
         if (!auth()->user() || !auth()->user()->canRead('movimentacoes')) {
             abort(403, 'Acesso negado.');
         }
+
+        $movimentacao->load(['produto', 'localizacao', 'tipo', 'situacao']);
 
         $pdf = PDF::loadView('movimentacoes.pdf', compact('movimentacao'));
         return $pdf->stream('movimentacao_' . $movimentacao->id . '.pdf');

@@ -37,8 +37,8 @@ class Movimentacao extends Model
         'concluido' => 'boolean'
     ];
 
-    // Definindo relacionamentos para serem carregados automaticamente
-    protected $with = ['produto', 'localizacao', 'tipo', 'situacao'];
+    // Relacionamentos NÃO são carregados automaticamente.
+    // Use ->with() ou ->load() explicitamente nas queries que precisam deles.
 
     // Accessor para URL do anexo
     public function getAnexoUrlAttribute()
