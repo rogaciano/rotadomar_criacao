@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -129,5 +129,8 @@
 
         <!-- Scripts personalizados -->
         @stack('scripts')
+
+        <!-- Widget Flutuante da Inteligência do Sistema (Restrito) -->
+        <x-admin-ai-widget />
     </body>
 </html>

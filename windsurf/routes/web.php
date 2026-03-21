@@ -84,6 +84,10 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
         // Alias plurais para compatibilidade com views que usam activity-logs.*
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+
+        // Assistente IA Rota do Mar
+        Route::get('ai-chat', [\App\Http\Controllers\Admin\AiChatController::class, 'index'])->name('admin.ai-chat');
+        Route::post('ai-chat/message', [\App\Http\Controllers\Admin\AiChatController::class, 'message'])->name('admin.ai-chat.message');
     });
 
     // === CADASTROS (protegido por permissão) ===

@@ -11,6 +11,13 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
+  'laravel/ai' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Ai\\AiServiceProvider',
+    ),
+  ),
   'laravel/breeze' => 
   array (
     'providers' => 
@@ -30,6 +37,13 @@
     'providers' => 
     array (
       0 => 'Laravel\\Sail\\SailServiceProvider',
+    ),
+  ),
+  'laravel/sanctum' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Sanctum\\SanctumServiceProvider',
     ),
   ),
   'laravel/tinker' => 
@@ -65,6 +79,17 @@
     'providers' => 
     array (
       0 => 'Termwind\\Laravel\\TermwindServiceProvider',
+    ),
+  ),
+  'prism-php/prism' => 
+  array (
+    'aliases' => 
+    array (
+      'PrismServer' => 'Prism\\Prism\\Facades\\PrismServer',
+    ),
+    'providers' => 
+    array (
+      0 => 'Prism\\Prism\\PrismServiceProvider',
     ),
   ),
   'spatie/laravel-activitylog' => 
