@@ -31,6 +31,7 @@ class User extends Authenticatable
         'password',
         'localizacao_id',
         'is_admin',
+        'is_faccao',
     ];
 
     /**
@@ -73,9 +74,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Verifica se o usuário é um usuário de facção (localização com capacidade > 0)
-     * Usuários de facção têm um localizacao_id definido, NÃO são admins,
-     * e a localização tem capacidade maior que zero
+     * Verifica se o usuário é um usuário de facção (empresa externa).
+     * Usuários de facção têm acesso restrito apenas à sua localização principal.
+     * O campo is_faccao deve ser marcado explicitamente pelo administrador.
      *
      * @return bool
      */
@@ -85,8 +86,7 @@ class User extends Authenticatable
             return false;
         }
 
-        $localizacao = $this->localizacao;
-        return $localizacao && $localizacao->capacidade > 0;
+        return (bool) $this->is_faccao;
     }
 
     /**

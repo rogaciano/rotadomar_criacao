@@ -66,6 +66,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'localizacao_id' => $request->localizacao_id,
             'is_admin' => (bool)$request->input('is_admin'),
+            'is_faccao' => (bool)$request->input('is_faccao'),
         ]);
 
         // Sincronizar localizações de visualização
@@ -123,6 +124,7 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->localizacao_id = $request->localizacao_id;
         $user->is_admin = (bool)$request->input('is_admin');
+        $user->is_faccao = (bool)$request->input('is_faccao');
 
         // Atualizar senha apenas se foi fornecida
         if ($request->filled('password')) {
