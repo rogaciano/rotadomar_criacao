@@ -253,6 +253,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('logistica-coleta/{coleta}/confirmar-recebimento-destino', [LogisticaColetaController::class, 'confirmarRecebimentoDestino'])->name('logistica-coleta.confirmar-recebimento-destino');
     Route::post('logistica-coleta/{coleta}/cancelar', [LogisticaColetaController::class, 'cancelar'])->name('logistica-coleta.cancelar');
 
+
     Route::resource('veiculos', VeiculoController::class)->except(['show']);
     }); // fim logística
 

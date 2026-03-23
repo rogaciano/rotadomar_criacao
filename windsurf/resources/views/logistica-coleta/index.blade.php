@@ -121,13 +121,11 @@
 
                                         {{-- Cancelar (motorista, só agendado) --}}
                                         @if($coleta->status === 'agendado' && $isMotorista)
-                                            <form action="{{ route('logistica-coleta.cancelar', $coleta) }}" method="POST" class="inline"
-                                                  onsubmit="return confirm('Tem certeza que deseja cancelar esta coleta?')">
-                                                @csrf
-                                                <button type="submit" class="inline-flex items-center px-2.5 py-1.5 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600">
-                                                    Cancelar
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                onclick="document.getElementById('modal-cancelar-{{ $coleta->id }}').classList.remove('hidden')"
+                                                class="inline-flex items-center px-2.5 py-1.5 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600">
+                                                Cancelar
+                                            </button>
                                         @endif
                                     </td>
                                 </tr>
@@ -178,6 +176,35 @@
                                     </div>
                                 </div>
                                 @endif
+
+                                {{-- Modal: Confirmar Cancelamento --}}
+                                @if($coleta->status === 'agendado' && $isMotorista)
+                                <div id="modal-cancelar-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+                                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+                                        <h3 class="text-lg font-bold text-red-700 dark:text-red-400 mb-4">⚠️ Cancelar Agendamento</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                            Deseja cancelar o agendamento do produto <strong>{{ $produto?->referencia }}</strong>?
+                                        </p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-500 mb-6">
+                                            O produto voltará para <strong>Aguardando Retirada</strong>.
+                                        </p>
+                                        <div class="flex justify-end gap-2">
+                                            <button type="button"
+                                                onclick="document.getElementById('modal-cancelar-{{ $coleta->id }}').classList.add('hidden')"
+                                                class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">
+                                                Não, manter
+                                            </button>
+                                            <form action="{{ route('logistica-coleta.cancelar', $coleta) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700">
+                                                    Sim, cancelar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+
                             @endforeach
                         </tbody>
                     </table>
