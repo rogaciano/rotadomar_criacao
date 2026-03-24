@@ -2,27 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProdutoObservacao;
-use App\Models\Produto;
 use App\Http\Requests\StoreProdutoObservacaoRequest;
-use Illuminate\Http\Request;
+use App\Models\ProdutoObservacao;
 use Illuminate\Support\Facades\Auth;
 
 class ProdutoObservacaoController extends Controller
 {
     /**
-     * Armazena uma nova observação
+     * Armazena uma nova observação.
      */
     public function store(StoreProdutoObservacaoRequest $request)
     {
-        // Log para debug
         \Log::info('ProdutoObservacao store chamado', [
             'produto_id' => $request->produto_id,
             'observacao' => $request->observacao,
             'observacao_length' => strlen($request->observacao ?? ''),
         ]);
 
-        // Validar se há conteúdo real (não apenas HTML vazio do Quill)
+        // Valida se há conteúdo real, não apenas HTML vazio do Quill.
         $observacao = $request->observacao;
         $textoLimpo = trim(strip_tags($observacao));
 
@@ -66,12 +63,18 @@ class ProdutoObservacaoController extends Controller
     }
 
     /**
-     * Remove uma observação
+     * Remove uma observação.
      */
     public function destroy($id)
     {
-        // Verificar permissão
-        if (!Auth::user()->canUpdate('produtos')) {
+        if (!Auth::user()->canDelete('produto_observacoes')) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Você não tem permissão para remover observações.'
+                ], 403);
+            }
+
             abort(403, 'Você não tem permissão para remover observações.');
         }
 
