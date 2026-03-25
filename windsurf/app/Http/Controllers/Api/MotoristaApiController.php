@@ -271,7 +271,7 @@ class MotoristaApiController extends Controller
             ->whereDoesntHave('coletasLogisticas', function ($q) {
                 $q->ativas();
             })
-            ->orderBy('created_at', 'asc')
+            ->orderBy('updated_at', 'asc')
             ->get()
             ->map(function ($pl) {
                 return [
@@ -281,7 +281,7 @@ class MotoristaApiController extends Controller
                     'quantidade' => $pl->quantidade ?? 0,
                     'origem' => $pl->localizacao?->nome_reduzido ?? $pl->localizacao?->nome_localizacao ?? '-',
                     'origem_id' => $pl->localizacao_id,
-                    'aguardando_desde' => $pl->created_at?->diffForHumans(),
+                    'aguardando_desde' => $pl->updated_at?->diffForHumans(),
                 ];
             });
 
