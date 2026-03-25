@@ -6,6 +6,7 @@ use App\Models\ColetaLogistica;
 use App\Models\EtapaProducao;
 use App\Models\Localizacao;
 use App\Models\ProdutoLocalizacao;
+use App\Models\User;
 use App\Models\Veiculo;
 use App\Http\Requests\AgendarColetaRequest;
 use Illuminate\Http\JsonResponse;
@@ -107,6 +108,7 @@ class LogisticaColetaController extends Controller
         // Dados para filtros
         $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         $veiculos = $tabelaVeiculosExiste ? Veiculo::ativos()->orderBy('placa')->get() : collect();
+        $usuariosColeta = User::with('localizacao')->orderBy('name')->get();
         $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
         $destinosDisponiveis = Localizacao::where('ativo', true)
             ->whereIn('id', $localizacoesPermitidas)
@@ -119,6 +121,7 @@ class LogisticaColetaController extends Controller
             'historicoColetas',
             'localizacoes',
             'veiculos',
+            'usuariosColeta',
             'destinosDisponiveis',
             'localizacaoId',
             'referencia',
@@ -135,6 +138,8 @@ class LogisticaColetaController extends Controller
         $validated = $request->validated();
 
         $user = auth()->user();
+        $motoristaId = (int) $validated['motorista_user_id'];
+        $motorista = User::findOrFail($motoristaId);
 
         // Validar que o destino está nas localizações permitidas do motorista
         $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
@@ -159,8 +164,8 @@ class LogisticaColetaController extends Controller
         }
 
         // Verificar conflito de motorista
-        if (ColetaLogistica::temConflitoMotorista($user->id, $inicio, $retorno)) {
-            return back()->with('error', 'Você já possui uma coleta agendada neste horário.');
+        if (ColetaLogistica::temConflitoMotorista($motoristaId, $inicio, $retorno)) {
+            return back()->with('error', 'O usuário selecionado já possui uma coleta agendada neste horário.');
         }
 
         // Verificar conflito de veículo
@@ -173,7 +178,7 @@ class LogisticaColetaController extends Controller
             // Criar coleta
             ColetaLogistica::create([
                 'produto_localizacao_id' => $produtoLocalizacao->id,
-                'motorista_user_id' => $user->id,
+                'motorista_user_id' => $motoristaId,
                 'veiculo_id' => $validated['veiculo_id'],
                 'destino_localizacao_id' => $validated['destino_localizacao_id'],
                 'inicio_previsto_em' => $inicio,
@@ -188,7 +193,7 @@ class LogisticaColetaController extends Controller
                 $produtoLocalizacao->avancarEtapa(
                     $etapaAguardandoMotorista->id,
                     $user->id,
-                    'Coleta agendada pelo motorista ' . $user->name
+                    'Coleta agendada para ' . $motorista->name . ' por ' . $user->name
                 );
             }
 

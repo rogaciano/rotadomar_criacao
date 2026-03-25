@@ -44,7 +44,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Motorista</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Responsável</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Início</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Retorno</th>
@@ -62,13 +62,13 @@
                                         'em_transito' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
                                     ];
                                     $statusLabels = [
-                                        'agendado' => 'Aguardando Motorista',
+                                        'agendado' => 'Aguardando Responsável',
                                         'em_transito' => 'Em Trânsito',
                                     ];
                                     $user = auth()->user();
                                     $isOrigem = $user->isAdmin() || $user->localizacao_id === $pl?->localizacao_id;
                                     $isDestino = $user->isAdmin() || $user->localizacao_id === $coleta->destino_localizacao_id;
-                                    $isMotorista = $user->isAdmin() || $coleta->motorista_user_id === $user->id;
+                                    $isResponsavel = $user->isAdmin() || $coleta->motorista_user_id === $user->id;
                                 @endphp
                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                     <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
@@ -119,8 +119,8 @@
                                             </button>
                                         @endif
 
-                                        {{-- Cancelar (motorista, só agendado) --}}
-                                        @if($coleta->status === 'agendado' && $isMotorista)
+                                        {{-- Cancelar (responsável, só agendado) --}}
+                                        @if($coleta->status === 'agendado' && $isResponsavel)
                                             <button type="button"
                                                 onclick="document.getElementById('modal-cancelar-{{ $coleta->id }}').classList.remove('hidden')"
                                                 class="inline-flex items-center px-2.5 py-1.5 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600">
@@ -134,9 +134,9 @@
                                 @if($coleta->status === 'agendado' && $isOrigem)
                                 <div id="modal-chegada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Chegada do Motorista</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Chegada do Responsável</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Motorista <strong>{{ $coleta->motorista?->name }}</strong> chegou para coletar
+                                            Responsável <strong>{{ $coleta->motorista?->name }}</strong> chegou para coletar
                                             <strong>{{ $produto?->referencia }}</strong>?
                                         </p>
                                         <form action="{{ route('logistica-coleta.confirmar-chegada-origem', $coleta) }}" method="POST">
@@ -178,7 +178,7 @@
                                 @endif
 
                                 {{-- Modal: Confirmar Cancelamento --}}
-                                @if($coleta->status === 'agendado' && $isMotorista)
+                                @if($coleta->status === 'agendado' && $isResponsavel)
                                 <div id="modal-cancelar-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
                                         <h3 class="text-lg font-bold text-red-700 dark:text-red-400 mb-4">⚠️ Cancelar Agendamento</h3>
@@ -256,7 +256,7 @@
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Situação</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Motorista</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Responsável</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Aguardando desde</th>
@@ -331,6 +331,17 @@
                                                 <input type="hidden" name="produto_localizacao_id" value="{{ $pl->id }}">
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Responsável pela Coleta *</label>
+                                                        <select name="motorista_user_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
+                                                            <option value="">Selecione...</option>
+                                                            @foreach($usuariosColeta as $usuarioColeta)
+                                                                <option value="{{ $usuarioColeta->id }}">
+                                                                    {{ $usuarioColeta->name }}{{ $usuarioColeta->localizacao ? ' - ' . ($usuarioColeta->localizacao->nome_reduzido ?? $usuarioColeta->localizacao->nome_localizacao) : '' }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
                                                     <div>
                                                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Veículo *</label>
                                                         <select name="veiculo_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
