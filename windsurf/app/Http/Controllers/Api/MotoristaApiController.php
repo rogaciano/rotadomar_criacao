@@ -280,6 +280,7 @@ class MotoristaApiController extends Controller
                     'descricao' => $pl->produto?->descricao ?? '-',
                     'quantidade' => $pl->quantidade ?? 0,
                     'origem' => $pl->localizacao?->nome_reduzido ?? $pl->localizacao?->nome_localizacao ?? '-',
+                    'origem_nome_completo' => $pl->localizacao?->nome_localizacao ?? $pl->localizacao?->nome_reduzido ?? '-',
                     'origem_id' => $pl->localizacao_id,
                     'aguardando_desde' => $pl->updated_at?->diffForHumans(),
                 ];
