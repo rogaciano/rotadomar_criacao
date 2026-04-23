@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "Bash(grep -rn '$maxWidth' resources/views/ '--include=*.blade.php')",
+      "Bash(pkill -f \"artisan serve\")"
+    ]
+  }
+}

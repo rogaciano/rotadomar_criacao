@@ -38,10 +38,10 @@ Decisões tomadas:
 - Permissões via hasPermission() / canAction() existentes
 
 A definir:
-- [ ] Nova tabela produto_criacao ou colunas em produtos?
-- [ ] Route prefix: /criacao ou /produtos/criacao?
-- [ ] Kanban existente ou novo para Criação?
-- [ ] Fluxo de transições entre etapas
+- [ ] Nova tabela produto_criacao ou colunas em produtos? campos em colunas
+- [ ] Route prefix: /criacao ou /produtos/criacao? /produtos/criacao melhor para consistência com outros modulos
+- [ ] Kanban existente ou novo para Criação? Novo
+- [ ] Fluxo de transições entre etapas. Isso mesmo que o transições entre etapas de produção?
 
 Escopo:
 1. Migration + Model + Relationships
