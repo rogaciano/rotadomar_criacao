@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produto_combinacao', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('produto_id')->constrained()->onDelete('cascade');
-            $table->string('descricao')->nullable();
-            $table->decimal('quantidade_pretendida', 10, 2)->default(0);
-            $table->text('observacoes')->nullable();
-            $table->timestamps();
-            
-            // Índice para melhorar a performance
-            $table->index('produto_id');
-        });
+        if (!Schema::hasTable('produto_combinacao')) {
+            Schema::create('produto_combinacao', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('produto_id')->constrained()->onDelete('cascade');
+                $table->string('descricao')->nullable();
+                $table->decimal('quantidade_pretendida', 10, 2)->default(0);
+                $table->text('observacoes')->nullable();
+                $table->timestamps();
+                $table->index('produto_id');
+            });
+        }
     }
 
     /**
@@ -29,6 +29,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('produto_combinacao');
+        if (Schema::hasTable('produto_combinacao')) {
+            Schema::dropIfExists('produto_combinacao');
+        }
     }
 };

@@ -12,8 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('status', function (Blueprint $table) {
-            $table->boolean('calc_necessidade')->default(false)->after('ativo')
-                ->comment('Define se produtos com este status devem ter necessidade de tecido calculada (0=Não, 1=Sim)');
+            if (!Schema::hasColumn('status', 'calc_necessidade')) {
+                $table->boolean('calc_necessidade')->default(false)->after('ativo')
+                    ->comment('Define se produtos com este status devem ter necessidade de tecido calculada (0=Não, 1=Sim)');
+            }
         });
     }
 
@@ -23,7 +25,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('status', function (Blueprint $table) {
-            $table->dropColumn('calc_necessidade');
+            if (Schema::hasColumn('status', 'calc_necessidade')) {
+                $table->dropColumn('calc_necessidade');
+            }
         });
     }
 };

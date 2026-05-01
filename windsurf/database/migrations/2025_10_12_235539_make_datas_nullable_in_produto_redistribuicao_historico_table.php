@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('produto_redistribuicao_historico', function (Blueprint $table) {
-            // Tornar colunas de data nullable (agora trabalhamos com mês/ano das alocações)
-            $table->date('data_prevista_origem')->nullable()->change();
-            $table->date('data_prevista_destino')->nullable()->change();
-        });
+        if (Schema::hasTable('produto_redistribuicao_historico')) {
+            Schema::table('produto_redistribuicao_historico', function (Blueprint $table) {
+                $table->date('data_prevista_origem')->nullable()->change();
+                $table->date('data_prevista_destino')->nullable()->change();
+            });
+        }
     }
 
     /**
@@ -23,10 +24,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('produto_redistribuicao_historico', function (Blueprint $table) {
-            // Reverter para NOT NULL
-            $table->date('data_prevista_origem')->nullable(false)->change();
-            $table->date('data_prevista_destino')->nullable(false)->change();
-        });
+        if (Schema::hasTable('produto_redistribuicao_historico')) {
+            Schema::table('produto_redistribuicao_historico', function (Blueprint $table) {
+                $table->date('data_prevista_origem')->nullable(false)->change();
+                $table->date('data_prevista_destino')->nullable(false)->change();
+            });
+        }
     }
 };

@@ -11,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('etapas_producao', function (Blueprint $table) {
-            $table->id();
-            $table->string('nome', 100);
-            $table->string('descricao', 255)->nullable();
-            $table->string('cor', 20)->default('blue'); // blue, green, yellow, red, purple, gray
-            $table->string('icone', 50)->nullable(); // emoji ou classe de ícone
-            $table->boolean('ativo')->default(true);
-            $table->integer('ordem')->default(0);
-            $table->timestamps();
-            $table->softDeletes();
-            
-            $table->index(['ativo', 'ordem']);
-        });
+        if (!Schema::hasTable('etapas_producao')) {
+            Schema::create('etapas_producao', function (Blueprint $table) {
+                $table->id();
+                $table->string('nome', 100);
+                $table->string('descricao', 255)->nullable();
+                $table->string('cor', 20)->default('blue'); // blue, green, yellow, red, purple, gray
+                $table->string('icone', 50)->nullable(); // emoji ou classe de ícone
+                $table->boolean('ativo')->default(true);
+                $table->integer('ordem')->default(0);
+                $table->timestamps();
+                $table->softDeletes();
+
+                $table->index(['ativo', 'ordem']);
+            });
+        }
     }
 
     /**
@@ -31,6 +33,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('etapas_producao');
+        if (Schema::hasTable('etapas_producao')) {
+            Schema::dropIfExists('etapas_producao');
+        }
     }
 };

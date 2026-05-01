@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tecido_cores', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('tecido_cores')) {
+            Schema::create('tecido_cores', function (Blueprint $table) {
+                $table->id();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
@@ -22,6 +24,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tecido_cores');
+        if (Schema::hasTable('tecido_cores')) {
+            Schema::dropIfExists('tecido_cores');
+        }
     }
 };

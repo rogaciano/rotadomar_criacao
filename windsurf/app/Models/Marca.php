@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Produto;
 
 class Marca extends Model
@@ -26,10 +27,51 @@ class Marca extends Model
         'updated_at' => 'datetime'
     ];
 
+    protected $appends = [
+        'logo_url',
+    ];
+
     // Relacionamento com produtos
     public function produtos()
     {
         return $this->hasMany(Produto::class);
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        $resolvedPath = $this->getResolvedLogoPath();
+
+        return $resolvedPath ? asset('storage/' . $resolvedPath) : null;
+    }
+
+    public function getResolvedLogoPath(): ?string
+    {
+        if (!$this->logo_path) {
+            return null;
+        }
+
+        if (Storage::disk('public')->exists($this->logo_path)) {
+            return $this->logo_path;
+        }
+
+        $directory = 'logos';
+        $filename = pathinfo($this->logo_path, PATHINFO_FILENAME);
+        $normalizedFilename = strtolower(preg_replace('/\.(jpe?g|png|gif|webp)$/i', '', $filename));
+        $normalizedFilename = preg_replace('/^\d+_/', '', $normalizedFilename);
+        $normalizedFilename = str_replace(['-', '_', ' '], '', $normalizedFilename);
+
+        foreach (Storage::disk('public')->files($directory) as $file) {
+            $candidate = pathinfo($file, PATHINFO_FILENAME);
+            $normalizedCandidate = strtolower(preg_replace('/\.(jpe?g|png|gif|webp)$/i', '', $candidate));
+            $normalizedCandidate = preg_replace('/^\d+_/', '', $normalizedCandidate);
+            $normalizedCandidate = str_replace(['-', '_', ' '], '', $normalizedCandidate);
+
+            if ($normalizedCandidate === $normalizedFilename || str_contains($normalizedCandidate, $normalizedFilename) || str_contains($normalizedFilename, $normalizedCandidate)) {
+                return $file;
+            }
+        }
+
+        return null;
     }
 
     /**

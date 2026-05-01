@@ -14,8 +14,8 @@
                     @endphp
                     @foreach($marcasDestaque as $marca)
                         <div class="flex flex-col items-center group transition-all duration-300">
-                            @if($marca->logo_path)
-                                <img src="{{ asset('storage/' . $marca->logo_path) }}" alt="{{ $marca->nome_marca }}" class="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100">
+                            @if($marca->logo_url)
+                                <img src="{{ $marca->logo_url }}" alt="{{ $marca->nome_marca }}" class="h-10 md:h-12 w-auto object-contain transition-transform group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100">
                             @else
                                 <div class="h-10 w-20 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
                                     <span class="text-[10px] font-bold text-slate-500 uppercase">{{ $marca->nome_marca }}</span>

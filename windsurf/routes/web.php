@@ -25,6 +25,7 @@ use App\Http\Controllers\DirecionamentoComercialController;
 use App\Http\Controllers\EtapaProducaoController;
 use App\Http\Controllers\SugestaoController;
 use App\Http\Controllers\UiPreferenceController;
+use App\Http\Controllers\CriacaoController;
 use App\Http\Controllers\LogisticaColetaController;
 use App\Http\Controllers\VeiculoController;
 use Illuminate\Support\Facades\Route;
@@ -150,6 +151,19 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('localizacao-capacidade/gerar-mes', [LocalizacaoCapacidadeMensalController::class, 'gerarCapacidadesMes'])->name('localizacao-capacidade.gerar-mes');
     Route::resource('localizacao-capacidade', LocalizacaoCapacidadeMensalController::class);
     }); // fim planejamento
+
+    // === CRIAÇÃO (protegido por permissão) ===
+    Route::middleware('permission:criacao')->prefix('criacao')->name('criacao.')->group(function () {
+    Route::get('/', [CriacaoController::class, 'index'])->name('index');
+    Route::get('bel', [CriacaoController::class, 'bel'])->name('bel');
+    Route::get('kanban', [CriacaoController::class, 'kanban'])->name('kanban');
+    Route::get('create', [CriacaoController::class, 'create'])->middleware('permission:criacao,create')->name('create');
+    Route::post('/', [CriacaoController::class, 'store'])->middleware('permission:criacao,create')->name('store');
+    Route::get('{produto}', [CriacaoController::class, 'show'])->middleware('permission:criacao,read')->name('show');
+    Route::get('{produto}/edit', [CriacaoController::class, 'edit'])->middleware('permission:criacao,update')->name('edit');
+    Route::put('{produto}', [CriacaoController::class, 'update'])->middleware('permission:criacao,update')->name('update');
+    Route::patch('{produto}/mover-etapa', [CriacaoController::class, 'moverEtapa'])->middleware('permission:criacao,update')->name('mover-etapa');
+    }); // fim criação
 
     // === PRODUTOS (protegido por permissão) ===
     Route::middleware('permission:produtos')->group(function () {

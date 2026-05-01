@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Estilista;
 use App\Models\Marca;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,13 +15,13 @@ class EstilistaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Estilista::with('marca');
+        $query = Estilista::with(['marca', 'user'])->withCount('produtos');
 
         // Filtros
         if ($request->filled('nome_estilista')) {
             $query->where('nome_estilista', 'like', '%' . $request->nome_estilista . '%');
         }
-        
+
         if ($request->filled('marca')) {
             $query->whereHas('marca', function($q) use ($request) {
                 $q->where('nome_marca', 'like', '%' . $request->marca . '%');
@@ -51,7 +52,8 @@ class EstilistaController extends Controller
     public function create()
     {
         $marcas = Marca::orderBy('nome_marca')->get();
-        return view('estilistas.create', compact('marcas'));
+        $users = User::orderBy('name')->get();
+        return view('estilistas.create', compact('marcas', 'users'));
     }
 
     /**
@@ -82,6 +84,7 @@ class EstilistaController extends Controller
         $validator = Validator::make($request->all(), [
             'nome_estilista' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
+            'user_id' => 'nullable|exists:users,id|unique:estilistas,user_id',
             'suporte_marca' => 'nullable|string|max:255',
             'foto' => 'nullable|file|max:2048', // Removida validação de imagem para teste
             'ativo' => 'boolean',
@@ -99,6 +102,7 @@ class EstilistaController extends Controller
         $data = [
             'nome_estilista' => $request->nome_estilista,
             'marca_id' => $request->marca_id,
+            'user_id' => $request->filled('user_id') ? $request->integer('user_id') : null,
             'suporte_marca' => $request->suporte_marca,
             'ativo' => $request->has('ativo'),
         ];
@@ -106,14 +110,14 @@ class EstilistaController extends Controller
         // Processar upload da foto, se fornecida
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
-            
+
             // Verificar se o arquivo é uma imagem
             if (!@getimagesize($file->getPathname())) {
                 return redirect()->back()
                     ->withErrors(['foto' => 'O arquivo não parece ser uma imagem válida.'])
                     ->withInput();
             }
-            
+
             // Verificar extensão manualmente
             $extensao = strtolower($file->getClientOriginalExtension());
             if (!in_array($extensao, ['jpeg', 'jpg', 'png', 'gif'])) {
@@ -121,7 +125,7 @@ class EstilistaController extends Controller
                     ->withErrors(['foto' => 'Apenas arquivos JPEG, JPG, PNG e GIF são permitidos.'])
                     ->withInput();
             }
-            
+
             try {
                 $path = $file->store('estilistas', 'public');
                 $data['foto'] = $path;
@@ -148,7 +152,7 @@ class EstilistaController extends Controller
         $estilista = Estilista::withTrashed()
             ->with(['marca', 'produtos.marca', 'produtos.status', 'produtos.grupoProduto'])
             ->findOrFail($id);
-            
+
         return view('estilistas.show', [
             'estilista' => $estilista,
             'totalProdutos' => $estilista->totalProdutos(),
@@ -168,7 +172,8 @@ class EstilistaController extends Controller
     {
         $estilista = Estilista::withTrashed()->findOrFail($id);
         $marcas = Marca::orderBy('nome_marca')->get();
-        return view('estilistas.edit', compact('estilista', 'marcas'));
+        $users = User::orderBy('name')->get();
+        return view('estilistas.edit', compact('estilista', 'marcas', 'users'));
     }
 
     /**
@@ -199,6 +204,7 @@ class EstilistaController extends Controller
         $validator = Validator::make($request->all(), [
             'nome_estilista' => 'required|string|max:255',
             'marca_id' => 'required|exists:marcas,id',
+            'user_id' => 'nullable|exists:users,id|unique:estilistas,user_id,' . $id,
             'suporte_marca' => 'nullable|string|max:255',
             'foto' => 'nullable|file|max:2048', // Validação mais simples
             'remover_foto' => 'nullable|boolean',
@@ -218,6 +224,7 @@ class EstilistaController extends Controller
         $data = [
             'nome_estilista' => $request->nome_estilista,
             'marca_id' => $request->marca_id,
+            'user_id' => $request->filled('user_id') ? $request->integer('user_id') : null,
             'suporte_marca' => $request->suporte_marca,
             'ativo' => $request->has('ativo'),
         ];
@@ -233,14 +240,14 @@ class EstilistaController extends Controller
         // Se uma nova foto foi enviada
         elseif ($request->hasFile('foto')) {
             $file = $request->file('foto');
-            
+
             // Verificar se o arquivo é uma imagem
             if (!@getimagesize($file->getPathname())) {
                 return redirect()->back()
                     ->withErrors(['foto' => 'O arquivo não parece ser uma imagem válida.'])
                     ->withInput();
             }
-            
+
             // Verificar extensão manualmente
             $extensao = strtolower($file->getClientOriginalExtension());
             if (!in_array($extensao, ['jpeg', 'jpg', 'png', 'gif'])) {
@@ -248,13 +255,13 @@ class EstilistaController extends Controller
                     ->withErrors(['foto' => 'Apenas arquivos JPEG, JPG, PNG e GIF são permitidos.'])
                     ->withInput();
             }
-            
+
             try {
                 // Excluir a foto antiga se existir
                 if ($estilista->foto && \Storage::disk('public')->exists($estilista->foto)) {
                     \Storage::disk('public')->delete($estilista->foto);
                 }
-                
+
                 // Fazer upload da nova foto
                 $path = $file->store('estilistas', 'public');
                 $data['foto'] = $path;

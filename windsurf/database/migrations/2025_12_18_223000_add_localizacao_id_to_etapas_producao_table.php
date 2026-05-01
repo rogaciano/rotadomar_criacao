@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('etapas_producao', function (Blueprint $table) {
-            $table->foreignId('localizacao_id')->nullable()->after('ativo')->constrained('localizacoes')->onDelete('set null');
+            if (!Schema::hasColumn('etapas_producao', 'localizacao_id')) {
+                $table->bigInteger('localizacao_id')->nullable()->after('ativo');
+            }
         });
     }
 
@@ -22,8 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('etapas_producao', function (Blueprint $table) {
-            $table->dropForeign(['localizacao_id']);
-            $table->dropColumn('localizacao_id');
+            if (Schema::hasColumn('etapas_producao', 'localizacao_id')) {
+                $table->dropColumn('localizacao_id');
+            }
         });
     }
 };

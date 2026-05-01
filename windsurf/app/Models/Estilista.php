@@ -21,6 +21,7 @@ class Estilista extends Model
         'nome_estilista',
         'ativo',
         'marca_id',
+        'user_id',
         'suporte_marca',
         'foto',
     ];
@@ -46,7 +47,7 @@ class Estilista extends Model
         if ($this->foto) {
             return asset('storage/' . $this->foto);
         }
-        
+
         // Retorna uma imagem padrão caso não haja foto
         return asset('images/default-estilista.jpg');
     }
@@ -59,9 +60,14 @@ class Estilista extends Model
         return $this->belongsTo(Marca::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * Relacionamento com os produtos do estilista
-     * 
+     *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function produtos()
@@ -88,7 +94,7 @@ class Estilista extends Model
     {
         $result = [];
         $produtos = $this->produtos()->with('marca')->get();
-        
+
         foreach ($produtos as $produto) {
             if ($produto->marca) {
                 $marca = $produto->marca->nome_marca;
@@ -98,7 +104,7 @@ class Estilista extends Model
                 $result[$marca]++;
             }
         }
-        
+
         return $result;
     }
 
@@ -111,7 +117,7 @@ class Estilista extends Model
     {
         $result = [];
         $produtos = $this->produtos()->with('status')->get();
-        
+
         foreach ($produtos as $produto) {
             if ($produto->status) {
                 $status = $produto->status->descricao;
@@ -121,7 +127,7 @@ class Estilista extends Model
                 $result[$status]++;
             }
         }
-        
+
         return $result;
     }
 
@@ -135,7 +141,7 @@ class Estilista extends Model
     {
         $result = [];
         $produtos = $this->produtos()->with('grupoProduto')->get();
-        
+
         // Contagem por grupo
         foreach ($produtos as $produto) {
             if ($produto->grupoProduto) {
@@ -146,18 +152,18 @@ class Estilista extends Model
                 $result[$grupo]++;
             }
         }
-        
+
         // Ordena por quantidade (maior para menor)
         arsort($result);
-        
+
         // Separa os 10 primeiros e soma os demais em 'Outros'
         $top10 = array_slice($result, 0, 10, true);
         $outros = array_slice($result, 10, null, true);
-        
+
         if (count($outros) > 0) {
             $top10['Outros'] = array_sum($outros);
         }
-        
+
         return $top10;
     }
 
@@ -171,12 +177,12 @@ class Estilista extends Model
     {
         $result = [];
         $produtos = $this->produtos()->with('movimentacoes.localizacao')->get();
-        
+
         // Contagem por localização
         foreach ($produtos as $produto) {
             // Pega a última movimentação (localização atual)
             $ultimaMovimentacao = $produto->movimentacoes->sortByDesc('id')->first();
-            
+
             if ($ultimaMovimentacao && $ultimaMovimentacao->localizacao) {
                 $localizacao = $ultimaMovimentacao->localizacao->nome_localizacao;
                 if (!isset($result[$localizacao])) {
@@ -185,18 +191,18 @@ class Estilista extends Model
                 $result[$localizacao]++;
             }
         }
-        
+
         // Ordena por quantidade (maior para menor)
         arsort($result);
-        
+
         // Separa as 10 primeiras e soma as demais em 'Outros'
         $top10 = array_slice($result, 0, 10, true);
         $outros = array_slice($result, 10, null, true);
-        
+
         if (count($outros) > 0) {
             $top10['Outros'] = array_sum($outros);
         }
-        
+
         return $top10;
     }
 
@@ -217,7 +223,7 @@ class Estilista extends Model
         $data = [];
         $labels = [];
         $valores = [];
-        
+
         // Inicializa os últimos 12 meses
         for ($i = 11; $i >= 0; $i--) {
             $dataAtual = now()->subMonths($i);
@@ -225,7 +231,7 @@ class Estilista extends Model
             $labels[] = $dataAtual->translatedFormat('M/Y');
             $data[$mesAno] = 0;
         }
-        
+
         // Conta produtos por mês/ano
         $produtos = $this->produtos()
             ->select('id', 'created_at')
@@ -234,7 +240,7 @@ class Estilista extends Model
             ->groupBy(function($item) {
                 return $item->created_at->format('m/Y');
             });
-        
+
         // Preenche os valores reais
         foreach ($data as $mesAno => $valor) {
             if (isset($produtos[$mesAno])) {
@@ -242,7 +248,7 @@ class Estilista extends Model
             }
             $valores[] = $data[$mesAno];
         }
-        
+
         return [
             'labels' => $labels,
             'data' => $valores,
@@ -275,7 +281,7 @@ class Estilista extends Model
         foreach ($produtos as $produto) {
             // Pega a primeira movimentação (mais antiga) como data de ativação
             $primeiraMovimentacao = $produto->movimentacoes->sortBy('data_entrada')->first();
-            
+
             if ($primeiraMovimentacao && $produto->data_cadastro) {
                 $diferenca = $produto->data_cadastro->diffInDays($primeiraMovimentacao->data_entrada);
                 $totalDias += $diferenca;
@@ -288,11 +294,11 @@ class Estilista extends Model
         }
 
         $mediaDias = $totalDias / $count;
-        
+
         if ($mediaDias < 1) {
             return 'Menos de 1 dia';
         }
-        
+
         return round($mediaDias) . ' dias';
     }
 }

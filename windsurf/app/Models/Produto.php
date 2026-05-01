@@ -17,29 +17,53 @@ class Produto extends Model
         'referencia',
         'descricao',
         'data_cadastro',
+        'data_entrada_processo',
         'data_prevista_producao',
         'marca_id',
         'quantidade',
+        'media_mensal',
+        'variantes_cores',
         'estilista_id',
+        'responsavel_criacao_id',
         'grupo_id',
         'preco_atacado',
         'preco_varejo',
         'status_id',
+        'prioridade',
+        'links_produto',
+        'obs_designer',
+        'observacoes_criacao',
+        'observacoes_adicionais',
         'direcionamento_comercial_id',
-        'localizacao_id',
+        'etapa_producao_id',
+        'faccao_localizacao_id',
+        'data_entrega',
+        'mes_criacao',
+        'mes_producao',
+        'mes_lancamento',
         'anexo_ficha_producao',
         'anexo_catalogo_vendas',
         'foto_principal',
+        'foto_principal_criacao',
+        'foto_principal_desenvolvimento',
         'produto_original_id',
         'numero_reprogramacao'
     ];
 
     protected $casts = [
         'data_cadastro' => 'date',
+        'data_entrada_processo' => 'date',
         'data_prevista_producao' => 'date',
+        'data_entrega' => 'date',
+        'mes_criacao' => 'date',
+        'mes_producao' => 'date',
+        'mes_lancamento' => 'date',
         'preco_atacado' => 'decimal:2',
         'preco_varejo' => 'decimal:2',
         'quantidade' => 'integer',
+        'media_mensal' => 'integer',
+        'variantes_cores' => 'integer',
+        'links_produto' => 'array',
         'produto_original_id' => 'integer',
         'numero_reprogramacao' => 'integer'
     ];
@@ -72,6 +96,11 @@ class Produto extends Model
         return $this->belongsTo(Estilista::class);
     }
 
+    public function responsavelCriacao()
+    {
+        return $this->belongsTo(Estilista::class, 'responsavel_criacao_id');
+    }
+
     public function grupoProduto()
     {
         return $this->belongsTo(GrupoProduto::class, 'grupo_id');
@@ -87,9 +116,25 @@ class Produto extends Model
         return $this->belongsTo(DirecionamentoComercial::class);
     }
 
+    public function etapaProducao()
+    {
+        return $this->belongsTo(EtapaProducao::class);
+    }
+
     public function localizacao()
     {
         return $this->belongsTo(\App\Models\Localizacao::class);
+    }
+
+    public function faccaoLocalizacao()
+    {
+        return $this->belongsTo(\App\Models\Localizacao::class, 'faccao_localizacao_id');
+    }
+
+    public function scopeEmCriacao($query)
+    {
+        return $query->whereNotNull('data_entrada_processo')
+            ->whereNull('etapa_producao_id');
     }
 
     // Relacionamento plural para todas as localizações
@@ -112,6 +157,16 @@ class Produto extends Model
     public function anexos()
     {
         return $this->hasMany(ProdutoAnexo::class);
+    }
+
+    public function anexosCriacao()
+    {
+        return $this->hasMany(ProdutoAnexo::class)->where('contexto', 'criacao');
+    }
+
+    public function anexosDesenvolvimento()
+    {
+        return $this->hasMany(ProdutoAnexo::class)->where('contexto', 'desenvolvimento');
     }
 
     /**

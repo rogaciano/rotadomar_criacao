@@ -63,6 +63,11 @@ class User extends Authenticatable
         return $this->belongsTo(Localizacao::class);
     }
 
+    public function estilista()
+    {
+        return $this->hasOne(Estilista::class);
+    }
+
     /**
      * Localizações que o usuário pode visualizar (além da principal)
      */

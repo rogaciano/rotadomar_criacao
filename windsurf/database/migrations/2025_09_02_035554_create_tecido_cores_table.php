@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tecido_cores', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('tecido_id')->constrained('tecidos')->onDelete('cascade');
-            $table->string('nome');
-            $table->string('codigo')->nullable();
-            $table->text('observacoes')->nullable();
-            $table->timestamps();
-            
-            // Índice para busca rápida por tecido
-            $table->index('tecido_id');
-        });
+        if (!Schema::hasTable('tecido_cores')) {
+            Schema::create('tecido_cores', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('tecido_id')->constrained('tecidos')->onDelete('cascade');
+                $table->string('nome');
+                $table->string('codigo')->nullable();
+                $table->text('observacoes')->nullable();
+                $table->timestamps();
+                $table->index('tecido_id');
+            });
+        }
     }
 
     /**
@@ -29,6 +29,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tecido_cores');
+        if (Schema::hasTable('tecido_cores')) {
+            Schema::dropIfExists('tecido_cores');
+        }
     }
 };

@@ -48,6 +48,17 @@
         </x-sidebar-item>
         @endif
 
+        @if(auth()->user()->hasPermission('criacao'))
+        <x-sidebar-item :href="route('criacao.index')" :active="request()->routeIs('criacao.*')">
+            <x-slot name="icon">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z" />
+                </svg>
+            </x-slot>
+            Criação
+        </x-sidebar-item>
+        @endif
+
         @if(auth()->user()->hasPermission('movimentacoes'))
         <x-sidebar-item :href="route('movimentacoes.index')" :active="request()->routeIs('movimentacoes.*')">
             <x-slot name="icon">

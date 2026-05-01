@@ -1,6 +1,6 @@
 # Módulo Criação — Especificação Técnica
 
-> **Status:** Planejado, não implementado
+> **Status:** Implementação inicial em andamento
 > **Pré-requisito:** Sidebar lateral já instalada
 > **Objetivo:** Gerenciar produtos em fase de criação/desenvolvimento antes de entrarem no fluxo de produção
 
@@ -8,7 +8,7 @@
 
 ## ⚠ Observação sobre estado do código
 
-Esta spec foi escrita com base em análise automática. Alguns models (`DirecionamentoComercial`, `EtapaProducao`) foram referenciados em conversas mas **não foram confirmados** no código. Antes de iniciar a implementação, verifique no seu ambiente local:
+Esta spec foi ajustada após validação do projeto. `DirecionamentoComercial` e `EtapaProducao` já existem no código e devem ser reaproveitados.
 
 ```powershell
 cd E:\projetos\RotaDoMar\windsurf
@@ -16,7 +16,7 @@ php artisan route:list | Select-String "direcionamento|etapa-producao|criacao"
 ls app/Models/ | Select-String "Direcionamento|Etapa"
 ```
 
-Se os arquivos já existem, adapte o escopo. Se não existem, crie-os conforme seção 4 abaixo.
+O módulo `criacao` já possui implementação inicial de migration, policy, controller, request, rotas e views base. Use esta spec como referência para as próximas ondas.
 
 ---
 
@@ -34,7 +34,7 @@ Se os arquivos já existem, adapte o escopo. Se não existem, crie-os conforme s
 
 **Papéis:**
 - **Estilista:** cria produto, preenche `obs_designer`, `data_entrada_processo`
-- **BEL (Criação/Produção):** define `direcionamento_comercial_id`, `etapa_producao_id`, transfere para Localização (facção)
+- **BEL (Criação/Produção):** nome da visão operacional da Criação; define `direcionamento_comercial_id` e `etapa_producao_id`
 - **Admin:** acesso total
 
 ---
@@ -50,7 +50,7 @@ Se os arquivos já existem, adapte o escopo. Se não existem, crie-os conforme s
 | Campo | Tipo | Null | Default | Descrição |
 |---|---|---|---|---|
 | `data_entrada_processo` | `date` | sim | null | Data manual de entrada no processo de criação |
-| `obs_designer` | `text` | sim | null | Observações editáveis **apenas pelo estilista dono** |
+| `obs_designer` | `text` | sim | null | Observações editáveis por admin e pelo usuário vinculado ao estilista do produto |
 | `direcionamento_comercial_id` | `bigint FK` | sim | null | FK → `direcionamentos_comerciais` |
 | `etapa_producao_id` | `bigint FK` | sim | null | FK → `etapas_producao` |
 
@@ -130,7 +130,7 @@ public function etapaProducao()
 public function scopeEmCriacao($query)
 {
     return $query->whereNotNull('data_entrada_processo')
-                 ->whereNull('etapa_producao_id');  // regra de negócio a confirmar
+                 ->whereNull('etapa_producao_id');
 }
 ```
 
@@ -152,21 +152,20 @@ public function editObsDesigner(User $user, Produto $produto): bool
     // Admin sempre pode
     if ($user->isAdmin()) return true;
 
-    // Só o estilista dono do produto
-    return $user->estilista_id === $produto->estilista_id;
+    return (int) ($user->estilista?->id ?? 0) === (int) $produto->estilista_id;
 }
 ```
 
-Registrar em `AuthServiceProvider`:
+Registrar em `AppServiceProvider`:
+
 ```php
-protected $policies = [
-    Produto::class => ProdutoPolicy::class,
-];
+Gate::policy(Produto::class, ProdutoPolicy::class);
 ```
 
 ### Seeder de permissões
 
-`database/seeders/CriacaoPermissionSeeder.php`:
+`database/seeders/PermissionSeeder.php`:
+
 ```php
 Permission::firstOrCreate(['name' => 'criacao'], [
     'descricao' => 'Módulo de Criação'
@@ -175,11 +174,11 @@ Permission::firstOrCreate(['name' => 'criacao'], [
 
 ---
 
-## 4. Models dependentes (se não existirem)
+## 4. Models dependentes
 
 ### DirecionamentoComercial
 
-Migration + Model + Controller + CRUD simples (seguindo padrão de `Marca` ou `Estilista`):
+Já existe no projeto.
 
 ```php
 // Migration
@@ -192,21 +191,7 @@ Schema::create('direcionamentos_comerciais', function (Blueprint $table) {
 });
 ```
 
-### EtapaProducao
-
-```php
-Schema::create('etapas_producao', function (Blueprint $table) {
-    $table->id();
-    $table->string('nome', 100);
-    $table->integer('ordem')->default(0);  // para ordenar no Kanban
-    $table->string('cor_hex', 7)->nullable();  // visual no Kanban
-    $table->boolean('ativo')->default(true);
-    $table->timestamps();
-    $table->softDeletes();
-});
-```
-
-Ambos os CRUDs já existem nos menus do sidebar (`direcionamentos-comerciais.index`, `etapas-producao.index`) — verifique se estão implementados.
+Ambos os CRUDs já existem e devem ser reaproveitados.
 
 ---
 
@@ -218,13 +203,12 @@ Ambos os CRUDs já existem nos menus do sidebar (`direcionamentos-comerciais.ind
 Route::prefix('criacao')->name('criacao.')->middleware('permission:criacao')->group(function () {
     Route::get('/', [CriacaoController::class, 'index'])->name('index');
     Route::get('/kanban', [CriacaoController::class, 'kanban'])->name('kanban');
-    Route::get('/bel', [CriacaoController::class, 'visaoBel'])->name('bel');
-    Route::get('/criar', [CriacaoController::class, 'create'])->name('create');
+    Route::get('/bel', [CriacaoController::class, 'bel'])->name('bel');
+    Route::get('/create', [CriacaoController::class, 'create'])->name('create');
     Route::post('/', [CriacaoController::class, 'store'])->name('store');
-    Route::get('/{produto}/editar', [CriacaoController::class, 'edit'])->name('edit');
+    Route::get('/{produto}/edit', [CriacaoController::class, 'edit'])->name('edit');
     Route::put('/{produto}', [CriacaoController::class, 'update'])->name('update');
     Route::patch('/{produto}/mover-etapa', [CriacaoController::class, 'moverEtapa'])->name('mover-etapa');
-    Route::patch('/{produto}/transferir-faccao', [CriacaoController::class, 'transferirFaccao'])->name('transferir-faccao');
 });
 ```
 
@@ -240,13 +224,17 @@ Responsabilidades principais:
 |---|---|---|
 | `index` | Lista paginada de produtos em criação | `permission:criacao` |
 | `kanban` | Vista Kanban agrupada por `etapa_producao_id` | `permission:criacao` |
-| `visaoBel` | Filtro especial para equipe BEL | `permission:criacao` + role BEL |
+| `bel` | Filtro/listagem especializada da visão BEL | `permission:criacao` |
 | `create` | Form de novo produto em criação | `permission:criacao,create` |
 | `store` | Cria produto com `data_entrada_processo` preenchida | Request validation |
 | `edit` | Form de edição | `permission:criacao,update` |
 | `update` | Atualiza; bloqueia `obs_designer` se não for estilista dono | **Policy** `editObsDesigner` |
 | `moverEtapa` | BEL muda `etapa_producao_id` | `permission:criacao,update` |
-| `transferirFaccao` | BEL cria `Movimentacao` para uma `Localizacao` | `permission:criacao,update` |
+
+Regra funcional confirmada:
+- ao definir etapa, o produto sai apenas da listagem da Criação;
+- ele continua visível em `produtos`;
+- o status passa para `AGUARDANDO DESENVOLVIMENTO`, já existente no banco.
 
 ### Form Request
 
@@ -268,64 +256,34 @@ public function rules(): array
 }
 ```
 
----
-
-## 7. Views
+### Views
 
 Pasta: `resources/views/criacao/`
 
 | Arquivo | Descrição |
 |---|---|
 | `index.blade.php` | Tabela listagem com filtros (estilista, etapa, direcionamento, data) |
-| `kanban.blade.php` | Colunas = etapas de produção; cards arrastáveis (Alpine.js Sortable) |
-| `bel.blade.php` | Similar à index mas com ações de mover etapa / transferir facção |
+| `kanban.blade.php` | Colunas/listas por etapa para visualização rápida |
+| `bel.blade.php` | Similar à index, representando a visão BEL dentro da própria Criação |
 | `create.blade.php` | Form de criação |
 | `edit.blade.php` | Form de edição com `obs_designer` desabilitado conforme Policy |
 | `_form.blade.php` | Partial com campos compartilhados create/edit |
-| `_card.blade.php` | Card do produto para o Kanban |
-
-### Detalhes da UI
-
-- Cabeçalho com botão "Nova Criação"
-- Tabs: **Lista** | **Kanban** | **Visão BEL**
-- Filtros em Alpine.js reativo
-- `obs_designer` renderizado como `<textarea disabled>` se `!$user->can('editObsDesigner', $produto)`
-- Badge colorido no status da etapa (usar `etapa.cor_hex`)
 
 ---
 
-## 8. Atualizar Sidebar
+## 7. Atualizar Sidebar
 
-**Arquivo:** `resources/views/layouts/navigation.blade.php` — trocar o placeholder:
+**Arquivo:** `resources/views/components/sidebar.blade.php` — apontar para a rota real:
 
 ```blade
 {{-- ANTES --}}
 <x-sidebar-item href="#" :active="request()->routeIs('criacao.*')">
 
 {{-- DEPOIS --}}
-<x-sidebar-item href="{{ route('criacao.index') }}" :active="request()->routeIs('criacao.*')">
+<x-sidebar-item :href="route('criacao.index')" :active="request()->routeIs('criacao.*')">
 ```
 
----
-
-## 9. Logs (Spatie ActivityLog)
-
-No `CriacaoController@moverEtapa` e `@transferirFaccao`:
-
-```php
-activity('criacao')
-    ->performedOn($produto)
-    ->causedBy(auth()->user())
-    ->withProperties([
-        'de' => $etapaAnterior,
-        'para' => $etapaNova,
-    ])
-    ->log('etapa_movida');
-```
-
----
-
-## 10. Checklist de entrega
+## 8. Checklist de entrega
 
 - [ ] Migration criada e rodada
 - [ ] Models `DirecionamentoComercial` e `EtapaProducao` verificados/criados
@@ -334,18 +292,17 @@ activity('criacao')
 - [ ] Permissão `criacao` no seeder
 - [ ] `CriacaoController` + `CriacaoRequest`
 - [ ] Rotas no `web.php`
-- [ ] 7 views em `resources/views/criacao/`
+- [ ] views iniciais em `resources/views/criacao/`
 - [ ] Sidebar: `href="#"` → `route('criacao.index')`
-- [ ] Logs via Spatie no `moverEtapa` e `transferirFaccao`
-- [ ] Teste manual: criar produto → editar como estilista → mover etapa como BEL → transferir facção
+- [ ] Teste manual: criar produto → editar como estilista → mover etapa como BEL
 - [ ] Commit e push
 
 ---
 
-## 11. Decisões a confirmar antes de começar
+## 11. Decisões confirmadas
 
-1. **Estilista dono = `produto.estilista_id`**, correto? Ou há outra regra (ex: criador do registro)?
-2. **Usuário ↔ Estilista:** `users` tem FK para `estilistas`? (visto `localizacao_id` em users, mas não `estilista_id`)
-3. **Etapa inicial:** quando cria produto em Criação, qual é a etapa default? A primeira `ordem` ativa?
-4. **Regra para "em criação":** quando um produto sai do módulo? Quando `etapa_producao_id IS NULL` e vira `NOT NULL`? Ou quando transfere para facção (cria Movimentação)?
-5. **Campos obrigatórios na criação:** `referencia`, `descricao`, `estilista_id`, `marca_id`? Ou mais permissivo?
+1. **Estilista dono = `produto.estilista_id`**.
+2. **Usuário ↔ Estilista** será resolvido por `estilistas.user_id`, opcional na v1.
+3. **Visão BEL** é a própria visão operacional da Criação.
+4. **Saída da Criação** ocorre ao definir `etapa_producao_id`.
+5. **Após a saída**, o produto continua em `produtos` com status `AGUARDANDO DESENVOLVIMENTO`.

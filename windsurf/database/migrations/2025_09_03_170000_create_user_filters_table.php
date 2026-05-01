@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_filters', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('page_type'); // 'produtos', 'movimentacoes', etc.
-            $table->json('filters')->nullable();
-            $table->timestamps();
-            
-            // Índice composto para busca rápida
-            $table->unique(['user_id', 'page_type']);
-        });
+        if (!Schema::hasTable('user_filters')) {
+            Schema::create('user_filters', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->onDelete('cascade');
+                $table->string('page_type');
+                $table->json('filters')->nullable();
+                $table->timestamps();
+                $table->unique(['user_id', 'page_type']);
+            });
+        }
     }
 
     /**
@@ -28,6 +28,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_filters');
+        if (Schema::hasTable('user_filters')) {
+            Schema::dropIfExists('user_filters');
+        }
     }
 };

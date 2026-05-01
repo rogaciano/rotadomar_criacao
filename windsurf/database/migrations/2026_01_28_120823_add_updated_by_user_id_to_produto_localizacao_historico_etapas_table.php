@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('produto_localizacao_historico_etapas', function (Blueprint $table) {
-            $table->foreignId('updated_by_user_id')->nullable()->constrained('users')->nullOnDelete();
+            if (!Schema::hasColumn('produto_localizacao_historico_etapas', 'updated_by_user_id')) {
+                $table->bigInteger('updated_by_user_id')->nullable();
+            }
         });
     }
 
@@ -22,8 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('produto_localizacao_historico_etapas', function (Blueprint $table) {
-            $table->dropForeign(['updated_by_user_id']);
-            $table->dropColumn('updated_by_user_id');
+            if (Schema::hasColumn('produto_localizacao_historico_etapas', 'updated_by_user_id')) {
+                $table->dropColumn('updated_by_user_id');
+            }
         });
     }
 };

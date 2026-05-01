@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('produtos', function (Blueprint $table) {
-            $table->date('data_prevista_producao')->nullable()->after('data_cadastro');
+            if (!Schema::hasColumn('produtos', 'data_prevista_producao')) {
+                $table->date('data_prevista_producao')->nullable()->after('data_cadastro');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('produtos', function (Blueprint $table) {
-            $table->dropColumn('data_prevista_producao');
+            if (Schema::hasColumn('produtos', 'data_prevista_producao')) {
+                $table->dropColumn('data_prevista_producao');
+            }
         });
     }
 };

@@ -1,4 +1,3 @@
-Set-Content -Path "docs\STATUS_E_PROXIMOS_PASSOS.md" -Encoding UTF8 -Value @'
 # Rota do Mar — Status e Próximos Passos
 
 > **Ultima atualização:** 2026-04-23
@@ -12,7 +11,8 @@ Set-Content -Path "docs\STATUS_E_PROXIMOS_PASSOS.md" -Encoding UTF8 -Value @'
 - Logo + tema + expandir/recolher no topo
 - Usuário (avatar, nome, email, Perfil/Sair) abaixo do logo
 - Notificações e Sugestões com badge e dropdown
-- Criação como primeiro item (placeholder href="#", sem rota ainda)
+- Criação com rota real na sidebar (`route('criacao.index')`)
+
 - Grupos colapsáveis: Cadastros, Consultas, Administração
 - Estado persistido em localStorage, dark mode via Alpine.store
 
@@ -27,21 +27,31 @@ Set-Content -Path "docs\STATUS_E_PROXIMOS_PASSOS.md" -Encoding UTF8 -Value @'
 
 ## 2. O que está PENDENTE
 
-### A. Módulo Criação (PRÓXIMO PASSO — prioridade)
-Campos: data_entrada_processo (manual), obs_designer (só estilista edita),
-direcionamento_comercial_id, etapa_producao_id, estilista_id
+### A. Módulo Criação (EM IMPLEMENTAÇÃO)
+Campos: `data_entrada_processo`, `obs_designer`, `direcionamento_comercial_id`, `etapa_producao_id`, `estilista_id`
 
 Decisões tomadas:
 - faccao = Localizacao (model existente)
-- Visão BEL = tela/filtro para equipe Criação
+- Visão BEL = visão da Criação, não um papel separado
 - DirecionamentoComercial já existe
-- Permissões via hasPermission() / canAction() existentes
+- EtapaProducao já existe
+- URL-base do módulo = `/criacao`
+- Ao definir etapa, o produto sai da listagem da Criação e continua visível em `produtos`
+- Ao definir etapa, o produto passa para o status `AGUARDANDO DESENVOLVIMENTO` (já existente no banco)
+- Vínculo `Estilista ↔ User` é opcional na v1
 
-A definir:
-- [ ] Nova tabela produto_criacao ou colunas em produtos? campos em colunas
-- [ ] Route prefix: /criacao ou /produtos/criacao? /produtos/criacao melhor para consistência com outros modulos
-- [ ] Kanban existente ou novo para Criação? Novo
-- [ ] Fluxo de transições entre etapas. Isso mesmo que o transições entre etapas de produção?
+Ajustes já iniciados no código:
+- [x] Rotas do módulo `criacao`
+- [x] `CriacaoController` + `CriacaoRequest`
+- [x] `ProdutoPolicy@editObsDesigner`
+- [x] vínculo opcional `estilistas.user_id`
+- [x] sidebar apontando para `criacao.index`
+- [x] views iniciais (`index`, `bel`, `kanban`, `create`, `edit`, `_form`)
+- [x] `PermissionSeeder` com permissão `criacao`
+- [x] seeder admin movido para `.env` com fallback seguro
+- [ ] rodar migrations
+- [ ] revisar manualmente o fluxo completo no browser
+- [ ] decidir se o kanban atual já atende ou se precisa de versão mais rica na onda seguinte
 
 Escopo:
 1. Migration + Model + Relationships
@@ -54,7 +64,7 @@ Escopo:
 8. Logs via Spatie ActivityLog
 
 ### B. Segurança backend (pendente)
-- [ ] Credenciais hardcoded para .env
+- [x] Credenciais hardcoded do admin movidas para `.env`/senha aleatória
 - [ ] Revisar bypasses de permissão
 - [ ] Rate limiting em rotas de API
 - [ ] CSRF em endpoints ajax
@@ -67,7 +77,7 @@ Escopo:
 Abra novo chat e cole:
 
     Leia windsurf/docs/STATUS_E_PROXIMOS_PASSOS.md e vamos continuar.
-    Quero iniciar o módulo Criação: migration + model + controller.
+    Quero validar o módulo Criação já implementado e seguir para os próximos ajustes.
 
 ---
 
@@ -81,4 +91,3 @@ URL: http://localhost:8000
 Models existentes: Produto, Tecido, Estilista, Marca, GrupoProduto, Tipo,
 Status, Situacao, Localizacao, DirecionamentoComercial, EtapaProducao,
 Movimentacao, User (hasPermission, canAction, isAdmin)
-'@

@@ -47,6 +47,15 @@
                             </select>
                         </div>
                         <div class="mb-4">
+                            <label for="user_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Usuário vinculado</label>
+                            <select name="user_id" id="user_id" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="">Nenhum usuário vinculado</option>
+                                @foreach($users as $user)
+                                    <option value="{{ $user->id }}" {{ old('user_id', $estilista->user_id) == $user->id ? 'selected' : '' }}>{{ $user->name }} - {{ $user->email }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-4">
                             <label for="suporte_marca" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Suporte Marca</label>
                             <select name="suporte_marca" id="suporte_marca" class="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                                 <option value="">Selecione uma marca para suporte</option>
@@ -63,11 +72,11 @@
                                 <label for="ativo" class="ml-2 block text-sm text-gray-900 dark:text-white">Ativo</label>
                             </div>
                         </div>
-                        
+
                         <!-- Campo de Upload de Foto -->
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Foto do Estilista</label>
-                            
+
                             <!-- Exibir foto atual se existir -->
                             @if($estilista->foto)
                                 <div class="mb-3">
@@ -80,12 +89,12 @@
                                 </div>
                                 <p class="text-sm font-medium text-gray-700 mb-1">Alterar Foto:</p>
                             @endif
-                            
+
                             <div class="mt-1 flex items-center">
                                 <input type="file" name="foto" id="foto" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" accept="image/*">
                             </div>
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</p>
-                            
+
                             <!-- Preview da Imagem -->
                             <div id="image-preview" class="mt-2 {{ !$estilista->foto ? 'hidden' : '' }}">
                                 <p class="text-sm font-medium text-gray-700 mb-1">Nova Prévia:</p>
@@ -109,22 +118,22 @@
                             const file = e.target.files[0];
                             const preview = document.getElementById('preview');
                             const previewContainer = document.getElementById('image-preview');
-                            
+
                             if (file) {
                                 const reader = new FileReader();
-                                
+
                                 reader.onload = function(e) {
                                     preview.src = e.target.result;
                                     previewContainer.classList.remove('hidden');
                                 }
-                                
+
                                 reader.readAsDataURL(file);
                             } else if (!{{ $estilista->foto ? 'true' : 'false' }}) {
                                 preview.src = '';
                                 previewContainer.classList.add('hidden');
                             }
                         });
-                        
+
                         // Mostrar/ocultar preview ao marcar/desmarcar remover_foto
                         document.getElementById('remover_foto')?.addEventListener('change', function(e) {
                             const previewContainer = document.getElementById('image-preview');

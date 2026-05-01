@@ -9,13 +9,17 @@ class ProdutoAnexo extends Model
 {
     use HasFactory;
 
+    public const CONTEXTO_CRIACAO = 'criacao';
+    public const CONTEXTO_DESENVOLVIMENTO = 'desenvolvimento';
+
     protected $table = 'produto_anexos';
 
     protected $fillable = [
         'produto_id',
         'descricao',
         'arquivo_path',
-        'tipo_arquivo'
+        'tipo_arquivo',
+        'contexto'
     ];
 
     /**

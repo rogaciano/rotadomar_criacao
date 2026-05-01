@@ -11,23 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('notificacoes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('movimentacao_id')->constrained('movimentacoes')->onDelete('cascade');
-            $table->foreignId('localizacao_id')->constrained('localizacoes')->onDelete('cascade');
-            $table->enum('tipo', ['nova_movimentacao', 'movimentacao_concluida']);
-            $table->string('titulo');
-            $table->text('mensagem');
-            $table->string('link');
-            $table->foreignId('visualizada_por')->nullable()->constrained('users')->onDelete('set null');
-            $table->timestamp('visualizada_em')->nullable();
-            $table->timestamps();
-            
-            // Índices para performance
-            $table->index(['localizacao_id', 'created_at']);
-            $table->index(['visualizada_por', 'visualizada_em']);
-            $table->index('tipo');
-        });
+        if (!Schema::hasTable('notificacoes')) {
+            Schema::create('notificacoes', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('movimentacao_id')->constrained('movimentacoes')->onDelete('cascade');
+                $table->foreignId('localizacao_id')->constrained('localizacoes')->onDelete('cascade');
+                $table->enum('tipo', ['nova_movimentacao', 'movimentacao_concluida']);
+                $table->string('titulo');
+                $table->text('mensagem');
+                $table->string('link');
+                $table->foreignId('visualizada_por')->nullable()->constrained('users')->onDelete('set null');
+                $table->timestamp('visualizada_em')->nullable();
+                $table->timestamps();
+                $table->index(['localizacao_id', 'created_at']);
+                $table->index(['visualizada_por', 'visualizada_em']);
+                $table->index('tipo');
+            });
+        }
     }
 
     /**
@@ -35,6 +35,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('notificacoes');
+        if (Schema::hasTable('notificacoes')) {
+            Schema::dropIfExists('notificacoes');
+        }
     }
 };

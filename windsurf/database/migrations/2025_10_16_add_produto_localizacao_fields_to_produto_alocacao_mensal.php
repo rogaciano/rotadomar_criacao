@@ -12,16 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('produto_alocacao_mensal', function (Blueprint $table) {
-            // Adicionar referência ao produto_localizacao para rastreamento
             if (!Schema::hasColumn('produto_alocacao_mensal', 'produto_localizacao_id')) {
-                $table->unsignedBigInteger('produto_localizacao_id')->nullable()->after('produto_id');
-                $table->foreign('produto_localizacao_id')
-                    ->references('id')
-                    ->on('produto_localizacao')
-                    ->onDelete('cascade');
+                $table->bigInteger('produto_localizacao_id')->nullable()->after('produto_id');
             }
-            
-            // Adicionar ordem_producao para rastreamento
+
             if (!Schema::hasColumn('produto_alocacao_mensal', 'ordem_producao')) {
                 $table->string('ordem_producao', 30)->nullable()->after('tipo');
             }
@@ -35,10 +29,9 @@ return new class extends Migration
     {
         Schema::table('produto_alocacao_mensal', function (Blueprint $table) {
             if (Schema::hasColumn('produto_alocacao_mensal', 'produto_localizacao_id')) {
-                $table->dropForeign(['produto_localizacao_id']);
                 $table->dropColumn('produto_localizacao_id');
             }
-            
+
             if (Schema::hasColumn('produto_alocacao_mensal', 'ordem_producao')) {
                 $table->dropColumn('ordem_producao');
             }

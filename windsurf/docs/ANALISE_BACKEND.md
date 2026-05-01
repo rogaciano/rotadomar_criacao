@@ -8,6 +8,7 @@
 ## Prioridade CRÍTICA (corrigir antes de ir a produção)
 
 ### 1. Senha padrão hardcoded no seeder
+
 **Arquivo:** `database/seeders/AdminUserSeeder.php:17-21`
 
 ```php
@@ -38,6 +39,8 @@ ADMIN_SEED_EMAIL=
 ADMIN_SEED_PASSWORD=
 ```
 
+**Status:** iniciado no código local (`AdminUserSeeder` usando `.env` + senha aleatória fallback)
+
 **Esforço:** 15 minutos
 
 ---
@@ -52,6 +55,8 @@ ADMIN_SEED_PASSWORD=
 - `ProdutoPolicy` — edit/delete/editObsDesigner
 - `MovimentacaoPolicy` — delete (só quem criou ou admin)
 - `SugestaoPolicy` — edit/delete (só autor)
+
+**Status:** iniciado no código local com `ProdutoPolicy@editObsDesigner`
 
 **Esforço:** 2-4h dependendo da granularidade
 
@@ -78,6 +83,8 @@ foreach ($permissions as $p) {
     Permission::firstOrCreate(['name' => $p['name']], $p);
 }
 ```
+
+**Status:** iniciado no código local com `PermissionSeeder`
 
 **Esforço:** 30 minutos
 

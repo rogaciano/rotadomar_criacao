@@ -75,6 +75,9 @@
                                         Marca
                                     </th>
                                     <th scope="col" class="table-header-cell">
+                                        Usuário vinculado
+                                    </th>
+                                    <th scope="col" class="table-header-cell">
                                         Suporte Marca
                                     </th>
                                     <th scope="col" class="table-header-cell">
@@ -101,6 +104,9 @@
                                             {{ $estilista->marca ? $estilista->marca->nome_marca : 'Não informada' }}
                                         </td>
                                         <td class="table-cell table-cell-secondary">
+                                            {{ $estilista->user?->name ?? 'Não vinculado' }}
+                                        </td>
+                                        <td class="table-cell table-cell-secondary">
                                             {{ $estilista->suporte_marca ?: 'Não informado' }}
                                         </td>
 
@@ -113,7 +119,7 @@
                                             </span>
                                         </td>
                                         <td class="table-cell text-center table-cell-secondary">
-                                            {{ $estilista->produtos->count() }}
+                                            {{ $estilista->produtos_count }}
                                         </td>
                                         <td class="table-cell text-right">
                                             <div class="flex items-center justify-end space-x-2">
@@ -142,7 +148,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="table-cell table-empty">
+                                        <td colspan="8" class="table-cell table-empty">
                                             Nenhum estilista encontrado.
                                         </td>
                                     </tr>

@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('produto_cor', function (Blueprint $table) {
-            $table->string('cor_rgb', 7)->nullable()->after('codigo_cor'); // Formato #RRGGBB
+            if (!Schema::hasColumn('produto_cor', 'cor_rgb')) {
+                $table->string('cor_rgb', 7)->nullable()->after('codigo_cor');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('produto_cor', function (Blueprint $table) {
-            $table->dropColumn('cor_rgb');
+            if (Schema::hasColumn('produto_cor', 'cor_rgb')) {
+                $table->dropColumn('cor_rgb');
+            }
         });
     }
 };

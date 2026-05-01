@@ -12,8 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Adicionar o novo tipo 'atribuicao_localizacao' ao enum
-        DB::statement("ALTER TABLE notificacoes MODIFY COLUMN tipo ENUM('nova_movimentacao', 'movimentacao_concluida', 'mudanca_etapa', 'atribuicao_localizacao') NOT NULL");
+        if (!Schema::hasTable('notificacoes')) {
+            return;
+        }
+
+        DB::statement("ALTER TABLE notificacoes MODIFY COLUMN tipo ENUM('nova_movimentacao', 'movimentacao_concluida', 'mudanca_etapa', 'atribuicao_localizacao', 'alteracao_atribuicao', 'remocao_atribuicao') NOT NULL");
     }
 
     /**
@@ -21,7 +24,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remover o tipo 'atribuicao_localizacao' do enum
-        DB::statement("ALTER TABLE notificacoes MODIFY COLUMN tipo ENUM('nova_movimentacao', 'movimentacao_concluida', 'mudanca_etapa') NOT NULL");
+        if (!Schema::hasTable('notificacoes')) {
+            return;
+        }
+
+        DB::statement("ALTER TABLE notificacoes MODIFY COLUMN tipo ENUM('nova_movimentacao', 'movimentacao_concluida', 'mudanca_etapa', 'atribuicao_localizacao', 'alteracao_atribuicao', 'remocao_atribuicao') NOT NULL");
     }
 };
