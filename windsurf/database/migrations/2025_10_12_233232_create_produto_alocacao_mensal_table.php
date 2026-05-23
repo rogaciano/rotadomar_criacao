@@ -11,24 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produto_alocacao_mensal', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('produto_id');
-            $table->unsignedBigInteger('localizacao_id');
-            $table->tinyInteger('mes')->comment('1-12');
-            $table->smallInteger('ano')->comment('Ex: 2025');
-            $table->integer('quantidade');
-            $table->string('tipo', 50)->default('original')->comment('original, redistribuido');
-            $table->text('observacoes')->nullable();
-            $table->unsignedBigInteger('usuario_id')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-            
-            // Indexes
-            $table->index('produto_id');
-            $table->index(['mes', 'ano']);
-            $table->index(['localizacao_id', 'mes', 'ano']);
-        });
+        if (!Schema::hasTable('produto_alocacao_mensal')) {
+            Schema::create('produto_alocacao_mensal', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('produto_id');
+                $table->unsignedBigInteger('localizacao_id');
+                $table->tinyInteger('mes')->comment('1-12');
+                $table->smallInteger('ano')->comment('Ex: 2025');
+                $table->integer('quantidade');
+                $table->string('tipo', 50)->default('original')->comment('original, redistribuido');
+                $table->text('observacoes')->nullable();
+                $table->unsignedBigInteger('usuario_id')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+
+                $table->index('produto_id');
+                $table->index(['mes', 'ano']);
+                $table->index(['localizacao_id', 'mes', 'ano']);
+            });
+        }
     }
 
     /**

@@ -46,6 +46,12 @@
                     </x-nav-link>
                     @endif
 
+                    @if(auth()->user()->hasPermission('criacao'))
+                    <x-nav-link :href="route('criacao.index')" :active="request()->routeIs('criacao.*')">
+                        {{ __('Criação') }}
+                    </x-nav-link>
+                    @endif
+
                     @if(auth()->user()->hasPermission('planejamento'))
                     <x-nav-link :href="route('localizacao-capacidade.dashboard')" :active="request()->routeIs('localizacao-capacidade.*')">
                         {{ __('Planejamento') }}
@@ -381,6 +387,12 @@
             @if(auth()->user()->hasPermission('kanban'))
             <x-responsive-nav-link :href="route('kanban.index')" :active="request()->routeIs('kanban.*')">
                 {{ __('Kanban') }}
+            </x-responsive-nav-link>
+            @endif
+
+            @if(auth()->user()->hasPermission('criacao'))
+            <x-responsive-nav-link :href="route('criacao.index')" :active="request()->routeIs('criacao.*')">
+                {{ __('Criação') }}
             </x-responsive-nav-link>
             @endif
 

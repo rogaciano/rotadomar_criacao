@@ -11,22 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produto_componentes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('produto_id')->constrained()->onDelete('cascade');
-            $table->foreignId('tecido_id')->constrained()->onDelete('cascade');
-            $table->string('cor')->nullable();
-            $table->string('codigo_cor')->nullable();
-            $table->decimal('consumo', 10, 2)->comment('Consumo de tecido em gramas/metros por unidade');
-            $table->decimal('quantidade', 10, 2)->default(0)->comment('Quantidade de unidades a serem produzidas');
-            $table->decimal('porcentagem', 5, 2)->nullable()->comment('Porcentagem do total de tecido');
-            $table->text('observacoes')->nullable();
-            $table->timestamps();
-            
-            // Índices para melhorar a performance
-            $table->index(['produto_id', 'tecido_id']);
-            $table->index(['cor', 'codigo_cor']);
-        });
+        if (!Schema::hasTable('produto_componentes')) {
+            Schema::create('produto_componentes', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('produto_id')->constrained()->onDelete('cascade');
+                $table->foreignId('tecido_id')->constrained()->onDelete('cascade');
+                $table->string('cor')->nullable();
+                $table->string('codigo_cor')->nullable();
+                $table->decimal('consumo', 10, 2)->comment('Consumo de tecido em gramas/metros por unidade');
+                $table->decimal('quantidade', 10, 2)->default(0)->comment('Quantidade de unidades a serem produzidas');
+                $table->decimal('porcentagem', 5, 2)->nullable()->comment('Porcentagem do total de tecido');
+                $table->text('observacoes')->nullable();
+                $table->timestamps();
+
+                $table->index(['produto_id', 'tecido_id']);
+                $table->index(['cor', 'codigo_cor']);
+            });
+        }
     }
 
     /**

@@ -12,8 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('produto_componentes', function (Blueprint $table) {
-            $table->string('descricao', 255)->nullable()->after('produto_id');
-            $table->decimal('quantidade_pretendida', 10, 2)->nullable()->default(0)->after('quantidade');
+            if (!Schema::hasColumn('produto_componentes', 'descricao')) {
+                $table->string('descricao', 255)->nullable()->after('produto_id');
+            }
+
+            if (!Schema::hasColumn('produto_componentes', 'quantidade_pretendida')) {
+                $table->decimal('quantidade_pretendida', 10, 2)->nullable()->default(0)->after('quantidade');
+            }
         });
     }
 
@@ -23,7 +28,19 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('produto_componentes', function (Blueprint $table) {
-            $table->dropColumn(['descricao', 'quantidade_pretendida']);
+            $columns = [];
+
+            if (Schema::hasColumn('produto_componentes', 'descricao')) {
+                $columns[] = 'descricao';
+            }
+
+            if (Schema::hasColumn('produto_componentes', 'quantidade_pretendida')) {
+                $columns[] = 'quantidade_pretendida';
+            }
+
+            if (!empty($columns)) {
+                $table->dropColumn($columns);
+            }
         });
     }
 };

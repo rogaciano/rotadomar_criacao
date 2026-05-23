@@ -12,6 +12,18 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('produtos') || !Schema::hasTable('produto_componentes') || !Schema::hasTable('produto_combinacao')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('produto_componentes', 'descricao') || !Schema::hasColumn('produto_componentes', 'quantidade_pretendida')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('produto_componentes', 'produto_combinacao_id')) {
+            return;
+        }
+
         // Obter todos os produtos que têm componentes
         $produtos = DB::table('produtos')
             ->whereExists(function ($query) {
@@ -64,6 +76,18 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('produto_componentes') || !Schema::hasTable('produto_combinacao')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('produto_componentes', 'descricao') || !Schema::hasColumn('produto_componentes', 'quantidade_pretendida')) {
+            return;
+        }
+
+        if (!Schema::hasColumn('produto_componentes', 'produto_combinacao_id')) {
+            return;
+        }
+
         // Obter todas as combinações
         $combinacoes = DB::table('produto_combinacao')->get(['id', 'produto_id', 'descricao', 'quantidade_pretendida']);
 
