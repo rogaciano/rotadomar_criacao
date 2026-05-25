@@ -5,11 +5,17 @@
     .dark .logo-wrapper {
         background-color: rgba(255, 255, 255, 0.9);
         border-radius: 0.5rem;
-        padding: 0.25rem 0.75rem;
+        padding: 0.25rem 0.5rem;
         display: inline-block;
     }
     .logo-wrapper {
         display: inline-block;
         transition: all 0.3s;
+    }
+    .logo-wrapper img {
+        width: auto;
+        max-width: none;
+        object-fit: contain;
+        display: block;
     }
 </style>
