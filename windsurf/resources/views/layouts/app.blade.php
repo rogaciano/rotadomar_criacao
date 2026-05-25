@@ -69,11 +69,15 @@
 
                     <!-- Page Title / Header -->
                     <div class="flex items-center gap-3 min-w-0">
+                        <span class="hidden sm:inline text-sm font-semibold tracking-wide text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                            Grupo Rota do Mar
+                        </span>
+                        <span class="hidden sm:inline text-slate-300 dark:text-slate-700">-</span>
                         @isset($header)
-                            <div class="text-slate-900 dark:text-white">{{ $header }}</div>
+                            <div class="min-w-0 text-slate-900 dark:text-white truncate">{{ $header }}</div>
                         @else
-                            <span class="text-lg font-semibold text-slate-700 dark:text-slate-200">
-                                {{ config('app.name', 'Laravel') }}
+                            <span class="text-lg font-semibold text-slate-700 dark:text-slate-200 truncate">
+                                Dashboard
                             </span>
                         @endisset
                     </div>
