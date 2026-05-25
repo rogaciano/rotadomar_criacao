@@ -8,10 +8,6 @@
             <span class="flex-shrink-0">
                 <x-application-logo class="h-8 w-8 fill-current text-white" />
             </span>
-            <span x-cloak x-show="$store.sidebar.open"
-                  class="text-white font-bold text-sm whitespace-nowrap overflow-hidden leading-tight">
-                Grupo Rota do Mar
-            </span>
         </a>
         <button @click="$store.sidebar.toggle()"
                 class="ml-auto flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 transition-colors">
