@@ -38,8 +38,9 @@
                                 <div class="flex-shrink-0 text-amber-500">🔒</div>
                                 <div class="ml-3">
                                     <p class="text-sm text-amber-800 dark:text-amber-300">
-                                        <strong>Etapa do fluxo logístico</strong> — identificador interno: <code class="bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded text-xs font-mono">{{ $etapa->slug }}</code>.
-                                        Este identificador é usado pelo sistema e não pode ser alterado ou excluído.
+                                        <strong>Etapa do sistema</strong> — contexto: <strong>{{ $contextos[$etapa->contexto] ?? $etapa->contexto }}</strong>,
+                                        slug: <code class="bg-amber-100 dark:bg-amber-900/40 px-1.5 py-0.5 rounded text-xs font-mono">{{ $etapa->slug }}</code>.
+                                        Contexto e identificador não podem ser alterados; a etapa não pode ser excluída.
                                     </p>
                                 </div>
                             </div>
@@ -60,6 +61,34 @@
                                 @error('nome')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
+                            </div>
+
+                            <!-- Contexto -->
+                            <div class="md:col-span-2 p-4 rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 dark:bg-indigo-950/30">
+                                <label for="contexto" class="block text-sm font-semibold text-indigo-900 dark:text-indigo-200 mb-1">Contexto — produção ou logística</label>
+                                @if($etapa->slug)
+                                    <input type="hidden" name="contexto" value="{{ $etapa->contexto }}">
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">{{ $contextos[$etapa->contexto] ?? $etapa->contexto }}</p>
+                                @else
+                                    <select name="contexto" id="contexto" required
+                                        class="w-full rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white shadow-sm">
+                                        @foreach($contextos as $valor => $rotulo)
+                                            <option value="{{ $valor }}" {{ old('contexto', $etapa->contexto) === $valor ? 'selected' : '' }}>{{ $rotulo }}</option>
+                                        @endforeach
+                                    </select>
+                                @endif
+                            </div>
+
+                            <div class="md:col-span-2 {{ $etapa->contexto === 'logistica' ? '' : 'hidden' }}" id="inicia-logistica-wrap">
+                                <label class="flex items-start gap-2 p-4 bg-amber-50/50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                                    <input type="checkbox" name="inicia_logistica" value="1" id="inicia_logistica"
+                                        {{ old('inicia_logistica', $etapa->inicia_logistica) ? 'checked' : '' }}
+                                        class="mt-1 rounded border-gray-300 text-amber-600 shadow-sm">
+                                    <span>
+                                        <span class="block text-sm font-medium">Encerra produção e inicia logística</span>
+                                        <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">Primeira etapa do fluxo logístico após a facção.</span>
+                                    </span>
+                                </label>
                             </div>
 
                             <!-- Ordem -->
@@ -233,6 +262,22 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const contextoSelect = document.getElementById('contexto');
+            const iniciaWrap = document.getElementById('inicia-logistica-wrap');
+            const obrigaRow = document.querySelector('input[name="obriga_data_entrega_faccao"]')?.closest('.md\\:col-span-2');
+
+            function toggleContextoFields() {
+                if (!contextoSelect) return;
+                const isLogistica = contextoSelect.value === 'logistica';
+                if (iniciaWrap) iniciaWrap.classList.toggle('hidden', !isLogistica);
+                if (obrigaRow) obrigaRow.classList.toggle('hidden', isLogistica);
+            }
+
+            if (contextoSelect) {
+                contextoSelect.addEventListener('change', toggleContextoFields);
+                toggleContextoFields();
+            }
+
             const container = document.getElementById('transicoes-container');
             const template = document.getElementById('transicao-template');
             const addButton = document.getElementById('add-transicao');

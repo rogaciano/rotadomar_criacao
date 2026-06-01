@@ -77,6 +77,15 @@
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Contexto</p>
+                            <p class="text-lg font-semibold dark:text-white">
+                                {{ $etapa->isLogistica() ? 'Logística' : 'Localização (facção)' }}
+                            </p>
+                            @if($etapa->inicia_logistica)
+                                <p class="text-xs text-amber-700 dark:text-amber-400 mt-1">Encerra produção e inicia logística</p>
+                            @endif
+                        </div>
+                        <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
                             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Ordem</p>
                             <p class="text-xl font-bold text-gray-900 dark:text-white">{{ $etapa->ordem }}</p>
                         </div>

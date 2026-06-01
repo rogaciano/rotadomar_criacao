@@ -47,6 +47,35 @@
                                 @enderror
                             </div>
 
+                            <!-- Contexto: produção (facção) ou logística -->
+                            <div class="md:col-span-2 p-4 rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 dark:bg-indigo-950/30">
+                                <label for="contexto" class="block text-sm font-semibold text-indigo-900 dark:text-indigo-200 mb-1">
+                                    Contexto — produção ou logística *
+                                </label>
+                                <select name="contexto" id="contexto" required
+                                    class="w-full rounded-md border-indigo-300 dark:border-indigo-700 dark:bg-slate-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                                    @foreach($contextos as $valor => $rotulo)
+                                        <option value="{{ $valor }}" {{ old('contexto', $contextoForm ?? 'localizacao') === $valor ? 'selected' : '' }}>{{ $rotulo }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="mt-2 text-xs text-gray-600 dark:text-gray-400">
+                                    Define se a etapa aparece no <strong>planejamento da facção</strong> ou no <strong>fluxo logístico</strong> (coleta/entrega).
+                                    Ao escolher <strong>Logística</strong>, aparece a opção de marcar o handoff fim da produção.
+                                </p>
+                            </div>
+
+                            <!-- Início da logística (handoff produção → logística) -->
+                            <div class="md:col-span-2 hidden" id="inicia-logistica-wrap">
+                                <label class="flex items-start gap-2 p-4 bg-amber-50/50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                                    <input type="checkbox" name="inicia_logistica" value="1" id="inicia_logistica" {{ old('inicia_logistica') ? 'checked' : '' }}
+                                        class="mt-1 rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-200">
+                                    <span>
+                                        <span class="block text-sm font-medium text-gray-800 dark:text-gray-200">Encerra produção e inicia logística</span>
+                                        <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">Marque na primeira etapa logística (ex.: Aguardando Retirada). Ao entrar nela, o produto sai do fluxo da facção e passa ao controle logístico. Apenas uma etapa pode ter esta marcação.</span>
+                                    </span>
+                                </label>
+                            </div>
+
                             <!-- Ordem -->
                             <div>
                                 <label for="ordem" class="block text-sm font-medium text-gray-700 mb-1">Ordem *</label>
@@ -191,6 +220,25 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const contextoSelect = document.getElementById('contexto');
+            const iniciaWrap = document.getElementById('inicia-logistica-wrap');
+            const obrigaDataWrap = document.querySelector('[name="obriga_data_entrega_faccao"]')?.closest('.md\\:col-span-2');
+
+            function toggleContextoFields() {
+                const isLogistica = contextoSelect && contextoSelect.value === 'logistica';
+                if (iniciaWrap) {
+                    iniciaWrap.classList.toggle('hidden', !isLogistica);
+                }
+                if (obrigaDataWrap) {
+                    obrigaDataWrap.classList.toggle('hidden', isLogistica);
+                }
+            }
+
+            if (contextoSelect) {
+                contextoSelect.addEventListener('change', toggleContextoFields);
+                toggleContextoFields();
+            }
+
             const container = document.getElementById('transicoes-container');
             const template = document.getElementById('transicao-template');
             const addButton = document.getElementById('add-transicao');

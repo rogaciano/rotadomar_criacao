@@ -17,23 +17,32 @@ class EtapaProducao extends Model
     const SLUG_EM_TRANSITO = 'em_transito';
     const SLUG_COLETADO = 'coletado';
 
+    /** Etapas do fluxo na facção / planejamento (produto_localizacao). */
+    const CONTEXTO_LOCALIZACAO = 'localizacao';
+
+    /** Etapas do fluxo logístico (coleta, trânsito, entrega). */
+    const CONTEXTO_LOGISTICA = 'logistica';
+
     protected $fillable = [
         'nome',
         'slug',
+        'contexto',
+        'inicia_logistica',
         'descricao',
         'cor',
         'icone',
         'ativo',
         'localizacao_id',
         'ordem',
-        'obriga_data_entrega_faccao'
+        'obriga_data_entrega_faccao',
     ];
 
     protected $casts = [
         'ativo' => 'boolean',
         'localizacao_id' => 'integer',
         'ordem' => 'integer',
-        'obriga_data_entrega_faccao' => 'boolean'
+        'obriga_data_entrega_faccao' => 'boolean',
+        'inicia_logistica' => 'boolean',
     ];
 
     /**
@@ -97,6 +106,52 @@ class EtapaProducao extends Model
         return $query->where('ativo', true)->orderBy('ordem');
     }
 
+    public function scopeParaLocalizacao($query)
+    {
+        return $query->where('contexto', self::CONTEXTO_LOCALIZACAO);
+    }
+
+    public function scopeParaLogistica($query)
+    {
+        return $query->where('contexto', self::CONTEXTO_LOGISTICA);
+    }
+
+    public function scopeIniciaLogistica($query)
+    {
+        return $query->where('inicia_logistica', true);
+    }
+
+    public static function contextosDisponiveis(): array
+    {
+        return [
+            self::CONTEXTO_LOCALIZACAO => 'Produção — facção / planejamento',
+            self::CONTEXTO_LOGISTICA => 'Logística — retirada, trânsito e entrega',
+        ];
+    }
+
+    public function isLocalizacao(): bool
+    {
+        return $this->contexto === self::CONTEXTO_LOCALIZACAO;
+    }
+
+    /**
+     * Transição permitida entre etapas (mesmo contexto ou handoff produção → logística).
+     */
+    public function podeTransicionarPara(self $destino): bool
+    {
+        if ($this->id === $destino->id) {
+            return false;
+        }
+
+        if ($this->contexto === $destino->contexto) {
+            return true;
+        }
+
+        return $this->isLocalizacao()
+            && $destino->isLogistica()
+            && $destino->inicia_logistica;
+    }
+
     /**
      * Obter transições ativas para botões na UI
      */
@@ -121,11 +176,27 @@ class EtapaProducao extends Model
     }
 
     /**
-     * Verifica se esta etapa faz parte do fluxo logístico (possui slug protegido)
+     * Etapa do fluxo logístico (coleta / trânsito / entrega).
      */
     public function isLogistica(): bool
     {
-        return !empty($this->slug);
+        return $this->contexto === self::CONTEXTO_LOGISTICA;
+    }
+
+    /**
+     * Etapa que encerra a produção na facção e inicia o processo logístico.
+     */
+    public function encerraProducaoIniciaLogistica(): bool
+    {
+        return (bool) $this->inicia_logistica;
+    }
+
+    public static function etapaInicioLogistica(): ?self
+    {
+        return static::query()
+            ->where('ativo', true)
+            ->where('inicia_logistica', true)
+            ->first();
     }
 
     public static function coresDisponiveis(): array

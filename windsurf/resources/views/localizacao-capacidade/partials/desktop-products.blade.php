@@ -310,7 +310,6 @@
                                                 $slugAtual = $etapaLinha?->slug ?? '';
                                                 $isUsuarioFaccao = auth()->user()->isUsuarioFaccao();
                                                 $isAdmin = auth()->user()->isAdmin();
-                                                $slugsLogisticos = ['aguardando_retirada', 'aguardando_motorista', 'em_transito', 'coletado'];
 
                                                 if ($etapaLinha) {
                                                     $transicoes = $etapaLinha->transicoesOrigem ?? collect([]);
@@ -382,7 +381,7 @@
                                                         </div>
                                                     @endif
 
-                                                    @if($etapaLinha && !($isUsuarioFaccao && in_array($slugAtual, $slugsLogisticos)))
+                                                    @if($etapaLinha && !($isUsuarioFaccao && $etapaLinha->isLogistica()))
                                                         <div class="flex gap-1 justify-end w-full">
                                                             @if(isset($loc->pivot->etapa_anterior_id) && $loc->pivot->etapa_anterior_id)
                                                                 <form action="{{ route('produtos.localizacoes.voltar-etapa', [$produtoPrincipal->id, $loc->pivot->id]) }}" method="POST">

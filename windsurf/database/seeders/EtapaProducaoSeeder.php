@@ -17,19 +17,19 @@ class EtapaProducaoSeeder extends Seeder
         EtapaTransicao::query()->delete();
         EtapaProducao::query()->forceDelete();
 
-        // Criar etapas
+        // Criar etapas — contexto localizacao (facção) vs logistica
         $etapas = [
-            ['nome' => 'Recebimento', 'slug' => null, 'icone' => '📦', 'cor' => 'blue', 'ordem' => 1],
-            ['nome' => 'Separação', 'slug' => null, 'icone' => '📋', 'cor' => 'indigo', 'ordem' => 2],
-            ['nome' => 'Preparação', 'slug' => null, 'icone' => '✂️', 'cor' => 'purple', 'ordem' => 3],
-            ['nome' => 'Produção', 'slug' => null, 'icone' => '⚙️', 'cor' => 'yellow', 'ordem' => 4],
-            ['nome' => 'Aplicação DTF', 'slug' => null, 'icone' => '🎨', 'cor' => 'pink', 'ordem' => 5],
-            ['nome' => 'Estamparia', 'slug' => null, 'icone' => '🖼️', 'cor' => 'orange', 'ordem' => 6],
-            ['nome' => 'Acabamento', 'slug' => null, 'icone' => '✨', 'cor' => 'green', 'ordem' => 7],
-            ['nome' => 'Aguardando Retirada', 'slug' => 'aguardando_retirada', 'icone' => '📍', 'cor' => 'gray', 'ordem' => 8],
-            ['nome' => 'Aguardando Motorista', 'slug' => 'aguardando_motorista', 'icone' => '🚛', 'cor' => 'yellow', 'ordem' => 9],
-            ['nome' => 'Em Trânsito', 'slug' => 'em_transito', 'icone' => '🚚', 'cor' => 'orange', 'ordem' => 10],
-            ['nome' => 'Coletado', 'slug' => 'coletado', 'icone' => '✅', 'cor' => 'green', 'ordem' => 11],
+            ['nome' => 'Recebimento', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '📦', 'cor' => 'blue', 'ordem' => 1],
+            ['nome' => 'Separação', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '📋', 'cor' => 'indigo', 'ordem' => 2],
+            ['nome' => 'Preparação', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '✂️', 'cor' => 'purple', 'ordem' => 3],
+            ['nome' => 'Produção', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '⚙️', 'cor' => 'yellow', 'ordem' => 4],
+            ['nome' => 'Aplicação DTF', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '🎨', 'cor' => 'pink', 'ordem' => 5],
+            ['nome' => 'Estamparia', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '🖼️', 'cor' => 'orange', 'ordem' => 6],
+            ['nome' => 'Acabamento', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '✨', 'cor' => 'green', 'ordem' => 7],
+            ['nome' => 'Aguardando Retirada', 'slug' => 'aguardando_retirada', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => true, 'icone' => '📍', 'cor' => 'gray', 'ordem' => 1],
+            ['nome' => 'Aguardando Motorista', 'slug' => 'aguardando_motorista', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🚛', 'cor' => 'yellow', 'ordem' => 2],
+            ['nome' => 'Em Trânsito', 'slug' => 'em_transito', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🚚', 'cor' => 'orange', 'ordem' => 3],
+            ['nome' => 'Coletado', 'slug' => 'coletado', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '✅', 'cor' => 'green', 'ordem' => 4],
         ];
 
         $etapasCriadas = [];

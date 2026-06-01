@@ -25,28 +25,45 @@ class EtapaProducaoController extends Controller
             $query->where('ativo', $request->ativo === '1');
         }
 
-        $etapas = $query->orderBy('ordem')->paginate(15)->appends($request->query());
+        if ($request->filled('contexto')) {
+            $query->where('contexto', $request->contexto);
+        }
 
-        // Carregar todas as etapas ativas com transições para o diagrama de fluxo
-        $etapasFluxo = EtapaProducao::where('ativo', true)
-            ->with(['transicoesOrigem.etapaDestino'])
-            ->orderBy('ordem')
-            ->get();
+        $etapas = $query->orderBy('contexto')->orderBy('ordem')->paginate(15)->appends($request->query());
 
-        return view('etapas-producao.index', compact('etapas', 'etapasFluxo'));
+        // Carregar etapas ativas com transições para o diagrama (filtro opcional por contexto)
+        $fluxoQuery = EtapaProducao::where('ativo', true)
+            ->with(['transicoesOrigem.etapaDestino']);
+
+        if ($request->filled('contexto')) {
+            $fluxoQuery->where('contexto', $request->contexto);
+        }
+
+        $etapasFluxo = $fluxoQuery->orderBy('ordem')->get();
+
+        $contextos = EtapaProducao::contextosDisponiveis();
+
+        return view('etapas-producao.index', compact('etapas', 'etapasFluxo', 'contextos'));
     }
 
     /**
      * Visualizar fluxo de etapas em página cheia
      */
-    public function visualizarFluxo()
+    public function visualizarFluxo(Request $request)
     {
-        $etapasFluxo = EtapaProducao::where('ativo', true)
-            ->with(['transicoesOrigem.etapaDestino'])
-            ->orderBy('ordem')
-            ->get();
+        $contexto = $request->get('contexto');
 
-        return view('etapas-producao.fluxo', compact('etapasFluxo'));
+        $query = EtapaProducao::where('ativo', true)
+            ->with(['transicoesOrigem.etapaDestino']);
+
+        if ($contexto && array_key_exists($contexto, EtapaProducao::contextosDisponiveis())) {
+            $query->where('contexto', $contexto);
+        }
+
+        $etapasFluxo = $query->orderBy('ordem')->get();
+        $contextos = EtapaProducao::contextosDisponiveis();
+
+        return view('etapas-producao.fluxo', compact('etapasFluxo', 'contexto', 'contextos'));
     }
 
     /**
@@ -84,10 +101,12 @@ class EtapaProducaoController extends Controller
     public function create()
     {
         $cores = EtapaProducao::coresDisponiveis();
-        $etapas = EtapaProducao::where('ativo', true)->orderBy('ordem')->get();
+        $contextoForm = request('contexto', EtapaProducao::CONTEXTO_LOCALIZACAO);
+        $etapas = $this->etapasParaTransicoes($contextoForm);
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $contextos = EtapaProducao::contextosDisponiveis();
 
-        return view('etapas-producao.create', compact('cores', 'etapas', 'localizacoes'));
+        return view('etapas-producao.create', compact('cores', 'etapas', 'localizacoes', 'contextos', 'contextoForm'));
     }
 
     /**
@@ -95,47 +114,29 @@ class EtapaProducaoController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nome' => 'required|string|max:100',
-            'descricao' => 'nullable|string|max:255',
-            'cor' => 'required|string|max:20',
-            'icone' => 'nullable|string|max:50',
-            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
-            'ativo' => 'sometimes|boolean',
-            'ordem' => 'required|integer|min:0',
-            'transicoes' => 'nullable|array',
-            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
-            'transicoes.*.label_botao' => 'nullable|string|max:50',
-            'transicoes.*.cor_botao' => 'nullable|string|max:20'
-        ]);
+        $validated = $this->validateEtapaRequest($request);
+
+        $contexto = $validated['contexto'];
+        $iniciaLogistica = $contexto === EtapaProducao::CONTEXTO_LOGISTICA && $request->has('inicia_logistica');
 
         $etapa = EtapaProducao::create([
             'nome' => $validated['nome'],
             'descricao' => $validated['descricao'] ?: null,
             'cor' => $validated['cor'],
             'icone' => $validated['icone'] ?: null,
+            'contexto' => $contexto,
+            'inicia_logistica' => $iniciaLogistica,
             'localizacao_id' => $validated['localizacao_id'] ?: null,
             'ativo' => $request->has('ativo'),
             'ordem' => $validated['ordem'],
-            'obriga_data_entrega_faccao' => $request->has('obriga_data_entrega_faccao')
+            'obriga_data_entrega_faccao' => $contexto === EtapaProducao::CONTEXTO_LOCALIZACAO && $request->has('obriga_data_entrega_faccao'),
         ]);
 
-        // Criar transições se fornecidas
-        if (!empty($validated['transicoes'])) {
-            $ordem = 0;
-            foreach ($validated['transicoes'] as $transicao) {
-                if (!empty($transicao['etapa_destino_id'])) {
-                    EtapaTransicao::create([
-                        'etapa_origem_id' => $etapa->id,
-                        'etapa_destino_id' => $transicao['etapa_destino_id'],
-                        'label_botao' => $transicao['label_botao'] ?? null,
-                        'cor_botao' => $transicao['cor_botao'] ?? 'blue',
-                        'ativo' => true,
-                        'ordem' => $ordem++
-                    ]);
-                }
-            }
+        if ($iniciaLogistica) {
+            $this->syncEtapaIniciaLogistica($etapa);
         }
+
+        $this->syncTransicoes($etapa, $validated['transicoes'] ?? []);
 
         return redirect()->route('etapas-producao.index')
             ->with('success', 'Etapa de produção criada com sucesso!');
@@ -157,18 +158,17 @@ class EtapaProducaoController extends Controller
     public function edit(EtapaProducao $etapasProducao)
     {
         $cores = EtapaProducao::coresDisponiveis();
-        $etapas = EtapaProducao::where('ativo', true)
-            ->where('id', '!=', $etapasProducao->id)
-            ->orderBy('ordem')
-            ->get();
+        $etapas = $this->etapasParaTransicoes($etapasProducao->contexto, $etapasProducao->id);
         $etapasProducao->load('transicoesOrigem.etapaDestino');
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $contextos = EtapaProducao::contextosDisponiveis();
 
         return view('etapas-producao.edit', [
             'etapa' => $etapasProducao,
             'cores' => $cores,
             'etapas' => $etapas,
-            'localizacoes' => $localizacoes
+            'localizacoes' => $localizacoes,
+            'contextos' => $contextos,
         ]);
     }
 
@@ -177,49 +177,34 @@ class EtapaProducaoController extends Controller
      */
     public function update(Request $request, EtapaProducao $etapasProducao)
     {
-        $validated = $request->validate([
-            'nome' => 'required|string|max:100',
-            'descricao' => 'nullable|string|max:255',
-            'cor' => 'required|string|max:20',
-            'icone' => 'nullable|string|max:50',
-            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
-            'ativo' => 'sometimes|boolean',
-            'ordem' => 'required|integer|min:0',
-            'transicoes' => 'nullable|array',
-            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
-            'transicoes.*.label_botao' => 'nullable|string|max:50',
-            'transicoes.*.cor_botao' => 'nullable|string|max:20'
-        ]);
+        $validated = $this->validateEtapaRequest($request, $etapasProducao);
+
+        $contexto = $etapasProducao->slug
+            ? $etapasProducao->contexto
+            : $validated['contexto'];
+
+        $iniciaLogistica = $contexto === EtapaProducao::CONTEXTO_LOGISTICA && $request->has('inicia_logistica');
 
         $etapasProducao->update([
             'nome' => $validated['nome'],
             'descricao' => $validated['descricao'] ?: null,
             'cor' => $validated['cor'],
             'icone' => $validated['icone'] ?: null,
+            'contexto' => $contexto,
+            'inicia_logistica' => $iniciaLogistica,
             'localizacao_id' => $validated['localizacao_id'] ?: null,
             'ativo' => $request->has('ativo'),
             'ordem' => $validated['ordem'],
-            'obriga_data_entrega_faccao' => $request->has('obriga_data_entrega_faccao')
+            'obriga_data_entrega_faccao' => $contexto === EtapaProducao::CONTEXTO_LOCALIZACAO && $request->has('obriga_data_entrega_faccao'),
         ]);
 
-        // Atualizar transições
-        $etapasProducao->transicoesOrigem()->delete();
-
-        if (!empty($validated['transicoes'])) {
-            $ordem = 0;
-            foreach ($validated['transicoes'] as $transicao) {
-                if (!empty($transicao['etapa_destino_id'])) {
-                    EtapaTransicao::create([
-                        'etapa_origem_id' => $etapasProducao->id,
-                        'etapa_destino_id' => $transicao['etapa_destino_id'],
-                        'label_botao' => $transicao['label_botao'] ?? null,
-                        'cor_botao' => $transicao['cor_botao'] ?? 'blue',
-                        'ativo' => true,
-                        'ordem' => $ordem++
-                    ]);
-                }
-            }
+        if ($iniciaLogistica) {
+            $this->syncEtapaIniciaLogistica($etapasProducao);
+        } elseif ($etapasProducao->wasChanged('inicia_logistica') || !$iniciaLogistica) {
+            // mantido false no update acima
         }
+
+        $this->syncTransicoes($etapasProducao, $validated['transicoes'] ?? []);
 
         return redirect()->route('etapas-producao.index')
             ->with('success', 'Etapa de produção atualizada com sucesso!');
@@ -239,5 +224,84 @@ class EtapaProducaoController extends Controller
 
         return redirect()->route('etapas-producao.index')
             ->with('success', 'Etapa de produção excluída com sucesso!');
+    }
+
+    private function validateEtapaRequest(Request $request, ?EtapaProducao $etapa = null): array
+    {
+        $contextos = implode(',', array_keys(EtapaProducao::contextosDisponiveis()));
+
+        $rules = [
+            'nome' => 'required|string|max:100',
+            'descricao' => 'nullable|string|max:255',
+            'cor' => 'required|string|max:20',
+            'icone' => 'nullable|string|max:50',
+            'contexto' => 'required|in:' . $contextos,
+            'localizacao_id' => 'nullable|integer|exists:localizacoes,id',
+            'ativo' => 'sometimes|boolean',
+            'ordem' => 'required|integer|min:0',
+            'transicoes' => 'nullable|array',
+            'transicoes.*.etapa_destino_id' => 'nullable|integer|exists:etapas_producao,id',
+            'transicoes.*.label_botao' => 'nullable|string|max:50',
+            'transicoes.*.cor_botao' => 'nullable|string|max:20',
+        ];
+
+        if ($etapa?->slug) {
+            unset($rules['contexto']);
+        }
+
+        return $request->validate($rules);
+    }
+
+    /**
+     * Etapas candidatas a destino de transição (mesmo contexto + etapa de início logístico).
+     */
+    private function etapasParaTransicoes(string $contexto, ?int $excluirId = null)
+    {
+        $query = EtapaProducao::where('ativo', true)
+            ->where(function ($q) use ($contexto) {
+                $q->where('contexto', $contexto);
+                if ($contexto === EtapaProducao::CONTEXTO_LOCALIZACAO) {
+                    $q->orWhere('inicia_logistica', true);
+                }
+            });
+
+        if ($excluirId) {
+            $query->where('id', '!=', $excluirId);
+        }
+
+        return $query->orderBy('contexto')->orderBy('ordem')->get();
+    }
+
+    private function syncEtapaIniciaLogistica(EtapaProducao $etapa): void
+    {
+        EtapaProducao::where('id', '!=', $etapa->id)
+            ->where('inicia_logistica', true)
+            ->update(['inicia_logistica' => false]);
+    }
+
+    private function syncTransicoes(EtapaProducao $origem, array $transicoes): void
+    {
+        $origem->transicoesOrigem()->delete();
+
+        $ordem = 0;
+        foreach ($transicoes as $transicao) {
+            if (empty($transicao['etapa_destino_id'])) {
+                continue;
+            }
+
+            $destino = EtapaProducao::find($transicao['etapa_destino_id']);
+            if (!$destino || !$origem->podeTransicionarPara($destino)) {
+                continue;
+            }
+
+            EtapaTransicao::create([
+                'etapa_origem_id' => $origem->id,
+                'etapa_destino_id' => $destino->id,
+                'label_botao' => $transicao['label_botao'] ?? null,
+                'cor_botao' => $transicao['cor_botao'] ?? 'blue',
+                'ativo' => true,
+                'ordem' => $ordem++,
+            ]);
+        }
     }
 }

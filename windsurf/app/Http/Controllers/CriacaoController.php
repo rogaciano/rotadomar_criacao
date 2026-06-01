@@ -237,7 +237,7 @@ class CriacaoController extends Controller
                 ->orderBy('descricao')
                 ->get(),
             'direcionamentosComerciais' => DirecionamentoComercial::where('ativo', true)->orderBy('descricao')->get(),
-            'etapasProducao' => EtapaProducao::where('ativo', true)->orderBy('ordem')->orderBy('nome')->get(),
+            'etapasProducao' => EtapaProducao::where('ativo', true)->paraLocalizacao()->orderBy('ordem')->orderBy('nome')->get(),
             'statusAguardandoDesenvolvimento' => Status::where('descricao', 'AGUARDANDO DESENVOLVIMENTO')->first(),
         ], $extra);
     }

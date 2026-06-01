@@ -526,15 +526,18 @@ class ProdutoController extends Controller
             $coresEnriquecidas->push($corInfo);
         }
 
-        // Carregar etapas de produção ativas para a seção de localizações
+        // Etapas para exibição (todos os contextos) e para menu "definir" (só facção)
         $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
-            ->with(['transicoesOrigem' => function($query) {
+            ->with(['transicoesOrigem' => function ($query) {
                 $query->where('ativo', true)->with('etapaDestino')->orderBy('ordem');
             }])
+            ->orderBy('contexto')
             ->orderBy('ordem')
             ->get();
 
-        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao'));
+        $etapasProducaoDefinir = $etapasProducao->where('contexto', \App\Models\EtapaProducao::CONTEXTO_LOCALIZACAO);
+
+        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao', 'etapasProducaoDefinir'));
     }
 
     /**

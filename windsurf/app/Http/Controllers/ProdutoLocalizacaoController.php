@@ -267,18 +267,15 @@ class ProdutoLocalizacaoController extends Controller
         // Buscar a etapa destino para verificar se obriga data_entrega_faccao
         $etapaDestino = \App\Models\EtapaProducao::find($request->etapa_id);
 
-        // Bloquear facção de avançar etapas logísticas (só via tela de logística ou admin)
-        if (!$user->isAdmin() && $user->isUsuarioFaccao()) {
-            $etapaAtual = $produtoLocalizacao->etapaAtual;
-            $slugsLogisticos = [
-                \App\Models\EtapaProducao::SLUG_AGUARDANDO_RETIRADA,
-                \App\Models\EtapaProducao::SLUG_AGUARDANDO_MOTORISTA,
-                \App\Models\EtapaProducao::SLUG_EM_TRANSITO,
-                \App\Models\EtapaProducao::SLUG_COLETADO,
-            ];
-            if ($etapaAtual && in_array($etapaAtual->slug, $slugsLogisticos)) {
-                return redirect()->back()->with('error', 'As etapas logísticas só podem ser alteradas pela tela de Logística de Coleta.');
-            }
+        $etapaAtual = $produtoLocalizacao->etapaAtual;
+
+        // Bloquear facção de alterar etapas logísticas (só via logística ou admin)
+        if (!$user->isAdmin() && $user->isUsuarioFaccao() && $etapaAtual?->isLogistica()) {
+            return redirect()->back()->with('error', 'As etapas logísticas só podem ser alteradas pela tela de Logística de Coleta.');
+        }
+
+        if ($etapaAtual && $etapaDestino && !$etapaAtual->podeTransicionarPara($etapaDestino)) {
+            return redirect()->back()->with('error', 'Transição de etapa não permitida para este fluxo.');
         }
 
         // Validação: Apenas se a etapa destino obriga data_entrega_faccao
@@ -414,10 +411,12 @@ class ProdutoLocalizacaoController extends Controller
             return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
         }
 
-        // Buscar a etapa para verificar se obriga data_entrega_faccao
         $etapa = \App\Models\EtapaProducao::find($request->etapa_id);
 
-        // Validação: Apenas se a etapa obriga data_entrega_faccao
+        if (!$user->isAdmin() && $etapa?->isLogistica()) {
+            return redirect()->back()->with('error', 'Use o fluxo de logística para definir etapas logísticas.');
+        }
+
         if ($etapa && $etapa->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
             return redirect()->back()->with('alert_error', 'Para definir esta etapa, você deve primeiro preencher a "Entrega Prevista Facção".');
         }

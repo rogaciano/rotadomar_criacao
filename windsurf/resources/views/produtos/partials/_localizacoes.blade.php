@@ -123,8 +123,7 @@
                             // Bloquear transições logísticas para facção
                             $slugAtualLoc = $etapaAtual?->slug ?? '';
                             $isUsuarioFaccaoLoc = auth()->user()->isUsuarioFaccao();
-                            $slugsLogisticosLoc = ['aguardando_retirada', 'aguardando_motorista', 'em_transito', 'coletado'];
-                            $bloquearLogistica = $isUsuarioFaccaoLoc && in_array($slugAtualLoc, $slugsLogisticosLoc);
+                            $bloquearLogistica = $isUsuarioFaccaoLoc && $etapaAtual && $etapaAtual->isLogistica();
                             if ($bloquearLogistica) {
                                 $transicoes = collect([]);
                             }
@@ -271,7 +270,7 @@
                                             <button type="button" @click="showEtapaMenu = !showEtapaMenu" class="px-2 py-1 text-xs rounded border border-dashed bg-gray-100 hover:bg-gray-200 border-gray-300">+ Definir</button>
                                         @endif
                                         <div x-show="showEtapaMenu" x-transition class="absolute z-20 mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200">
-                                            @foreach($etapasProducao as $etapa)
+                                            @foreach(($etapasProducaoDefinir ?? $etapasProducao->where('contexto', \App\Models\EtapaProducao::CONTEXTO_LOCALIZACAO)) as $etapa)
                                                 <button type="button"
                                                     @click.prevent="$dispatch('abrir-modal-etapa', { action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, etapaId: {{ $etapa->id }}, etapaNome: {{ Js::from($etapa->nome) }} }); showEtapaMenu = false"
                                                     class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center gap-1">
@@ -339,8 +338,7 @@
                     // Bloquear transições logísticas para facção (mobile cards)
                     $slugAtualLoc = $etapaAtual?->slug ?? '';
                     $isUsuarioFaccaoLoc = auth()->user()->isUsuarioFaccao();
-                    $slugsLogisticosLoc = ['aguardando_retirada', 'aguardando_motorista', 'em_transito', 'coletado'];
-                    $bloquearLogistica = $isUsuarioFaccaoLoc && in_array($slugAtualLoc, $slugsLogisticosLoc);
+                    $bloquearLogistica = $isUsuarioFaccaoLoc && $etapaAtual && $etapaAtual->isLogistica();
                     if ($bloquearLogistica) {
                         $transicoes = collect([]);
                     }
@@ -476,7 +474,7 @@
                                             </button>
 
                                             <div x-show="openMenu" @click.away="openMenu = false" class="absolute left-0 right-0 bottom-full mb-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-600 z-50 overflow-hidden max-h-60 overflow-y-auto" style="display: none;">
-                                                @foreach($etapasProducao as $etapa)
+                                                @foreach(($etapasProducaoDefinir ?? $etapasProducao->where('contexto', \App\Models\EtapaProducao::CONTEXTO_LOCALIZACAO)) as $etapa)
                                                     <button type="button"
                                                         @click.prevent="$dispatch('abrir-modal-etapa', { action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produto->id, $localizacao->pivot->id])) }}, etapaId: {{ $etapa->id }}, etapaNome: {{ Js::from($etapa->nome) }} }); openMenu = false"
                                                         class="w-full text-left px-4 py-3 text-xs hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-700 last:border-0 text-gray-700 dark:text-gray-200">

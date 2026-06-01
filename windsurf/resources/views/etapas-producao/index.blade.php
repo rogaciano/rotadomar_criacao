@@ -49,6 +49,16 @@
                             </div>
 
                             <div>
+                                <label for="contexto" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contexto</label>
+                                <select name="contexto" id="contexto" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
+                                    <option value="">Todos</option>
+                                    @foreach($contextos as $valor => $rotulo)
+                                        <option value="{{ $valor }}" {{ request('contexto') === $valor ? 'selected' : '' }}>{{ $rotulo }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
                                 <label for="ativo" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Status</label>
                                 <select name="ativo" id="ativo" class="w-full rounded-xl border-slate-300 dark:border-slate-700 shadow-sm focus:border-primary-500 focus:ring focus:ring-primary-200 focus:ring-opacity-50">
                                     <option value="">Todos</option>
@@ -77,6 +87,7 @@
                             <thead class="table-header">
                                 <tr>
                                     <th scope="col" class="table-header-cell">Ordem</th>
+                                    <th scope="col" class="table-header-cell">Contexto</th>
                                     <th scope="col" class="table-header-cell">Nome</th>
                                     <th scope="col" class="table-header-cell">Cor / Ícone</th>
                                     <th scope="col" class="table-header-cell">Transições</th>
@@ -89,6 +100,16 @@
                                 @forelse ($etapas as $etapa)
                                     <tr class="table-row">
                                         <td class="table-cell table-cell-primary">{{ $etapa->ordem }}</td>
+                                        <td class="table-cell">
+                                            @if($etapa->contexto === 'logistica')
+                                                <span class="badge-neutral text-xs">Logística</span>
+                                            @else
+                                                <span class="badge-neutral text-xs">Facção</span>
+                                            @endif
+                                            @if($etapa->inicia_logistica)
+                                                <span class="ml-1 text-[10px] font-bold text-amber-700 dark:text-amber-400" title="Encerra produção e inicia logística">→ LOG</span>
+                                            @endif
+                                        </td>
                                         <td class="table-cell">
                                             <div class="flex items-center">
                                                 @if($etapa->icone)
