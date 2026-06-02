@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EtapaProducao;
 use App\Models\EtapaTransicao;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -105,8 +106,9 @@ class EtapaProducaoController extends Controller
         $etapas = $this->etapasParaTransicoes($contextoForm);
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         $contextos = EtapaProducao::contextosDisponiveis();
+        $etapaInicioLogisticaAtual = $this->etapaInicioLogisticaExistente();
 
-        return view('etapas-producao.create', compact('cores', 'etapas', 'localizacoes', 'contextos', 'contextoForm'));
+        return view('etapas-producao.create', compact('cores', 'etapas', 'localizacoes', 'contextos', 'contextoForm', 'etapaInicioLogisticaAtual'));
     }
 
     /**
@@ -118,6 +120,10 @@ class EtapaProducaoController extends Controller
 
         $contexto = $validated['contexto'];
         $iniciaLogistica = $contexto === EtapaProducao::CONTEXTO_LOGISTICA && $request->has('inicia_logistica');
+
+        if ($redirect = $this->validarEtapaInicioLogisticaUnica($request, $contexto, $iniciaLogistica)) {
+            return $redirect;
+        }
 
         $etapa = EtapaProducao::create([
             'nome' => $validated['nome'],
@@ -162,6 +168,7 @@ class EtapaProducaoController extends Controller
         $etapasProducao->load('transicoesOrigem.etapaDestino');
         $localizacoes = \App\Models\Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         $contextos = EtapaProducao::contextosDisponiveis();
+        $etapaInicioLogisticaAtual = $this->etapaInicioLogisticaExistente($etapasProducao->id);
 
         return view('etapas-producao.edit', [
             'etapa' => $etapasProducao,
@@ -169,6 +176,7 @@ class EtapaProducaoController extends Controller
             'etapas' => $etapas,
             'localizacoes' => $localizacoes,
             'contextos' => $contextos,
+            'etapaInicioLogisticaAtual' => $etapaInicioLogisticaAtual,
         ]);
     }
 
@@ -184,6 +192,10 @@ class EtapaProducaoController extends Controller
             : $validated['contexto'];
 
         $iniciaLogistica = $contexto === EtapaProducao::CONTEXTO_LOGISTICA && $request->has('inicia_logistica');
+
+        if ($redirect = $this->validarEtapaInicioLogisticaUnica($request, $contexto, $iniciaLogistica, $etapasProducao->id)) {
+            return $redirect;
+        }
 
         $etapasProducao->update([
             'nome' => $validated['nome'],
@@ -275,8 +287,38 @@ class EtapaProducaoController extends Controller
     private function syncEtapaIniciaLogistica(EtapaProducao $etapa): void
     {
         EtapaProducao::where('id', '!=', $etapa->id)
+            ->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA)
             ->where('inicia_logistica', true)
             ->update(['inicia_logistica' => false]);
+    }
+
+    private function etapaInicioLogisticaExistente(?int $ignorarEtapaId = null): ?EtapaProducao
+    {
+        return EtapaProducao::query()
+            ->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA)
+            ->where('inicia_logistica', true)
+            ->when($ignorarEtapaId, function ($query) use ($ignorarEtapaId) {
+                $query->where('id', '!=', $ignorarEtapaId);
+            })
+            ->first();
+    }
+
+    private function validarEtapaInicioLogisticaUnica(Request $request, string $contexto, bool $iniciaLogistica, ?int $etapaId = null): ?RedirectResponse
+    {
+        if (!$iniciaLogistica || $contexto !== EtapaProducao::CONTEXTO_LOGISTICA) {
+            return null;
+        }
+
+        $etapaInicioExistente = $this->etapaInicioLogisticaExistente($etapaId);
+        if (!$etapaInicioExistente) {
+            return null;
+        }
+
+        return back()
+            ->withInput($request->except('inicia_logistica'))
+            ->withErrors([
+                'inicia_logistica' => 'A etapa "' . $etapaInicioExistente->nome . '" já encerra a produção e inicia a logística. Edite essa etapa para alterar essa configuração.',
+            ]);
     }
 
     private function syncTransicoes(EtapaProducao $origem, array $transicoes): void

@@ -109,15 +109,15 @@ const API = {
         return this.request(`/motorista/coletas/${id}`);
     },
 
-    async confirmarChegada(id, observacao = '') {
-        return this.request(`/motorista/coletas/${id}/confirmar-chegada`, {
+    async solicitarRetirada(id, observacao = '') {
+        return this.request(`/motorista/coletas/${id}/solicitar-retirada`, {
             method: 'POST',
             body: JSON.stringify({ observacao }),
         });
     },
 
-    async confirmarEntrega(id, observacao = '') {
-        return this.request(`/motorista/coletas/${id}/confirmar-entrega`, {
+    async confirmarEntregaFabrica(id, observacao = '') {
+        return this.request(`/motorista/coletas/${id}/confirmar-entrega-fabrica`, {
             method: 'POST',
             body: JSON.stringify({ observacao }),
         });

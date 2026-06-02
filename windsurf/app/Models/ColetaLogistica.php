@@ -13,6 +13,7 @@ class ColetaLogistica extends Model
 
     const STATUS_AGENDADO = 'agendado';
     const STATUS_EM_TRANSITO = 'em_transito';
+    const STATUS_ENTREGUE = 'entregue';
     const STATUS_FINALIZADO = 'finalizado';
     const STATUS_CANCELADO = 'cancelado';
 
@@ -75,7 +76,7 @@ class ColetaLogistica extends Model
      */
     public function scopeAtivas($query)
     {
-        return $query->whereIn('status', [self::STATUS_AGENDADO, self::STATUS_EM_TRANSITO]);
+        return $query->whereIn('status', [self::STATUS_AGENDADO, self::STATUS_EM_TRANSITO, self::STATUS_ENTREGUE]);
     }
 
     /**
@@ -83,7 +84,7 @@ class ColetaLogistica extends Model
      */
     public function isAtiva(): bool
     {
-        return in_array($this->status, [self::STATUS_AGENDADO, self::STATUS_EM_TRANSITO]);
+        return in_array($this->status, [self::STATUS_AGENDADO, self::STATUS_EM_TRANSITO, self::STATUS_ENTREGUE]);
     }
 
     /**
@@ -92,6 +93,17 @@ class ColetaLogistica extends Model
     public function podeCancelar(): bool
     {
         return $this->status === self::STATUS_AGENDADO;
+    }
+
+    public static function labelsStatus(): array
+    {
+        return [
+            self::STATUS_AGENDADO => 'Agendado',
+            self::STATUS_EM_TRANSITO => 'Em trânsito',
+            self::STATUS_ENTREGUE => 'Entregue na fábrica',
+            self::STATUS_FINALIZADO => 'Finalizado',
+            self::STATUS_CANCELADO => 'Cancelado',
+        ];
     }
 
     /**

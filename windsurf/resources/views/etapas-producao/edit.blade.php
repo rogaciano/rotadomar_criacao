@@ -80,13 +80,22 @@
                             </div>
 
                             <div class="md:col-span-2 {{ $etapa->contexto === 'logistica' ? '' : 'hidden' }}" id="inicia-logistica-wrap">
+                                @php
+                                    $bloquearInicioLogistica = $etapaInicioLogisticaAtual !== null;
+                                @endphp
                                 <label class="flex items-start gap-2 p-4 bg-amber-50/50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
                                     <input type="checkbox" name="inicia_logistica" value="1" id="inicia_logistica"
                                         {{ old('inicia_logistica', $etapa->inicia_logistica) ? 'checked' : '' }}
+                                        {{ $bloquearInicioLogistica ? 'disabled' : '' }}
                                         class="mt-1 rounded border-gray-300 text-amber-600 shadow-sm">
                                     <span>
                                         <span class="block text-sm font-medium">Encerra produção e inicia logística</span>
-                                        <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">Primeira etapa do fluxo logístico após a facção.</span>
+                                        <span class="block text-xs text-gray-600 dark:text-gray-400 mt-1">Primeira etapa do fluxo logístico após a facção. Apenas uma etapa pode ter esta marcação.</span>
+                                        @if($bloquearInicioLogistica)
+                                            <span class="block text-xs font-medium text-amber-700 dark:text-amber-300 mt-2">
+                                                A etapa <strong>{{ $etapaInicioLogisticaAtual->nome }}</strong> já encerra a produção e inicia a logística. Edite essa etapa caso queira alterar essa configuração.
+                                            </span>
+                                        @endif
                                     </span>
                                 </label>
                             </div>

@@ -26,10 +26,13 @@ class EtapaProducaoSeeder extends Seeder
             ['nome' => 'Aplicação DTF', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '🎨', 'cor' => 'pink', 'ordem' => 5],
             ['nome' => 'Estamparia', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '🖼️', 'cor' => 'orange', 'ordem' => 6],
             ['nome' => 'Acabamento', 'slug' => null, 'contexto' => EtapaProducao::CONTEXTO_LOCALIZACAO, 'inicia_logistica' => false, 'icone' => '✨', 'cor' => 'green', 'ordem' => 7],
-            ['nome' => 'Aguardando Retirada', 'slug' => 'aguardando_retirada', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => true, 'icone' => '📍', 'cor' => 'gray', 'ordem' => 1],
-            ['nome' => 'Aguardando Motorista', 'slug' => 'aguardando_motorista', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🚛', 'cor' => 'yellow', 'ordem' => 2],
-            ['nome' => 'Em Trânsito', 'slug' => 'em_transito', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🚚', 'cor' => 'orange', 'ordem' => 3],
-            ['nome' => 'Coletado', 'slug' => 'coletado', 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '✅', 'cor' => 'green', 'ordem' => 4],
+            ['nome' => 'Agendamento', 'slug' => EtapaProducao::SLUG_AGENDAMENTO, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => true, 'icone' => '�️', 'cor' => 'gray', 'ordem' => 1],
+            ['nome' => 'Saída da Fábrica / Solicitar Retirada', 'slug' => EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '📤', 'cor' => 'yellow', 'ordem' => 2],
+            ['nome' => 'Retirada Confirmada pela Facção', 'slug' => EtapaProducao::SLUG_RETIRADA_CONFIRMADA_FACCAO, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '�', 'cor' => 'orange', 'ordem' => 3],
+            ['nome' => 'Em Trânsito', 'slug' => EtapaProducao::SLUG_EM_TRANSITO, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🚚', 'cor' => 'orange', 'ordem' => 4],
+            ['nome' => 'Entrega Confirmada na Fábrica', 'slug' => EtapaProducao::SLUG_ENTREGA_CONFIRMADA_FABRICA, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🏭', 'cor' => 'indigo', 'ordem' => 5],
+            ['nome' => 'Check-in', 'slug' => EtapaProducao::SLUG_CHECK_IN, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '🧾', 'cor' => 'blue', 'ordem' => 6],
+            ['nome' => 'Chegada do Produto na Fábrica', 'slug' => EtapaProducao::SLUG_CHEGADA_PRODUTO_FABRICA, 'contexto' => EtapaProducao::CONTEXTO_LOGISTICA, 'inicia_logistica' => false, 'icone' => '✅', 'cor' => 'green', 'ordem' => 7],
         ];
 
         $etapasCriadas = [];
@@ -59,13 +62,16 @@ class EtapaProducaoSeeder extends Seeder
             // Estamparia → Acabamento
             ['origem' => 'Estamparia', 'destino' => 'Acabamento'],
 
-            // Acabamento → Aguardando Retirada
-            ['origem' => 'Acabamento', 'destino' => 'Aguardando Retirada'],
+            // Acabamento → Agendamento
+            ['origem' => 'Acabamento', 'destino' => 'Agendamento'],
 
-            // Fluxo logístico: Aguardando Retirada → Aguardando Motorista → Em Trânsito → Coletado
-            ['origem' => 'Aguardando Retirada', 'destino' => 'Aguardando Motorista', 'cor' => 'yellow'],
-            ['origem' => 'Aguardando Motorista', 'destino' => 'Em Trânsito', 'cor' => 'orange'],
-            ['origem' => 'Em Trânsito', 'destino' => 'Coletado', 'cor' => 'green'],
+            // Fluxo logístico detalhado
+            ['origem' => 'Agendamento', 'destino' => 'Saída da Fábrica / Solicitar Retirada', 'label' => 'Solicitar retirada', 'cor' => 'yellow'],
+            ['origem' => 'Saída da Fábrica / Solicitar Retirada', 'destino' => 'Retirada Confirmada pela Facção', 'label' => 'Confirmar retirada', 'cor' => 'orange'],
+            ['origem' => 'Retirada Confirmada pela Facção', 'destino' => 'Em Trânsito', 'label' => 'Em trânsito', 'cor' => 'orange'],
+            ['origem' => 'Em Trânsito', 'destino' => 'Entrega Confirmada na Fábrica', 'label' => 'Confirmar entrega', 'cor' => 'indigo'],
+            ['origem' => 'Entrega Confirmada na Fábrica', 'destino' => 'Check-in', 'label' => 'Registrar check-in', 'cor' => 'blue'],
+            ['origem' => 'Check-in', 'destino' => 'Chegada do Produto na Fábrica', 'label' => 'Confirmar chegada', 'cor' => 'green'],
         ];
 
         $ordem = 0;

@@ -18,8 +18,8 @@ Route::middleware('auth:sanctum')->prefix('motorista')->group(function () {
     Route::get('/perfil', [MotoristaApiController::class, 'perfil']);
     Route::get('/coletas', [MotoristaApiController::class, 'coletas']);
     Route::get('/coletas/{coleta}', [MotoristaApiController::class, 'coletaDetalhe']);
-    Route::post('/coletas/{coleta}/confirmar-chegada', [MotoristaApiController::class, 'confirmarChegada']);
-    Route::post('/coletas/{coleta}/confirmar-entrega', [MotoristaApiController::class, 'confirmarEntrega']);
+    Route::post('/coletas/{coleta}/solicitar-retirada', [MotoristaApiController::class, 'solicitarRetirada']);
+    Route::post('/coletas/{coleta}/confirmar-entrega-fabrica', [MotoristaApiController::class, 'confirmarEntregaFabrica']);
     Route::get('/disponiveis', [MotoristaApiController::class, 'disponiveis']);
     Route::get('/veiculos', [MotoristaApiController::class, 'veiculos']);
     Route::get('/destinos', [MotoristaApiController::class, 'destinos']);

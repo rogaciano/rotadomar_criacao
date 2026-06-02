@@ -49,6 +49,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Início</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Retorno</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Etapa Atual</th>
                                 <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Ações</th>
                             </tr>
                         </thead>
@@ -60,11 +61,9 @@
                                     $statusClasses = [
                                         'agendado' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
                                         'em_transito' => 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
+                                        'entregue' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
                                     ];
-                                    $statusLabels = [
-                                        'agendado' => 'Aguardando Motorista',
-                                        'em_transito' => 'Em Trânsito',
-                                    ];
+                                    $etapaAtualSlug = $pl?->etapaAtual?->slug;
                                     $user = auth()->user();
                                     $isOrigem = $user->isAdmin() || $user->localizacao_id === $pl?->localizacao_id;
                                     $isDestino = $user->isAdmin() || $user->localizacao_id === $coleta->destino_localizacao_id;
@@ -97,25 +96,53 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$coleta->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                            {{ $statusLabels[$coleta->status] ?? $coleta->status }}
+                                            {{ $coletaStatusLabels[$coleta->status] ?? $coleta->status }}
                                         </span>
                                     </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        <div class="font-medium text-gray-900 dark:text-white">{{ $pl?->etapaAtual?->nome ?? '-' }}</div>
+                                        @if($pl?->etapaAtual?->slug)
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $pl->etapaAtual->slug }}</div>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-3 text-right space-x-1">
-                                        {{-- Confirmar Chegada (origem) --}}
-                                        @if($coleta->status === 'agendado' && $isOrigem)
+                                        @if($coleta->status === 'agendado' && $isMotorista && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_AGENDAMENTO)
                                             <button type="button"
-                                                onclick="document.getElementById('modal-chegada-{{ $coleta->id }}').classList.remove('hidden')"
+                                                onclick="document.getElementById('modal-solicitar-retirada-{{ $coleta->id }}').classList.remove('hidden')"
                                                 class="inline-flex items-center px-2.5 py-1.5 bg-orange-500 text-white text-xs font-semibold rounded hover:bg-orange-600">
-                                                Confirmar Chegada
+                                                Solicitar Retirada
                                             </button>
                                         @endif
 
-                                        {{-- Confirmar Recebimento (destino) --}}
-                                        @if($coleta->status === 'em_transito' && $isDestino)
+                                        @if($coleta->status === 'agendado' && $isOrigem && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA)
                                             <button type="button"
-                                                onclick="document.getElementById('modal-recebimento-{{ $coleta->id }}').classList.remove('hidden')"
+                                                onclick="document.getElementById('modal-confirmar-retirada-{{ $coleta->id }}').classList.remove('hidden')"
+                                                class="inline-flex items-center px-2.5 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded hover:bg-amber-700">
+                                                Confirmar Retirada
+                                            </button>
+                                        @endif
+
+                                        @if($coleta->status === 'em_transito' && $isMotorista && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_EM_TRANSITO)
+                                            <button type="button"
+                                                onclick="document.getElementById('modal-entrega-fabrica-{{ $coleta->id }}').classList.remove('hidden')"
                                                 class="inline-flex items-center px-2.5 py-1.5 bg-green-600 text-white text-xs font-semibold rounded hover:bg-green-700">
-                                                Confirmar Recebimento
+                                                Confirmar Entrega
+                                            </button>
+                                        @endif
+
+                                        @if($coleta->status === 'entregue' && $isDestino && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_ENTREGA_CONFIRMADA_FABRICA)
+                                            <button type="button"
+                                                onclick="document.getElementById('modal-checkin-{{ $coleta->id }}').classList.remove('hidden')"
+                                                class="inline-flex items-center px-2.5 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded hover:bg-indigo-700">
+                                                Registrar Check-in
+                                            </button>
+                                        @endif
+
+                                        @if($coleta->status === 'entregue' && $isDestino && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_CHECK_IN)
+                                            <button type="button"
+                                                onclick="document.getElementById('modal-chegada-fabrica-{{ $coleta->id }}').classList.remove('hidden')"
+                                                class="inline-flex items-center px-2.5 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700">
+                                                Confirmar Chegada Final
                                             </button>
                                         @endif
 
@@ -132,16 +159,37 @@
                                     </td>
                                 </tr>
 
-                                {{-- Modal: Confirmar Chegada na Origem --}}
-                                @if($coleta->status === 'agendado' && $isOrigem)
-                                <div id="modal-chegada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+                                @if($coleta->status === 'agendado' && $isMotorista && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_AGENDAMENTO)
+                                <div id="modal-solicitar-retirada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Chegada do Motorista</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Solicitar Retirada na Facção</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Motorista <strong>{{ $coleta->motorista?->name }}</strong> chegou para coletar
-                                            <strong>{{ $produto?->referencia }}</strong>?
+                                            Registrar que o motorista <strong>{{ $coleta->motorista?->name }}</strong> solicitou a retirada de
+                                            <strong>{{ $produto?->referencia }}</strong> na facção.
                                         </p>
-                                        <form action="{{ route('logistica-coleta.confirmar-chegada-origem', $coleta) }}" method="POST">
+                                        <form action="{{ route('logistica-coleta.solicitar-retirada', $coleta) }}" method="POST">
+                                            @csrf
+                                            <div class="mb-4">
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
+                                                <textarea name="observacao_motorista" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
+                                            </div>
+                                            <div class="flex justify-end gap-2">
+                                                <button type="button" onclick="this.closest('[id^=modal-]').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
+                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-md hover:bg-orange-600">Solicitar Retirada</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                @endif
+
+                                @if($coleta->status === 'agendado' && $isOrigem && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA)
+                                <div id="modal-confirmar-retirada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+                                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Retirada pela Facção</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                            Confirmar a retirada do produto <strong>{{ $produto?->referencia }}</strong> pela facção? Após isso, ele entra automaticamente em trânsito.
+                                        </p>
+                                        <form action="{{ route('logistica-coleta.confirmar-retirada-faccao', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
                                                 <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
@@ -149,22 +197,21 @@
                                             </div>
                                             <div class="flex justify-end gap-2">
                                                 <button type="button" onclick="this.closest('[id^=modal-]').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
-                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-orange-500 rounded-md hover:bg-orange-600">Confirmar Chegada</button>
+                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-amber-600 rounded-md hover:bg-amber-700">Confirmar Retirada</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                                 @endif
 
-                                {{-- Modal: Confirmar Recebimento no Destino --}}
-                                @if($coleta->status === 'em_transito' && $isDestino)
-                                <div id="modal-recebimento-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+                                @if($coleta->status === 'em_transito' && $isMotorista && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_EM_TRANSITO)
+                                <div id="modal-entrega-fabrica-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Recebimento do Produto</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Entrega na Fábrica</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar que o produto <strong>{{ $produto?->referencia }}</strong> foi recebido?
+                                            Confirmar que o produto <strong>{{ $produto?->referencia }}</strong> foi entregue na fábrica?
                                         </p>
-                                        <form action="{{ route('logistica-coleta.confirmar-recebimento-destino', $coleta) }}" method="POST">
+                                        <form action="{{ route('logistica-coleta.confirmar-entrega-fabrica', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
                                                 <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
@@ -172,7 +219,51 @@
                                             </div>
                                             <div class="flex justify-end gap-2">
                                                 <button type="button" onclick="this.closest('[id^=modal-]').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
-                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700">Confirmar Recebimento</button>
+                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700">Confirmar Entrega</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                @endif
+
+                                @if($coleta->status === 'entregue' && $isDestino && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_ENTREGA_CONFIRMADA_FABRICA)
+                                <div id="modal-checkin-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+                                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Registrar Check-in</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                            Registrar o check-in do produto <strong>{{ $produto?->referencia }}</strong> na fábrica?
+                                        </p>
+                                        <form action="{{ route('logistica-coleta.registrar-checkin', $coleta) }}" method="POST">
+                                            @csrf
+                                            <div class="mb-4">
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
+                                                <textarea name="observacao_destino" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
+                                            </div>
+                                            <div class="flex justify-end gap-2">
+                                                <button type="button" onclick="this.closest('[id^=modal-]').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
+                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Registrar Check-in</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                @endif
+
+                                @if($coleta->status === 'entregue' && $isDestino && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_CHECK_IN)
+                                <div id="modal-chegada-fabrica-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+                                    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Chegada Final</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                            Confirmar a chegada final do produto <strong>{{ $produto?->referencia }}</strong> na fábrica e encerrar o processo?
+                                        </p>
+                                        <form action="{{ route('logistica-coleta.confirmar-chegada-fabrica', $coleta) }}" method="POST">
+                                            @csrf
+                                            <div class="mb-4">
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
+                                                <textarea name="observacao_destino" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
+                                            </div>
+                                            <div class="flex justify-end gap-2">
+                                                <button type="button" onclick="this.closest('[id^=modal-]').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
+                                                <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-md hover:bg-emerald-700">Encerrar Processo</button>
                                             </div>
                                         </form>
                                     </div>
@@ -189,7 +280,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-4 py-4 border-b border-gray-200 dark:border-slate-700 bg-indigo-50 dark:bg-indigo-900/30">
                     <h3 class="text-base font-extrabold text-indigo-900 dark:text-indigo-100 uppercase tracking-wider">
-                        📍 Produtos Aguardando Retirada ({{ $aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator ? $aguardandoRetirada->total() : $aguardandoRetirada->count() }})
+                        📍 Produtos Disponíveis para Agendamento ({{ $aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator ? $aguardandoRetirada->total() : $aguardandoRetirada->count() }})
                     </h3>
                 </div>
 
@@ -229,6 +320,7 @@
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Situação</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Etapa Atual</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Motorista</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
@@ -256,13 +348,16 @@
                                         <td class="px-4 py-3 text-sm">
                                             @if($temColeta)
                                                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
-                                                    🚛 Agendado
+                                                    🚛 {{ $coletaStatusLabels[$coleta->status] ?? 'Agendado' }}
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-slate-600 dark:text-gray-300">
-                                                    ⏳ Sem coleta
+                                                    ⏳ Disponível
                                                 </span>
                                             @endif
+                                        </td>
+                                        <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                            {{ $pl->etapaAtual?->nome ?? '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
                                             {{ $temColeta ? $coleta->motorista?->name : '-' }}
@@ -359,7 +454,7 @@
                     @endif
                 @else
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        Nenhum produto aguardando retirada no momento.
+                        Nenhum produto disponível para agendamento logístico no momento.
                     </div>
                 @endif
             </div>
@@ -413,6 +508,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Motorista</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Etapa Final</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Início</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Finalizado em</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
@@ -424,12 +520,9 @@
                                     $pl = $coleta->produtoLocalizacao;
                                     $produto = $pl?->produto;
                                     $statusClasses = [
+                                        'entregue' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300',
                                         'finalizado' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
                                         'cancelado' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-                                    ];
-                                    $statusLabels = [
-                                        'finalizado' => '✅ Coletado',
-                                        'cancelado' => '❌ Cancelado',
                                     ];
                                 @endphp
                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
@@ -452,6 +545,9 @@
                                         {{ $coleta->veiculo?->placa ?? '-' }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
+                                        {{ $pl?->etapaAtual?->nome ?? '-' }}
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
                                         {{ $coleta->inicio_previsto_em?->format('d/m H:i') }}
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
@@ -459,7 +555,7 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <span class="inline-flex px-2 py-1 rounded-full text-xs font-semibold {{ $statusClasses[$coleta->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                            {{ $statusLabels[$coleta->status] ?? $coleta->status }}
+                                            {{ $coletaStatusLabels[$coleta->status] ?? $coleta->status }}
                                         </span>
                                     </td>
                                 </tr>

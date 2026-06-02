@@ -141,9 +141,9 @@ class MotoristaApiController extends Controller
     }
 
     /**
-     * Motorista confirma chegada na origem → EM TRANSITO
+     * Motorista solicita a retirada do produto na facção.
      */
-    public function confirmarChegada(Request $request, ColetaLogistica $coleta): JsonResponse
+    public function solicitarRetirada(Request $request, ColetaLogistica $coleta): JsonResponse
     {
         $user = $request->user();
 
@@ -152,7 +152,7 @@ class MotoristaApiController extends Controller
         }
 
         if ($coleta->status !== ColetaLogistica::STATUS_AGENDADO) {
-            return response()->json(['message' => 'Esta coleta não está em status agendado.'], 422);
+            return response()->json(['message' => 'Esta coleta não está em um status válido para solicitar retirada.'], 422);
         }
 
         $request->validate([
@@ -162,19 +162,15 @@ class MotoristaApiController extends Controller
         DB::beginTransaction();
         try {
             $coleta->update([
-                'status' => ColetaLogistica::STATUS_EM_TRANSITO,
-                'chegada_origem_em' => now(),
                 'observacao_motorista' => $request->input('observacao'),
             ]);
 
-            $etapaEmTransito = EtapaProducao::porSlug(EtapaProducao::SLUG_EM_TRANSITO);
-            if ($etapaEmTransito) {
-                $coleta->produtoLocalizacao->avancarEtapa(
-                    $etapaEmTransito->id,
-                    $user->id,
-                    'Motorista confirmou chegada na origem via app'
-                );
-            }
+            $this->avancarProdutoParaEtapaLogistica(
+                $coleta->produtoLocalizacao,
+                EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA,
+                $user->id,
+                'Solicitação de retirada registrada pelo motorista via app'
+            );
 
             DB::commit();
 
@@ -187,19 +183,19 @@ class MotoristaApiController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Chegada confirmada! Produto em trânsito.',
+                'message' => 'Retirada solicitada com sucesso!',
                 'coleta' => $this->formatarColeta($coleta),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['message' => 'Erro ao confirmar chegada: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Erro ao solicitar retirada: ' . $e->getMessage()], 500);
         }
     }
 
     /**
-     * Motorista confirma entrega no destino → FINALIZADO
+     * Motorista confirma entrega na fábrica.
      */
-    public function confirmarEntrega(Request $request, ColetaLogistica $coleta): JsonResponse
+    public function confirmarEntregaFabrica(Request $request, ColetaLogistica $coleta): JsonResponse
     {
         $user = $request->user();
 
@@ -218,19 +214,16 @@ class MotoristaApiController extends Controller
         DB::beginTransaction();
         try {
             $coleta->update([
-                'status' => ColetaLogistica::STATUS_FINALIZADO,
-                'recebido_destino_em' => now(),
+                'status' => ColetaLogistica::STATUS_ENTREGUE,
                 'observacao_destino' => $request->input('observacao'),
             ]);
 
-            $etapaColetado = EtapaProducao::porSlug(EtapaProducao::SLUG_COLETADO);
-            if ($etapaColetado) {
-                $coleta->produtoLocalizacao->avancarEtapa(
-                    $etapaColetado->id,
-                    $user->id,
-                    'Motorista confirmou entrega no destino via app'
-                );
-            }
+            $this->avancarProdutoParaEtapaLogistica(
+                $coleta->produtoLocalizacao,
+                EtapaProducao::SLUG_ENTREGA_CONFIRMADA_FABRICA,
+                $user->id,
+                'Motorista confirmou entrega na fábrica via app'
+            );
 
             DB::commit();
 
@@ -243,7 +236,7 @@ class MotoristaApiController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Entrega confirmada! Coleta finalizada.',
+                'message' => 'Entrega na fábrica confirmada com sucesso!',
                 'coleta' => $this->formatarColeta($coleta),
             ]);
         } catch (\Exception $e) {
@@ -261,13 +254,15 @@ class MotoristaApiController extends Controller
             return response()->json(['produtos' => []]);
         }
 
-        $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
-        if (!$etapaAguardandoRetirada) {
+        $etapaAgendamento = EtapaProducao::etapaInicioLogistica()
+            ?? EtapaProducao::etapaLogisticaPorSlug(EtapaProducao::SLUG_AGENDAMENTO)
+            ?? EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
+        if (!$etapaAgendamento) {
             return response()->json(['produtos' => []]);
         }
 
         $produtos = \App\Models\ProdutoLocalizacao::with(['produto', 'localizacao'])
-            ->where('etapa_atual_id', $etapaAguardandoRetirada->id)
+            ->where('etapa_atual_id', $etapaAgendamento->id)
             ->whereDoesntHave('coletasLogisticas', function ($q) {
                 $q->ativas();
             })
@@ -357,10 +352,10 @@ class MotoristaApiController extends Controller
 
         $produtoLocalizacao = \App\Models\ProdutoLocalizacao::findOrFail($request->produto_localizacao_id);
 
-        // Verificar etapa
-        $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
-        if (!$etapaAguardandoRetirada || $produtoLocalizacao->etapa_atual_id !== $etapaAguardandoRetirada->id) {
-            return response()->json(['message' => 'Produto não está aguardando retirada.'], 422);
+        $etapaAgendamento = $this->etapaLogisticaObrigatoria(EtapaProducao::SLUG_AGENDAMENTO)
+            ?? EtapaProducao::etapaInicioLogistica();
+        if (!$etapaAgendamento || $produtoLocalizacao->etapa_atual_id !== $etapaAgendamento->id) {
+            return response()->json(['message' => 'Produto não está disponível para agendamento logístico.'], 422);
         }
 
         $inicio = $request->inicio_previsto_em;
@@ -380,7 +375,7 @@ class MotoristaApiController extends Controller
 
         DB::beginTransaction();
         try {
-            $coleta = ColetaLogistica::create([
+            ColetaLogistica::create([
                 'produto_localizacao_id' => $produtoLocalizacao->id,
                 'motorista_user_id' => $user->id,
                 'veiculo_id' => $request->veiculo_id,
@@ -391,14 +386,12 @@ class MotoristaApiController extends Controller
                 'observacao_motorista' => $request->observacao,
             ]);
 
-            $etapaAguardandoMotorista = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_MOTORISTA);
-            if ($etapaAguardandoMotorista) {
-                $produtoLocalizacao->avancarEtapa(
-                    $etapaAguardandoMotorista->id,
-                    $user->id,
-                    'Coleta agendada via app pelo motorista ' . $user->name
-                );
-            }
+            $this->avancarProdutoParaEtapaLogistica(
+                $produtoLocalizacao,
+                EtapaProducao::SLUG_AGENDAMENTO,
+                $user->id,
+                'Coleta agendada via app pelo motorista ' . $user->name
+            );
 
             DB::commit();
 
@@ -430,19 +423,18 @@ class MotoristaApiController extends Controller
                 'status' => ColetaLogistica::STATUS_CANCELADO,
             ]);
 
-            // Reverter etapa para AGUARDANDO RETIRADA
             $produtoLocalizacao = $coleta->produtoLocalizacao;
-            $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
-            if ($etapaAguardandoRetirada) {
+            $etapaInicioLogistica = EtapaProducao::etapaInicioLogistica();
+            if ($etapaInicioLogistica) {
                 $produtoLocalizacao->avancarEtapa(
-                    $etapaAguardandoRetirada->id,
+                    $etapaInicioLogistica->id,
                     $user->id,
                     'Coleta cancelada via app pelo motorista ' . $user->name
                 );
             }
 
             DB::commit();
-            return response()->json(['message' => 'Coleta cancelada. Produto retornou para Aguardando Retirada.']);
+            return response()->json(['message' => 'Coleta cancelada. Produto retornou ao início da logística.']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Erro ao cancelar: ' . $e->getMessage()], 500);
@@ -504,6 +496,7 @@ class MotoristaApiController extends Controller
         $data = [
             'id' => $coleta->id,
             'status' => $coleta->status,
+            'status_label' => ColetaLogistica::labelsStatus()[$coleta->status] ?? $coleta->status,
             'produto' => [
                 'referencia' => $pl?->produto?->referencia ?? '-',
                 'descricao' => $pl?->produto?->descricao ?? '-',
@@ -519,6 +512,10 @@ class MotoristaApiController extends Controller
                 'descricao' => $coleta->veiculo?->descricao ?? '-',
             ],
             'quantidade' => $pl?->quantidade ?? 0,
+            'etapa_atual' => [
+                'slug' => $pl?->etapaAtual?->slug,
+                'nome' => $pl?->etapaAtual?->nome ?? '-',
+            ],
             'inicio_previsto' => $coleta->inicio_previsto_em?->format('d/m/Y H:i'),
             'retorno_previsto' => $coleta->retorno_previsto_em?->format('d/m/Y H:i'),
             'chegada_origem' => $coleta->chegada_origem_em?->format('d/m/Y H:i'),
@@ -529,10 +526,28 @@ class MotoristaApiController extends Controller
             $data['observacao_motorista'] = $coleta->observacao_motorista;
             $data['observacao_origem'] = $coleta->observacao_origem;
             $data['observacao_destino'] = $coleta->observacao_destino;
-            $data['etapa_atual'] = $pl?->etapaAtual?->nome ?? '-';
             $data['created_at'] = $coleta->created_at?->format('d/m/Y H:i');
         }
 
         return $data;
+    }
+
+    private function etapaLogisticaObrigatoria(string $slug): ?EtapaProducao
+    {
+        return EtapaProducao::etapaLogisticaPorSlug($slug) ?? EtapaProducao::porSlug($slug);
+    }
+
+    private function avancarProdutoParaEtapaLogistica($produtoLocalizacao, string $slug, int $userId, string $observacao): void
+    {
+        $etapa = $this->etapaLogisticaObrigatoria($slug);
+        if (!$etapa) {
+            throw new \RuntimeException('Etapa logística não encontrada para o slug: ' . $slug);
+        }
+
+        if ($produtoLocalizacao->etapa_atual_id === $etapa->id) {
+            return;
+        }
+
+        $produtoLocalizacao->avancarEtapa($etapa->id, $userId, $observacao);
     }
 }

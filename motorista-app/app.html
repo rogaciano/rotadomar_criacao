@@ -295,6 +295,7 @@
                  :class="{
                      'border-yellow-700/50': coleta.status === 'agendado',
                      'border-blue-700/50': coleta.status === 'em_transito',
+                     'border-indigo-700/50': coleta.status === 'entregue',
                      'border-green-700/50': coleta.status === 'finalizado',
                      'border-slate-700': coleta.status === 'cancelado'
                  }">
@@ -304,11 +305,12 @@
                      :class="{
                          'bg-yellow-900/20': coleta.status === 'agendado',
                          'bg-blue-900/20': coleta.status === 'em_transito',
+                         'bg-indigo-900/20': coleta.status === 'entregue',
                          'bg-green-900/20': coleta.status === 'finalizado',
                          'bg-slate-800': coleta.status === 'cancelado'
                      }">
                     <div class="flex items-center gap-2">
-                        <span class="text-lg" x-text="coleta.status === 'agendado' ? '📋' : coleta.status === 'em_transito' ? '🚛' : coleta.status === 'finalizado' ? '✅' : '❌'"></span>
+                        <span class="text-lg" x-text="coleta.status === 'agendado' ? '📋' : coleta.status === 'em_transito' ? '🚛' : coleta.status === 'entregue' ? '🏭' : coleta.status === 'finalizado' ? '✅' : '❌'"></span>
                         <div>
                             <p class="text-white font-bold text-sm" x-text="'Ref. ' + coleta.produto.referencia"></p>
                             <p class="text-slate-400 text-xs" x-text="coleta.produto.descricao"></p>
@@ -318,10 +320,11 @@
                           :class="{
                               'bg-yellow-900/50 text-yellow-300 border border-yellow-700': coleta.status === 'agendado',
                               'bg-blue-900/50 text-blue-300 border border-blue-700': coleta.status === 'em_transito',
+                              'bg-indigo-900/50 text-indigo-300 border border-indigo-700': coleta.status === 'entregue',
                               'bg-green-900/50 text-green-300 border border-green-700': coleta.status === 'finalizado',
                               'bg-slate-700 text-slate-400 border border-slate-600': coleta.status === 'cancelado'
                           }"
-                          x-text="coleta.status === 'agendado' ? 'Agendado' : coleta.status === 'em_transito' ? 'Em Trânsito' : coleta.status === 'finalizado' ? 'Finalizado' : 'Cancelado'">
+                          x-text="coleta.status_label || coleta.status">
                     </span>
                 </div>
 
@@ -361,11 +364,15 @@
                             <p class="text-white font-bold text-xs" x-text="coleta.inicio_previsto || '-'"></p>
                         </div>
                     </div>
+                    <div class="bg-slate-700/30 rounded-lg p-2 mt-2">
+                        <p class="text-slate-500 text-[10px] font-bold uppercase mb-1">Etapa atual</p>
+                        <p class="text-white font-semibold text-sm" x-text="coleta.etapa_atual?.nome || '-' "></p>
+                    </div>
                 </div>
 
                 <!-- Card Actions -->
                 <div class="px-4 py-3 border-t border-slate-700/50">
-                    <!-- Agendado: botão confirmar chegada -->
+                    <!-- Agendado: botão solicitar retirada -->
                     <template x-if="coleta.status === 'agendado'">
                         <div x-data="{ showObs: false, obs: '', submitting: false }">
                             <div x-show="!showObs">
@@ -375,7 +382,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     </svg>
-                                    Confirmar Chegada na Origem
+                                    Solicitar Retirada na Facção
                                 </button>
                             </div>
                             <div x-show="showObs" class="space-y-2">
@@ -383,7 +390,7 @@
                                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500"></textarea>
                                 <div class="flex gap-2">
                                     <button @click="showObs = false" class="flex-1 py-2 bg-slate-700 text-slate-300 text-sm font-semibold rounded-lg">Cancelar</button>
-                                    <button @click="submitting = true; $dispatch('confirmar-chegada', { id: coleta.id, obs: obs })"
+                                    <button @click="submitting = true; $dispatch('solicitar-retirada', { id: coleta.id, obs: obs })"
                                             :disabled="submitting"
                                             class="flex-1 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50">
                                         <span x-show="!submitting">Confirmar</span>
@@ -403,7 +410,7 @@
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                     </svg>
-                                    Confirmar Entrega no Destino
+                                    Confirmar Entrega na Fábrica
                                 </button>
                             </div>
                             <div x-show="showObs" class="space-y-2">
@@ -411,7 +418,7 @@
                                           class="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
                                 <div class="flex gap-2">
                                     <button @click="showObs = false" class="flex-1 py-2 bg-slate-700 text-slate-300 text-sm font-semibold rounded-lg">Cancelar</button>
-                                    <button @click="submitting = true; $dispatch('confirmar-entrega', { id: coleta.id, obs: obs })"
+                                    <button @click="submitting = true; $dispatch('confirmar-entrega-fabrica', { id: coleta.id, obs: obs })"
                                             :disabled="submitting"
                                             class="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50">
                                         <span x-show="!submitting">Confirmar</span>
@@ -422,8 +429,8 @@
                         </div>
                     </template>
 
-                    <!-- Finalizado/Cancelado: info timestamps -->
-                    <template x-if="coleta.status === 'finalizado' || coleta.status === 'cancelado'">
+                    <!-- Finalizado/Cancelado/Entregue: info timestamps -->
+                    <template x-if="coleta.status === 'finalizado' || coleta.status === 'cancelado' || coleta.status === 'entregue'">
                         <div class="text-xs text-slate-500 flex items-center justify-between">
                             <span x-show="coleta.chegada_origem" x-text="'Chegada: ' + coleta.chegada_origem"></span>
                             <span x-show="coleta.recebido_destino" x-text="'Entrega: ' + coleta.recebido_destino"></span>
@@ -497,8 +504,8 @@
                 }, 30000);
 
                 // Listen for action events
-                this.$el.addEventListener('confirmar-chegada', (e) => this.handleConfirmarChegada(e.detail));
-                this.$el.addEventListener('confirmar-entrega', (e) => this.handleConfirmarEntrega(e.detail));
+                this.$el.addEventListener('solicitar-retirada', (e) => this.handleSolicitarRetirada(e.detail));
+                this.$el.addEventListener('confirmar-entrega-fabrica', (e) => this.handleConfirmarEntregaFabrica(e.detail));
 
                 // Push notifications
                 if (typeof PushManager !== 'undefined') {
@@ -598,20 +605,20 @@
                 }
             },
 
-            async handleConfirmarChegada({ id, obs }) {
+            async handleSolicitarRetirada({ id, obs }) {
                 try {
-                    const data = await API.confirmarChegada(id, obs);
-                    this.showToast(data?.message || 'Chegada confirmada!', 'success');
+                    const data = await API.solicitarRetirada(id, obs);
+                    this.showToast(data?.message || 'Retirada solicitada!', 'success');
                     await this.loadColetas();
                 } catch (err) {
-                    this.showToast(err?.data?.message || 'Erro ao confirmar chegada.', 'error');
+                    this.showToast(err?.data?.message || 'Erro ao solicitar retirada.', 'error');
                 }
             },
 
-            async handleConfirmarEntrega({ id, obs }) {
+            async handleConfirmarEntregaFabrica({ id, obs }) {
                 try {
-                    const data = await API.confirmarEntrega(id, obs);
-                    this.showToast(data?.message || 'Entrega confirmada!', 'success');
+                    const data = await API.confirmarEntregaFabrica(id, obs);
+                    this.showToast(data?.message || 'Entrega na fábrica confirmada!', 'success');
                     await this.loadColetas();
                 } catch (err) {
                     this.showToast(err?.data?.message || 'Erro ao confirmar entrega.', 'error');

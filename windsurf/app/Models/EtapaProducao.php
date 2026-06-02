@@ -16,6 +16,12 @@ class EtapaProducao extends Model
     const SLUG_AGUARDANDO_MOTORISTA = 'aguardando_motorista';
     const SLUG_EM_TRANSITO = 'em_transito';
     const SLUG_COLETADO = 'coletado';
+    const SLUG_AGENDAMENTO = 'agendamento';
+    const SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA = 'saida_fabrica_solicitar_retirada';
+    const SLUG_RETIRADA_CONFIRMADA_FACCAO = 'retirada_confirmada_faccao';
+    const SLUG_ENTREGA_CONFIRMADA_FABRICA = 'entrega_confirmada_fabrica';
+    const SLUG_CHECK_IN = 'check_in';
+    const SLUG_CHEGADA_PRODUTO_FABRICA = 'chegada_produto_fabrica';
 
     /** Etapas do fluxo na facção / planejamento (produto_localizacao). */
     const CONTEXTO_LOCALIZACAO = 'localizacao';
@@ -196,6 +202,40 @@ class EtapaProducao extends Model
         return static::query()
             ->where('ativo', true)
             ->where('inicia_logistica', true)
+            ->first();
+    }
+
+    public static function slugsLogisticaPadrao(): array
+    {
+        return [
+            self::SLUG_AGENDAMENTO,
+            self::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA,
+            self::SLUG_RETIRADA_CONFIRMADA_FACCAO,
+            self::SLUG_EM_TRANSITO,
+            self::SLUG_ENTREGA_CONFIRMADA_FABRICA,
+            self::SLUG_CHECK_IN,
+            self::SLUG_CHEGADA_PRODUTO_FABRICA,
+        ];
+    }
+
+    public static function etapasLogisticaPadrao(): array
+    {
+        return [
+            self::SLUG_AGENDAMENTO => 'Agendamento',
+            self::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA => 'Saída da Fábrica / Solicitar Retirada',
+            self::SLUG_RETIRADA_CONFIRMADA_FACCAO => 'Retirada Confirmada pela Facção',
+            self::SLUG_EM_TRANSITO => 'Em Trânsito',
+            self::SLUG_ENTREGA_CONFIRMADA_FABRICA => 'Entrega Confirmada na Fábrica',
+            self::SLUG_CHECK_IN => 'Check-in',
+            self::SLUG_CHEGADA_PRODUTO_FABRICA => 'Chegada do Produto na Fábrica',
+        ];
+    }
+
+    public static function etapaLogisticaPorSlug(string $slug): ?self
+    {
+        return static::query()
+            ->where('contexto', self::CONTEXTO_LOGISTICA)
+            ->where('slug', $slug)
             ->first();
     }
 

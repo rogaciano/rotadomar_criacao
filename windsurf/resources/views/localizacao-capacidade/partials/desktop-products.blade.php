@@ -171,7 +171,7 @@
                                                         </svg>
                                                     </a>
                                                     @php
-                                                        $isEtapaAguardandoMotorista = $etapaLinha->slug === 'aguardando_motorista';
+                                                        $isEtapaAguardandoMotorista = $etapaLinha->slug === \App\Models\EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA;
                                                         $coletaAtivaPl = null;
                                                         if ($isEtapaAguardandoMotorista && \Illuminate\Support\Facades\Schema::hasTable('coletas_logisticas')) {
                                                             $coletaAtivaPl = \App\Models\ColetaLogistica::where('produto_localizacao_id', $loc->pivot->id)
@@ -188,14 +188,14 @@
                                                             @if(auth()->user()->podeGerenciarEtapa($loc->id) || auth()->user()->isAdmin())
                                                                 <button type="button"
                                                                     @click.prevent="$dispatch('abrir-modal-confirmar-chegada', {
-                                                                        action: {{ Js::from(route('logistica-coleta.confirmar-chegada-origem', $coletaAtivaPl->id)) }},
+                                                                        action: {{ Js::from(route('logistica-coleta.confirmar-retirada-faccao', $coletaAtivaPl->id)) }},
                                                                         referencia: {{ Js::from($produtoPrincipal->referencia) }},
                                                                         motorista: {{ Js::from($coletaAtivaPl->motorista?->name ?? '?') }},
                                                                         veiculo: {{ Js::from($coletaAtivaPl->veiculo?->placa ?? '?') }},
                                                                         backUrl: {{ Js::from(request()->fullUrlWithQuery(['expand_produtos' => 1])) }}
                                                                     })"
                                                                     class="inline-flex items-center px-1.5 py-0.5 bg-orange-500 text-white text-[9px] font-bold rounded hover:bg-orange-600 transition-colors">
-                                                                    Confirmar Chegada
+                                                                    Confirmar Retirada
                                                                 </button>
                                                             @endif
                                                         </div>
@@ -315,16 +315,21 @@
                                                     $transicoes = $etapaLinha->transicoesOrigem ?? collect([]);
 
                                                     // Regras de negócio logística:
-                                                    // aguardando_retirada → aguardando_motorista: só via tela de logística
-                                                    if ($slugAtual === 'aguardando_retirada' && $isUsuarioFaccao) {
+                                                    // agendamento → solicitar retirada: só via tela de logística
+                                                    if ($slugAtual === \App\Models\EtapaProducao::SLUG_AGENDAMENTO && $isUsuarioFaccao) {
                                                         $transicoes = collect([]);
                                                     }
-                                                    // aguardando_motorista → em_transito: facção NÃO pode (só Confirmar Chegada)
-                                                    elseif ($slugAtual === 'aguardando_motorista' && $isUsuarioFaccao) {
+                                                    // solicitar retirada → retirada confirmada: facção só confirma pela ação dedicada
+                                                    elseif ($slugAtual === \App\Models\EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA && $isUsuarioFaccao) {
                                                         $transicoes = collect([]);
                                                     }
-                                                    // em_transito → coletado: só admin/fábrica, facção NÃO pode
-                                                    elseif ($slugAtual === 'em_transito' && $isUsuarioFaccao) {
+                                                    // em trânsito em diante: facção não executa transição manual
+                                                    elseif (in_array($slugAtual, [
+                                                        \App\Models\EtapaProducao::SLUG_RETIRADA_CONFIRMADA_FACCAO,
+                                                        \App\Models\EtapaProducao::SLUG_EM_TRANSITO,
+                                                        \App\Models\EtapaProducao::SLUG_ENTREGA_CONFIRMADA_FABRICA,
+                                                        \App\Models\EtapaProducao::SLUG_CHECK_IN,
+                                                    ], true) && $isUsuarioFaccao) {
                                                         $transicoes = collect([]);
                                                     }
                                                 }

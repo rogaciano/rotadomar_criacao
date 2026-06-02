@@ -23,8 +23,9 @@ class LogisticaColetaController extends Controller
     {
         $user = auth()->user();
 
-        // Etapa "Aguardando Retirada" por slug
-        $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
+        $etapaAgendamento = EtapaProducao::etapaInicioLogistica()
+            ?? EtapaProducao::etapaLogisticaPorSlug(EtapaProducao::SLUG_AGENDAMENTO)
+            ?? EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
 
         // Filtros
         $localizacaoId = $request->get('localizacao_id');
@@ -35,11 +36,11 @@ class LogisticaColetaController extends Controller
         $tabelaColetasExiste = Schema::hasTable('coletas_logisticas');
         $tabelaVeiculosExiste = Schema::hasTable('veiculos');
 
-        // Produtos aguardando retirada
+        // Produtos disponíveis para entrada no fluxo logístico
         $aguardandoRetirada = collect();
-        if ($etapaAguardandoRetirada) {
+        if ($etapaAgendamento) {
             $query = ProdutoLocalizacao::with(['produto', 'localizacao', 'etapaAtual'])
-                ->where('etapa_atual_id', $etapaAguardandoRetirada->id);
+                ->where('etapa_atual_id', $etapaAgendamento->id);
 
             if ($tabelaColetasExiste) {
                 $query->with(['coletaLogisticaAtiva.motorista', 'coletaLogisticaAtiva.veiculo', 'coletaLogisticaAtiva.destinoLocalizacao']);
@@ -111,6 +112,7 @@ class LogisticaColetaController extends Controller
             ->whereIn('id', $localizacoesPermitidas)
             ->orderBy('nome_localizacao')
             ->get();
+        $coletaStatusLabels = ColetaLogistica::labelsStatus();
 
         return view('logistica-coleta.index', compact(
             'aguardandoRetirada',
@@ -123,6 +125,7 @@ class LogisticaColetaController extends Controller
             'referencia',
             'historicoDataDe',
             'historicoDataAte',
+            'coletaStatusLabels',
         ));
     }
 
@@ -150,10 +153,10 @@ class LogisticaColetaController extends Controller
 
         $produtoLocalizacao = ProdutoLocalizacao::findOrFail($validated['produto_localizacao_id']);
 
-        // Verificar se produto está em AGUARDANDO RETIRADA
-        $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
-        if (!$etapaAguardandoRetirada || $produtoLocalizacao->etapa_atual_id !== $etapaAguardandoRetirada->id) {
-            return back()->with('error', 'Este produto não está na etapa Aguardando Retirada.');
+        $etapaAgendamento = $this->etapaLogisticaObrigatoria(EtapaProducao::SLUG_AGENDAMENTO)
+            ?? EtapaProducao::etapaInicioLogistica();
+        if (!$etapaAgendamento || $produtoLocalizacao->etapa_atual_id !== $etapaAgendamento->id) {
+            return back()->with('error', 'Este produto não está disponível para agendamento logístico.');
         }
 
         $inicio = $validated['inicio_previsto_em'];
@@ -188,15 +191,12 @@ class LogisticaColetaController extends Controller
                 'observacao_motorista' => $validated['observacao_motorista'] ?? null,
             ]);
 
-            // Avançar etapa para AGUARDANDO MOTORISTA
-            $etapaAguardandoMotorista = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_MOTORISTA);
-            if ($etapaAguardandoMotorista) {
-                $produtoLocalizacao->avancarEtapa(
-                    $etapaAguardandoMotorista->id,
-                    $user->id,
-                    'Coleta agendada pelo motorista ' . $user->name
-                );
-            }
+            $this->avancarProdutoParaEtapaLogistica(
+                $produtoLocalizacao,
+                EtapaProducao::SLUG_AGENDAMENTO,
+                $user->id,
+                'Coleta agendada pelo motorista ' . $user->name
+            );
 
             DB::commit();
             return redirect()->route('logistica-coleta.index')->with('success', 'Coleta agendada com sucesso!');
@@ -207,26 +207,70 @@ class LogisticaColetaController extends Controller
     }
 
     /**
-     * Responsável da origem confirma chegada do motorista → EM TRANSITO
+     * Motorista solicita a retirada do produto na facção.
      */
-    public function confirmarChegadaOrigem(Request $request, ColetaLogistica $coleta): RedirectResponse
+    public function solicitarRetirada(Request $request, ColetaLogistica $coleta): RedirectResponse
     {
         $user = auth()->user();
 
-        // Verificar se a coleta está em status agendado
-        if ($coleta->status !== ColetaLogistica::STATUS_AGENDADO) {
-            return back()->with('error', 'Esta coleta não está em status agendado.');
+        if (!$user->isAdmin() && $coleta->motorista_user_id !== $user->id) {
+            return back()->with('error', 'Você não tem permissão para solicitar a retirada deste produto.');
         }
 
-        // Verificar se o usuário pertence à localização de origem
         $produtoLocalizacao = $coleta->produtoLocalizacao;
+        if ($coleta->status !== ColetaLogistica::STATUS_AGENDADO) {
+            return back()->with('error', 'Esta coleta não está em um status válido para solicitar retirada.');
+        }
+
+        $validated = $request->validate([
+            'observacao_motorista' => 'nullable|string|max:1000',
+            'back_url' => 'nullable|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $coleta->update([
+                'observacao_motorista' => $validated['observacao_motorista'] ?? $coleta->observacao_motorista,
+            ]);
+
+            $this->avancarProdutoParaEtapaLogistica(
+                $produtoLocalizacao,
+                EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA,
+                $user->id,
+                'Solicitação de retirada registrada pelo motorista ' . $user->name
+            );
+
+            DB::commit();
+
+            $backUrl = $request->input('back_url');
+            if ($backUrl) {
+                return redirect($backUrl)->with('success', 'Retirada solicitada com sucesso.');
+            }
+            return redirect()->route('logistica-coleta.index')->with('success', 'Retirada solicitada com sucesso.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Erro ao solicitar retirada: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Responsável da facção confirma a retirada e o produto entra automaticamente em trânsito.
+     */
+    public function confirmarRetiradaFaccao(Request $request, ColetaLogistica $coleta): RedirectResponse
+    {
+        $user = auth()->user();
+        $produtoLocalizacao = $coleta->produtoLocalizacao;
+
+        if ($coleta->status !== ColetaLogistica::STATUS_AGENDADO) {
+            return back()->with('error', 'Esta coleta não está em um status válido para confirmação de retirada.');
+        }
+
         if (!$user->isAdmin() && $user->localizacao_id !== $produtoLocalizacao->localizacao_id) {
-            return back()->with('error', 'Você não tem permissão para confirmar chegada nesta localização.');
+            return back()->with('error', 'Você não tem permissão para confirmar a retirada nesta localização.');
         }
 
         $validated = $request->validate([
             'observacao_origem' => 'nullable|string|max:1000',
-            'back_url' => 'nullable|string',
         ]);
 
         DB::beginTransaction();
@@ -237,44 +281,130 @@ class LogisticaColetaController extends Controller
                 'observacao_origem' => $validated['observacao_origem'] ?? null,
             ]);
 
-            // Avançar etapa para EM TRANSITO
-            $etapaEmTransito = EtapaProducao::porSlug(EtapaProducao::SLUG_EM_TRANSITO);
-            if ($etapaEmTransito) {
-                $produtoLocalizacao->avancarEtapa(
-                    $etapaEmTransito->id,
-                    $user->id,
-                    'Motorista chegou na origem - confirmado por ' . $user->name
-                );
-            }
+            $this->avancarProdutoParaEtapaLogistica(
+                $produtoLocalizacao,
+                EtapaProducao::SLUG_RETIRADA_CONFIRMADA_FACCAO,
+                $user->id,
+                'Retirada confirmada pela facção por ' . $user->name
+            );
+
+            $this->avancarProdutoParaEtapaLogistica(
+                $produtoLocalizacao,
+                EtapaProducao::SLUG_EM_TRANSITO,
+                $user->id,
+                'Produto entrou automaticamente em trânsito após confirmação da retirada pela facção'
+            );
 
             DB::commit();
-
-            $backUrl = $request->input('back_url');
-            if ($backUrl) {
-                return redirect($backUrl)->with('success', 'Chegada confirmada! Produto em trânsito.');
-            }
-            return redirect()->route('logistica-coleta.index')->with('success', 'Chegada confirmada! Produto em trânsito.');
+            return redirect()->route('logistica-coleta.index')->with('success', 'Retirada confirmada! Produto em trânsito.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro ao confirmar chegada: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao confirmar retirada: ' . $e->getMessage());
         }
     }
 
     /**
-     * Funcionário do destino confirma recebimento → COLETADO
+     * Motorista confirma a entrega na fábrica.
      */
-    public function confirmarRecebimentoDestino(Request $request, ColetaLogistica $coleta): RedirectResponse
+    public function confirmarEntregaFabrica(Request $request, ColetaLogistica $coleta): RedirectResponse
     {
         $user = auth()->user();
 
-        // Verificar se a coleta está em trânsito
+        if (!$user->isAdmin() && $coleta->motorista_user_id !== $user->id) {
+            return back()->with('error', 'Você não tem permissão para confirmar a entrega desta coleta.');
+        }
+
         if ($coleta->status !== ColetaLogistica::STATUS_EM_TRANSITO) {
             return back()->with('error', 'Esta coleta não está em trânsito.');
         }
 
-        // Verificar se o usuário pertence à localização de destino
+        $validated = $request->validate([
+            'observacao_destino' => 'nullable|string|max:1000',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $coleta->update([
+                'status' => ColetaLogistica::STATUS_ENTREGUE,
+                'observacao_destino' => $validated['observacao_destino'] ?? $coleta->observacao_destino,
+            ]);
+
+            $this->avancarProdutoParaEtapaLogistica(
+                $coleta->produtoLocalizacao,
+                EtapaProducao::SLUG_ENTREGA_CONFIRMADA_FABRICA,
+                $user->id,
+                'Entrega na fábrica confirmada pelo motorista ' . $user->name
+            );
+
+            DB::commit();
+            return redirect()->route('logistica-coleta.index')->with('success', 'Entrega na fábrica confirmada com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Erro ao confirmar entrega: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Destino registra o check-in do produto entregue.
+     */
+    public function registrarCheckIn(Request $request, ColetaLogistica $coleta): RedirectResponse
+    {
+        $user = auth()->user();
+
         if (!$user->isAdmin() && $user->localizacao_id !== $coleta->destino_localizacao_id) {
-            return back()->with('error', 'Você não tem permissão para confirmar recebimento nesta localização.');
+            return back()->with('error', 'Você não tem permissão para registrar check-in nesta localização.');
+        }
+
+        if (!in_array($coleta->status, [ColetaLogistica::STATUS_EM_TRANSITO, ColetaLogistica::STATUS_ENTREGUE], true)) {
+            return back()->with('error', 'Esta coleta não está em um status válido para check-in.');
+        }
+
+        $validated = $request->validate([
+            'observacao_destino' => 'nullable|string|max:1000',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            if ($coleta->status !== ColetaLogistica::STATUS_ENTREGUE) {
+                $coleta->update([
+                    'status' => ColetaLogistica::STATUS_ENTREGUE,
+                ]);
+            }
+
+            if (!empty($validated['observacao_destino'])) {
+                $coleta->update([
+                    'observacao_destino' => $validated['observacao_destino'],
+                ]);
+            }
+
+            $this->avancarProdutoParaEtapaLogistica(
+                $coleta->produtoLocalizacao,
+                EtapaProducao::SLUG_CHECK_IN,
+                $user->id,
+                'Check-in registrado por ' . $user->name
+            );
+
+            DB::commit();
+            return redirect()->route('logistica-coleta.index')->with('success', 'Check-in registrado com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Erro ao registrar check-in: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Destino confirma a chegada final do produto na fábrica.
+     */
+    public function confirmarChegadaFabrica(Request $request, ColetaLogistica $coleta): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if (!$user->isAdmin() && $user->localizacao_id !== $coleta->destino_localizacao_id) {
+            return back()->with('error', 'Você não tem permissão para confirmar a chegada final nesta localização.');
+        }
+
+        if (!in_array($coleta->status, [ColetaLogistica::STATUS_EM_TRANSITO, ColetaLogistica::STATUS_ENTREGUE], true)) {
+            return back()->with('error', 'Esta coleta não está em um status válido para encerramento.');
         }
 
         $validated = $request->validate([
@@ -286,25 +416,21 @@ class LogisticaColetaController extends Controller
             $coleta->update([
                 'status' => ColetaLogistica::STATUS_FINALIZADO,
                 'recebido_destino_em' => now(),
-                'observacao_destino' => $validated['observacao_destino'] ?? null,
+                'observacao_destino' => $validated['observacao_destino'] ?? $coleta->observacao_destino,
             ]);
 
-            // Avançar etapa para COLETADO
-            $produtoLocalizacao = $coleta->produtoLocalizacao;
-            $etapaColetado = EtapaProducao::porSlug(EtapaProducao::SLUG_COLETADO);
-            if ($etapaColetado) {
-                $produtoLocalizacao->avancarEtapa(
-                    $etapaColetado->id,
-                    $user->id,
-                    'Produto recebido no destino - confirmado por ' . $user->name
-                );
-            }
+            $this->avancarProdutoParaEtapaLogistica(
+                $coleta->produtoLocalizacao,
+                EtapaProducao::SLUG_CHEGADA_PRODUTO_FABRICA,
+                $user->id,
+                'Chegada final do produto na fábrica confirmada por ' . $user->name
+            );
 
             DB::commit();
-            return redirect()->route('logistica-coleta.index')->with('success', 'Produto coletado com sucesso!');
+            return redirect()->route('logistica-coleta.index')->with('success', 'Chegada do produto confirmada com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro ao confirmar recebimento: ' . $e->getMessage());
+            return back()->with('error', 'Erro ao confirmar chegada: ' . $e->getMessage());
         }
     }
 
@@ -330,22 +456,40 @@ class LogisticaColetaController extends Controller
                 'status' => ColetaLogistica::STATUS_CANCELADO,
             ]);
 
-            // Reverter etapa para AGUARDANDO RETIRADA
             $produtoLocalizacao = $coleta->produtoLocalizacao;
-            $etapaAguardandoRetirada = EtapaProducao::porSlug(EtapaProducao::SLUG_AGUARDANDO_RETIRADA);
-            if ($etapaAguardandoRetirada) {
+            $etapaInicioLogistica = EtapaProducao::etapaInicioLogistica();
+            if ($etapaInicioLogistica) {
                 $produtoLocalizacao->avancarEtapa(
-                    $etapaAguardandoRetirada->id,
+                    $etapaInicioLogistica->id,
                     $user->id,
                     'Coleta cancelada por ' . $user->name
                 );
             }
 
             DB::commit();
-            return redirect()->route('logistica-coleta.index')->with('success', 'Coleta cancelada. Produto retornou para Aguardando Retirada.');
+            return redirect()->route('logistica-coleta.index')->with('success', 'Coleta cancelada. Produto retornou ao início da logística.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Erro ao cancelar coleta: ' . $e->getMessage());
         }
+    }
+
+    private function etapaLogisticaObrigatoria(string $slug): ?EtapaProducao
+    {
+        return EtapaProducao::etapaLogisticaPorSlug($slug) ?? EtapaProducao::porSlug($slug);
+    }
+
+    private function avancarProdutoParaEtapaLogistica(ProdutoLocalizacao $produtoLocalizacao, string $slug, int $userId, string $observacao): void
+    {
+        $etapa = $this->etapaLogisticaObrigatoria($slug);
+        if (!$etapa) {
+            throw new \RuntimeException('Etapa logística não encontrada para o slug: ' . $slug);
+        }
+
+        if ($produtoLocalizacao->etapa_atual_id === $etapa->id) {
+            return;
+        }
+
+        $produtoLocalizacao->avancarEtapa($etapa->id, $userId, $observacao);
     }
 }

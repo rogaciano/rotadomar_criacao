@@ -258,8 +258,11 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::middleware('permission:logistica')->group(function () {
     Route::get('logistica-coleta', [LogisticaColetaController::class, 'index'])->name('logistica-coleta.index');
     Route::post('logistica-coleta/agendar', [LogisticaColetaController::class, 'agendar'])->name('logistica-coleta.agendar');
-    Route::post('logistica-coleta/{coleta}/confirmar-chegada-origem', [LogisticaColetaController::class, 'confirmarChegadaOrigem'])->name('logistica-coleta.confirmar-chegada-origem');
-    Route::post('logistica-coleta/{coleta}/confirmar-recebimento-destino', [LogisticaColetaController::class, 'confirmarRecebimentoDestino'])->name('logistica-coleta.confirmar-recebimento-destino');
+    Route::post('logistica-coleta/{coleta}/solicitar-retirada', [LogisticaColetaController::class, 'solicitarRetirada'])->name('logistica-coleta.solicitar-retirada');
+    Route::post('logistica-coleta/{coleta}/confirmar-retirada-faccao', [LogisticaColetaController::class, 'confirmarRetiradaFaccao'])->name('logistica-coleta.confirmar-retirada-faccao');
+    Route::post('logistica-coleta/{coleta}/confirmar-entrega-fabrica', [LogisticaColetaController::class, 'confirmarEntregaFabrica'])->name('logistica-coleta.confirmar-entrega-fabrica');
+    Route::post('logistica-coleta/{coleta}/registrar-checkin', [LogisticaColetaController::class, 'registrarCheckIn'])->name('logistica-coleta.registrar-checkin');
+    Route::post('logistica-coleta/{coleta}/confirmar-chegada-fabrica', [LogisticaColetaController::class, 'confirmarChegadaFabrica'])->name('logistica-coleta.confirmar-chegada-fabrica');
     Route::post('logistica-coleta/{coleta}/cancelar', [LogisticaColetaController::class, 'cancelar'])->name('logistica-coleta.cancelar');
 
     Route::resource('veiculos', VeiculoController::class)->except(['show']);
