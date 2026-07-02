@@ -14,7 +14,7 @@ class Estilista extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * Os atributos que sÃ£o atribuÃ­veis em massa.
+     * Os atributos que são atribuíveis em massa.
      *
      * @var array
      */
@@ -49,7 +49,7 @@ class Estilista extends Model
             return asset('storage/' . $this->foto);
         }
 
-        // Retorna uma imagem padrÃ£o caso nÃ£o haja foto
+        // Retorna uma imagem padrão caso não haja foto
         return asset('images/default-estilista.jpg');
     }
 
@@ -118,8 +118,8 @@ class Estilista extends Model
     }
 
     /**
-     * Retorna a contagem de produtos agrupados por localizaÃ§Ã£o
-     * Retorna as 10 primeiras localizaÃ§Ãµes e agrupa as demais em 'Outros'
+     * Retorna a contagem de produtos agrupados por localização
+     * Retorna as 10 primeiras localizações e agrupa as demais em 'Outros'
      *
      * @return array
      */
@@ -129,14 +129,14 @@ class Estilista extends Model
     }
 
     /**
-     * Calcula o tempo mÃ©dio desde a criaÃ§Ã£o atÃ© a ativaÃ§Ã£o dos produtos
-     * Usa a data da primeira movimentaÃ§Ã£o como data de ativaÃ§Ã£o
+     * Calcula o tempo médio desde a criação até a ativação dos produtos
+     * Usa a data da primeira movimentação como data de ativação
      *
      * @return string|null
      */
     /**
      * Retorna os dados mensais de produtos do estilista
-     * Ãšltimos 12 meses
+     * Últimos 12 meses
      *
      * @return array
      */
@@ -146,8 +146,8 @@ class Estilista extends Model
     }
 
     /**
-     * Calcula o tempo mÃ©dio desde a criaÃ§Ã£o atÃ© a ativaÃ§Ã£o dos produtos
-     * Usa a data da primeira movimentaÃ§Ã£o como data de ativaÃ§Ã£o
+     * Calcula o tempo médio desde a criação até a ativação dos produtos
+     * Usa a data da primeira movimentação como data de ativação
      *
      * @return string|null
      */

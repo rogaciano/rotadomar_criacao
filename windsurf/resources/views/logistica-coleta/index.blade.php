@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
-                ðŸš› LogÃ­stica de Coleta
+                🚛 Logística de Coleta
             </h2>
             @if(auth()->user()->isAdmin())
                 <a href="{{ route('veiculos.index') }}" class="inline-flex items-center px-4 py-2 bg-slate-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-slate-700">
-                    VeÃ­culos
+                    Veículos
                 </a>
             @endif
         </div>
@@ -16,7 +16,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             {{-- Mensagens de sucesso/erro --}}
-            {{-- Erros de validaÃ§Ã£o (nÃ£o exibidos pelo toast global) --}}
+            {{-- Erros de validação (não exibidos pelo toast global) --}}
             @if($errors->any())
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4">
                     <p class="text-sm font-semibold text-red-700 dark:text-red-300 mb-1">Erro ao agendar coleta:</p>
@@ -28,29 +28,29 @@
                 </div>
             @endif
 
-            {{-- ===== SEÃ‡ÃƒO 1: COLETAS ATIVAS ===== --}}
+            {{-- ===== SEÇÃO 1: COLETAS ATIVAS ===== --}}
             @if($coletasAtivas->count() > 0)
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 bg-indigo-50 dark:bg-indigo-900/30">
                     <h3 class="text-sm font-bold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider">
-                        ðŸ“‹ Coletas Ativas ({{ $coletasAtivas->count() }})
+                        📋 Coletas Ativas ({{ $coletasAtivas->count() }})
                     </h3>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                         <thead class="bg-gray-50 dark:bg-slate-700">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">ReferÃªncia</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Referência</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">ResponsÃ¡vel</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">VeÃ­culo</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">InÃ­cio</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Responsável</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Início</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Retorno</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Etapa Atual</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">AÃ§Ãµes</th>
+                                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Ações</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -65,8 +65,8 @@
                                     ];
                                     $etapaAtualSlug = $pl?->etapaAtual?->slug;
                                     $statusLabels = [
-                                        'agendado' => 'Aguardando ResponsÃ¡vel',
-                                        'em_transito' => 'Em TrÃ¢nsito',
+                                        'agendado' => 'Aguardando Responsável',
+                                        'em_transito' => 'Em Trânsito',
                                         'entregue' => 'Entregue',
                                     ];
                                     $user = auth()->user();
@@ -151,7 +151,7 @@
                                             </button>
                                         @endif
 
-                                        {{-- Cancelar (responsÃ¡vel, sÃ³ agendado) --}}
+                                        {{-- Cancelar (responsável, só agendado) --}}
                                         @if($coleta->status === 'agendado' && $isResponsavel)
                                             <button type="button"
                                                 onclick="document.getElementById('modal-cancelar-{{ $coleta->id }}').classList.remove('hidden')"
@@ -165,15 +165,15 @@
                                 @if($coleta->status === 'agendado' && $isResponsavel && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_AGENDAMENTO)
                                 <div id="modal-solicitar-retirada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Solicitar Retirada na FacÃ§Ã£o</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Solicitar Retirada na Facção</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Registrar que o responsÃ¡vel <strong>{{ $coleta->motorista?->name }}</strong> solicitou a retirada de
-                                            <strong>{{ $produto?->referencia }}</strong> na facÃ§Ã£o.
+                                            Registrar que o responsável <strong>{{ $coleta->motorista?->name }}</strong> solicitou a retirada de
+                                            <strong>{{ $produto?->referencia }}</strong> na facção.
                                         </p>
                                         <form action="{{ route('logistica-coleta.solicitar-retirada', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
-                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ObservaÃ§Ã£o (opcional)</label>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
                                                 <textarea name="observacao_motorista" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
                                             </div>
                                             <div class="flex justify-end gap-2">
@@ -188,14 +188,14 @@
                                 @if($coleta->status === 'agendado' && $isOrigem && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA)
                                 <div id="modal-confirmar-retirada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Retirada pela FacÃ§Ã£o</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Retirada pela Facção</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar a retirada do produto <strong>{{ $produto?->referencia }}</strong> pela facÃ§Ã£o? ApÃ³s isso, ele entra automaticamente em trÃ¢nsito.
+                                            Confirmar a retirada do produto <strong>{{ $produto?->referencia }}</strong> pela facção? Após isso, ele entra automaticamente em trânsito.
                                         </p>
                                         <form action="{{ route('logistica-coleta.confirmar-retirada-faccao', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
-                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ObservaÃ§Ã£o (opcional)</label>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
                                                 <textarea name="observacao_origem" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
                                             </div>
                                             <div class="flex justify-end gap-2">
@@ -210,14 +210,14 @@
                                 @if($coleta->status === 'em_transito' && $isResponsavel && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_EM_TRANSITO)
                                 <div id="modal-entrega-fabrica-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Entrega na FÃ¡brica</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Entrega na Fábrica</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar que o produto <strong>{{ $produto?->referencia }}</strong> foi entregue na fÃ¡brica?
+                                            Confirmar que o produto <strong>{{ $produto?->referencia }}</strong> foi entregue na fábrica?
                                         </p>
                                         <form action="{{ route('logistica-coleta.confirmar-entrega-fabrica', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
-                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ObservaÃ§Ã£o (opcional)</label>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
                                                 <textarea name="observacao_destino" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
                                             </div>
                                             <div class="flex justify-end gap-2">
@@ -234,12 +234,12 @@
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
                                         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Registrar Check-in</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Registrar o check-in do produto <strong>{{ $produto?->referencia }}</strong> na fÃ¡brica?
+                                            Registrar o check-in do produto <strong>{{ $produto?->referencia }}</strong> na fábrica?
                                         </p>
                                         <form action="{{ route('logistica-coleta.registrar-checkin', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
-                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ObservaÃ§Ã£o (opcional)</label>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
                                                 <textarea name="observacao_destino" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
                                             </div>
                                             <div class="flex justify-end gap-2">
@@ -256,12 +256,12 @@
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
                                         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Chegada Final</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar a chegada final do produto <strong>{{ $produto?->referencia }}</strong> na fÃ¡brica e encerrar o processo?
+                                            Confirmar a chegada final do produto <strong>{{ $produto?->referencia }}</strong> na fábrica e encerrar o processo?
                                         </p>
                                         <form action="{{ route('logistica-coleta.confirmar-chegada-fabrica', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
-                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ObservaÃ§Ã£o (opcional)</label>
+                                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
                                                 <textarea name="observacao_destino" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
                                             </div>
                                             <div class="flex justify-end gap-2">
@@ -277,18 +277,18 @@
                                 @if($coleta->status === 'agendado' && $isResponsavel)
                                 <div id="modal-cancelar-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-red-700 dark:text-red-400 mb-4">âš ï¸ Cancelar Agendamento</h3>
+                                        <h3 class="text-lg font-bold text-red-700 dark:text-red-400 mb-4">⚠️ Cancelar Agendamento</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
                                             Deseja cancelar o agendamento do produto <strong>{{ $produto?->referencia }}</strong>?
                                         </p>
                                         <p class="text-sm text-gray-500 dark:text-gray-500 mb-6">
-                                            O produto voltarÃ¡ para <strong>Aguardando Retirada</strong>.
+                                            O produto voltará para <strong>Aguardando Retirada</strong>.
                                         </p>
                                         <div class="flex justify-end gap-2">
                                             <button type="button"
                                                 onclick="document.getElementById('modal-cancelar-{{ $coleta->id }}').classList.add('hidden')"
                                                 class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">
-                                                NÃ£o, manter
+                                                Não, manter
                                             </button>
                                             <form action="{{ route('logistica-coleta.cancelar', $coleta) }}" method="POST">
                                                 @csrf
@@ -308,11 +308,11 @@
             </div>
             @endif
 
-            {{-- ===== SEÃ‡ÃƒO 2: FILTROS + PRODUTOS AGUARDANDO RETIRADA ===== --}}
+            {{-- ===== SEÇÃO 2: FILTROS + PRODUTOS AGUARDANDO RETIRADA ===== --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-4 py-4 border-b border-gray-200 dark:border-slate-700 bg-indigo-50 dark:bg-indigo-900/30">
                     <h3 class="text-base font-extrabold text-indigo-900 dark:text-indigo-100 uppercase tracking-wider">
-                        ðŸ“ Produtos DisponÃ­veis para Agendamento ({{ $aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator ? $aguardandoRetirada->total() : $aguardandoRetirada->count() }})
+                        📍 Produtos Disponíveis para Agendamento ({{ $aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator ? $aguardandoRetirada->total() : $aguardandoRetirada->count() }})
                     </h3>
                 </div>
 
@@ -320,7 +320,7 @@
                 <div class="p-4 border-b border-gray-200 dark:border-slate-700">
                     <form method="GET" action="{{ route('logistica-coleta.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 md:items-end">
                         <div>
-                            <label for="localizacao_id" class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">LocalizaÃ§Ã£o (Origem)</label>
+                            <label for="localizacao_id" class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Localização (Origem)</label>
                             <select name="localizacao_id" id="localizacao_id" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
                                 <option value="">Todas</option>
                                 @foreach($localizacoes as $loc)
@@ -331,8 +331,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="referencia" class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">ReferÃªncia</label>
-                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Buscar referÃªncia"
+                            <label for="referencia" class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Referência</label>
+                            <input type="text" name="referencia" id="referencia" value="{{ $referencia ?? '' }}" placeholder="Buscar referência"
                                    class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
                         </div>
                         <div class="flex gap-2">
@@ -348,16 +348,16 @@
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                             <thead class="bg-gray-50 dark:bg-slate-700">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">ReferÃªncia</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Referência</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">SituaÃ§Ã£o</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Situação</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Etapa Atual</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">ResponsÃ¡vel</th>
-                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">VeÃ­culo</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Responsável</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
                                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Aguardando desde</th>
-                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">AÃ§Ã£o</th>
+                                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Ação</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -380,11 +380,11 @@
                                         <td class="px-4 py-3 text-sm">
                                             @if($temColeta)
                                                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
-                                                    ðŸš› {{ $coletaStatusLabels[$coleta->status] ?? 'Agendado' }}
+                                                    🚛 {{ $coletaStatusLabels[$coleta->status] ?? 'Agendado' }}
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 dark:bg-slate-600 dark:text-gray-300">
-                                                    â³ DisponÃ­vel
+                                                    ⏳ Disponível
                                                 </span>
                                             @endif
                                         </td>
@@ -418,13 +418,13 @@
                                         </td>
                                     </tr>
 
-                                    {{-- Modal: Agendar Coleta (sÃ³ se nÃ£o tem coleta ativa) --}}
+                                    {{-- Modal: Agendar Coleta (só se não tem coleta ativa) --}}
                                     @if(!$temColeta)
                                     <div id="modal-agendar-{{ $pl->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6">
                                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Agendar Coleta</h3>
                                             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                                Produto: <strong>{{ $produto?->referencia }}</strong> â€” {{ $pl->localizacao?->nome_localizacao }} â€” {{ $pl->quantidade }} un.
+                                                Produto: <strong>{{ $produto?->referencia }}</strong> — {{ $pl->localizacao?->nome_localizacao }} — {{ $pl->quantidade }} un.
                                             </p>
                                             <form action="{{ route('logistica-coleta.agendar') }}" method="POST">
                                                 @csrf
@@ -432,7 +432,7 @@
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                                     <div>
-                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ResponsÃ¡vel pela Coleta *</label>
+                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Responsável pela Coleta *</label>
                                                         <select name="motorista_user_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
                                                             <option value="">Selecione...</option>
                                                             @foreach($usuariosColeta as $usuarioColeta)
@@ -443,7 +443,7 @@
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">VeÃ­culo *</label>
+                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Veículo *</label>
                                                         <select name="veiculo_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
                                                             <option value="">Selecione...</option>
                                                             @foreach($veiculos as $v)
@@ -461,7 +461,7 @@
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">InÃ­cio previsto *</label>
+                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Início previsto *</label>
                                                         <input type="datetime-local" name="inicio_previsto_em" required
                                                                class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
                                                     </div>
@@ -473,7 +473,7 @@
                                                 </div>
 
                                                 <div class="mb-4">
-                                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ObservaÃ§Ã£o (opcional)</label>
+                                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
                                                     <textarea name="observacao_motorista" rows="2" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
                                                 </div>
 
@@ -489,7 +489,7 @@
                             </tbody>
                         </table>
                     </div>
-                    {{-- PaginaÃ§Ã£o Aguardando Retirada --}}
+                    {{-- Paginação Aguardando Retirada --}}
                     @if($aguardandoRetirada instanceof \Illuminate\Pagination\LengthAwarePaginator && $aguardandoRetirada->hasPages())
                         <div class="px-4 py-3 border-t border-gray-200 dark:border-slate-700">
                             {{ $aguardandoRetirada->appends(request()->query())->links() }}
@@ -497,26 +497,26 @@
                     @endif
                 @else
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        Nenhum produto disponÃ­vel para agendamento logÃ­stico no momento.
+                        Nenhum produto disponível para agendamento logístico no momento.
                     </div>
                 @endif
             </div>
 
-            {{-- ===== SEÃ‡ÃƒO 3: HISTÃ“RICO DE COLETAS ===== --}}
+            {{-- ===== SEÇÃO 3: HISTÓRICO DE COLETAS ===== --}}
             @php
                 $historicoTotal = $historicoColetas instanceof \Illuminate\Pagination\LengthAwarePaginator ? $historicoColetas->total() : 0;
             @endphp
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 bg-green-50 dark:bg-green-900/20">
                     <h3 class="text-sm font-bold text-green-800 dark:text-green-300 uppercase tracking-wider">
-                        âœ… HistÃ³rico de Coletas ({{ $historicoTotal }})
+                        ✅ Histórico de Coletas ({{ $historicoTotal }})
                     </h3>
                 </div>
 
-                {{-- Filtro por perÃ­odo --}}
+                {{-- Filtro por período --}}
                 <div class="p-4 border-b border-gray-200 dark:border-slate-700">
                     <form method="GET" action="{{ route('logistica-coleta.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-3 md:items-end">
-                        {{-- Manter filtros da seÃ§Ã£o de retirada --}}
+                        {{-- Manter filtros da seção de retirada --}}
                         @if(request('localizacao_id'))
                             <input type="hidden" name="localizacao_id" value="{{ request('localizacao_id') }}">
                         @endif
@@ -529,7 +529,7 @@
                                    class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">AtÃ©</label>
+                            <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Até</label>
                             <input type="date" name="historico_ate" value="{{ $historicoDataAte ?? '' }}"
                                    class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
                         </div>
@@ -545,14 +545,14 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
                         <thead class="bg-gray-50 dark:bg-slate-700">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">ReferÃªncia</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Referência</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Origem</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Destino</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Qtd</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Motorista</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">VeÃ­culo</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Veículo</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Etapa Final</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">InÃ­cio</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Início</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Finalizado em</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase">Status</th>
                             </tr>
@@ -606,7 +606,7 @@
                         </tbody>
                     </table>
                 </div>
-                {{-- PaginaÃ§Ã£o --}}
+                {{-- Paginação --}}
                 @if($historicoColetas->hasPages())
                     <div class="px-4 py-3 border-t border-gray-200 dark:border-slate-700">
                         {{ $historicoColetas->appends(request()->query())->links() }}
@@ -614,7 +614,7 @@
                 @endif
                 @else
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        Nenhuma coleta finalizada no perÃ­odo selecionado.
+                        Nenhuma coleta finalizada no período selecionado.
                     </div>
                 @endif
             </div>
