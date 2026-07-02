@@ -15,16 +15,23 @@
 - Controladas em **Planejamento → Localização** e na ficha do produto (localizações).  
 - Usuário de facção só manipula etapas deste contexto (avanço via transições; a última pode ir para logística).
 
-### Logística
+### Logística (fluxo detalhado)
 
-- Aguardando Retirada *(inicia_logistica)* → Em Trânsito → Coletado  
-- Alteradas pela **Logística de Coleta**, API motorista e admin.  
-- A etapa com `inicia_logistica = true` é o handoff: produto saiu da produção na facção.
+1. **Agendamento** *(inicia_logistica)* — entrada no fluxo logístico  
+2. Saída da Fábrica / Solicitar Retirada  
+3. Retirada Confirmada pela Facção  
+4. Em Trânsito  
+5. Entrega Confirmada na Fábrica  
+6. Check-in  
+7. Chegada do Produto na Fábrica  
+
+Alteradas pela **Logística de Coleta**, API motorista (parcial) e admin.  
+Ver checklist completo em [FLUXO_LOGISTICA_TESTE.md](./FLUXO_LOGISTICA_TESTE.md).
 
 ## Transições permitidas
 
 1. Mesmo `contexto` (localizacao → localizacao, logistica → logistica)  
-2. **Handoff:** `localizacao` → etapa logística com `inicia_logistica = true` (ex.: Acabamento → Aguardando Retirada)
+2. **Handoff:** `localizacao` → etapa logística com `inicia_logistica = true` (ex.: Acabamento → Agendamento)
 
 ## Deploy
 

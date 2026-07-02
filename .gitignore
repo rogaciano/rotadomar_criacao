@@ -3,3 +3,14 @@ node_modules/
 .env
 quadro_estudantil.py
 quadro_metas_vendas.pdf
+
+# Dumps de banco (nunca versionar)
+/backup_*.sql
+/*.sql
+
+# Artefatos de diagnostico de migracao
+/windsurf/cols_*.txt
+/windsurf/tabelas_*.txt
+/windsurf/local_migrations.txt
+/windsurf/server_migrations.txt
+/windsurf/migrate_*.txt

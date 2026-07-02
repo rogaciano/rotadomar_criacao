@@ -175,3 +175,4 @@ Abra tarefas.md e CODE_REVIEW_BACKLOG.md. Identifique o primeiro dia/item ainda 
 _Espaço para anotações durante a semana (bloqueios, decisões de negócio, ex.: critério “quem é motorista”):_
 
 - 
+
