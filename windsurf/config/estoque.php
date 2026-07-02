@@ -11,8 +11,8 @@ return [
     |
     */
 
-    'api_url' => env('ESTOQUE_API_URL', 'https://dapic.app/api/home/estoques'),
-    'empresa' => env('ESTOQUE_API_EMPRESA', 'canalpernambuco'),
-    'token' => env('ESTOQUE_API_TOKEN', '9EUVDSZKT8zh5uqirzgdPN3WKwWGGd'),
-    'armazenador' => env('ESTOQUE_API_ARMAZENADOR', 'Armazenador - Matéria Prima - Tecido'),
+    'api_url' => env('ESTOQUE_API_URL', ''),
+    'empresa' => env('ESTOQUE_API_EMPRESA', ''),
+    'token' => env('ESTOQUE_API_TOKEN', ''),
+    'armazenador' => env('ESTOQUE_API_ARMAZENADOR', ''),
 ];

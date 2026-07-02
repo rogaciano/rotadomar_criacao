@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Localizacao;
 use App\Models\Group;
 use App\Models\Permission;
@@ -30,6 +31,7 @@ class User extends Authenticatable
         'password',
         'localizacao_id',
         'is_admin',
+        'is_faccao',
     ];
 
     /**
@@ -77,9 +79,9 @@ class User extends Authenticatable
     }
 
     /**
-     * Verifica se o usuário é um usuário de facção (localização com capacidade > 0)
-     * Usuários de facção têm um localizacao_id definido, NÃO são admins,
-     * e a localização tem capacidade maior que zero
+     * Verifica se o usuário é um usuário de facção (empresa externa).
+     * Usuários de facção têm acesso restrito apenas à sua localização principal.
+     * O campo is_faccao deve ser marcado explicitamente pelo administrador.
      *
      * @return bool
      */
@@ -89,8 +91,7 @@ class User extends Authenticatable
             return false;
         }
 
-        $localizacao = $this->localizacao;
-        return $localizacao && $localizacao->capacidade > 0;
+        return (bool) $this->is_faccao;
     }
 
     /**
@@ -183,22 +184,19 @@ class User extends Authenticatable
             return true;
         }
 
-        // Se o usuário possui uma permissão específica cadastrada com qualquer ação permitida, considera que ele possui a permissão
-        $permission = Permission::where('name', $permissionSlug)->first();
-        if ($permission) {
-            $up = $this->userPermissions()->where('permission_id', $permission->id)->first();
-            if ($up && ($up->can_create || $up->can_read || $up->can_update || $up->can_delete)) {
+        $cached = $this->loadPermissionsCache();
+
+        // Verifica permissão direta do usuário
+        if (isset($cached['direct'][$permissionSlug])) {
+            $up = $cached['direct'][$permissionSlug];
+            if ($up['can_create'] || $up['can_read'] || $up['can_update'] || $up['can_delete']) {
                 return true;
             }
         }
 
-        // Verifica se o usuário tem a permissão através de seus grupos
-        foreach ($this->groups as $group) {
-            foreach ($group->permissions as $permission) {
-                if ($permission->name === $permissionSlug) {
-                    return true;
-                }
-            }
+        // Verifica permissão via grupos
+        if (in_array($permissionSlug, $cached['group_permissions'] ?? [], true)) {
+            return true;
         }
 
         return false;
@@ -253,20 +251,62 @@ class User extends Authenticatable
             return false;
         }
 
-        $permission = Permission::where('name', $permissionSlug)->first();
-        if (!$permission) {
-            return false;
-        }
+        $cached = $this->loadPermissionsCache();
 
         // Se houver configuração específica do usuário, ela prevalece
-        $up = $this->userPermissions()->where('permission_id', $permission->id)->first();
-        if ($up) {
+        if (isset($cached['direct'][$permissionSlug])) {
             $col = 'can_' . $action;
-            return (bool) data_get($up, $col);
+            return (bool) ($cached['direct'][$permissionSlug][$col] ?? false);
         }
 
         // Fallback: usa a permissão por grupo
         return $this->hasPermission($permissionSlug);
+    }
+
+    /**
+     * Carrega e cacheia todas as permissões do usuário.
+     * Cache é invalidado pelos Observers ao alterar UserPermission ou Group.
+     *
+     * @return array{direct: array, group_permissions: array}
+     */
+    public function loadPermissionsCache(): array
+    {
+        return Cache::remember("user:{$this->id}:permissions", 3600, function () {
+            // Permissões diretas do usuário
+            $direct = [];
+            $userPerms = $this->userPermissions()->with('permission')->get();
+            foreach ($userPerms as $up) {
+                if ($up->permission) {
+                    $direct[$up->permission->name] = [
+                        'can_create' => $up->can_create,
+                        'can_read' => $up->can_read,
+                        'can_update' => $up->can_update,
+                        'can_delete' => $up->can_delete,
+                    ];
+                }
+            }
+
+            // Permissões via grupos
+            $groupPermissions = [];
+            foreach ($this->groups()->with('permissions')->get() as $group) {
+                foreach ($group->permissions as $permission) {
+                    $groupPermissions[] = $permission->name;
+                }
+            }
+
+            return [
+                'direct' => $direct,
+                'group_permissions' => array_unique($groupPermissions),
+            ];
+        });
+    }
+
+    /**
+     * Limpa o cache de permissões deste usuário.
+     */
+    public function clearPermissionsCache(): void
+    {
+        Cache::forget("user:{$this->id}:permissions");
     }
 
     public function canCreate(string $permissionSlug): bool

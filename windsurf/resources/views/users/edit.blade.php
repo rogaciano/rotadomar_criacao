@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
@@ -70,6 +70,20 @@
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">O campo is_admin deve ser verdadeiro ou falso.</p>
                                 <x-input-error :messages="$errors->get('is_admin')" class="mt-2" />
+                            </div>
+
+                            <!-- Usuário de Facção -->
+                            <div>
+                                <x-label for="is_faccao" value="{{ __('Acesso Restrito (Facção)') }}" />
+                                <div class="mt-2">
+                                    <label class="inline-flex items-center">
+                                        <input type="hidden" name="is_faccao" value="0">
+                                        <input type="checkbox" name="is_faccao" id="is_faccao" value="1" class="rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 text-orange-600 shadow-sm focus:border-orange-300 focus:ring focus:ring-orange-200 focus:ring-opacity-50" {{ old('is_faccao', $user->is_faccao) ? 'checked' : '' }}>
+                                        <span class="ml-2 text-sm text-gray-600">Usuário de Facção</span>
+                                    </label>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Marque se este usuário pertence a uma facção externa. Ele só verá os dados da sua localização no Planejamento.</p>
+                                <x-input-error :messages="$errors->get('is_faccao')" class="mt-2" />
                             </div>
 
                             <!-- Localizações de Visualização -->

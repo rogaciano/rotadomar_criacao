@@ -2,44 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProdutoObservacaoRequest;
 use App\Models\ProdutoObservacao;
-use App\Models\Produto;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ProdutoObservacaoController extends Controller
 {
     /**
-     * Armazena uma nova observação
+     * Armazena uma nova observação.
      */
-    public function store(Request $request)
+    public function store(StoreProdutoObservacaoRequest $request)
     {
-        // Log para debug
         \Log::info('ProdutoObservacao store chamado', [
             'produto_id' => $request->produto_id,
             'observacao' => $request->observacao,
             'observacao_length' => strlen($request->observacao ?? ''),
         ]);
 
-        // Verificar permissão
-        if (!Auth::user()->canUpdate('produtos')) {
-            abort(403, 'Você não tem permissão para adicionar observações.');
-        }
-
-        $request->validate([
-            'produto_id' => 'required|exists:produtos,id',
-            'observacao' => 'required|string|max:5000',
-        ], [
-            'produto_id.required' => 'Produto não identificado.',
-            'produto_id.exists' => 'Produto não encontrado.',
-            'observacao.required' => 'A observação é obrigatória.',
-            'observacao.max' => 'A observação não pode ter mais de 5000 caracteres.',
-        ]);
-
-        // Validar se há conteúdo real (não apenas HTML vazio do Quill)
+        // Valida se há conteúdo real, não apenas HTML vazio do Quill.
         $observacao = $request->observacao;
         $textoLimpo = trim(strip_tags($observacao));
-        
+
         if (empty($textoLimpo) || $observacao === '<p><br></p>') {
             return response()->json([
                 'success' => false,
@@ -71,7 +54,7 @@ class ProdutoObservacaoController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao adicionar observação: ' . $e->getMessage()
@@ -80,12 +63,18 @@ class ProdutoObservacaoController extends Controller
     }
 
     /**
-     * Remove uma observação
+     * Remove uma observação.
      */
     public function destroy($id)
     {
-        // Verificar permissão
-        if (!Auth::user()->canUpdate('produtos')) {
+        if (!Auth::user()->canDelete('produto_observacoes')) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Você não tem permissão para remover observações.'
+                ], 403);
+            }
+
             abort(403, 'Você não tem permissão para remover observações.');
         }
 

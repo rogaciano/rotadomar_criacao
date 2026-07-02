@@ -281,5 +281,8 @@
 
         <!-- Scripts personalizados -->
         @stack('scripts')
+
+        <!-- Widget Flutuante da Inteligência do Sistema (Restrito) -->
+        <x-admin-ai-widget />
     </body>
 </html>

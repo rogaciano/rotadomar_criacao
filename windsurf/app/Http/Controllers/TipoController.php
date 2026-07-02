@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTipoRequest;
 use Illuminate\Http\Request;
 
 class TipoController extends Controller
@@ -21,14 +22,14 @@ class TipoController extends Controller
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
         }
-        
+
         // Incluir excluídos se solicitado
         if ($request->filled('incluir_excluidos')) {
             $query->withTrashed();
         }
 
         $tipos = $query->orderBy('descricao')->paginate(10);
-        
+
         return view('tipos.index', compact('tipos'));
     }
 
@@ -43,13 +44,9 @@ class TipoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTipoRequest $request)
     {
-        $validated = $request->validate([
-            'descricao' => 'required|string|max:255',
-            'observacoes' => 'nullable|string',
-            'ativo' => 'boolean'
-        ]);
+        $validated = $request->validated();
 
         \App\Models\Tipo::create($validated);
 
@@ -78,13 +75,9 @@ class TipoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(StoreTipoRequest $request, string $id)
     {
-        $validated = $request->validate([
-            'descricao' => 'required|string|max:255',
-            'observacoes' => 'nullable|string',
-            'ativo' => 'boolean'
-        ]);
+        $validated = $request->validated();
 
         $tipo = \App\Models\Tipo::findOrFail($id);
         $tipo->update($validated);
@@ -104,7 +97,7 @@ class TipoController extends Controller
         return redirect()->route('tipos.index')
             ->with('success', 'Tipo excluído com sucesso!');
     }
-    
+
     /**
      * Restore the specified resource from trash.
      */
@@ -116,7 +109,7 @@ class TipoController extends Controller
         return redirect()->route('tipos.index')
             ->with('success', 'Tipo restaurado com sucesso!');
     }
-    
+
     /**
      * Permanently delete the specified resource.
      */

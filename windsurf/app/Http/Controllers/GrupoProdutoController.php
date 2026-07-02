@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\GrupoProduto;
+use App\Http\Requests\StoreGrupoProdutoRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,13 +24,13 @@ class GrupoProdutoController extends Controller
         if ($request->filled('ativo')) {
             $query->where('ativo', $request->ativo);
         }
-        
+
         if ($request->filled('created_at')) {
             $query->whereDate('created_at', $request->created_at);
         }
 
         $grupo_produtos = $query->orderBy('descricao')->paginate(10);
-        
+
         return view('grupo_produtos.index', compact('grupo_produtos'));
     }
 
@@ -44,12 +45,9 @@ class GrupoProdutoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreGrupoProdutoRequest $request)
     {
-        $validated = $request->validate([
-            'descricao' => 'required|string|max:255',
-            'ativo' => 'required|boolean',
-        ]);
+        $validated = $request->validated();
 
         GrupoProduto::create($validated);
 
@@ -76,12 +74,9 @@ class GrupoProdutoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, GrupoProduto $grupo_produto)
+    public function update(StoreGrupoProdutoRequest $request, GrupoProduto $grupo_produto)
     {
-        $validated = $request->validate([
-            'descricao' => 'required|string|max:255',
-            'ativo' => 'required|boolean',
-        ]);
+        $validated = $request->validated();
 
         $grupo_produto->update($validated);
 

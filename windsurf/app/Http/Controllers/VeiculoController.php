@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Veiculo;
+use App\Http\Requests\StoreVeiculoRequest;
+use App\Http\Requests\UpdateVeiculoRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,13 +37,9 @@ class VeiculoController extends Controller
         return view('veiculos.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreVeiculoRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'placa' => 'required|string|max:10|unique:veiculos,placa',
-            'descricao' => 'nullable|string|max:255',
-            'ativo' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $validated['ativo'] = $request->has('ativo');
 
@@ -55,13 +53,9 @@ class VeiculoController extends Controller
         return view('veiculos.edit', compact('veiculo'));
     }
 
-    public function update(Request $request, Veiculo $veiculo): RedirectResponse
+    public function update(UpdateVeiculoRequest $request, Veiculo $veiculo): RedirectResponse
     {
-        $validated = $request->validate([
-            'placa' => 'required|string|max:10|unique:veiculos,placa,' . $veiculo->id,
-            'descricao' => 'nullable|string|max:255',
-            'ativo' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $validated['ativo'] = $request->has('ativo');
 

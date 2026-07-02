@@ -133,44 +133,57 @@
         </div>
 
         <!-- Disponíveis list -->
-        <div x-show="disponiveis.length > 0" class="p-4 space-y-3">
-            <template x-for="prod in disponiveis" :key="prod.id">
-                <div class="bg-slate-800 rounded-2xl border border-orange-700/30 overflow-hidden shadow-lg">
-                    <div class="px-4 py-3 bg-orange-900/20 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg">📦</span>
-                            <div>
-                                <p class="text-white font-bold text-sm" x-text="'Ref. ' + prod.referencia"></p>
-                                <p class="text-slate-400 text-xs" x-text="prod.descricao"></p>
+        <div x-show="disponiveis.length > 0" class="p-4 space-y-5">
+            <template x-for="grupo in disponiveisAgrupados" :key="grupo.localizacao + '-' + grupo.localizacaoId">
+                <div class="space-y-3">
+                    <div class="px-1">
+                        <div class="flex items-center justify-between gap-3 mb-1">
+                            <h2 class="text-sm font-extrabold tracking-wide text-orange-300 uppercase" x-text="grupo.localizacao"></h2>
+                            <span class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-800 border border-orange-700/40 text-orange-300" x-text="grupo.produtos.length + ' produto' + (grupo.produtos.length === 1 ? '' : 's')"></span>
+                        </div>
+                        <p class="text-slate-500 text-[11px]" x-text="'Produtos aguardando retirada nesta localidade'">
+                        </p>
+                    </div>
+
+                    <template x-for="prod in grupo.produtos" :key="prod.id">
+                        <div class="bg-slate-800 rounded-2xl border border-orange-700/30 overflow-hidden shadow-lg">
+                            <div class="px-4 py-3 bg-orange-900/20 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">📦</span>
+                                    <div>
+                                        <p class="text-white font-bold text-sm" x-text="'Ref. ' + prod.referencia"></p>
+                                        <p class="text-slate-400 text-xs" x-text="prod.descricao"></p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-orange-900/50 text-orange-300 border border-orange-700">
+                                    Disponível
+                                </span>
+                            </div>
+                            <div class="px-4 py-3">
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                        <p class="text-slate-500 text-[10px] font-bold uppercase">Qtd</p>
+                                        <p class="text-white font-bold text-sm" x-text="prod.quantidade"></p>
+                                    </div>
+                                    <div class="bg-slate-700/50 rounded-lg p-2 text-center">
+                                        <p class="text-slate-500 text-[10px] font-bold uppercase">Esperando</p>
+                                        <p class="text-white font-bold text-xs" x-text="prod.aguardando_desde"></p>
+                                    </div>
+                                </div>
+                                <div class="mb-3 bg-slate-700/40 rounded-lg px-3 py-2">
+                                    <p class="text-slate-500 text-[10px] font-bold uppercase mb-1">Localidade</p>
+                                    <p class="text-white font-bold text-sm" x-text="prod.origem_nome_completo || prod.origem"></p>
+                                </div>
+                                <button @click="openAgendar(prod)"
+                                        class="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    Agendar Coleta
+                                </button>
                             </div>
                         </div>
-                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-orange-900/50 text-orange-300 border border-orange-700">
-                            Disponível
-                        </span>
-                    </div>
-                    <div class="px-4 py-3">
-                        <div class="grid grid-cols-3 gap-2 mb-3">
-                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
-                                <p class="text-slate-500 text-[10px] font-bold uppercase">Qtd</p>
-                                <p class="text-white font-bold text-sm" x-text="prod.quantidade"></p>
-                            </div>
-                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
-                                <p class="text-slate-500 text-[10px] font-bold uppercase">Origem</p>
-                                <p class="text-white font-bold text-xs" x-text="prod.origem"></p>
-                            </div>
-                            <div class="bg-slate-700/50 rounded-lg p-2 text-center">
-                                <p class="text-slate-500 text-[10px] font-bold uppercase">Esperando</p>
-                                <p class="text-white font-bold text-xs" x-text="prod.aguardando_desde"></p>
-                            </div>
-                        </div>
-                        <button @click="openAgendar(prod)"
-                                class="w-full py-2.5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                            Agendar Coleta
-                        </button>
-                    </div>
+                    </template>
                 </div>
             </template>
         </div>
@@ -517,6 +530,26 @@
                     e.preventDefault();
                     this.installPrompt = e;
                 });
+            },
+
+            get disponiveisAgrupados() {
+                const grupos = this.disponiveis.reduce((acc, prod) => {
+                    const localizacao = prod.origem_nome_completo || prod.origem || 'Sem localidade';
+                    const chave = `${prod.origem_id || 'sem-id'}::${localizacao}`;
+
+                    if (!acc[chave]) {
+                        acc[chave] = {
+                            localizacao,
+                            localizacaoId: prod.origem_id || null,
+                            produtos: [],
+                        };
+                    }
+
+                    acc[chave].produtos.push(prod);
+                    return acc;
+                }, {});
+
+                return Object.values(grupos).sort((a, b) => a.localizacao.localeCompare(b.localizacao, 'pt-BR'));
             },
 
             async loadDisponiveis() {

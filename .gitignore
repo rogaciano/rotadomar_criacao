@@ -1,8 +1,10 @@
-﻿vendor/
+vendor/
 node_modules/
 .env
 quadro_estudantil.py
 quadro_metas_vendas.pdf
+*.rar
+*.zip
 
 # Dumps de banco (nunca versionar)
 /backup_*.sql

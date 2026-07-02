@@ -5,16 +5,17 @@
 
 -- Inserir permissões de módulo (ignora se já existem)
 INSERT IGNORE INTO permissions (name, display_name, description, created_at, updated_at) VALUES
-('dashboard',     'Dashboard',      'Acesso ao painel principal',              NOW(), NOW()),
-('produtos',      'Produtos',       'Gerenciamento de produtos',               NOW(), NOW()),
-('tecidos',       'Tecidos',        'Gerenciamento de tecidos',                NOW(), NOW()),
-('movimentacoes', 'Movimentações',  'Visualização de movimentações',           NOW(), NOW()),
-('kanban',        'Kanban',         'Quadro Kanban de produção',               NOW(), NOW()),
-('planejamento',  'Planejamento',   'Dashboard de planejamento e capacidade',  NOW(), NOW()),
-('sugestoes',     'Sugestões',      'Módulo de sugestões',                     NOW(), NOW()),
-('logistica',     'Logística',      'Coletas logísticas e veículos',           NOW(), NOW()),
-('cadastros',     'Cadastros',      'Cadastros gerais (estilistas, marcas, etc)', NOW(), NOW()),
-('consultas',     'Consultas',      'Consultas e relatórios',                  NOW(), NOW());
+('dashboard', 'Dashboard', 'Acesso ao painel principal', NOW(), NOW()),
+('produtos', 'Produtos', 'Gerenciamento de produtos', NOW(), NOW()),
+('produto_observacoes', 'Observações de Produtos', 'Gerenciamento de observações de produtos', NOW(), NOW()),
+('tecidos', 'Tecidos', 'Gerenciamento de tecidos', NOW(), NOW()),
+('movimentacoes', 'Movimentações', 'Visualização de movimentações', NOW(), NOW()),
+('kanban', 'Kanban', 'Quadro Kanban de produção', NOW(), NOW()),
+('planejamento', 'Planejamento', 'Dashboard de planejamento e capacidade', NOW(), NOW()),
+('sugestoes', 'Sugestões', 'Módulo de sugestões', NOW(), NOW()),
+('logistica', 'Logística', 'Coletas logísticas e veículos', NOW(), NOW()),
+('cadastros', 'Cadastros', 'Cadastros gerais (estilistas, marcas, etc)', NOW(), NOW()),
+('consultas', 'Consultas', 'Consultas e relatórios', NOW(), NOW());
 
 -- Criar grupo "Motorista" (se não existir)
 INSERT IGNORE INTO `groups` (name, display_name, description, is_active, created_at, updated_at) VALUES

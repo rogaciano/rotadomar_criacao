@@ -7,7 +7,11 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use App\Models\Produto;
+use App\Models\UserPermission;
+use App\Models\Group;
 use App\Observers\ProdutoObserver;
+use App\Observers\UserPermissionObserver;
+use App\Observers\GroupObserver;
 use App\Http\View\Composers\NotificationComposer;
 use Carbon\Carbon;
 
@@ -37,8 +41,10 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Produto::class, ProdutoPolicy::class);
 
-        // Registrar Observer de Produto
+        // Registrar Observers
         Produto::observe(ProdutoObserver::class);
+        UserPermission::observe(UserPermissionObserver::class);
+        Group::observe(GroupObserver::class);
 
         // Registrar View Composer para notificações de movimentações
         // DESABILITADO - Sistema de notificações muito pesado

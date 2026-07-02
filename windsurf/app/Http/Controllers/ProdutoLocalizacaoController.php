@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Produto;
 use App\Models\Localizacao;
 use App\Models\ProdutoLocalizacao;
+use App\Http\Requests\StoreProdutoLocalizacaoRequest;
+use App\Http\Requests\UpdateProdutoLocalizacaoRequest;
+use App\Http\Requests\AvancarEtapaRequest;
+use App\Http\Requests\DefinirEtapaRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -19,23 +23,8 @@ class ProdutoLocalizacaoController extends Controller
     /**
      * Adicionar uma localização ao produto
      */
-    public function store(Request $request, $produtoId)
+    public function store(StoreProdutoLocalizacaoRequest $request, $produtoId)
     {
-        if (!auth()->user()->canCreate('produto_localizacao')) {
-            abort(403);
-        }
-
-        $request->validate([
-            'localizacao_id' => 'required|exists:localizacoes,id',
-            'quantidade' => 'required|integer|min:1',
-            'data_prevista_faccao' => 'nullable|date',
-            'data_envio_faccao' => 'nullable|date',
-            'data_retorno_faccao' => 'nullable|date|required_if:concluido,1',
-            'ordem_producao' => 'required|string|max:30',
-            'observacao' => 'nullable|string|max:255',
-            'concluido' => 'nullable|boolean',
-            'data_entrega_faccao' => 'nullable|date'
-        ]);
 
         $produto = Produto::findOrFail($produtoId);
 
@@ -100,22 +89,8 @@ class ProdutoLocalizacaoController extends Controller
     /**
      * Atualizar uma localização do produto
      */
-    public function update(Request $request, $produtoId, $produtoLocalizacaoId)
+    public function update(UpdateProdutoLocalizacaoRequest $request, $produtoId, $produtoLocalizacaoId)
     {
-        if (!auth()->user()->canUpdate('produto_localizacao')) {
-            abort(403);
-        }
-
-        $request->validate([
-            'quantidade' => 'required|integer|min:1',
-            'data_prevista_faccao' => 'nullable|date',
-            'data_envio_faccao' => 'nullable|date',
-            'data_retorno_faccao' => 'nullable|date|required_if:concluido,1',
-            'ordem_producao' => 'required|string|max:30',
-            'observacao' => 'nullable|string|max:255',
-            'concluido' => 'nullable|boolean',
-            'data_entrega_faccao' => 'nullable|date'
-        ]);
 
         // Buscar o registro na tabela pivot pelo ID
         $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
@@ -243,12 +218,8 @@ class ProdutoLocalizacaoController extends Controller
     /**
      * Avançar para uma nova etapa de produção
      */
-    public function avancarEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
+    public function avancarEtapa(AvancarEtapaRequest $request, $produtoId, $produtoLocalizacaoId)
     {
-        $request->validate([
-            'etapa_id' => 'required|exists:etapas_producao,id',
-            'observacao' => 'nullable|string|max:255'
-        ]);
 
         $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
             ->where('produto_id', $produtoId)
@@ -305,9 +276,6 @@ class ProdutoLocalizacaoController extends Controller
      */
     public function voltarEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
     {
-        $request->validate([
-            'observacao' => 'nullable|string|max:255'
-        ]);
 
         $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
             ->where('produto_id', $produtoId)
@@ -390,12 +358,8 @@ class ProdutoLocalizacaoController extends Controller
     /**
      * Definir etapa inicial
      */
-    public function definirEtapa(Request $request, $produtoId, $produtoLocalizacaoId)
+    public function definirEtapa(DefinirEtapaRequest $request, $produtoId, $produtoLocalizacaoId)
     {
-        $request->validate([
-            'etapa_id' => 'required|exists:etapas_producao,id',
-            'observacao' => 'nullable|string|max:255'
-        ]);
 
         $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
             ->where('produto_id', $produtoId)
@@ -461,9 +425,6 @@ class ProdutoLocalizacaoController extends Controller
      */
     public function updateDataEntrega(Request $request, $produtoId, $produtoLocalizacaoId)
     {
-        $request->validate([
-            'data_entrega_faccao' => 'nullable|date'
-        ]);
 
         $user = auth()->user();
         $produtoLocalizacao = ProdutoLocalizacao::where('id', $produtoLocalizacaoId)
@@ -503,10 +464,6 @@ class ProdutoLocalizacaoController extends Controller
      */
     public function updateHistoricoEtapa(Request $request, $historicoId)
     {
-        $request->validate([
-            'created_at' => 'required|date',
-            'observacao' => 'nullable|string|max:255'
-        ]);
 
         $historico = \App\Models\ProdutoLocalizacaoHistoricoEtapa::findOrFail($historicoId);
 

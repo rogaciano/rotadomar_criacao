@@ -85,6 +85,11 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
         // Alias plurais para compatibilidade com views que usam activity-logs.*
         Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
         Route::get('activity-logs/{id}', [ActivityLogController::class, 'show'])->name('activity-logs.show');
+
+        // Assistente IA Rota do Mar
+        Route::get('ai-chat', [\App\Http\Controllers\Admin\AiChatController::class, 'index'])->name('admin.ai-chat');
+        Route::post('ai-chat/message', [\App\Http\Controllers\Admin\AiChatController::class, 'message'])->name('admin.ai-chat.message');
+        Route::patch('ai-chat/feedback/{historico}', [\App\Http\Controllers\Admin\AiChatController::class, 'feedback'])->name('admin.ai-chat.feedback');
     });
 
     // === CADASTROS (protegido por permissão) ===
@@ -264,6 +269,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::post('logistica-coleta/{coleta}/registrar-checkin', [LogisticaColetaController::class, 'registrarCheckIn'])->name('logistica-coleta.registrar-checkin');
     Route::post('logistica-coleta/{coleta}/confirmar-chegada-fabrica', [LogisticaColetaController::class, 'confirmarChegadaFabrica'])->name('logistica-coleta.confirmar-chegada-fabrica');
     Route::post('logistica-coleta/{coleta}/cancelar', [LogisticaColetaController::class, 'cancelar'])->name('logistica-coleta.cancelar');
+
 
     Route::resource('veiculos', VeiculoController::class)->except(['show']);
     }); // fim logística
