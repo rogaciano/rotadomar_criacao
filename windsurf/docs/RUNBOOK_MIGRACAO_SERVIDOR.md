@@ -25,12 +25,31 @@ de desenvolvimento (`cols_local.txt`).
   adiciona o valor `entregue` ao enum de `coletas_logisticas.status`
   (obrigatória — sem ela a confirmação de entrega da logística falha).
 
+## Ambiente confirmado (02/07/2026)
+
+- Produção: `sistemasrota.com.br` → DocumentRoot
+  `/var/www/html/criacao/windsurf/public` (o app do repositório git).
+- Banco de produção: `criacao` (MySQL local do VPS). Os dois `.env` do
+  servidor apontam para ele.
+- O Laravel solto na raiz `/var/www/html/criacao/` (app/, config/, artisan…)
+  está **fora do git** e não é servido — lixo de deploy antigo. Arquivar depois.
+- App do motorista (PWA): servido de `/var/www/html/motorista-app` (porta
+  3000, `motorista.conf`) — pasta FORA do repositório. Sincronizar manualmente
+  no deploy (passo 3).
+- O checkout do servidor está na branch local `master`
+  (= `feature/backend-improvements`). O deploy deve trocar para `main`
+  **somente depois** que o merge de integração
+  (`integracao/main-backend`) estiver na `main` do GitHub.
+- As centenas de arquivos "modified" no `git status` do servidor são ruído de
+  permissões (`core.fileMode=true`) + 1 linha em `navigation.blade.php`.
+  Conferir essa linha antes do checkout: `git diff windsurf/resources/views/layouts/navigation.blade.php`.
+
 ## Passo a passo
 
 ### 1. Backup completo (obrigatório)
 
 ```bash
-mysqldump -u USUARIO -p --single-transaction --routines --triggers NOME_DO_BANCO > backup_pre_migracao_$(date +%Y%m%d_%H%M).sql
+mysqldump -u root -p --single-transaction --routines --triggers criacao > backup_pre_migracao_$(date +%Y%m%d_%H%M).sql
 ```
 
 Confirme o tamanho do arquivo antes de prosseguir.
@@ -38,14 +57,32 @@ Confirme o tamanho do arquivo antes de prosseguir.
 ### 2. Colocar a aplicação em manutenção
 
 ```bash
-cd /caminho/do/projeto
+cd /var/www/html/criacao/windsurf
 php artisan down
 ```
 
-### 3. Atualizar o código (deploy do repositório atualizado)
+### 3. Atualizar o código
 
-Garanta que a pasta `database/migrations/` contém tudo até
+```bash
+cd /var/www/html/criacao
+git config core.fileMode false   # remove o ruído de permissões do status
+git fetch origin
+git status                # deve sobrar pouca coisa; avaliar/stash antes do checkout
+git stash                 # se restar modificação local (ex.: navigation.blade.php)
+git checkout main         # cria main local rastreando origin/main
+cd windsurf
+composer install --no-interaction   # com dev: TelescopeServiceProvider exige o pacote
+npm install && npm run build        # requer Node no VPS; sem Node, copiar public/build gerado localmente
+# Sincronizar PWA do motorista (pasta servida fica fora do repo):
+rsync -av --delete /var/www/html/criacao/motorista-app/ /var/www/html/motorista-app/
+```
+
+Garanta que `database/migrations/` contém tudo até
 `2026_07_02_100000_add_entregue_status_to_coletas_logisticas`.
+
+> Pendência conhecida (backlog 2.3): Telescope está em `require-dev` e o
+> provider é registrado sempre — por isso o `composer install` acima NÃO usa
+> `--no-dev`. Endurecer isso depois do deploy.
 
 ### 4. Verificar Telescope
 
@@ -70,6 +107,10 @@ WHERE NOT EXISTS (SELECT 1 FROM migrations WHERE migration = '2026_05_25_070740_
 php artisan migrate --pretend   # conferir o SQL que será executado
 php artisan migrate
 ```
+
+Além das migrations ensaiadas, o merge de integração traz
+`2026_03_24_120000_add_produto_observacoes_permission` (da feature branch) —
+validada no ensaio local em 02/07/2026.
 
 ### 6. Validar
 
