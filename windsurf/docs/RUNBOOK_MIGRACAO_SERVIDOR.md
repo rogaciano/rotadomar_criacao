@@ -1,5 +1,21 @@
 # Runbook — atualizar banco do servidor (migrations pendentes)
 
+> **DEPLOY EXECUTADO COM SUCESSO em 02/07/2026 ~22h.** As 51 migrations
+> rodaram sem erro no banco `criacao`, a auditoria (`etapas:auditar-logistica`)
+> confirmou as 7 etapas + handoff + 6 transições, o enum de
+> `coletas_logisticas.status` inclui `entregue` e o teste no navegador passou.
+> Ocorrências da janela (não previstas no ensaio, todas resolvidas):
+> - `windsurf/public/motorista/` existia solto no servidor e bloqueou o
+>   checkout — movido para `/root/deploy_backup_20260703/motorista_public_old`;
+> - `composer install` exigiu `--ignore-platform-req=php` (o `laravel/ai`
+>   v0.3.2 do lock pede PHP 8.3 e o VPS tem 8.2.28; pacote não é usado pelo
+>   código) e `COMPOSER_ALLOW_SUPERUSER=1` (rodando como root);
+> - build do frontend feito no próprio VPS (Node v20.20.2 disponível).
+>
+> Backlog pós-deploy: remover `laravel/ai` do composer.json (ou subir PHP para
+> 8.3), apagar `MovimentacaoController_temp.php` do repositório, mover
+> Telescope para carregar apenas em ambiente local.
+
 Procedimento validado em 02/07/2026 em DUAS cópias do banco do servidor
 restauradas localmente:
 
