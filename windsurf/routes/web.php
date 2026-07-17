@@ -174,6 +174,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\CheckUserAccessSched
     Route::middleware('permission:produtos')->group(function () {
     Route::resource('produtos', ProdutoController::class);
     Route::get('produtos/{id}/pdf', [ProdutoController::class, 'generatePdf'])->name('produtos.pdf');
+    Route::post('produtos/{produto}/liberar-producao', [\App\Http\Controllers\LogisticaColetaController::class, 'liberarProducao'])->name('produtos.liberar-producao');
     Route::post('produtos/get-available-colors', [ProdutoController::class, 'getAvailableColors'])->name('produtos.get-available-colors');
     Route::get('produtos-inconsistencias', [ProdutoController::class, 'inconsistencias'])->name('produtos.inconsistencias');
     Route::get('produtos-lista-pdf', [ProdutoController::class, 'generateListPdf'])->name('produtos.lista.pdf');

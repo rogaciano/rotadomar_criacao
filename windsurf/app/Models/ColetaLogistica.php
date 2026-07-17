@@ -17,11 +17,18 @@ class ColetaLogistica extends Model
     const STATUS_FINALIZADO = 'finalizado';
     const STATUS_CANCELADO = 'cancelado';
 
+    /** Coleta de volta: facção → fábrica (fluxo original). */
+    const TIPO_VOLTA = 'volta';
+
+    /** Coleta de ida: fábrica → facção (liberação para produção). */
+    const TIPO_IDA = 'ida';
+
     protected $fillable = [
         'produto_localizacao_id',
         'motorista_user_id',
         'veiculo_id',
         'destino_localizacao_id',
+        'tipo',
         'inicio_previsto_em',
         'retorno_previsto_em',
         'chegada_origem_em',
@@ -100,10 +107,18 @@ class ColetaLogistica extends Model
         return [
             self::STATUS_AGENDADO => 'Agendado',
             self::STATUS_EM_TRANSITO => 'Em trânsito',
-            self::STATUS_ENTREGUE => 'Entregue na fábrica',
+            self::STATUS_ENTREGUE => 'Entregue no destino',
             self::STATUS_FINALIZADO => 'Finalizado',
             self::STATUS_CANCELADO => 'Cancelado',
         ];
+    }
+
+    /**
+     * Coleta de ida (fábrica → facção)?
+     */
+    public function isIda(): bool
+    {
+        return $this->tipo === self::TIPO_IDA;
     }
 
     /**

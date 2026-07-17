@@ -46,6 +46,9 @@ LOGÍSTICA (contexto: logistica)
 
 ## Checklist de teste
 
+- **Operacional (usuários / treinamento):** [`docs/CHECKLIST_OPERACIONAL_LOGISTICA.md`](CHECKLIST_OPERACIONAL_LOGISTICA.md)
+- **Técnico (TI / QA):** [`docs/CHECKLIST_TESTE_LOGISTICA_COMPLETO.md`](CHECKLIST_TESTE_LOGISTICA_COMPLETO.md)
+
 ### A. Cadastro de etapas
 
 - [ ] **Cadastros → Etapas de Produção** — filtrar contexto **Logística**
@@ -90,3 +93,11 @@ php artisan etapas:auditar-logistica
 | Sem botão Acabamento → logística | Transição handoff ausente | Migration `2026_06_11` ou criar transição manual |
 | “Produto não disponível para agendamento” | Produto não está em **Agendamento** | Avançar de Acabamento primeiro |
 | Etapas antigas (Aguardando Retirada) | Banco não migrado | Rodar `reorganize_logistica_etapas_flow` |
+
+## Fluxo de IDA (fábrica → facção)
+
+Documentação completa, status da sessão e pendências:
+
+**`docs/FLUXO_LOGISTICA_IDA.md`**
+
+Resumo: gatilho **Liberar para Produção** → mesmas 7 etapas logísticas com `tipo=ida` → destino restrito às localizações planejadas na ficha do produto.

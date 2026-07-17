@@ -73,10 +73,16 @@
                                     $isOrigem = $user->isAdmin() || $user->localizacao_id === $pl?->localizacao_id;
                                     $isDestino = $user->isAdmin() || $user->localizacao_id === $coleta->destino_localizacao_id;
                                     $isResponsavel = $user->isAdmin() || $coleta->motorista_user_id === $user->id;
+                                    $isIda = $coleta->isIda();
+                                    $nomeOrigem = $isIda ? 'fábrica' : 'facção';
+                                    $nomeDestino = $isIda ? 'facção' : 'fábrica';
                                 @endphp
                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                                     <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
                                         {{ $produto?->referencia ?? '-' }}
+                                        <span class="ml-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold uppercase {{ $isIda ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' }}">
+                                            {{ $isIda ? 'Ida' : 'Volta' }}
+                                        </span>
                                     </td>
                                     <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
                                         {{ $pl?->localizacao?->nome_reduzido ?? $pl?->localizacao?->nome_localizacao ?? '-' }}
@@ -165,10 +171,10 @@
                                 @if($coleta->status === 'agendado' && $isResponsavel && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_AGENDAMENTO)
                                 <div id="modal-solicitar-retirada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Solicitar Retirada na Facção</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Solicitar Retirada na {{ ucfirst($nomeOrigem) }}</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                                             Registrar que o responsável <strong>{{ $coleta->motorista?->name }}</strong> solicitou a retirada de
-                                            <strong>{{ $produto?->referencia }}</strong> na facção.
+                                            <strong>{{ $produto?->referencia }}</strong> na {{ $nomeOrigem }}.
                                         </p>
                                         <form action="{{ route('logistica-coleta.solicitar-retirada', $coleta) }}" method="POST">
                                             @csrf
@@ -188,9 +194,9 @@
                                 @if($coleta->status === 'agendado' && $isOrigem && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_SAIDA_FABRICA_SOLICITAR_RETIRADA)
                                 <div id="modal-confirmar-retirada-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Retirada pela Facção</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Retirada na {{ ucfirst($nomeOrigem) }}</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar a retirada do produto <strong>{{ $produto?->referencia }}</strong> pela facção? Após isso, ele entra automaticamente em trânsito.
+                                            Confirmar a retirada do produto <strong>{{ $produto?->referencia }}</strong> na {{ $nomeOrigem }}? Após isso, ele entra automaticamente em trânsito.
                                         </p>
                                         <form action="{{ route('logistica-coleta.confirmar-retirada-faccao', $coleta) }}" method="POST">
                                             @csrf
@@ -210,9 +216,9 @@
                                 @if($coleta->status === 'em_transito' && $isResponsavel && $etapaAtualSlug === \App\Models\EtapaProducao::SLUG_EM_TRANSITO)
                                 <div id="modal-entrega-fabrica-{{ $coleta->id }}" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Entrega na Fábrica</h3>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Entrega na {{ ucfirst($nomeDestino) }}</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar que o produto <strong>{{ $produto?->referencia }}</strong> foi entregue na fábrica?
+                                            Confirmar que o produto <strong>{{ $produto?->referencia }}</strong> foi entregue na {{ $nomeDestino }}?
                                         </p>
                                         <form action="{{ route('logistica-coleta.confirmar-entrega-fabrica', $coleta) }}" method="POST">
                                             @csrf
@@ -234,7 +240,7 @@
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
                                         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Registrar Check-in</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Registrar o check-in do produto <strong>{{ $produto?->referencia }}</strong> na fábrica?
+                                            Registrar o check-in do produto <strong>{{ $produto?->referencia }}</strong> na {{ $nomeDestino }}?
                                         </p>
                                         <form action="{{ route('logistica-coleta.registrar-checkin', $coleta) }}" method="POST">
                                             @csrf
@@ -256,8 +262,13 @@
                                     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
                                         <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Confirmar Chegada Final</h3>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                            Confirmar a chegada final do produto <strong>{{ $produto?->referencia }}</strong> na fábrica e encerrar o processo?
+                                            Confirmar a chegada final do produto <strong>{{ $produto?->referencia }}</strong> na {{ $nomeDestino }} e encerrar o processo?
                                         </p>
+                                        @if($isIda)
+                                            <p class="text-xs text-sky-700 dark:text-sky-300 mb-4">
+                                                Ao confirmar, o produto será transferido para a facção de destino e entrará na etapa de Recebimento, iniciando o fluxo de produção.
+                                            </p>
+                                        @endif
                                         <form action="{{ route('logistica-coleta.confirmar-chegada-fabrica', $coleta) }}" method="POST">
                                             @csrf
                                             <div class="mb-4">
@@ -366,6 +377,7 @@
                                         $produto = $pl->produto;
                                         $coleta = $pl->coletaLogisticaAtiva ?? null;
                                         $temColeta = $coleta !== null;
+                                        $destinosPlanejados = $pl->destinosLogisticaPermitidos(auth()->user()->getLocalizacoesPermitidasIds());
                                     @endphp
                                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 {{ $temColeta ? 'bg-yellow-50/50 dark:bg-yellow-900/10' : '' }}">
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
@@ -405,11 +417,15 @@
                                         </td>
                                         <td class="px-4 py-3 text-right">
                                             @if(!$temColeta)
-                                                <button type="button"
-                                                    onclick="document.getElementById('modal-agendar-{{ $pl->id }}').classList.remove('hidden')"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded hover:bg-indigo-700">
-                                                    Agendar Coleta
-                                                </button>
+                                                @if($destinosPlanejados->isEmpty())
+                                                    <span class="text-xs text-amber-600 dark:text-amber-400" title="Cadastre a facção de destino na ficha do produto">Sem destino planejado</span>
+                                                @else
+                                                    <button type="button"
+                                                        onclick="document.getElementById('modal-agendar-{{ $pl->id }}').classList.remove('hidden')"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded hover:bg-indigo-700">
+                                                        Agendar Coleta
+                                                    </button>
+                                                @endif
                                             @else
                                                 <span class="text-xs text-gray-400 dark:text-gray-500">
                                                     {{ $coleta->inicio_previsto_em?->format('d/m H:i') }}
@@ -453,12 +469,21 @@
                                                     </div>
                                                     <div>
                                                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Destino *</label>
-                                                        <select name="destino_localizacao_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
-                                                            <option value="">Selecione...</option>
-                                                            @foreach($destinosDisponiveis as $dest)
-                                                                <option value="{{ $dest->id }}">{{ $dest->nome_reduzido ?? $dest->nome_localizacao }}</option>
-                                                            @endforeach
-                                                        </select>
+                                                        @if($destinosPlanejados->isEmpty())
+                                                            <p class="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
+                                                                Cadastre a localização de destino na ficha do produto (ex.: facção) antes de agendar.
+                                                            </p>
+                                                        @else
+                                                            <select name="destino_localizacao_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
+                                                                @if($destinosPlanejados->count() > 1)
+                                                                    <option value="">Selecione...</option>
+                                                                @endif
+                                                                @foreach($destinosPlanejados as $dest)
+                                                                    <option value="{{ $dest->id }}" @selected($destinosPlanejados->count() === 1)>{{ $dest->nome_reduzido ?? $dest->nome_localizacao }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">Destinos limitados às localizações planejadas na ficha do produto.</p>
+                                                        @endif
                                                     </div>
                                                     <div>
                                                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Início previsto *</label>
@@ -479,7 +504,7 @@
 
                                                 <div class="flex justify-end gap-2">
                                                     <button type="button" onclick="this.closest('[id^=modal-]').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
-                                                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Agendar</button>
+                                                    <button type="submit" @disabled($destinosPlanejados->isEmpty()) class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed">Agendar</button>
                                                 </div>
                                             </form>
                                         </div>

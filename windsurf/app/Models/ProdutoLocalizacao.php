@@ -26,7 +26,8 @@ class ProdutoLocalizacao extends Pivot
         'concluido',
         'etapa_atual_id',
         'etapa_anterior_id',
-        'data_entrega_faccao'
+        'data_entrega_faccao',
+        'fluxo_logistica'
     ];
 
     protected $casts = [
@@ -162,6 +163,182 @@ class ProdutoLocalizacao extends Pivot
             'acao' => 'definir_inicial',
             'observacao' => $observacao
         ]);
+
+        return true;
+    }
+
+    /**
+     * IDs de localizações que já possuem linha em etapa logística (ida/volta em andamento).
+     */
+    public static function idsLocalizacoesEmFluxoLogistica(int $produtoId): \Illuminate\Support\Collection
+    {
+        return static::query()
+            ->where('produto_id', $produtoId)
+            ->whereHas('etapaAtual', function ($q) {
+                $q->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA);
+            })
+            ->pluck('localizacao_id')
+            ->unique()
+            ->filter()
+            ->values();
+    }
+
+    /**
+     * Localizações planejadas na ficha que ainda podem ser liberadas para a ida.
+     */
+    public static function localizacoesOrigemIdaDisponiveis(int $produtoId): \Illuminate\Support\Collection
+    {
+        $planejadas = static::query()
+            ->where('produto_id', $produtoId)
+            ->pluck('localizacao_id')
+            ->unique()
+            ->filter()
+            ->values();
+
+        $disponiveis = $planejadas->diff(static::idsLocalizacoesEmFluxoLogistica($produtoId))->values();
+
+        if ($disponiveis->isEmpty()) {
+            return collect();
+        }
+
+        return Localizacao::query()
+            ->whereIn('id', $disponiveis)
+            ->where('ativo', true)
+            ->orderBy('nome_localizacao')
+            ->get();
+    }
+
+    /**
+     * Quantidades por localização ainda disponíveis para liberação (ida).
+     */
+    public static function quantidadesOrigemIdaDisponiveis(int $produtoId): \Illuminate\Support\Collection
+    {
+        $disponiveis = static::localizacoesOrigemIdaDisponiveis($produtoId)->pluck('id');
+
+        if ($disponiveis->isEmpty()) {
+            return collect();
+        }
+
+        return static::query()
+            ->where('produto_id', $produtoId)
+            ->whereIn('localizacao_id', $disponiveis)
+            ->whereDoesntHave('etapaAtual', function ($q) {
+                $q->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA);
+            })
+            ->get()
+            ->groupBy('localizacao_id')
+            ->map(fn ($rows) => $rows->first()->quantidade);
+    }
+
+    /**
+     * Verifica se a localização ainda pode ser liberada para a ida.
+     */
+    public static function localizacaoDisponivelParaLiberacaoIda(int $produtoId, int $localizacaoId): bool
+    {
+        if (!static::localizacaoPlanejadaNoProduto($produtoId, $localizacaoId)) {
+            return false;
+        }
+
+        return !static::idsLocalizacoesEmFluxoLogistica($produtoId)->contains($localizacaoId);
+    }
+
+    /**
+     * Linha de planejamento existente para reutilizar na liberação (evita duplicar).
+     */
+    public static function registroPlanejamentoParaLiberacaoIda(int $produtoId, int $localizacaoId): ?self
+    {
+        return static::query()
+            ->where('produto_id', $produtoId)
+            ->where('localizacao_id', $localizacaoId)
+            ->whereDoesntHave('etapaAtual', function ($q) {
+                $q->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA);
+            })
+            ->first();
+    }
+
+    /**
+     * Localizações já cadastradas na ficha do produto (planejamento).
+     * Usado no modal "Liberar para Produção" para restringir a origem da ida.
+     */
+    public static function localizacoesPlanejadasParaProduto(int $produtoId): \Illuminate\Support\Collection
+    {
+        $ids = static::query()
+            ->where('produto_id', $produtoId)
+            ->pluck('localizacao_id')
+            ->unique()
+            ->filter()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            return collect();
+        }
+
+        return Localizacao::query()
+            ->whereIn('id', $ids)
+            ->where('ativo', true)
+            ->orderBy('nome_localizacao')
+            ->get();
+    }
+
+    /**
+     * Verifica se a localização informada está planejada na ficha do produto.
+     */
+    public static function localizacaoPlanejadaNoProduto(int $produtoId, int $localizacaoId): bool
+    {
+        return static::query()
+            ->where('produto_id', $produtoId)
+            ->where('localizacao_id', $localizacaoId)
+            ->exists();
+    }
+
+    /**
+     * Destinos permitidos no agendamento: outras localizações já planejadas
+     * na ficha do produto (view), exceto a origem deste registro.
+     *
+     * @param  array<int>|null  $restringirIds  Interseção opcional (ex.: localizações permitidas ao usuário)
+     */
+    public function destinosLogisticaPermitidos(?array $restringirIds = null): \Illuminate\Support\Collection
+    {
+        $ids = static::query()
+            ->where('produto_id', $this->produto_id)
+            ->where('localizacao_id', '!=', $this->localizacao_id)
+            ->pluck('localizacao_id')
+            ->unique()
+            ->values();
+
+        if ($restringirIds !== null) {
+            $ids = $ids->intersect($restringirIds)->values();
+        }
+
+        if ($ids->isEmpty()) {
+            return collect();
+        }
+
+        return Localizacao::query()
+            ->whereIn('id', $ids)
+            ->where('ativo', true)
+            ->orderBy('nome_localizacao')
+            ->get();
+    }
+
+    /**
+     * Verifica se o destino informado está entre as localizações planejadas do produto.
+     */
+    public function destinoPermitidoParaColeta(int $destinoLocalizacaoId, ?array $restringirIds = null): bool
+    {
+        $planejado = static::query()
+            ->where('produto_id', $this->produto_id)
+            ->where('localizacao_id', $destinoLocalizacaoId)
+            ->where('localizacao_id', '!=', $this->localizacao_id)
+            ->exists();
+
+        if (!$planejado) {
+            return false;
+        }
+
+        if ($restringirIds !== null && !in_array($destinoLocalizacaoId, $restringirIds, true)) {
+            return false;
+        }
 
         return true;
     }

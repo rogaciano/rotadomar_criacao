@@ -468,6 +468,22 @@ class ProdutoController extends Controller
         // Recarregar localizações de forma fresca (sem cache)
         $produto->load('localizacoes');
 
+        $coletasLogisticaPorPlId = collect();
+        $plIds = $produto->localizacoes->pluck('pivot.id')->filter()->values();
+        if ($plIds->isNotEmpty()) {
+            $coletasLogisticaPorPlId = \App\Models\ColetaLogistica::query()
+                ->whereIn('produto_localizacao_id', $plIds)
+                ->with([
+                    'motorista:id,name',
+                    'destinoLocalizacao:id,nome_localizacao,nome_reduzido',
+                    'veiculo:id,placa',
+                ])
+                ->orderByDesc('updated_at')
+                ->get()
+                ->unique('produto_localizacao_id')
+                ->keyBy('produto_localizacao_id');
+        }
+
         // Carregar as movimentações relacionadas a este produto
         $movimentacoes = \App\Models\Movimentacao::where('produto_id', $id)
             ->with(['localizacao', 'tipo', 'situacao'])
@@ -537,7 +553,20 @@ class ProdutoController extends Controller
 
         $etapasProducaoDefinir = $etapasProducao->where('contexto', \App\Models\EtapaProducao::CONTEXTO_LOCALIZACAO);
 
-        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao', 'etapasProducaoDefinir'));
+        // Dados para o modal "Liberar para Produção" (fluxo logístico de ida)
+        $statusDescricao = mb_strtoupper(trim((string) $produto->status?->descricao));
+        $baseLiberarProducao = !$produto->trashed()
+            && $statusDescricao === 'DESENVOLVIMENTO FINALIZADO'
+            && auth()->user()->hasPermission('liberar_producao');
+        $localizacoesOrigemIda = $baseLiberarProducao
+            ? \App\Models\ProdutoLocalizacao::localizacoesOrigemIdaDisponiveis($produto->id)
+            : collect();
+        $podeLiberarProducao = $baseLiberarProducao && $localizacoesOrigemIda->isNotEmpty();
+        $quantidadesOrigemIda = $baseLiberarProducao
+            ? \App\Models\ProdutoLocalizacao::quantidadesOrigemIdaDisponiveis($produto->id)
+            : collect();
+
+        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao', 'etapasProducaoDefinir', 'podeLiberarProducao', 'localizacoesOrigemIda', 'quantidadesOrigemIda', 'coletasLogisticaPorPlId'));
     }
 
     /**

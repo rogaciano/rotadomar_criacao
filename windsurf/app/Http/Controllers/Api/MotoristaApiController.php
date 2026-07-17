@@ -353,6 +353,15 @@ class MotoristaApiController extends Controller
 
         $produtoLocalizacao = \App\Models\ProdutoLocalizacao::findOrFail($request->produto_localizacao_id);
 
+        if (!$produtoLocalizacao->destinoPermitidoParaColeta((int) $request->destino_localizacao_id, $localizacoesPermitidas)) {
+            $destinosPlanejados = $produtoLocalizacao->destinosLogisticaPermitidos($localizacoesPermitidas);
+            if ($destinosPlanejados->isEmpty()) {
+                return response()->json(['message' => 'Cadastre a localização de destino na ficha do produto antes de agendar.'], 422);
+            }
+
+            return response()->json(['message' => 'Destino não está entre as localizações planejadas para este produto.'], 422);
+        }
+
         $etapaAgendamento = $this->etapaLogisticaObrigatoria(EtapaProducao::SLUG_AGENDAMENTO)
             ?? EtapaProducao::etapaInicioLogistica();
         if (!$etapaAgendamento || $produtoLocalizacao->etapa_atual_id !== $etapaAgendamento->id) {

@@ -29,6 +29,13 @@
         $canUpdateProdutoLocalizacoes = auth()->user()->canUpdate('produto_localizacao');
         $canDeleteProdutoLocalizacoes = auth()->user()->canDelete('produto_localizacao');
         $canAnyProdutoLocalizacoes = $canUpdateProdutoLocalizacoes || $canDeleteProdutoLocalizacoes;
+        $coletasLogisticaPorPlId = $coletasLogisticaPorPlId ?? collect();
+        $temLocalizacaoEmLogistica = $produto->localizacoes->contains(function ($loc) use ($etapasProducao) {
+            $etapa = $loc->pivot->etapa_atual_id
+                ? $etapasProducao->firstWhere('id', $loc->pivot->etapa_atual_id)
+                : null;
+            return $etapa && $etapa->isLogistica();
+        });
     @endphp
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Localizações do Produto</h3>
@@ -47,6 +54,20 @@
         $quantidadeProduto = $produto->quantidade ?? 0;
         $divergencia = $totalLocalizacoes - $quantidadeProduto;
     @endphp
+
+    @if($temLocalizacaoEmLogistica)
+        <div class="mb-4 rounded-md border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-3 flex flex-wrap items-center justify-between gap-2">
+            <p class="text-sm text-indigo-900 dark:text-indigo-100">
+                <strong>Logística em andamento:</strong> acompanhe a etapa e a coleta em cada localização abaixo (coluna <em>Etapa Atual</em>).
+            </p>
+            @if(auth()->user()->hasPermission('logistica'))
+                <a href="{{ route('logistica-coleta.index', ['referencia' => $produto->referencia]) }}"
+                   class="text-xs font-bold uppercase text-indigo-700 dark:text-indigo-300 hover:underline whitespace-nowrap">
+                    Ir para Logística de Coleta →
+                </a>
+            @endif
+        </div>
+    @endif
 
     @if($produto->localizacoes->count() > 0 && $divergencia != 0)
         <div class="mb-4 rounded-md p-4 {{ $divergencia > 0 ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-red-50 border-l-4 border-red-400' }}">
@@ -156,6 +177,7 @@
                             // Fallback para cores não mapeadas
                             $defaultCorClass = 'bg-gray-100 text-gray-800 border-gray-200';
                             $defaultBtnClass = 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm';
+                            $coletaLogistica = $coletasLogisticaPorPlId[$localizacao->pivot->id] ?? null;
                         @endphp
                         <tr>
                             <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -244,6 +266,12 @@
                                                 </svg>
                                             </a>
                                         </div>
+                                        @include('produtos.partials._localizacoes_logistica_status', [
+                                            'etapaAtual' => $etapaAtual,
+                                            'coleta' => $coletaLogistica,
+                                            'fluxoLogistica' => $localizacao->pivot->fluxo_logistica ?? null,
+                                            'referenciaProduto' => $produto->referencia,
+                                        ])
                                         @if($podeGerenciarEtapa && !$bloquearLogistica)
                                             <div class="flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
                                                 @if($etapaAnteriorId)
@@ -369,6 +397,7 @@
                     ];
                     $defaultCorClass = 'bg-gray-100 text-gray-800 border-gray-200';
                     $defaultBtnClass = 'bg-blue-600 text-white shadow-sm';
+                    $coletaLogistica = $coletasLogisticaPorPlId[$localizacao->pivot->id] ?? null;
                 @endphp
                 <div x-data="{ showEtapaMenu: false }" class="bg-white border rounded-xl shadow-sm overflow-hidden border-purple-100">
                     <!-- Header -->
@@ -408,6 +437,12 @@
                                             </svg>
                                         </a>
                                     </div>
+                                    @include('produtos.partials._localizacoes_logistica_status', [
+                                        'etapaAtual' => $etapaAtual,
+                                        'coleta' => $coletaLogistica,
+                                        'fluxoLogistica' => $localizacao->pivot->fluxo_logistica ?? null,
+                                        'referenciaProduto' => $produto->referencia,
+                                    ])
                                 @else
                                     <span class="text-gray-400 text-xs italic">Não definida</span>
                                 @endif

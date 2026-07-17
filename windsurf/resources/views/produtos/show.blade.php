@@ -21,6 +21,15 @@
                         Reprogramar
                     </button>
                 @endif
+                @if($podeLiberarProducao ?? false)
+                    <button onclick="document.getElementById('modal-liberar-producao').classList.remove('hidden')" class="btn-ghost-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
+                        </svg>
+                        Liberar para Produção
+                    </button>
+                @endif
                 @if(auth()->user()->canRead('produtos'))
                     <a href="{{ route('produtos.pdf', $produto->id) }}" class="btn-ghost-rose" target="_blank">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -53,7 +62,7 @@
 
                     @include('produtos.partials._tecidos', ['produto' => $produto])
 
-                    @include('produtos.partials._localizacoes', ['produto' => $produto, 'etapasProducao' => $etapasProducao])
+                    @include('produtos.partials._localizacoes', ['produto' => $produto, 'etapasProducao' => $etapasProducao, 'coletasLogisticaPorPlId' => $coletasLogisticaPorPlId ?? collect()])
 
                     @include('produtos.partials._variacoes-cores', ['produto' => $produto, 'coresEnriquecidas' => $coresEnriquecidas])
 
@@ -72,4 +81,67 @@
     </div>
 
     @include('produtos.partials._modais', ['produto' => $produto, 'movimentacoes' => $movimentacoes])
+
+    {{-- Modal: Liberar para Produção (início da logística de ida) --}}
+    @if($podeLiberarProducao ?? false)
+    <div id="modal-liberar-producao" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick="if(event.target===this)this.classList.add('hidden')">
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Liberar para Produção</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                O produto <strong>{{ $produto->referencia }}</strong> entrará no fluxo logístico de <strong>ida</strong>
+                a partir da localização escolhida. Você pode liberar <strong>uma localização por vez</strong>;
+                as que já estiverem em logística não aparecem na lista.
+            </p>
+            <form action="{{ route('produtos.liberar-producao', $produto->id) }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Localização de origem (onde o produto está aguardando) *</label>
+                    @if($localizacoesOrigemIda->isEmpty())
+                        <p class="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-md p-3">
+                            Todas as localizações planejadas já estão em logística, ou nenhuma foi cadastrada na ficha.
+                        </p>
+                    @else
+                        <select name="origem_localizacao_id" id="origem-localizacao-ida" required
+                                class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
+                            <option value="">Selecione...</option>
+                            @foreach($localizacoesOrigemIda as $loc)
+                                <option value="{{ $loc->id }}"
+                                        data-quantidade="{{ $quantidadesOrigemIda[$loc->id] ?? $produto->quantidade }}"
+                                        @selected($localizacoesOrigemIda->count() === 1)>
+                                    {{ $loc->nome_reduzido ?? $loc->nome_localizacao }}
+                                    @if(isset($quantidadesOrigemIda[$loc->id]))
+                                        ({{ number_format($quantidadesOrigemIda[$loc->id], 0, ',', '.') }} un.)
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Quantidade</label>
+                    <input type="number" name="quantidade" id="quantidade-origem-ida" min="1"
+                           value="{{ $localizacoesOrigemIda->count() === 1 ? ($quantidadesOrigemIda[$localizacoesOrigemIda->first()->id] ?? $produto->quantidade) : $produto->quantidade }}"
+                           class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
+                    <textarea name="observacao" rows="2" maxlength="255" class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm"></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('modal-liberar-producao').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-slate-600 rounded-md hover:bg-gray-300">Cancelar</button>
+                    <button type="submit" @disabled($localizacoesOrigemIda->isEmpty()) class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">Liberar para Produção</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if($localizacoesOrigemIda->isNotEmpty())
+    <script>
+        document.getElementById('origem-localizacao-ida')?.addEventListener('change', function () {
+            const qty = this.selectedOptions[0]?.dataset?.quantidade;
+            const input = document.getElementById('quantidade-origem-ida');
+            if (qty && input) input.value = qty;
+        });
+    </script>
+    @endif
+    @endif
 </x-app-layout>

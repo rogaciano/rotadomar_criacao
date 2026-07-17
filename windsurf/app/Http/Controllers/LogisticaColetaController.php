@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ColetaLogistica;
 use App\Models\EtapaProducao;
 use App\Models\Localizacao;
+use App\Models\Produto;
 use App\Models\ProdutoLocalizacao;
 use App\Models\User;
 use App\Models\Veiculo;
@@ -74,7 +75,16 @@ class LogisticaColetaController extends Controller
             ])->ativas()->orderBy('inicio_previsto_em');
 
             if (!$user->isAdmin()) {
-                $coletasAtivasQuery->where('motorista_user_id', $user->id);
+                $localizacaoId = $user->localizacao_id;
+                $coletasAtivasQuery->where(function ($q) use ($user, $localizacaoId) {
+                    $q->where('motorista_user_id', $user->id);
+                    if ($localizacaoId) {
+                        $q->orWhere('destino_localizacao_id', $localizacaoId)
+                            ->orWhereHas('produtoLocalizacao', function ($q2) use ($localizacaoId) {
+                                $q2->where('localizacao_id', $localizacaoId);
+                            });
+                    }
+                });
             }
 
             $coletasAtivas = $coletasAtivasQuery->get();
@@ -110,11 +120,6 @@ class LogisticaColetaController extends Controller
         $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
         $veiculos = $tabelaVeiculosExiste ? Veiculo::ativos()->orderBy('placa')->get() : collect();
         $usuariosColeta = User::with('localizacao')->orderBy('name')->get();
-        $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
-        $destinosDisponiveis = Localizacao::where('ativo', true)
-            ->whereIn('id', $localizacoesPermitidas)
-            ->orderBy('nome_localizacao')
-            ->get();
         $coletaStatusLabels = ColetaLogistica::labelsStatus();
 
         return view('logistica-coleta.index', compact(
@@ -124,13 +129,82 @@ class LogisticaColetaController extends Controller
             'localizacoes',
             'veiculos',
             'usuariosColeta',
-            'destinosDisponiveis',
             'localizacaoId',
             'referencia',
             'historicoDataDe',
             'historicoDataAte',
             'coletaStatusLabels',
         ));
+    }
+
+    /**
+     * Libera um produto com desenvolvimento finalizado para produção,
+     * criando o registro na localização de origem (fábrica) já na etapa
+     * Agendamento — início do fluxo logístico de IDA (fábrica → facção).
+     */
+    public function liberarProducao(Request $request, Produto $produto): RedirectResponse
+    {
+        $user = auth()->user();
+
+        if (!$user->hasPermission('liberar_producao')) {
+            return back()->with('error', 'Você não tem permissão para liberar produtos para produção.');
+        }
+
+        $statusDescricao = mb_strtoupper(trim((string) $produto->status?->descricao));
+        if ($statusDescricao !== 'DESENVOLVIMENTO FINALIZADO') {
+            return back()->with('error', 'Somente produtos com status DESENVOLVIMENTO FINALIZADO podem ser liberados para produção.');
+        }
+
+        $validated = $request->validate([
+            'origem_localizacao_id' => 'required|integer|exists:localizacoes,id',
+            'quantidade' => 'nullable|integer|min:1',
+            'observacao' => 'nullable|string|max:255',
+        ]);
+
+        $etapaAgendamento = EtapaProducao::etapaInicioLogistica()
+            ?? $this->etapaLogisticaObrigatoria(EtapaProducao::SLUG_AGENDAMENTO);
+        if (!$etapaAgendamento) {
+            return back()->with('error', 'Etapa inicial da logística não configurada. Contate o administrador.');
+        }
+
+        // Evitar liberação duplicada na mesma localização
+        $origemId = (int) $validated['origem_localizacao_id'];
+        if (!ProdutoLocalizacao::localizacaoDisponivelParaLiberacaoIda($produto->id, $origemId)) {
+            return back()->with('error', 'Esta localização já está no fluxo logístico ou não está planejada para o produto.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $produtoLocalizacao = ProdutoLocalizacao::registroPlanejamentoParaLiberacaoIda($produto->id, $origemId);
+
+            $dadosLiberacao = [
+                'quantidade' => $validated['quantidade'] ?? $produtoLocalizacao?->quantidade ?? $produto->quantidade,
+                'observacao' => $validated['observacao'] ?? $produtoLocalizacao?->observacao,
+                'concluido' => 0,
+                'fluxo_logistica' => ColetaLogistica::TIPO_IDA,
+            ];
+
+            if ($produtoLocalizacao) {
+                $produtoLocalizacao->update($dadosLiberacao);
+            } else {
+                $produtoLocalizacao = ProdutoLocalizacao::create(array_merge($dadosLiberacao, [
+                    'produto_id' => $produto->id,
+                    'localizacao_id' => $origemId,
+                ]));
+            }
+
+            $produtoLocalizacao->definirEtapaInicial(
+                $etapaAgendamento->id,
+                $user->id,
+                'Produto liberado para produção por ' . $user->name . ' — aguardando agendamento logístico (ida)'
+            );
+
+            DB::commit();
+            return back()->with('success', 'Produto liberado para produção! Ele já aparece na tela de Logística para agendamento da entrega à facção.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Erro ao liberar produto para produção: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -144,13 +218,22 @@ class LogisticaColetaController extends Controller
         $motoristaId = (int) $validated['motorista_user_id'];
         $motorista = User::findOrFail($motoristaId);
 
-        // Validar que o destino está nas localizações permitidas do motorista
+        // Validar que o destino está nas localizações permitidas do usuário
         $localizacoesPermitidas = $user->getLocalizacoesPermitidasIds();
         if (!in_array((int) $validated['destino_localizacao_id'], $localizacoesPermitidas)) {
             return back()->with('error', 'Você não tem permissão para enviar produtos a este destino.');
         }
 
         $produtoLocalizacao = ProdutoLocalizacao::findOrFail($validated['produto_localizacao_id']);
+
+        if (!$produtoLocalizacao->destinoPermitidoParaColeta((int) $validated['destino_localizacao_id'], $localizacoesPermitidas)) {
+            $destinosPlanejados = $produtoLocalizacao->destinosLogisticaPermitidos($localizacoesPermitidas);
+            if ($destinosPlanejados->isEmpty()) {
+                return back()->with('error', 'Cadastre a localização de destino na ficha do produto antes de agendar a coleta.');
+            }
+
+            return back()->with('error', 'O destino selecionado não está entre as localizações planejadas para este produto.');
+        }
 
         $etapaAgendamento = $this->etapaLogisticaObrigatoria(EtapaProducao::SLUG_AGENDAMENTO)
             ?? EtapaProducao::etapaInicioLogistica();
@@ -178,12 +261,15 @@ class LogisticaColetaController extends Controller
 
         DB::beginTransaction();
         try {
-            // Criar coleta
+            // Criar coleta (direção herdada de como o produto entrou no fluxo)
             ColetaLogistica::create([
                 'produto_localizacao_id' => $produtoLocalizacao->id,
                 'motorista_user_id' => $motoristaId,
                 'veiculo_id' => $validated['veiculo_id'],
                 'destino_localizacao_id' => $validated['destino_localizacao_id'],
+                'tipo' => $produtoLocalizacao->fluxo_logistica === ColetaLogistica::TIPO_IDA
+                    ? ColetaLogistica::TIPO_IDA
+                    : ColetaLogistica::TIPO_VOLTA,
                 'inicio_previsto_em' => $inicio,
                 'retorno_previsto_em' => $retorno,
                 'status' => ColetaLogistica::STATUS_AGENDADO,
@@ -422,14 +508,49 @@ class LogisticaColetaController extends Controller
                 $coleta->produtoLocalizacao,
                 EtapaProducao::SLUG_CHEGADA_PRODUTO_FABRICA,
                 $user->id,
-                'Chegada final do produto na fábrica confirmada por ' . $user->name
+                'Chegada final do produto no destino confirmada por ' . $user->name
             );
+
+            // Fechamento da IDA: produto chegou na facção → move para o destino
+            // e inicia o fluxo de produção na etapa RECEBIMENTO
+            if ($coleta->isIda()) {
+                $this->concluirIdaNaFaccao($coleta, $user->id);
+            }
 
             DB::commit();
             return redirect()->route('logistica-coleta.index')->with('success', 'Chegada do produto confirmada com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Erro ao confirmar chegada: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fecha o ciclo da ida: transfere o produto para a facção de destino
+     * e o coloca na primeira etapa de produção (RECEBIMENTO).
+     */
+    private function concluirIdaNaFaccao(ColetaLogistica $coleta, int $userId): void
+    {
+        $produtoLocalizacao = $coleta->produtoLocalizacao;
+
+        $etapaRecebimento = EtapaProducao::query()
+            ->where('contexto', EtapaProducao::CONTEXTO_LOCALIZACAO)
+            ->where('ativo', true)
+            ->orderBy('ordem')
+            ->first();
+
+        $produtoLocalizacao->update([
+            'localizacao_id' => $coleta->destino_localizacao_id,
+            'data_entrega_faccao' => now()->toDateString(),
+            'fluxo_logistica' => null,
+        ]);
+
+        if ($etapaRecebimento) {
+            $produtoLocalizacao->avancarEtapa(
+                $etapaRecebimento->id,
+                $userId,
+                'Produto entregue na facção (fim da logística de ida) — produção iniciada em ' . $etapaRecebimento->nome
+            );
         }
     }
 
