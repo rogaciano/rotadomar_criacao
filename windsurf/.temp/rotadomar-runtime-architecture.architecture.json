@@ -1,0 +1,326 @@
+{
+    "schema_version": 1,
+    "diagram_type": "architecture",
+    "meta": {
+        "title": "Rota do Mar Runtime Architecture",
+        "subtitle": "Laravel monolith runtime view with primary creation/product request path",
+        "output": "rotadomar-runtime-architecture.html"
+    },
+    "components": [
+        {
+            "id": "users",
+            "type": "external",
+            "label": "Office Users",
+            "sublabel": "Admin / BEL / Stylist / Factory",
+            "pos": [
+                40,
+                270
+            ],
+            "size": [
+                140,
+                64
+            ]
+        },
+        {
+            "id": "web_ui",
+            "type": "frontend",
+            "label": "Web UI",
+            "sublabel": "Blade + Alpine + Tailwind + Vite assets",
+            "pos": [
+                260,
+                270
+            ],
+            "size": [
+                170,
+                64
+            ],
+            "tag": "SSR + AJAX"
+        },
+        {
+            "id": "driver_pwa",
+            "type": "frontend",
+            "label": "Driver PWA",
+            "sublabel": "Sanctum token client for logistics",
+            "pos": [
+                260,
+                430
+            ],
+            "size": [
+                170,
+                64
+            ]
+        },
+        {
+            "id": "entry",
+            "type": "backend",
+            "label": "HTTP Entry",
+            "sublabel": "Laravel routes + controllers",
+            "pos": [
+                520,
+                270
+            ],
+            "size": [
+                160,
+                64
+            ],
+            "tag": "web + api"
+        },
+        {
+            "id": "authz",
+            "type": "security",
+            "label": "Auth & Access Control",
+            "sublabel": "Breeze auth, CSRF, verified, schedule, permission",
+            "pos": [
+                520,
+                120
+            ],
+            "size": [
+                190,
+                72
+            ],
+            "tag": "session + policy checks"
+        },
+        {
+            "id": "domain",
+            "type": "backend",
+            "label": "Domain Modules",
+            "sublabel": "Criacao, Produtos, Movimentacoes, Planejamento, Logistica",
+            "pos": [
+                770,
+                270
+            ],
+            "size": [
+                210,
+                64
+            ]
+        },
+        {
+            "id": "models",
+            "type": "backend",
+            "label": "Models & Services",
+            "sublabel": "Eloquent models, NotificacaoService, observers",
+            "pos": [
+                1070,
+                270
+            ],
+            "size": [
+                200,
+                64
+            ]
+        },
+        {
+            "id": "db",
+            "type": "database",
+            "label": "MySQL",
+            "sublabel": "Primary app database",
+            "pos": [
+                1360,
+                270
+            ],
+            "size": [
+                140,
+                64
+            ],
+            "tag": "source of truth"
+        },
+        {
+            "id": "storage",
+            "type": "cloud",
+            "label": "File Storage",
+            "sublabel": "public disk, uploads, PDFs, network-file route",
+            "pos": [
+                1070,
+                430
+            ],
+            "size": [
+                200,
+                64
+            ]
+        },
+        {
+            "id": "jobs",
+            "type": "messagebus",
+            "label": "Scheduler & Jobs",
+            "sublabel": "artisan schedule + queue listener + stock sync",
+            "pos": [
+                770,
+                430
+            ],
+            "size": [
+                210,
+                64
+            ]
+        },
+        {
+            "id": "external",
+            "type": "external",
+            "label": "External Systems",
+            "sublabel": "Fabric stock API, LLM providers, browser push",
+            "pos": [
+                1360,
+                430
+            ],
+            "size": [
+                170,
+                64
+            ]
+        }
+    ],
+    "boundaries": [
+        {
+            "kind": "region",
+            "label": "Untrusted clients",
+            "wraps": [
+                "users",
+                "web_ui",
+                "driver_pwa"
+            ]
+        },
+        {
+            "kind": "security-group",
+            "label": "Trusted Laravel runtime",
+            "wraps": [
+                "entry",
+                "authz",
+                "domain",
+                "models",
+                "db",
+                "storage",
+                "jobs"
+            ]
+        },
+        {
+            "kind": "region",
+            "label": "External dependencies",
+            "wraps": [
+                "external"
+            ]
+        }
+    ],
+    "connections": [
+        {
+            "from": "users",
+            "to": "web_ui",
+            "label": "HTTPS",
+            "variant": "emphasis"
+        },
+        {
+            "from": "web_ui",
+            "to": "entry"
+        },
+        {
+            "from": "entry",
+            "to": "authz",
+            "label": "session + CSRF",
+            "variant": "security",
+            "fromSide": "top",
+            "toSide": "bottom",
+            "labelAt": [
+                608,
+                116
+            ]
+        },
+        {
+            "from": "authz",
+            "to": "domain",
+            "label": "module/action gate",
+            "variant": "security",
+            "fromSide": "right",
+            "toSide": "top",
+            "route": "orthogonal-h",
+            "labelDx": 22,
+            "labelDy": -16
+        },
+        {
+            "from": "domain",
+            "to": "models"
+        },
+        {
+            "from": "models",
+            "to": "db",
+            "label": "SQL",
+            "variant": "emphasis"
+        },
+        {
+            "from": "domain",
+            "to": "storage",
+            "label": "uploads + generated files",
+            "variant": "dashed",
+            "fromSide": "bottom",
+            "toSide": "top",
+            "labelAt": [
+                1023,
+                508
+            ]
+        },
+        {
+            "from": "domain",
+            "to": "jobs",
+            "label": "dispatch / poll / schedule",
+            "variant": "dashed",
+            "fromSide": "bottom",
+            "toSide": "top",
+            "labelDy": 58
+        },
+        {
+            "from": "jobs",
+            "to": "external",
+            "label": "HTTP / LLM / push",
+            "variant": "dashed",
+            "labelDy": 56
+        },
+        {
+            "from": "driver_pwa",
+            "to": "entry",
+            "label": "Sanctum API",
+            "variant": "dashed",
+            "fromSide": "right",
+            "toSide": "bottom",
+            "route": "orthogonal-h",
+            "labelDx": 12,
+            "labelDy": 14
+        }
+    ],
+    "cards": [
+        {
+            "dot": "cyan",
+            "title": "Primary Path",
+            "items": [
+                "Creation or product requests typically flow Browser -> Web UI -> HTTP Entry -> Auth/Access Control -> Domain Modules -> Models/Services -> MySQL.",
+                "The diagram centers the server-rendered web app because most repository functionality hangs off web.php route groups and Blade views."
+            ]
+        },
+        {
+            "dot": "emerald",
+            "title": "Application Shape",
+            "items": [
+                "This is a Laravel monolith, not a fleet of microservices; modules share the same runtime, database, auth session, and deployment unit.",
+                "Core runtime modules include Criacao, Produtos, Movimentacoes, Planejamento de Capacidade, Sugestoes, and Logistica."
+            ]
+        },
+        {
+            "dot": "rose",
+            "title": "Trust Boundaries",
+            "items": [
+                "Client devices are untrusted even when they execute first-party Blade and Alpine code.",
+                "Authorization is mostly enforced by auth, verified, schedule, admin, and permission middleware, with some resource-specific policy checks."
+            ]
+        },
+        {
+            "dot": "amber",
+            "title": "Supporting Runtime",
+            "items": [
+                "Spatie ActivityLog, notifications, and user-specific filters persist back into the same MySQL data plane rather than separate infrastructure.",
+                "Files move through the public disk and a dedicated network-file route; PDFs are generated in-process via DomPDF."
+            ]
+        },
+        {
+            "dot": "violet",
+            "title": "External Integrations",
+            "items": [
+                "Background sync reaches an external stock API, while admin AI chat fans out to Gemini, Groq, DeepSeek, or OpenAI through Prism fallback logic.",
+                "A separate logistics PWA consumes Sanctum-protected API endpoints but still lands in the same Laravel runtime and domain model."
+            ]
+        }
+    ]
+}
