@@ -226,6 +226,11 @@ class LogisticaColetaController extends Controller
 
         $produtoLocalizacao = ProdutoLocalizacao::findOrFail($validated['produto_localizacao_id']);
 
+        // A origem é definida pela linha de planejamento e não pode ser alterada no agendamento.
+        if ((int) $validated['origem_localizacao_id'] !== (int) $produtoLocalizacao->localizacao_id) {
+            return back()->with('error', 'A origem informada não corresponde ao lançamento de planejamento selecionado.');
+        }
+
         if (!$produtoLocalizacao->destinoPermitidoParaColeta((int) $validated['destino_localizacao_id'], $localizacoesPermitidas)) {
             $destinosPlanejados = $produtoLocalizacao->destinosLogisticaPermitidos($localizacoesPermitidas);
             if ($destinosPlanejados->isEmpty()) {

@@ -361,13 +361,16 @@ class LocalizacaoCapacidadeMensalController extends Controller
         $etapasProducao = \App\Models\EtapaProducao::where('ativo', true)
             ->orderBy('ordem')
             ->get();
+        $etapasProducaoDefinir = $etapasProducao
+            ->where('contexto', \App\Models\EtapaProducao::CONTEXTO_LOCALIZACAO)
+            ->values();
 
         // Marcas para filtro
         $marcas = \App\Models\Marca::where('ativo', true)
             ->orderBy('nome_marca')
             ->get();
 
-        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioFaccao', 'localizacaoPrincipalId', 'localizacoesVisualizacaoIds'));
+        return view('localizacao-capacidade.dashboard', compact('dadosDashboard', 'mes', 'ano', 'localizacoes', 'localizacaoId', 'etapasProducao', 'etapasProducaoDefinir', 'etapaId', 'marcas', 'marcaId', 'referencia', 'usuarioFaccao', 'localizacaoPrincipalId', 'localizacoesVisualizacaoIds'));
     }
 
     /**

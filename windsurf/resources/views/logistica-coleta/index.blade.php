@@ -445,8 +445,17 @@
                                             <form action="{{ route('logistica-coleta.agendar') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="produto_localizacao_id" value="{{ $pl->id }}">
+                                                <input type="hidden" name="origem_localizacao_id" value="{{ $pl->localizacao_id }}">
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Origem</label>
+                                                        <input type="text"
+                                                               value="{{ $pl->localizacao?->nome_reduzido ?? $pl->localizacao?->nome_localizacao }}"
+                                                               readonly
+                                                               class="w-full rounded-md border-gray-300 bg-gray-100 text-gray-600 dark:bg-slate-700 dark:border-slate-600 dark:text-gray-300 text-sm cursor-not-allowed" />
+                                                        <p class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">A origem é definida pelo lançamento de planejamento selecionado.</p>
+                                                    </div>
                                                     <div>
                                                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Responsável pela Coleta *</label>
                                                         <select name="motorista_user_id" required class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">

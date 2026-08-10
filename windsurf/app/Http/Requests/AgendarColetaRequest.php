@@ -15,6 +15,7 @@ class AgendarColetaRequest extends FormRequest
     {
         return [
             'produto_localizacao_id' => 'required|integer|exists:produto_localizacao,id',
+            'origem_localizacao_id' => 'required|integer|exists:localizacoes,id',
             'motorista_user_id' => 'required|integer|exists:users,id',
             'veiculo_id' => 'required|integer|exists:veiculos,id',
             'destino_localizacao_id' => 'required|integer|exists:localizacoes,id',
@@ -29,6 +30,8 @@ class AgendarColetaRequest extends FormRequest
         return [
             'produto_localizacao_id.required' => 'O produto/localização é obrigatório.',
             'produto_localizacao_id.exists' => 'O produto/localização selecionado não existe.',
+            'origem_localizacao_id.required' => 'A origem da coleta é obrigatória.',
+            'origem_localizacao_id.exists' => 'A origem da coleta selecionada não existe.',
             'motorista_user_id.required' => 'O usuário responsável pela coleta é obrigatório.',
             'motorista_user_id.exists' => 'O usuário responsável selecionado não existe.',
             'veiculo_id.required' => 'O veículo é obrigatório.',

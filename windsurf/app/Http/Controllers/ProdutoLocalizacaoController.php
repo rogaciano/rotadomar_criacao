@@ -375,10 +375,13 @@ class ProdutoLocalizacaoController extends Controller
             return redirect()->back()->with('error', 'Você não tem permissão para gerenciar a etapa desta localização.');
         }
 
-        $etapa = \App\Models\EtapaProducao::find($request->etapa_id);
+        $etapa = \App\Models\EtapaProducao::query()
+            ->where('ativo', true)
+            ->paraLocalizacao()
+            ->find($request->etapa_id);
 
-        if (!$user->isAdmin() && $etapa?->isLogistica()) {
-            return redirect()->back()->with('error', 'Use o fluxo de logística para definir etapas logísticas.');
+        if (!$etapa) {
+            return redirect()->back()->with('error', 'Selecione uma etapa ativa de produção. Etapas logísticas devem ser movimentadas pelo fluxo de logística.');
         }
 
         if ($etapa && $etapa->obriga_data_entrega_faccao && !$produtoLocalizacao->data_entrega_faccao) {
@@ -386,7 +389,7 @@ class ProdutoLocalizacaoController extends Controller
         }
 
         $produtoLocalizacao->definirEtapaInicial(
-            $request->etapa_id,
+            $etapa->id,
             auth()->id(),
             $request->observacao
         );

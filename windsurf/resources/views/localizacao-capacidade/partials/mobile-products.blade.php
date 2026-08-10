@@ -244,7 +244,7 @@
                                             </button>
 
                                             <div x-show="openMenu" @click.away="openMenu = false" class="absolute left-0 right-0 bottom-full mb-1 bg-white dark:bg-slate-800 rounded shadow-xl border border-gray-200 dark:border-slate-600 z-50 overflow-hidden max-h-48 overflow-y-auto" style="display: none;">
-                                                @foreach($etapasProducao as $etapa)
+                                                @foreach($etapasProducaoDefinir as $etapa)
                                                     <button type="button"
                                                         @click.prevent="$dispatch('abrir-modal-etapa', {
                                                             action: {{ Js::from(route('produtos.localizacoes.definir-etapa', [$produtoPrincipal->id, $loc->pivot->id])) }},

@@ -3,7 +3,15 @@
     "allow": [
       "Bash(php artisan *)",
       "Bash(grep -rn '$maxWidth' resources/views/ '--include=*.blade.php')",
-      "Bash(pkill -f \"artisan serve\")"
+      "Bash(pkill -f \"artisan serve\")",
+      "Bash(grep -Hm1 ^description: E:/projetos/RotaDoMar/.claude/skills/*/SKILL.md)",
+      "Bash(echo \"---\")",
+      "Bash(ls E:/projetos/RotaDoMar/.claude/skills)",
+      "Bash(php -v)",
+      "Bash(npm -v)",
+      "Bash(disown)",
+      "Read(//tmp/**)",
+      "Bash(npm run *)"
     ]
   }
 }

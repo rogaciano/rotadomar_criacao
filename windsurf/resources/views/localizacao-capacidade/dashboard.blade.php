@@ -581,17 +581,19 @@
 
                                                 <div class="hidden md:block">
                                                     @include('localizacao-capacidade.partials.desktop-products', [
-                                                        'produtosAgrupados' => $produtosAgrupados,
-                                                        'etapasProducao' => $etapasProducao,
-                                                        'corClasses' => $corClasses
+                                                         'produtosAgrupados' => $produtosAgrupados,
+                                                         'etapasProducao' => $etapasProducao,
+                                                         'etapasProducaoDefinir' => $etapasProducaoDefinir,
+                                                         'corClasses' => $corClasses
                                                     ])
                                                 </div>
 
                                                 <div class="md:hidden">
                                                     @include('localizacao-capacidade.partials.mobile-products', [
-                                                        'produtosAgrupados' => $produtosAgrupados,
-                                                        'etapasProducao' => $etapasProducao,
-                                                        'corClasses' => $corClasses
+                                                         'produtosAgrupados' => $produtosAgrupados,
+                                                         'etapasProducao' => $etapasProducao,
+                                                         'etapasProducaoDefinir' => $etapasProducaoDefinir,
+                                                         'corClasses' => $corClasses
                                                     ])
                                                 </div>
                                             </div>
