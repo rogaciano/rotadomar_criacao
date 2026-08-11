@@ -52,10 +52,8 @@ class KanbanController extends Controller
             }
         }
 
-        // Lista completa de localizações ativas, com capacidade > 0 e que fazem movimentação (para o filtro)
-        $todasLocalizacoesQuery = Localizacao::where('ativo', true)
-            ->where('faz_movimentacao', true)
-            ->where('capacidade', '>', 0);
+        // O Kanban exibe planejamentos existentes; capacidade e movimentação não podem ocultá-los.
+        $todasLocalizacoesQuery = Localizacao::where('ativo', true);
 
         // Se usuário restrito, filtrar lista de localizações do filtro
         if ($usuarioRestrito && !empty($localizacoesPermitidas)) {
@@ -65,9 +63,7 @@ class KanbanController extends Controller
         $todasLocalizacoes = $todasLocalizacoesQuery->orderBy('nome_localizacao')->get();
 
         // Localizações que serão exibidas nas colunas do Kanban (pode ser filtrada)
-        $localizacoesQuery = Localizacao::where('ativo', true)
-            ->where('faz_movimentacao', true)
-            ->where('capacidade', '>', 0);
+        $localizacoesQuery = Localizacao::where('ativo', true);
 
         if (!empty($localizacaoIds)) {
             $localizacoesQuery->whereIn('id', $localizacaoIds);
