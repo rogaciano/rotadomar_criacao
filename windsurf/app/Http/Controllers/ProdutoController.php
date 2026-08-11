@@ -561,12 +561,14 @@ class ProdutoController extends Controller
         $localizacoesOrigemIda = $baseLiberarProducao
             ? \App\Models\ProdutoLocalizacao::localizacoesOrigemIdaDisponiveis($produto->id)
             : collect();
-        $podeLiberarProducao = $baseLiberarProducao && $localizacoesOrigemIda->isNotEmpty();
-        $quantidadesOrigemIda = $baseLiberarProducao
-            ? \App\Models\ProdutoLocalizacao::quantidadesOrigemIdaDisponiveis($produto->id)
-            : collect();
+        $temDestinosProducao = $baseLiberarProducao
+            && \App\Models\ProdutoLocalizacao::localizacoesPlanejadasParaProduto($produto->id)->isNotEmpty();
+        $podeLiberarProducao = $temDestinosProducao && $localizacoesOrigemIda->isNotEmpty();
+        $origemLogisticaPadraoId = $baseLiberarProducao
+            ? \App\Models\Localizacao::query()->where('ativo', true)->where('origem_logistica_padrao', true)->value('id')
+            : null;
 
-        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao', 'etapasProducaoDefinir', 'podeLiberarProducao', 'localizacoesOrigemIda', 'quantidadesOrigemIda', 'coletasLogisticaPorPlId'));
+        return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao', 'etapasProducaoDefinir', 'podeLiberarProducao', 'localizacoesOrigemIda', 'origemLogisticaPadraoId', 'coletasLogisticaPorPlId'));
     }
 
     /**

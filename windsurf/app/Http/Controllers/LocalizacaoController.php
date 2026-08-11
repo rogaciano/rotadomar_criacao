@@ -76,13 +76,24 @@ class LocalizacaoController extends Controller
             $validated['faz_movimentacao'] = false;
         }
 
+        if (!isset($validated['origem_logistica_padrao'])) {
+            $validated['origem_logistica_padrao'] = false;
+        }
+
         // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
         if (!isset($validated['pode_ver_todas_notificacoes'])) {
             $validated['pode_ver_todas_notificacoes'] = false;
         }
 
         try {
-            $localizacao = \App\Models\Localizacao::create($validated);
+            \DB::transaction(function () use ($validated) {
+                if ($validated['origem_logistica_padrao']) {
+                    \App\Models\Localizacao::where('origem_logistica_padrao', true)
+                        ->update(['origem_logistica_padrao' => false]);
+                }
+
+                \App\Models\Localizacao::create($validated);
+            });
 
             return redirect()->route('localizacoes.index')
                 ->with('success', 'Localização criada com sucesso!');
@@ -181,13 +192,25 @@ class LocalizacaoController extends Controller
             $validated['faz_movimentacao'] = false;
         }
 
+        if (!isset($validated['origem_logistica_padrao'])) {
+            $validated['origem_logistica_padrao'] = false;
+        }
+
         // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
         if (!isset($validated['pode_ver_todas_notificacoes'])) {
             $validated['pode_ver_todas_notificacoes'] = false;
         }
 
         try {
-            $localizacao->update($validated);
+            \DB::transaction(function () use ($localizacao, $validated) {
+                if ($validated['origem_logistica_padrao']) {
+                    \App\Models\Localizacao::where('id', '!=', $localizacao->id)
+                        ->where('origem_logistica_padrao', true)
+                        ->update(['origem_logistica_padrao' => false]);
+                }
+
+                $localizacao->update($validated);
+            });
 
             // Redirecionar para a mesma página que estava antes
             $page = $request->input('current_page') ? ['page' => $request->input('current_page')] : [];

@@ -64,6 +64,11 @@
                                 <label for="faz_movimentacao" class="ml-2 block text-sm text-gray-900 dark:text-white">Faz Movimentação</label>
                             </div>
 
+                            <div class="flex items-center mt-4">
+                                <input id="origem_logistica_padrao" name="origem_logistica_padrao" type="checkbox" value="1" {{ old('origem_logistica_padrao', false) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                                <label for="origem_logistica_padrao" class="ml-2 block text-sm text-gray-900 dark:text-white">Origem logística padrão</label>
+                            </div>
+
                             <!-- Pode Ver Todas Notificações -->
                             <div class="flex items-center mt-8">
                                 <input id="pode_ver_todas_notificacoes" name="pode_ver_todas_notificacoes" type="checkbox" value="1" {{ old('pode_ver_todas_notificacoes', false) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">

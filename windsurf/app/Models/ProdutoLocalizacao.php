@@ -27,7 +27,8 @@ class ProdutoLocalizacao extends Pivot
         'etapa_atual_id',
         'etapa_anterior_id',
         'data_entrega_faccao',
-        'fluxo_logistica'
+        'fluxo_logistica',
+        'eh_origem_logistica',
     ];
 
     protected $casts = [
@@ -38,7 +39,8 @@ class ProdutoLocalizacao extends Pivot
         'concluido' => 'integer',
         'etapa_atual_id' => 'integer',
         'etapa_anterior_id' => 'integer',
-        'data_entrega_faccao' => 'date'
+        'data_entrega_faccao' => 'date',
+        'eh_origem_logistica' => 'boolean',
     ];
 
     /**
@@ -188,22 +190,17 @@ class ProdutoLocalizacao extends Pivot
      */
     public static function localizacoesOrigemIdaDisponiveis(int $produtoId): \Illuminate\Support\Collection
     {
-        $planejadas = static::query()
+        $destinosPlanejados = static::query()
             ->where('produto_id', $produtoId)
+            ->where('eh_origem_logistica', false)
             ->pluck('localizacao_id')
             ->unique()
             ->filter()
             ->values();
 
-        $disponiveis = $planejadas->diff(static::idsLocalizacoesEmFluxoLogistica($produtoId))->values();
-
-        if ($disponiveis->isEmpty()) {
-            return collect();
-        }
-
         return Localizacao::query()
-            ->whereIn('id', $disponiveis)
             ->where('ativo', true)
+            ->whereNotIn('id', $destinosPlanejados)
             ->orderBy('nome_localizacao')
             ->get();
     }
@@ -221,6 +218,7 @@ class ProdutoLocalizacao extends Pivot
 
         return static::query()
             ->where('produto_id', $produtoId)
+            ->where('eh_origem_logistica', true)
             ->whereIn('localizacao_id', $disponiveis)
             ->whereDoesntHave('etapaAtual', function ($q) {
                 $q->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA);
@@ -235,11 +233,12 @@ class ProdutoLocalizacao extends Pivot
      */
     public static function localizacaoDisponivelParaLiberacaoIda(int $produtoId, int $localizacaoId): bool
     {
-        if (!static::localizacaoPlanejadaNoProduto($produtoId, $localizacaoId)) {
+        if (!Localizacao::query()->whereKey($localizacaoId)->where('ativo', true)->exists()) {
             return false;
         }
 
-        return !static::idsLocalizacoesEmFluxoLogistica($produtoId)->contains($localizacaoId);
+        return !static::localizacaoPlanejadaNoProduto($produtoId, $localizacaoId)
+            && !static::idsLocalizacoesEmFluxoLogistica($produtoId)->contains($localizacaoId);
     }
 
     /**
@@ -250,6 +249,7 @@ class ProdutoLocalizacao extends Pivot
         return static::query()
             ->where('produto_id', $produtoId)
             ->where('localizacao_id', $localizacaoId)
+            ->where('eh_origem_logistica', true)
             ->whereDoesntHave('etapaAtual', function ($q) {
                 $q->where('contexto', EtapaProducao::CONTEXTO_LOGISTICA);
             })
@@ -264,6 +264,7 @@ class ProdutoLocalizacao extends Pivot
     {
         $ids = static::query()
             ->where('produto_id', $produtoId)
+            ->where('eh_origem_logistica', false)
             ->pluck('localizacao_id')
             ->unique()
             ->filter()
@@ -288,6 +289,7 @@ class ProdutoLocalizacao extends Pivot
         return static::query()
             ->where('produto_id', $produtoId)
             ->where('localizacao_id', $localizacaoId)
+            ->where('eh_origem_logistica', false)
             ->exists();
     }
 
@@ -301,6 +303,7 @@ class ProdutoLocalizacao extends Pivot
     {
         $ids = static::query()
             ->where('produto_id', $this->produto_id)
+            ->where('eh_origem_logistica', false)
             ->where('localizacao_id', '!=', $this->localizacao_id)
             ->pluck('localizacao_id')
             ->unique()

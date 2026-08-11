@@ -182,6 +182,7 @@ class LogisticaColetaController extends Controller
                 'observacao' => $validated['observacao'] ?? $produtoLocalizacao?->observacao,
                 'concluido' => 0,
                 'fluxo_logistica' => ColetaLogistica::TIPO_IDA,
+                'eh_origem_logistica' => true,
             ];
 
             if ($produtoLocalizacao) {

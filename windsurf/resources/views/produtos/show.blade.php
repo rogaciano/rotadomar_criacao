@@ -88,30 +88,25 @@
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Liberar para Produção</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                O produto <strong>{{ $produto->referencia }}</strong> entrará no fluxo logístico de <strong>ida</strong>
-                a partir da localização escolhida. Você pode liberar <strong>uma localização por vez</strong>;
-                as que já estiverem em logística não aparecem na lista.
+                Escolha a origem física do produto. As localizações planejadas na ficha são os
+                <strong>destinos da produção</strong> e serão usadas no agendamento.
             </p>
             <form action="{{ route('produtos.liberar-producao', $produto->id) }}" method="POST">
                 @csrf
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Localização de origem (onde o produto está aguardando) *</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Localização de origem *</label>
                     @if($localizacoesOrigemIda->isEmpty())
                         <p class="text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-md p-3">
-                            Todas as localizações planejadas já estão em logística, ou nenhuma foi cadastrada na ficha.
+                            Não há uma localização ativa disponível como origem. Ative ou cadastre a origem antes de liberar.
                         </p>
                     @else
                         <select name="origem_localizacao_id" id="origem-localizacao-ida" required
                                 class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
                             <option value="">Selecione...</option>
                             @foreach($localizacoesOrigemIda as $loc)
-                                <option value="{{ $loc->id }}"
-                                        data-quantidade="{{ $quantidadesOrigemIda[$loc->id] ?? $produto->quantidade }}"
-                                        @selected($localizacoesOrigemIda->count() === 1)>
+                                    <option value="{{ $loc->id }}"
+                                        @selected($loc->id === $origemLogisticaPadraoId || ($localizacoesOrigemIda->count() === 1 && !$origemLogisticaPadraoId))>
                                     {{ $loc->nome_reduzido ?? $loc->nome_localizacao }}
-                                    @if(isset($quantidadesOrigemIda[$loc->id]))
-                                        ({{ number_format($quantidadesOrigemIda[$loc->id], 0, ',', '.') }} un.)
-                                    @endif
                                 </option>
                             @endforeach
                         </select>
@@ -120,7 +115,7 @@
                 <div class="mb-4">
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Quantidade</label>
                     <input type="number" name="quantidade" id="quantidade-origem-ida" min="1"
-                           value="{{ $localizacoesOrigemIda->count() === 1 ? ($quantidadesOrigemIda[$localizacoesOrigemIda->first()->id] ?? $produto->quantidade) : $produto->quantidade }}"
+                           value="{{ $produto->quantidade }}"
                            class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
                 </div>
                 <div class="mb-4">
@@ -134,14 +129,5 @@
             </form>
         </div>
     </div>
-    @if($localizacoesOrigemIda->isNotEmpty())
-    <script>
-        document.getElementById('origem-localizacao-ida')?.addEventListener('change', function () {
-            const qty = this.selectedOptions[0]?.dataset?.quantidade;
-            const input = document.getElementById('quantidade-origem-ida');
-            if (qty && input) input.value = qty;
-        });
-    </script>
-    @endif
     @endif
 </x-app-layout>

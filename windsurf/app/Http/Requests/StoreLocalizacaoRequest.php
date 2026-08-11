@@ -19,6 +19,7 @@ class StoreLocalizacaoRequest extends FormRequest
             'capacidade' => 'nullable|integer|min:0',
             'ativo' => 'boolean',
             'faz_movimentacao' => 'boolean',
+            'origem_logistica_padrao' => 'boolean',
             'pode_ver_todas_notificacoes' => 'boolean',
         ];
     }
