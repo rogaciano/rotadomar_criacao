@@ -565,7 +565,7 @@ class ProdutoController extends Controller
             && \App\Models\ProdutoLocalizacao::localizacoesPlanejadasParaProduto($produto->id)->isNotEmpty();
         $podeLiberarProducao = $temDestinosProducao && $localizacoesOrigemIda->isNotEmpty();
         $origemLogisticaPadraoId = $baseLiberarProducao
-            ? \App\Models\Localizacao::query()->where('ativo', true)->where('origem_logistica_padrao', true)->value('id')
+            ? \App\Models\Localizacao::query()->where('ativo', true)->where('pode_ser_origem_logistica', true)->where('origem_logistica_padrao', true)->value('id')
             : null;
 
         return view('produtos.show', compact('produto', 'movimentacoes', 'coresEnriquecidas', 'observacoes', 'etapasProducao', 'etapasProducaoDefinir', 'podeLiberarProducao', 'localizacoesOrigemIda', 'origemLogisticaPadraoId', 'coletasLogisticaPorPlId'));

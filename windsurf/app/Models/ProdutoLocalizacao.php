@@ -200,6 +200,7 @@ class ProdutoLocalizacao extends Pivot
 
         return Localizacao::query()
             ->where('ativo', true)
+            ->where('pode_ser_origem_logistica', true)
             ->whereNotIn('id', $destinosPlanejados)
             ->orderBy('nome_localizacao')
             ->get();
@@ -233,7 +234,11 @@ class ProdutoLocalizacao extends Pivot
      */
     public static function localizacaoDisponivelParaLiberacaoIda(int $produtoId, int $localizacaoId): bool
     {
-        if (!Localizacao::query()->whereKey($localizacaoId)->where('ativo', true)->exists()) {
+        if (!Localizacao::query()
+            ->whereKey($localizacaoId)
+            ->where('ativo', true)
+            ->where('pode_ser_origem_logistica', true)
+            ->exists()) {
             return false;
         }
 

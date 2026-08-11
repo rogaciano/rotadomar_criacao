@@ -80,6 +80,15 @@ class LocalizacaoController extends Controller
             $validated['origem_logistica_padrao'] = false;
         }
 
+        if (!isset($validated['pode_ser_origem_logistica'])) {
+            $validated['pode_ser_origem_logistica'] = false;
+        }
+
+        if ($validated['origem_logistica_padrao'] && !$validated['pode_ser_origem_logistica']) {
+            return redirect()->back()->withInput()
+                ->with('error', 'A origem logística padrão também deve estar habilitada como origem logística.');
+        }
+
         // Definir pode_ver_todas_notificacoes como false se não estiver presente no request
         if (!isset($validated['pode_ver_todas_notificacoes'])) {
             $validated['pode_ver_todas_notificacoes'] = false;
@@ -194,6 +203,15 @@ class LocalizacaoController extends Controller
 
         if (!isset($validated['origem_logistica_padrao'])) {
             $validated['origem_logistica_padrao'] = false;
+        }
+
+        if (!isset($validated['pode_ser_origem_logistica'])) {
+            $validated['pode_ser_origem_logistica'] = false;
+        }
+
+        if ($validated['origem_logistica_padrao'] && !$validated['pode_ser_origem_logistica']) {
+            return redirect()->back()->withInput()
+                ->with('error', 'A origem logística padrão também deve estar habilitada como origem logística.');
         }
 
         // Definir pode_ver_todas_notificacoes como false se não estiver presente no request

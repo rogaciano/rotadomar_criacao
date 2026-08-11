@@ -67,6 +67,11 @@
                             </div>
 
                             <div class="flex items-center mt-4">
+                                <input id="pode_ser_origem_logistica" name="pode_ser_origem_logistica" type="checkbox" value="1" {{ old('pode_ser_origem_logistica', $localizacao->pode_ser_origem_logistica) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
+                                <label for="pode_ser_origem_logistica" class="ml-2 block text-sm text-gray-900 dark:text-white">Pode ser origem logística</label>
+                            </div>
+
+                            <div class="flex items-center mt-4">
                                 <input id="origem_logistica_padrao" name="origem_logistica_padrao" type="checkbox" value="1" {{ old('origem_logistica_padrao', $localizacao->origem_logistica_padrao) ? 'checked' : '' }} class="h-4 w-4 text-amber-600 focus:ring-amber-500 border-gray-300 rounded">
                                 <label for="origem_logistica_padrao" class="ml-2 block text-sm text-gray-900 dark:text-white">Origem logística padrão</label>
                             </div>

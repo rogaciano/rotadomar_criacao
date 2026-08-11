@@ -20,6 +20,7 @@ class Localizacao extends Model
         'prazo',
         'capacidade',
         'faz_movimentacao',
+        'pode_ser_origem_logistica',
         'origem_logistica_padrao',
         'pode_ver_todas_notificacoes',
         'observacoes'
@@ -29,6 +30,7 @@ class Localizacao extends Model
         'ativo' => 'boolean',
         'capacidade' => 'integer',
         'faz_movimentacao' => 'boolean',
+        'pode_ser_origem_logistica' => 'boolean',
         'origem_logistica_padrao' => 'boolean',
         'pode_ver_todas_notificacoes' => 'boolean',
         'observacoes' => 'string'
