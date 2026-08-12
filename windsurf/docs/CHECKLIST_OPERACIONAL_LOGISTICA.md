@@ -1,384 +1,167 @@
-# Guia prático — Testar a Logística no sistema
+# Guia de treinamento - Logística
 
-> Este roteiro é para **quem vai usar o sistema no dia a dia**: criação, fábrica, facção, motorista e logística.  
-> Marque ✅ conforme for avançando.  
-> **Senha de teste (ambiente local):** `@Senha123` para todos os usuários abaixo.
+> Uso diário do fluxo de ida (origem -> facção), produção e volta (facção -> destino).
+> Atualizado em 12/08/2026.
 
 ---
 
-## Antes de começar
+## 1. Regra principal
 
-### O que você vai simular
+Há duas informações diferentes e elas não devem ser confundidas:
 
-Imagine um produto que nasce na **Criação**, vai para a **facção** costurar e depois **volta para a fábrica** quando estiver pronto:
+| Informação | Onde é definida | Significado |
+|---|---|---|
+| **Origem logística** | Cadastro de Localizações e modal de Liberação | Onde o material está fisicamente antes de sair. Ex.: fábrica ou centro de distribuição. |
+| **Destino de produção** | Planejamento na ficha do produto | Facção/localização que receberá e produzirá o produto. |
 
-```
-1. IDA      → levar o material da FÁBRICA até a FACÇÃO
-2. PRODUÇÃO → a facção recebe e produz (até Acabamento)
-3. VOLTA    → trazer o produto pronto da FACÇÃO de volta para a FÁBRICA
-```
+O planejamento **não é origem**. Cada lançamento planejado representa um destino e sua quantidade. Se o mesmo produto for enviado para duas facções, devem existir dois lançamentos de planejamento, um para cada destino.
 
-Cada deslocamento passa por **7 momentos** na tela **Logística de Coleta** — sempre envolvendo **motorista**, **quem está na origem** e **quem está no destino**.
+---
 
-### Quem participa do teste
+## 2. Pré-requisitos do administrador
 
-| Papel | Nome para login | O que representa |
-|-------|-----------------|------------------|
-| Administrador | **Admin** | Libera o produto para ir à facção |
-| Fábrica (CHECK-LIST) | **CAROL** | Confirma saída na ida; recebe na volta |
-| Facção (Maurício Lima) | **MAURICIO** | Recebe na ida; confirma saída na volta |
-| Motorista | **LEONARDO** | Agenda viagem, busca e entrega o material |
+Faça esta conferência antes do primeiro treinamento ou antes de liberar um produto.
 
-> Dica: use **outra aba anônima** ou **saia e entre** a cada troca de personagem — assim fica claro quem está fazendo o quê.
+### 2.1 Localização de origem
 
-### Produto sugerido para o teste
+Em **Cadastros > Localizações**, abra a fábrica, centro de distribuição ou outro ponto de saída e confirme:
 
-Anote aqui o produto que você escolheu:
+- [ ] A localização está **Ativa**.
+- [ ] Está marcada como **Pode ser origem logística**.
+- [ ] Se for o ponto mais usado, está marcada como **Origem logística padrão**.
 
-| | |
+`Pode ser origem logística` faz a localização aparecer no select de origem da liberação. Uma facção comum não deve receber essa marcação.
+
+`Origem logística padrão` apenas deixa uma origem pré-selecionada para agilizar o preenchimento. Ela não impede a escolha de outra origem habilitada. Mantenha somente uma localização como padrão.
+
+### 2.2 Produto e planejamento
+
+- [ ] O produto está com status **DESENVOLVIMENTO FINALIZADO**.
+- [ ] Existe pelo menos um lançamento planejado na ficha do produto para a facção de destino.
+- [ ] A quantidade de cada destino foi revisada.
+- [ ] Não existe coleta ativa para a mesma linha logística.
+
+Não cadastre a fábrica como destino somente para fazê-la aparecer na liberação. A origem vem do cadastro de Localizações; o destino vem do planejamento.
+
+### 2.3 Usuários, acessos e veículo
+
+| Ação | Necessário |
 |---|---|
-| **Referência do produto** | __________________ |
-| **Quantidade** | __________________ |
+| Consultar a ficha do produto | Permissão `produtos: leitura`. |
+| Liberar para produção | `produtos: leitura` e permissão específica `liberar_producao`. |
+| Abrir e operar a tela de coletas | Permissão `logistica`. |
+| Agendar | Acesso à localização de destino, motorista cadastrado e veículo ativo. |
+| Solicitar retirada, confirmar entrega ou cancelar | Usuário definido como motorista daquela coleta (ou administrador). |
+| Confirmar retirada na origem | Usuário vinculado à localização de origem (ou administrador). |
+| Check-in e chegada final | Usuário vinculado à localização de destino (ou administrador). |
 
-O produto precisa:
-
-- [ ] Estar com status **Desenvolvimento Finalizado**
-- [ ] Ter na ficha a **fábrica (CHECK-LIST)** e a **facção (Maurício Lima)** cadastradas
-- [ ] Ainda **não** ter viagem em andamento
-
----
-
-## Parte 1 — IDA (fábrica → facção)
-
-> **Objetivo:** o material sai da fábrica e chega na facção para começar a produção.
+Antes de testar, confirme que cada pessoa possui uma localização vinculada no cadastro de usuário. Sem isso, ela pode ver a tela, mas não conseguirá confirmar a ação da origem ou do destino.
 
 ---
 
-### Passo 1 — Liberar o produto para produção
+## 3. Fluxo de ida: origem -> facção
 
-**Entre como:** Admin
+### Passo 1 - Liberar para produção
 
-1. [ ] Abra o menu e localize o **produto** pela referência
-2. [ ] Na ficha do produto, clique em **Liberar para Produção**
-3. [ ] Escolha a origem **CHECK-LIST** e confirme a quantidade
-4. [ ] Clique em confirmar
+**Quem faz:** usuário com `liberar_producao`.
 
-**Você deve ver:**
+1. Abra a ficha do produto.
+2. Clique em **Liberar para Produção**.
+3. Escolha a **origem física**. A origem padrão, se configurada, já vem selecionada.
+4. Escolha o **destino planejado** que receberá esta liberação.
+5. Confira a quantidade planejada, exibida somente para leitura, e inclua observação se necessário.
+6. Confirme.
 
-- [ ] Mensagem de sucesso
-- [ ] O produto aparece aguardando logística, com etapa **Agendamento**
+Resultado esperado:
 
-**O que aprendeu:** a Criação/administrador autoriza o envio do material para a facção. Só depois disso a logística pode agendar a viagem.
+- [ ] O produto entra na etapa **Agendamento** da logística de ida.
+- [ ] É criada uma linha logística ligada à origem e ao destino planejado escolhidos.
+- [ ] A quantidade da coleta é a quantidade daquele lançamento planejado.
 
----
+Se a origem não aparecer, ela está inativa, não foi marcada como `Pode ser origem logística` ou também foi usada como destino planejado desse produto.
 
-### Passo 2 — Agendar a viagem de ida
+Se houver duas facções planejadas, faça uma liberação para cada destino. Cada uma gera sua própria linha em Agendamento, coleta e histórico.
 
-**Entre como:** LEONARDO (motorista)
+### Passo 2 - Agendar a coleta
 
-1. [ ] Abra **Logística de Coleta** no menu
-2. [ ] Localize o produto na lista de agendamento
-3. [ ] Clique em **Agendar**
-4. [ ] Selecione o motorista **LEONARDO**, o **veículo** e a data/hora
-5. [ ] No destino, escolha **Confecção - Maurício Lima** (só devem aparecer facções já planejadas no produto)
-6. [ ] Confirme
+**Quem faz:** usuário com acesso a `logistica`.
 
-**Você deve ver:**
+1. Abra **Logística de Coleta**.
+2. Localize a linha em **Agendamento** e clique em **Agendar**.
+3. Confira a **Origem** exibida em modo somente leitura.
+4. Escolha motorista, veículo e período.
+5. Escolha o destino entre as localizações planejadas na ficha do produto.
+6. Confirme.
 
-- [ ] A coleta na lista **Coletas Ativas** com etiqueta **IDA**
-- [ ] Origem: CHECK-LIST → Destino: Maurício Lima
-- [ ] Status: **Aguardando Responsável**
+Regras do modal:
 
-**O que aprendeu:** agendar não significa que o caminhão já saiu — apenas reserva a viagem e o responsável.
+- A origem não pode ser trocada no agendamento.
+- O servidor recusa origem diferente da linha logística selecionada.
+- Só aparecem destinos planejados para o produto e permitidos ao usuário que agenda.
+- Para enviar para outro destino, cadastre outro lançamento de planejamento antes de agendar.
 
----
+Resultado esperado:
 
-### Passo 3 — Motorista avisa que vai buscar na fábrica
+- [ ] A coleta aparece em **Coletas Ativas** com tipo **IDA**.
+- [ ] A origem e o destino exibidos correspondem ao que foi configurado.
+- [ ] Não há conflito de motorista ou veículo no período.
 
-**Entre como:** LEONARDO
+### Passo 3 - Retirada, trânsito e entrega
 
-1. [ ] Em **Coletas Ativas**, encontre a coleta **IDA** do produto
-2. [ ] Clique em **Solicitar Retirada**
-3. [ ] Confirme (observação opcional)
+| Ordem | Quem faz | Ação | Resultado esperado |
+|---|---|---|---|
+| 1 | Motorista | **Solicitar Retirada** | A origem é avisada de que o motorista irá buscar o material. |
+| 2 | Responsável da origem | **Confirmar Retirada** | A coleta entra em trânsito. |
+| 3 | Motorista | **Confirmar Entrega** | O motorista registra a entrega no destino. |
+| 4 | Responsável do destino | **Registrar Check-in** | A facção confirma que recebeu fisicamente a carga. |
+| 5 | Responsável do destino | **Confirmar Chegada Final** | A ida é concluída e o produto segue para produção no destino. |
 
-**Você deve ver:**
-
-- [ ] Mensagem de sucesso
-- [ ] Etapa muda para algo como **Saída da Fábrica / Solicitar Retirada**
-- [ ] Agora a **fábrica** precisa confirmar que liberou o material
-
-**O que aprendeu:** na **ida**, “retirada” é na **fábrica** — o motorista avisa que está indo buscar lá.
-
----
-
-### Passo 4 — Fábrica confirma que o material saiu
-
-**Entre como:** CAROL (CHECK-LIST)
-
-1. [ ] Abra **Logística de Coleta**
-2. [ ] Na mesma coleta, clique em **Confirmar Retirada**
-3. [ ] Confirme
-
-**Você deve ver:**
-
-- [ ] Status **Em Trânsito**
-- [ ] Etapa **Em Trânsito**
-- [ ] O produto “saiu” da fábrica no fluxo
-
-**O que aprendeu:** a origem (fábrica) atesta que entregou o material ao motorista. Só então a viagem começa de fato.
+Após a chegada final, confira na ficha do produto se a localização de destino está na etapa de produção esperada, iniciando em **Recebimento**.
 
 ---
 
-### Passo 5 — Motorista confirma entrega na facção
+## 4. Produção e volta: facção -> destino
 
-**Entre como:** LEONARDO
+1. Na ficha do produto, o responsável pela facção avança as etapas de produção até **Acabamento**.
+2. Encaminhe a linha de **Acabamento** para **Agendamento** da logística.
+3. Em **Logística de Coleta**, agende a viagem de volta.
+4. Selecione o destino operacional definido para o retorno.
+5. Repita a sequência: solicitar retirada, confirmar retirada na origem, confirmar entrega pelo motorista, check-in e chegada final no destino.
 
-1. [ ] Em **Coletas Ativas**, clique em **Confirmar Entrega**
-2. [ ] Confirme
-
-**Você deve ver:**
-
-- [ ] Status **Entregue** (ou equivalente na tela)
-- [ ] Etapa de entrega confirmada pelo motorista
-
-**O que aprendeu:** isto é a **declaração do motorista** — “deixei na facção”. O recebimento oficial ainda depende da facção (próximos passos).
+Na volta, a origem é a facção que concluiu a produção. Os mesmos controles de motorista, veículo, origem e destino continuam válidos.
 
 ---
 
-### Passo 6 — Facção registra o check-in
+## 5. Problemas frequentes
 
-**Entre como:** MAURICIO (facção)
-
-1. [ ] Abra **Logística de Coleta**
-2. [ ] Clique em **Registrar Check-in**
-3. [ ] Confirme
-
-**Você deve ver:**
-
-- [ ] Etapa **Check-in**
-- [ ] A facção reconhece que o material chegou
-
-**O que aprendeu:** check-in é o primeiro registro **oficial** da facção de que recebeu a carga.
+| Situação | Verificar |
+|---|---|
+| Botão **Liberar para Produção** não aparece | Status do produto, `produtos: leitura`, `liberar_producao` e existência de destino planejado. |
+| Origem não aparece no select | Localização ativa, marcada como **Pode ser origem logística**, não planejada como destino para aquele produto. |
+| Origem padrão não vem selecionada | Confirme que ela também está habilitada como origem e que não existe outra marcada como padrão. |
+| Destino não aparece no agendamento | Cadastre a localização na ficha como planejamento e confira o acesso do usuário que agenda a esse destino. |
+| Usuário vê a coleta, mas não confirma | Confira se o usuário está vinculado à localização correspondente à origem ou ao destino. |
+| Origem diferente foi enviada pelo navegador | O servidor recusa a solicitação; abra novamente o agendamento pela linha correta. |
+| Coleta já existe | Há uma coleta ativa para a mesma linha logística; conclua ou cancele a coleta existente antes de criar outra. |
 
 ---
 
-### Passo 7 — Facção confirma chegada final (fim da ida)
-
-**Entre como:** MAURICIO
-
-1. [ ] Na mesma coleta, clique em **Confirmar Chegada Final**
-2. [ ] Confirme
-
-**Você deve ver:**
-
-- [ ] Coleta **finalizada** no histórico
-- [ ] Na ficha do produto: linha na facção **Maurício Lima** em etapa **Recebimento**
-
-**O que aprendeu:** a ida termina aqui. O produto entra no fluxo de **produção na facção**.
-
----
-
-### Conferência rápida — IDA concluída?
-
-**Entre como:** Admin (opcional)
-
-- [ ] Coleta **IDA** aparece no histórico como finalizada
-- [ ] Produto na facção em **Recebimento**
-- [ ] Anote qualquer coisa estranha na ficha (ex.: duas linhas para a mesma facção) para reportar à TI
-
----
-
-## Parte 2 — Produção na facção (até Acabamento)
-
-> **Objetivo:** simular que a facção produziu o pedido e está pronta para devolver à fábrica.  
-> Este trecho usa a **ficha do produto / planejamento**, não a tela de logística.
-
-**Entre como:** MAURICIO (ou Admin, se precisar agilizar)
-
-1. [ ] Confirme que o produto está em **Recebimento** na facção Maurício Lima
-2. [ ] Avance as etapas de produção uma a uma (Corte, Costura, etc.) até **Acabamento**
-3. [ ] Pare em **Acabamento** — ainda **não** envie para logística
-
-**Você deve ver:**
-
-- [ ] Produto em **Acabamento** na facção
-- [ ] Opção para encaminhar à logística (handoff)
-
-**O que aprendeu:** a **volta** só começa depois que a produção na facção termina (Acabamento).
-
----
-
-## Parte 3 — VOLTA (facção → fábrica)
-
-> **Objetivo:** trazer o produto pronto da facção de volta para a fábrica.
-
----
-
-### Passo 8 — Facção encaminha para logística
-
-**Entre como:** MAURICIO
-
-1. [ ] Na ficha do produto, avance de **Acabamento** para **Agendamento** (logística)
-2. [ ] Confirme a ação
-
-**Você deve ver:**
-
-- [ ] Etapa **Agendamento** (contexto logístico)
-- [ ] Produto disponível em **Logística de Coleta**
-
-**O que aprendeu:** igual à ida, a volta também começa no **Agendamento** — mas agora a origem é a **facção**.
-
----
-
-### Passo 9 — Agendar a viagem de volta
-
-**Entre como:** LEONARDO
-
-1. [ ] **Logística de Coleta** → **Agendar**
-2. [ ] Motorista, veículo, datas
-3. [ ] Destino: **CHECK-LIST** (fábrica)
-4. [ ] Confirme
-
-**Você deve ver:**
-
-- [ ] Coleta com etiqueta **VOLTA**
-- [ ] Origem: Maurício Lima → Destino: CHECK-LIST
-
----
-
-### Passo 10 — Motorista avisa que vai buscar na facção
-
-**Entre como:** LEONARDO
-
-1. [ ] **Solicitar Retirada** → confirmar
-
-**Você deve ver:**
-
-- [ ] Etapa de solicitação de retirada
-- [ ] Aguardando confirmação da **facção** (origem)
-
-**O que aprendeu:** na **volta**, “retirada” é na **facção** — o motorista busca o produto pronto lá.
-
----
-
-### Passo 11 — Facção confirma que o produto saiu
-
-**Entre como:** MAURICIO
-
-1. [ ] **Confirmar Retirada** → confirmar
-
-**Você deve ver:**
-
-- [ ] Status **Em Trânsito**
-
----
-
-### Passo 12 — Motorista confirma entrega na fábrica
-
-**Entre como:** LEONARDO
-
-1. [ ] **Confirmar Entrega** → confirmar
-
-**Você deve ver:**
-
-- [ ] Entrega registrada pelo motorista na fábrica
-
----
-
-### Passo 13 — Fábrica registra check-in
-
-**Entre como:** CAROL
-
-1. [ ] **Registrar Check-in** → confirmar
-
-**Você deve ver:**
-
-- [ ] Check-in registrado na CHECK-LIST
-
----
-
-### Passo 14 — Fábrica confirma chegada final (fim da volta)
-
-**Entre como:** CAROL
-
-1. [ ] **Confirmar Chegada Final** → confirmar
-
-**Você deve ver:**
-
-- [ ] Coleta **VOLTA** finalizada no histórico
-- [ ] Circuito completo encerrado
-
-**O que aprendeu:** o produto voltou à fábrica. Ida + produção + volta concluídas.
-
----
-
-## Resumo — quem faz o quê
-
-### IDA (fábrica → facção)
-
-| Ordem | Quem entra | O que clica |
-|-------|------------|-------------|
-| 1 | Admin | Liberar para Produção |
-| 2 | LEONARDO | Agendar |
-| 3 | LEONARDO | Solicitar Retirada |
-| 4 | CAROL | Confirmar Retirada |
-| 5 | LEONARDO | Confirmar Entrega |
-| 6 | MAURICIO | Registrar Check-in |
-| 7 | MAURICIO | Confirmar Chegada Final |
-
-### VOLTA (facção → fábrica)
-
-| Ordem | Quem entra | O que clica |
-|-------|------------|-------------|
-| 8 | MAURICIO | Acabamento → Agendamento (ficha) |
-| 9 | LEONARDO | Agendar |
-| 10 | LEONARDO | Solicitar Retirada |
-| 11 | MAURICIO | Confirmar Retirada |
-| 12 | LEONARDO | Confirmar Entrega |
-| 13 | CAROL | Registrar Check-in |
-| 14 | CAROL | Confirmar Chegada Final |
-
----
-
-## Dúvidas frequentes
-
-**Por que “Solicitar Retirada” se na ida o material está na fábrica?**  
-O nome do botão é o mesmo nos dois sentidos. Na **ida**, retirada = buscar na **fábrica**. Na **volta**, retirada = buscar na **facção**.
-
-**“Confirmar Entrega” do motorista é o recebimento final?**  
-Não. É só o motorista dizendo que entregou. Quem **recebe de verdade** faz o **Check-in** e depois a **Chegada Final**.
-
-**Não aparece botão para mim.**  
-Cada botão só aparece para o **papel certo** na **etapa certa**. Troque de usuário conforme a tabela acima.
-
-**O destino no agendamento está vazio ou errado.**  
-O destino precisa estar **planejado na ficha do produto** antes. Peça à Criação/administrador para cadastrar a facção ou fábrica correta.
-
-**Posso cancelar uma viagem?**  
-Sim. O **motorista** pode **Cancelar** enquanto a coleta ainda está aguardando (antes de solicitar retirada ou logo no início). O produto volta para **Agendamento**.
-
----
-
-## Registro do seu teste
-
-| Pergunta | Sim | Não |
-|----------|-----|-----|
-| Consegui fazer a ida completa? | ☐ | ☐ |
-| Consegui avançar a produção até Acabamento? | ☐ | ☐ |
-| Consegui fazer a volta completa? | ☐ | ☐ |
-| Entendi a diferença entre motorista, origem e destino? | ☐ | ☐ |
-
-**Observações ou dificuldades:**
+## 6. Checklist de treinamento
+
+| Verificação | Sim | Não |
+|---|---|---|
+| A origem escolhida apareceu porque está habilitada como origem logística | [ ] | [ ] |
+| A origem padrão veio pré-selecionada corretamente | [ ] | [ ] |
+| O destino exibido no agendamento era um planejamento do produto | [ ] | [ ] |
+| A origem permaneceu somente leitura no agendamento | [ ] | [ ] |
+| A ida foi concluída até a chegada final no destino | [ ] | [ ] |
+| A produção foi avançada até Acabamento | [ ] | [ ] |
+| A volta foi concluída até a chegada final | [ ] | [ ] |
+
+**Observações do treinamento:**
 
 ```
 _________________________________________________________________
 _________________________________________________________________
 _________________________________________________________________
 ```
-
----
-
-## Para a equipe de TI
-
-Checklist técnico (slugs, status, auditoria de banco):  
-[`CHECKLIST_TESTE_LOGISTICA_COMPLETO.md`](CHECKLIST_TESTE_LOGISTICA_COMPLETO.md)

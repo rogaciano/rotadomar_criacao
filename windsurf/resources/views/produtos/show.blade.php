@@ -113,10 +113,24 @@
                     @endif
                 </div>
                 <div class="mb-4">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Quantidade</label>
-                    <input type="number" name="quantidade" id="quantidade-origem-ida" min="1"
-                           value="{{ $produto->quantidade }}"
-                           class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Destino planejado *</label>
+                    <select name="destino_planejado_produto_localizacao_id" id="destino-planejado-ida" required
+                            class="w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm">
+                        <option value="">Selecione...</option>
+                        @foreach($destinosPlanejadosIda as $destinoPlanejado)
+                            <option value="{{ $destinoPlanejado->id }}" data-quantidade="{{ $destinoPlanejado->quantidade }}"
+                                    @selected($destinosPlanejadosIda->count() === 1)>
+                                {{ $destinoPlanejado->localizacao?->nome_reduzido ?? $destinoPlanejado->localizacao?->nome_localizacao }}
+                                ({{ number_format($destinoPlanejado->quantidade, 0, ',', '.') }} un.)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Quantidade planejada</label>
+                    <input type="text" id="quantidade-destino-ida" readonly
+                           value="{{ $destinosPlanejadosIda->count() === 1 ? number_format($destinosPlanejadosIda->first()->quantidade, 0, ',', '.') : '' }}"
+                           class="w-full rounded-md border-gray-300 bg-gray-100 dark:bg-slate-700 dark:border-slate-600 dark:text-white text-sm" />
                 </div>
                 <div class="mb-4">
                     <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Observação (opcional)</label>
@@ -129,5 +143,14 @@
             </form>
         </div>
     </div>
+    <script>
+        const destinoPlanejadoIda = document.getElementById('destino-planejado-ida');
+        const quantidadeDestinoIda = document.getElementById('quantidade-destino-ida');
+
+        destinoPlanejadoIda?.addEventListener('change', function () {
+            const quantidade = this.selectedOptions[0]?.dataset?.quantidade;
+            quantidadeDestinoIda.value = quantidade ? Number(quantidade).toLocaleString('pt-BR') : '';
+        });
+    </script>
     @endif
 </x-app-layout>

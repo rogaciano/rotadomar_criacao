@@ -157,7 +157,7 @@ class LogisticaColetaController extends Controller
 
         $validated = $request->validate([
             'origem_localizacao_id' => 'required|integer|exists:localizacoes,id',
-            'quantidade' => 'nullable|integer|min:1',
+            'destino_planejado_produto_localizacao_id' => 'required|integer|exists:produto_localizacao,id',
             'observacao' => 'nullable|string|max:255',
         ]);
 
@@ -173,16 +173,23 @@ class LogisticaColetaController extends Controller
             return back()->with('error', 'Esta localização já está no fluxo logístico ou não está planejada para o produto.');
         }
 
+        $destinoPlanejadoId = (int) $validated['destino_planejado_produto_localizacao_id'];
+        if (!ProdutoLocalizacao::destinoPlanejadoDisponivelParaLiberacaoIda($produto->id, $destinoPlanejadoId)) {
+            return back()->with('error', 'Este destino planejado já possui uma liberação logística ou não pertence ao produto.');
+        }
+
         DB::beginTransaction();
         try {
-            $produtoLocalizacao = ProdutoLocalizacao::registroPlanejamentoParaLiberacaoIda($produto->id, $origemId);
+            $destinoPlanejado = ProdutoLocalizacao::with('localizacao')->findOrFail($destinoPlanejadoId);
+            $produtoLocalizacao = ProdutoLocalizacao::registroPlanejamentoParaLiberacaoIda($produto->id, $origemId, $destinoPlanejadoId);
 
             $dadosLiberacao = [
-                'quantidade' => $validated['quantidade'] ?? $produtoLocalizacao?->quantidade ?? $produto->quantidade,
-                'observacao' => $validated['observacao'] ?? $produtoLocalizacao?->observacao,
+                'quantidade' => $destinoPlanejado->quantidade,
+                'observacao' => $validated['observacao'] ?? $destinoPlanejado->observacao,
                 'concluido' => 0,
                 'fluxo_logistica' => ColetaLogistica::TIPO_IDA,
                 'eh_origem_logistica' => true,
+                'destino_planejado_produto_localizacao_id' => $destinoPlanejado->id,
             ];
 
             if ($produtoLocalizacao) {
@@ -538,12 +545,28 @@ class LogisticaColetaController extends Controller
     private function concluirIdaNaFaccao(ColetaLogistica $coleta, int $userId): void
     {
         $produtoLocalizacao = $coleta->produtoLocalizacao;
+        $destinoPlanejado = $produtoLocalizacao->destinoPlanejado;
 
         $etapaRecebimento = EtapaProducao::query()
             ->where('contexto', EtapaProducao::CONTEXTO_LOCALIZACAO)
             ->where('ativo', true)
             ->orderBy('ordem')
             ->first();
+
+        if ($destinoPlanejado && (int) $destinoPlanejado->localizacao_id === (int) $coleta->destino_localizacao_id) {
+            $produtoLocalizacao->update(['concluido' => 1]);
+            $destinoPlanejado->update(['data_entrega_faccao' => now()->toDateString()]);
+
+            if ($etapaRecebimento) {
+                $destinoPlanejado->definirEtapaInicial(
+                    $etapaRecebimento->id,
+                    $userId,
+                    'Produto entregue no destino planejado; produção iniciada em ' . $etapaRecebimento->nome
+                );
+            }
+
+            return;
+        }
 
         $produtoLocalizacao->update([
             'localizacao_id' => $coleta->destino_localizacao_id,
