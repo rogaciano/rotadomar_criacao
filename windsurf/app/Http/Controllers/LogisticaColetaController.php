@@ -40,10 +40,20 @@ class LogisticaColetaController extends Controller
         $tabelaVeiculosExiste = Schema::hasTable('veiculos');
 
         // Produtos disponíveis para entrada no fluxo logístico
+        $baseAguardandoRetirada = null;
         $aguardandoRetirada = collect();
         if ($etapaAgendamento) {
-            $query = ProdutoLocalizacao::with(['produto', 'localizacao', 'etapaAtual'])
-                ->where('etapa_atual_id', $etapaAgendamento->id);
+            $baseAguardandoRetirada = ProdutoLocalizacao::query()
+                ->where('etapa_atual_id', $etapaAgendamento->id)
+                ->where('eh_origem_logistica', true)
+                ->whereNotNull('destino_planejado_produto_localizacao_id')
+                ->whereHas('destinoPlanejado', function ($q) {
+                    $q->where('eh_origem_logistica', false)
+                        ->whereHas('localizacao', fn ($q2) => $q2->where('ativo', true));
+                });
+
+            $query = (clone $baseAguardandoRetirada)
+                ->with(['produto', 'localizacao', 'etapaAtual', 'destinoPlanejado.localizacao']);
 
             if ($tabelaColetasExiste) {
                 $query->with(['coletaLogisticaAtiva.motorista', 'coletaLogisticaAtiva.veiculo', 'coletaLogisticaAtiva.destinoLocalizacao']);
@@ -75,13 +85,13 @@ class LogisticaColetaController extends Controller
             ])->ativas()->orderBy('inicio_previsto_em');
 
             if (!$user->isAdmin()) {
-                $localizacaoId = $user->localizacao_id;
-                $coletasAtivasQuery->where(function ($q) use ($user, $localizacaoId) {
+                $userLocalizacaoId = $user->localizacao_id;
+                $coletasAtivasQuery->where(function ($q) use ($user, $userLocalizacaoId) {
                     $q->where('motorista_user_id', $user->id);
-                    if ($localizacaoId) {
-                        $q->orWhere('destino_localizacao_id', $localizacaoId)
-                            ->orWhereHas('produtoLocalizacao', function ($q2) use ($localizacaoId) {
-                                $q2->where('localizacao_id', $localizacaoId);
+                    if ($userLocalizacaoId) {
+                        $q->orWhere('destino_localizacao_id', $userLocalizacaoId)
+                            ->orWhereHas('produtoLocalizacao', function ($q2) use ($userLocalizacaoId) {
+                                $q2->where('localizacao_id', $userLocalizacaoId);
                             });
                     }
                 });
@@ -117,7 +127,13 @@ class LogisticaColetaController extends Controller
         }
 
         // Dados para filtros
-        $localizacoes = Localizacao::where('ativo', true)->orderBy('nome_localizacao')->get();
+        $localizacoes = $baseAguardandoRetirada
+            ? Localizacao::query()
+                ->where('ativo', true)
+                ->whereIn('id', (clone $baseAguardandoRetirada)->select('localizacao_id')->distinct())
+                ->orderBy('nome_localizacao')
+                ->get()
+            : collect();
         $veiculos = $tabelaVeiculosExiste ? Veiculo::ativos()->orderBy('placa')->get() : collect();
         $usuariosColeta = User::with('localizacao')->orderBy('name')->get();
         $coletaStatusLabels = ColetaLogistica::labelsStatus();

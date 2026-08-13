@@ -410,7 +410,11 @@
                                             {{ $temColeta ? $coleta->veiculo?->placa : '-' }}
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
-                                            {{ $temColeta ? ($coleta->destinoLocalizacao?->nome_reduzido ?? $coleta->destinoLocalizacao?->nome_localizacao) : '-' }}
+                                            @if($temColeta)
+                                                {{ $coleta->destinoLocalizacao?->nome_reduzido ?? $coleta->destinoLocalizacao?->nome_localizacao ?? '-' }}
+                                            @else
+                                                {{ $pl->destinoPlanejado?->localizacao?->nome_reduzido ?? $pl->destinoPlanejado?->localizacao?->nome_localizacao ?? '-' }}
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                                             {{ $pl->updated_at?->diffForHumans() }}
