@@ -141,7 +141,17 @@ class Produto extends Model
     public function localizacoes()
     {
         return $this->belongsToMany(Localizacao::class, 'produto_localizacao')
-                    ->withPivot('id', 'quantidade', 'data_prevista_faccao', 'data_envio_faccao', 'data_retorno_faccao', 'data_entrega_faccao', 'ordem_producao', 'observacao', 'concluido', 'etapa_atual_id', 'etapa_anterior_id', 'fluxo_logistica')
+                    ->withPivot('id', 'quantidade', 'data_prevista_faccao', 'data_envio_faccao', 'data_retorno_faccao', 'data_entrega_faccao', 'ordem_producao', 'observacao', 'concluido', 'etapa_atual_id', 'etapa_anterior_id', 'fluxo_logistica', 'eh_origem_logistica', 'destino_planejado_produto_localizacao_id')
+                    ->wherePivot('eh_origem_logistica', false)
+                    ->withTimestamps()
+                    ->using(ProdutoLocalizacao::class);
+    }
+
+    public function localizacoesLogistica()
+    {
+        return $this->belongsToMany(Localizacao::class, 'produto_localizacao')
+                    ->withPivot('id', 'quantidade', 'data_prevista_faccao', 'data_envio_faccao', 'data_retorno_faccao', 'data_entrega_faccao', 'ordem_producao', 'observacao', 'concluido', 'etapa_atual_id', 'etapa_anterior_id', 'fluxo_logistica', 'eh_origem_logistica', 'destino_planejado_produto_localizacao_id')
+                    ->wherePivot('eh_origem_logistica', true)
                     ->withTimestamps()
                     ->using(ProdutoLocalizacao::class);
     }

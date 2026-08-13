@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Produto;
+use App\Models\ProdutoLocalizacao;
 
 class ProdutoObserver
 {
@@ -28,7 +29,7 @@ class ProdutoObserver
     public function deleted(Produto $produto): void
     {
         // Soft delete das localizações do produto
-        $produto->localizacoes()->detach();
+        ProdutoLocalizacao::where('produto_id', $produto->id)->delete();
     }
 
     /**
@@ -37,6 +38,6 @@ class ProdutoObserver
     public function forceDeleted(Produto $produto): void
     {
         // Delete permanente das localizações do produto
-        $produto->localizacoes()->detach();
+        ProdutoLocalizacao::where('produto_id', $produto->id)->delete();
     }
 }
